@@ -19,10 +19,11 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Leer datos del Google Sheet vía Apps Script
-    var readUrl = sheetUrl.replace('/exec', '/exec') + '?action=read&sheet=' + type;
-    var response = await fetch(readUrl);
-    var data = await response.json();
+    // GET al Apps Script para leer datos
+    var readUrl = sheetUrl.replace('/exec', '/exec');
+    var response = await fetch(readUrl + '?sheet=' + type);
+    var text = await response.text();
+    var data = JSON.parse(text);
 
     return res.status(200).json({
       rows: data.rows || [],
