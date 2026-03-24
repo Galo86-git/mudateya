@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1117,7 +1118,22 @@ function estimarPrecio(){
   return Math.round(precio/500)*500; // redondear a 500
 }
 
+// Datos pendientes para abrir el modal de pago después del login
+var _pendingPayModal = null;
+
 function openPayModal(name,initials,rating,precio,placeId){
+  // Verificar si está logueado
+  var saved = sessionStorage.getItem('googleUser') || sessionStorage.getItem('clienteUser');
+  if(!saved){
+    // Guardar datos para abrir después del login
+    _pendingPayModal = {name,initials,rating,precio,placeId};
+    openLoginModal();
+    return;
+  }
+  _doOpenPayModal(name,initials,rating,precio,placeId);
+}
+
+function _doOpenPayModal(name,initials,rating,precio,placeId){
   var fee=Math.round(precio*0.10/100)*100;
   var mapsUrl='https://www.google.com/maps/place/?q=place_id:'+placeId;
   var desde=getInputVal('desde')||'Origen';
@@ -1521,6 +1537,62 @@ openPayModal=function(name,initials,rating,precio,placeId){
   document.getElementById('pm-btn-fee').style.display='block';
   document.getElementById('pm-btn-total').style.display='none';
 };
+</script>
+
+<!-- MODAL LOGIN -->
+<div id="loginModal" class="pay-modal-overlay">
+  <div class="pay-modal" style="max-width:380px;text-align:center">
+    <button class="pm-close" onclick="closeLoginModal()">✕</button>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:1px;margin-bottom:.3rem">ANTES DE CONTINUAR</div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:1.5rem">Iniciá sesión para confirmar tu identidad y recibir el comprobante de pago.</p>
+    <div id="loginModalBtn" style="display:flex;justify-content:center;margin-bottom:1rem"></div>
+    <p style="font-size:10px;color:var(--text3);font-family:var(--mono)">🔒 Solo usamos tu email · No publicamos nada en tu cuenta</p>
+  </div>
+</div>
+
+<script>
+// ── LOGIN MODAL ────────────────────────────────────────────────────────────
+var _googleLoginInited = false;
+
+function openLoginModal(){
+  document.getElementById('loginModal').classList.add('open');
+  document.body.style.overflow='hidden';
+
+  if(!_googleLoginInited){
+    fetch('/api/admin-config').then(r=>r.json()).then(function(cfg){
+      if(!cfg.googleClientId) return;
+      google.accounts.id.initialize({
+        client_id: cfg.googleClientId,
+        callback: function(response){
+          var payload = JSON.parse(atob(response.credential.split('.')[1]));
+          var user = {name:payload.name, email:payload.email, picture:payload.picture};
+          sessionStorage.setItem('googleUser', JSON.stringify(user));
+          sessionStorage.setItem('clienteUser', JSON.stringify(user));
+          closeLoginModal();
+          // Actualizar nav
+          var navLogin = document.getElementById('navLogin');
+          if(navLogin) navLogin.textContent = user.name.split(' ')[0];
+          // Abrir modal de pago pendiente
+          if(_pendingPayModal){
+            var p = _pendingPayModal;
+            _pendingPayModal = null;
+            _doOpenPayModal(p.name, p.initials, p.rating, p.precio, p.placeId);
+          }
+        }
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('loginModalBtn'),
+        {theme:'filled_black', size:'large', text:'signin_with', width:260}
+      );
+      _googleLoginInited = true;
+    }).catch(function(e){ console.error('Error cargando config Google:', e); });
+  }
+}
+
+function closeLoginModal(){
+  document.getElementById('loginModal').classList.remove('open');
+  document.body.style.overflow='';
+}
 </script>
 
 </body>
