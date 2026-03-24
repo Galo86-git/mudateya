@@ -565,117 +565,243 @@ function showPage(name){
   if(name==='chat') loadChat();
 }
 
-// ── PEDIDOS ────────────────────────────────────────────────────────────────
-function loadPedidos(){
-  // Pedidos simulados hasta que haya sistema de pedidos real
-  pedidosSimulados = [
-    {id:'MYA-001',desde:'Palermo, CABA',hasta:'Núñez, CABA',ambientes:'2 ambientes',fecha:'Hoy 10:30hs',precio:89000,fee:8900,estado:'nuevo',extras:'Embalaje incluido'},
-    {id:'MYA-002',desde:'Villa Urquiza, CABA',hasta:'San Isidro, GBA Norte',ambientes:'3 ambientes',fecha:'Mañana 9:00hs',precio:125000,fee:12500,estado:'nuevo',extras:'Desmontaje, Sube / escalera'},
-    {id:'MYA-003',desde:'Flores, CABA',hasta:'Quilmes, GBA Sur',ambientes:'1 ambiente',fecha:'15 Abr · 14:00hs',precio:55000,fee:5500,estado:'aceptado',extras:''},
-  ];
+// ── PEDIDOS / MUDANZAS DISPONIBLES ────────────────────────────────────────
+var mudanzasDisponibles = [];
+var misCotizaciones = [];
 
-  var nuevos = pedidosSimulados.filter(p=>p.estado==='nuevo').length;
+async function loadPedidos(){
+  document.getElementById('pedidosList').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando mudanzas disponibles…</div>';
+  try{
+    var zona = mudanceroData ? (mudanceroData[5]||'') : '';
+    var r = await fetch('/api/cotizaciones?action=por-zona&email='+encodeURIComponent(currentUser.email)+'&zona='+encodeURIComponent(zona));
+    var d = await r.json();
+    mudanzasDisponibles = d.mudanzas || [];
+
+    // También cargar mis cotizaciones enviadas
+    var r2 = await fetch('/api/cotizaciones?action=mis-cotizaciones&email='+encodeURIComponent(currentUser.email));
+    var d2 = await r2.json();
+    misCotizaciones = d2.mudanzas || [];
+
+    renderPedidos();
+  }catch(e){
+    // Si falla la API, mostrar estado vacío
+    mudanzasDisponibles = [];
+    misCotizaciones = [];
+    renderPedidos();
+  }
+}
+
+function renderPedidos(){
   var badge = document.getElementById('badgeNuevos');
-  badge.textContent = nuevos;
-  badge.style.display = nuevos > 0 ? '' : 'none';
+  badge.textContent = mudanzasDisponibles.length;
+  badge.style.display = mudanzasDisponibles.length > 0 ? '' : 'none';
 
-  if(pedidosSimulados.length === 0){
-    document.getElementById('pedidosList').innerHTML = '<div class="empty"><div class="empty-icon">📋</div>No tenés pedidos nuevos por ahora.<br>Cuando un cliente elija tu zona, te aparece acá.</div>';
-    return;
+  var html = '';
+
+  // Mudanzas disponibles para cotizar
+  if(mudanzasDisponibles.length > 0){
+    html += '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📋 Mudanzas disponibles en tu zona</div>';
+    html += mudanzasDisponibles.map(m => {
+      var expira = new Date(m.expira);
+      var ahorita = new Date();
+      var horasRestantes = Math.max(0, Math.round((expira - ahorita) / 3600000));
+      return `
+        <div class="pedido-card nuevo" style="margin-bottom:10px">
+          <div class="pedido-header">
+            <div>
+              <div class="pedido-ruta">${m.desde} → ${m.hasta}</div>
+              <div class="pedido-fecha">📅 ${m.fecha||'A confirmar'} · ${m.ambientes||'—'}</div>
+            </div>
+            <span class="badge nuevo">Disponible</span>
+          </div>
+          ${m.extras ? `<div class="pedido-meta"><span class="pedido-tag">📦 ${m.extras}</span></div>` : ''}
+          <div style="display:flex;align-items:flex-end;justify-content:space-between">
+            <div>
+              <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Precio estimado del cliente</div>
+              <div class="pedido-precio">$${parseInt(m.precio_estimado||0).toLocaleString('es-AR')}</div>
+              <div style="font-size:10px;color:${horasRestantes < 4 ? 'var(--red)':'var(--amber)'};font-family:var(--mono);margin-top:3px">⏱ Expira en ${horasRestantes}hs</div>
+            </div>
+            <div class="pedido-actions">
+              <button class="btn btn-green" onclick="abrirCotizacion(${JSON.stringify(m).replace(/"/g,'&quot;')})">💰 Enviar cotización</button>
+            </div>
+          </div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px">ID: ${m.id}</div>
+        </div>`;
+    }).join('');
   }
 
-  var html = pedidosSimulados.map(p => `
-    <div class="pedido-card ${p.estado}" id="pedido-${p.id}">
-      <div class="pedido-header">
-        <div>
-          <div class="pedido-ruta">${p.desde} → ${p.hasta}</div>
-          <div class="pedido-fecha">📅 ${p.fecha} · ${p.ambientes}</div>
-        </div>
-        <span class="badge ${p.estado}">${p.estado==='nuevo'?'Nuevo':p.estado==='aceptado'?'Aceptado':'Rechazado'}</span>
-      </div>
-      ${p.extras ? `<div class="pedido-meta"><span class="pedido-tag">📦 ${p.extras}</span></div>` : ''}
-      <div style="display:flex;align-items:flex-end;justify-content:space-between">
-        <div>
-          <div class="pedido-precio">$${p.precio.toLocaleString('es-AR')}</div>
-          <div class="pedido-precio-sub">Fee MudateYa: $${p.fee.toLocaleString('es-AR')} · Vos cobrás: $${(p.precio-p.fee).toLocaleString('es-AR')}</div>
-        </div>
-        ${p.estado==='nuevo' ? `
-          <div class="pedido-actions">
-            <button class="btn btn-red" onclick="responderPedido('${p.id}','rechazar')">✗ Rechazar</button>
-            <button class="btn btn-green" onclick="responderPedido('${p.id}','aceptar')">✓ Aceptar</button>
-          </div>` : ''}
-        ${p.estado==='aceptado' ? `
-          <div class="pedido-actions">
-            <button class="btn btn-ghost" onclick="showPage('chat')">💬 Chatear</button>
-          </div>` : ''}
-      </div>
-      <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px">ID: ${p.id}</div>
-    </div>`).join('');
+  // Mis cotizaciones enviadas
+  if(misCotizaciones.length > 0){
+    html += '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px">✉️ Cotizaciones enviadas</div>';
+    html += misCotizaciones.map(m => {
+      var cot = m.miCotizacion;
+      var estadoBadge = m.estado === 'cotizacion_aceptada' && m.cotizacionAceptada?.id === cot?.id
+        ? '<span class="badge aceptado">✓ Aceptada</span>'
+        : m.estado === 'cotizacion_aceptada'
+        ? '<span class="badge rechazado">No elegida</span>'
+        : '<span class="badge nuevo">Pendiente</span>';
+      return `
+        <div class="pedido-card ${m.estado === 'cotizacion_aceptada' && m.cotizacionAceptada?.id === cot?.id ? 'aceptado' : ''}">
+          <div class="pedido-header">
+            <div>
+              <div class="pedido-ruta">${m.desde} → ${m.hasta}</div>
+              <div class="pedido-fecha">📅 ${m.fecha||'—'} · ${m.ambientes||'—'}</div>
+            </div>
+            ${estadoBadge}
+          </div>
+          <div class="pedido-precio">$${cot?.precio?.toLocaleString('es-AR')||'—'}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">tu cotización</div>
+          ${cot?.nota ? `<div style="font-size:12px;color:var(--text2);margin-top:6px;font-style:italic">"${cot.nota}"</div>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  if(!html){
+    html = '<div class="empty"><div class="empty-icon">📋</div>No hay mudanzas disponibles en tu zona por ahora.<br>Te avisamos por email cuando aparezca una.</div>';
+  }
 
   document.getElementById('pedidosList').innerHTML = html;
 }
 
-function responderPedido(id, accion){
-  var pedido = pedidosSimulados.find(p=>p.id===id);
-  if(!pedido) return;
-  pedido.estado = accion === 'aceptar' ? 'aceptado' : 'rechazado';
-  loadPedidos();
+function abrirCotizacion(mudanza){
+  var precioSugerido = parseInt(mudanza.precio_estimado || 0);
+  var modal = document.createElement('div');
+  modal.id = 'cotModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem';
+  modal.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1.8rem;max-width:460px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.6)">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:.4rem">Enviar cotización</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:1.2rem">${mudanza.desde} → ${mudanza.hasta} · ${mudanza.ambientes||''}</div>
 
-  if(accion === 'aceptar'){
-    // Agregar contacto al chat
-    if(!mensajes[id]){
-      mensajes[id] = {
-        nombre: 'Cliente — ' + pedido.desde.split(',')[0],
-        msgs: [{from:'system',text:'Pedido aceptado. Podés coordinar con el cliente acá.',time:new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}]
-      };
-    }
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Tu precio ($ARS) <span style="color:var(--emerald)">*</span></label>
+          <div style="position:relative;display:flex;align-items:center">
+            <span style="position:absolute;left:12px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span>
+            <input type="number" id="cot-precio" value="${precioSugerido}" min="0"
+              style="width:100%;padding:11px 14px 11px 26px;border:1px solid var(--border2);border-radius:10px;font-size:14px;font-family:var(--mono);color:var(--text);background:var(--surface2);outline:none;font-weight:600"/>
+          </div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px">Precio estimado del cliente: $${precioSugerido.toLocaleString('es-AR')}</div>
+        </div>
+
+        <div>
+          <label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Tiempo estimado</label>
+          <input type="text" id="cot-tiempo" placeholder="Ej: 3-4 horas" 
+            style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);background:var(--surface2);outline:none"/>
+        </div>
+
+        <div>
+          <label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Nota para el cliente</label>
+          <textarea id="cot-nota" rows="3" placeholder="Describí tu propuesta: experiencia, qué incluye, condiciones…"
+            style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);background:var(--surface2);outline:none;resize:vertical;line-height:1.55"></textarea>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:1.2rem;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="document.getElementById('cotModal').remove()">Cancelar</button>
+        <button class="btn btn-green" id="btnEnviarCot" onclick="enviarCotizacion('${mudanza.id}')">Enviar cotización →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function enviarCotizacion(mudanzaId){
+  var precio = document.getElementById('cot-precio').value;
+  var nota = document.getElementById('cot-nota').value.trim();
+  var tiempo = document.getElementById('cot-tiempo').value.trim();
+
+  if(!precio || parseInt(precio) <= 0){
+    alert('Ingresá un precio válido');
+    return;
+  }
+
+  var btn = document.getElementById('btnEnviarCot');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px;vertical-align:middle;display:inline-block"></span>Enviando…';
+
+  var m = Array.isArray(mudanceroData) ? mudanceroData : [];
+
+  try{
+    var r = await fetch('/api/cotizaciones?action=cotizar', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mudanzaId,
+        mudanceroEmail: currentUser.email,
+        mudanceroNombre: m[1] || currentUser.name,
+        mudanceroTel: m[3] || '',
+        precio: parseInt(precio),
+        nota,
+        tiempoEstimado: tiempo,
+      })
+    });
+    var d = await r.json();
+    if(d.error) throw new Error(d.error);
+    document.getElementById('cotModal').remove();
+    await loadPedidos();
+  }catch(e){
+    btn.disabled = false;
+    btn.innerHTML = 'Enviar cotización →';
+    alert('Error: ' + e.message);
   }
 }
 
+
 // ── HISTORIAL ──────────────────────────────────────────────────────────────
 function loadHistorial(){
-  var completados = pedidosSimulados.filter(p=>p.estado==='aceptado');
-  if(completados.length === 0){
-    document.getElementById('historialList').innerHTML = '<div class="empty"><div class="empty-icon">📅</div>Aún no tenés trabajos completados.</div>';
+  var aceptadas = misCotizaciones.filter(m =>
+    m.estado === 'cotizacion_aceptada' && m.cotizacionAceptada?.id === m.miCotizacion?.id
+  );
+  if(aceptadas.length === 0){
+    document.getElementById('historialList').innerHTML = '<div class="empty"><div class="empty-icon">📅</div>Aún no tenés trabajos aceptados.</div>';
     return;
   }
-  var html = completados.map(p => `
-    <div class="pedido-card aceptado">
-      <div class="pedido-header">
-        <div>
-          <div class="pedido-ruta">${p.desde} → ${p.hasta}</div>
-          <div class="pedido-fecha">📅 ${p.fecha} · ${p.ambientes}</div>
+  var html = aceptadas.map(m => {
+    var cot = m.miCotizacion;
+    var fee = Math.round(cot.precio * 0.10);
+    return `
+      <div class="pedido-card aceptado">
+        <div class="pedido-header">
+          <div>
+            <div class="pedido-ruta">${m.desde} → ${m.hasta}</div>
+            <div class="pedido-fecha">📅 ${m.fecha||'—'} · ${m.ambientes||'—'}</div>
+          </div>
+          <span class="badge aceptado">✓ Aceptado</span>
         </div>
-        <span class="badge pagado">Completado</span>
-      </div>
-      <div class="pedido-precio">$${(p.precio-p.fee).toLocaleString('es-AR')}</div>
-      <div class="pedido-precio-sub">cobrado · fee $${p.fee.toLocaleString('es-AR')} pagado a MudateYa</div>
-    </div>`).join('');
+        <div class="pedido-precio">$${(cot.precio-fee).toLocaleString('es-AR')}</div>
+        <div class="pedido-precio-sub">vos cobrás · fee MudateYa: $${fee.toLocaleString('es-AR')}</div>
+      </div>`;
+  }).join('');
   document.getElementById('historialList').innerHTML = html;
 }
 
 // ── GANANCIAS ──────────────────────────────────────────────────────────────
 function loadGanancias(){
-  var completados = pedidosSimulados.filter(p=>p.estado==='aceptado');
-  var total = completados.reduce((s,p)=>s+(p.precio-p.fee),0);
-  var promedio = completados.length > 0 ? Math.round(total/completados.length) : 0;
-  document.getElementById('g-total').textContent = '$'+total.toLocaleString('es-AR');
-  document.getElementById('g-trabajos').textContent = completados.length;
+  var aceptadas = misCotizaciones.filter(m =>
+    m.estado === 'cotizacion_aceptada' && m.cotizacionAceptada?.id === m.miCotizacion?.id
+  );
+  var total = aceptadas.reduce((s,m) => s + (m.miCotizacion?.precio||0) * 0.90, 0);
+  var promedio = aceptadas.length > 0 ? Math.round(total/aceptadas.length) : 0;
+  document.getElementById('g-total').textContent = '$'+Math.round(total).toLocaleString('es-AR');
+  document.getElementById('g-trabajos').textContent = aceptadas.length;
   document.getElementById('g-promedio').textContent = '$'+promedio.toLocaleString('es-AR');
 
-  if(completados.length === 0){
-    document.getElementById('gananciasList').innerHTML = '<div class="empty"><div class="empty-icon">💰</div>Aceptá pedidos para ver tus ganancias acá.</div>';
+  if(aceptadas.length === 0){
+    document.getElementById('gananciasList').innerHTML = '<div class="empty"><div class="empty-icon">💰</div>Cuando el cliente acepte tu cotización, tus ganancias aparecen acá.</div>';
     return;
   }
   var html = '<table style="width:100%;border-collapse:collapse">'
     + '<thead><tr style="border-bottom:1px solid var(--border)"><th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Trabajo</th><th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Precio total</th><th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Fee MYA</th><th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Vos cobrás</th></tr></thead><tbody>'
-    + completados.map(p=>`
-      <tr style="border-bottom:1px solid var(--border)">
-        <td style="padding:11px 14px;font-size:12px;color:var(--text2)">${p.desde.split(',')[0]} → ${p.hasta.split(',')[0]}</td>
-        <td style="padding:11px 14px;font-size:12px;font-family:var(--mono)">$${p.precio.toLocaleString('es-AR')}</td>
-        <td style="padding:11px 14px;font-size:12px;font-family:var(--mono);color:var(--red)">-$${p.fee.toLocaleString('es-AR')}</td>
-        <td style="padding:11px 14px;font-size:13px;font-family:var(--mono);color:var(--emerald);font-weight:600">$${(p.precio-p.fee).toLocaleString('es-AR')}</td>
-      </tr>`).join('')
+    + aceptadas.map(m => {
+        var cot = m.miCotizacion;
+        var fee = Math.round(cot.precio * 0.10);
+        return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:11px 14px;font-size:12px;color:var(--text2)">${m.desde.split(',')[0]} → ${m.hasta.split(',')[0]}</td>
+          <td style="padding:11px 14px;font-size:12px;font-family:var(--mono)">$${cot.precio.toLocaleString('es-AR')}</td>
+          <td style="padding:11px 14px;font-size:12px;font-family:var(--mono);color:var(--red)">-$${fee.toLocaleString('es-AR')}</td>
+          <td style="padding:11px 14px;font-size:13px;font-family:var(--mono);color:var(--emerald);font-weight:600">$${(cot.precio-fee).toLocaleString('es-AR')}</td>
+        </tr>`;
+      }).join('')
     + '</tbody></table>';
   document.getElementById('gananciasList').innerHTML = html;
 }
