@@ -109,7 +109,7 @@ async function enviarEmailAdmin(data) {
   const resend = new Resend(apiKey);
 
   await resend.emails.send({
-    from:    'MudateYa <noreply@mudateya.vercel.app>',
+    from:    'MudateYa <onboarding@resend.dev>',
     to:      adminEmail,
     subject: `🚛 Nuevo mudancero: ${data.nombre} — ${data.zonaBase}`,
     html: `
@@ -154,7 +154,7 @@ async function enviarEmailMudancero(data) {
   const resend = new Resend(apiKey);
 
   await resend.emails.send({
-    from:    'MudateYa <noreply@mudateya.vercel.app>',
+    from:    'MudateYa <onboarding@resend.dev>',
     to:      data.email,
     subject: `¡Recibimos tu solicitud, ${data.nombre.split(' ')[0]}! 🚛`,
     html: `
