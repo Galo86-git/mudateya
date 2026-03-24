@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "mercadopago": "^2.0.6"
+    "mercadopago": "^2.0.6",
+    "resend": "^3.2.0"
   },
   "engines": {
     "node": "20.x"
