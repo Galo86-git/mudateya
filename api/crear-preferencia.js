@@ -1,77 +1,125 @@
-// api/webhook-mp.js
-// Recibe notificaciones de Mercado Pago cuando un pago cambia de estado
-// Configurar en: https://www.mercadopago.com.ar/developers/panel/notifications
+// api/crear-preferencia.js
+// Endpoint serverless — crea una preferencia de pago en Mercado Pago
+// Deploy en Vercel: esta función corre en Edge/Node automáticamente
 
-const { MercadoPagoConfig, Payment } = require('mercadopago');
+const { MercadoPagoConfig, Preference } = require('mercadopago');
 
 module.exports = async function handler(req, res) {
+
+  // CORS preflight
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(200).end();
+  }
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  try {
-    const { type, data } = req.body;
+  // Validar que tenemos las env vars
+  if (!process.env.MP_ACCESS_TOKEN) {
+    console.error('Falta MP_ACCESS_TOKEN en variables de entorno');
+    return res.status(500).json({ error: 'Configuración de pago incompleta' });
+  }
 
-    // Solo procesar notificaciones de pagos
-    if (type !== 'payment') {
-      return res.status(200).json({ status: 'ignorado', type });
+  try {
+    const {
+      mudanceroNombre,
+      tipoPago,      // 'fee' | 'total'
+      monto,         // número en ARS
+      precioTotal,   // número en ARS (precio completo de la mudanza)
+      desde,
+      hasta,
+      ambientes,
+    } = req.body;
+
+    // Validaciones básicas
+    if (!monto || monto <= 0) {
+      return res.status(400).json({ error: 'Monto inválido' });
+    }
+    if (!['fee', 'total'].includes(tipoPago)) {
+      return res.status(400).json({ error: 'Tipo de pago inválido' });
     }
 
+    // Inicializar cliente MP
     const client = new MercadoPagoConfig({
       accessToken: process.env.MP_ACCESS_TOKEN,
     });
-    const paymentClient = new Payment(client);
+    const preference = new Preference(client);
 
-    // Obtener el pago completo desde MP
-    const pago = await paymentClient.get({ id: data.id });
+    const siteUrl = process.env.SITE_URL || 'https://mudateya.vercel.app';
 
-    const {
-      status,           // approved | pending | rejected
-      status_detail,
-      external_reference,
-      metadata,
-      transaction_amount,
-      payer,
-    } = pago;
+    // Título descriptivo del ítem según tipo de pago
+    const titulo = tipoPago === 'fee'
+      ? `MudateYa — Fee de servicio (${mudanceroNombre})`
+      : `MudateYa — Mudanza completa (${mudanceroNombre})`;
 
-    console.log(`[Webhook MP] Pago ${data.id} — ${status} (${status_detail})`);
-    console.log(`  Referencia: ${external_reference}`);
-    console.log(`  Mudancero:  ${metadata?.mudancero}`);
-    console.log(`  Tipo:       ${metadata?.tipo_pago}`);
-    console.log(`  Monto:      $${transaction_amount}`);
+    const descripcion = tipoPago === 'fee'
+      ? `Reserva tu mudanza de ${desde} a ${hasta}. ` +
+        `El resto ($${(precioTotal - monto).toLocaleString('es-AR')}) lo pagás al mudancero el día de la mudanza.`
+      : `Mudanza completa de ${desde} a ${hasta} — ${ambientes}. ` +
+        `El mudancero recibe su parte automáticamente.`;
 
-    if (status === 'approved') {
-      // ── Acá va tu lógica de negocio ──────────────────────────────────
-      // 1. Guardar en DB: crear registro de mudanza confirmada
-      // 2. Notificar al mudancero (email / WhatsApp)
-      // 3. Notificar al usuario con la confirmación
-      // 4. Si tipo_pago === 'fee': recordar que queda saldo al mudancero
-      //
-      // Ejemplo con base de datos (pseudocódigo):
-      // await db.mudanzas.create({
-      //   estado: 'confirmada',
-      //   tipo_pago: metadata.tipo_pago,
-      //   precio_total: metadata.precio_total,
-      //   fee_pagado: transaction_amount,
-      //   saldo_al_mudancero: metadata.precio_total - transaction_amount,
-      //   mudancero: metadata.mudancero,
-      //   desde: metadata.desde,
-      //   hasta: metadata.hasta,
-      //   payer_email: payer.email,
-      //   mp_payment_id: data.id,
-      // });
-      //
-      // await enviarEmailConfirmacion(payer.email, metadata);
-      // await notificarMudancero(metadata.mudancero, metadata);
-      // ────────────────────────────────────────────────────────────────
-    }
+    // Crear preferencia
+    const body = {
+      items: [
+        {
+          id:          `mudanza-${Date.now()}`,
+          title:       titulo,
+          description: descripcion,
+          quantity:    1,
+          unit_price:  Number(monto),
+          currency_id: 'ARS',
+        },
+      ],
+      payer: {
+        // MP pedirá los datos del pagador en su checkout
+      },
+      back_urls: {
+        success: `${siteUrl}/pago-exitoso?tipo=${tipoPago}&monto=${monto}&mudancero=${encodeURIComponent(mudanceroNombre)}`,
+        failure: `${siteUrl}?pago=error`,
+        pending: `${siteUrl}?pago=pendiente`,
+      },
+      auto_return: 'approved',
+      statement_descriptor: 'MUDATEYA',
+      external_reference: `${tipoPago}-${Date.now()}`,
+      metadata: {
+        tipo_pago:       tipoPago,
+        precio_total:    precioTotal,
+        mudancero:       mudanceroNombre,
+        desde,
+        hasta,
+        ambientes,
+      },
+      // Notificaciones webhook (opcional pero recomendado)
+      // notification_url: `${siteUrl}/api/webhook-mp`,
+    };
 
-    return res.status(200).json({ status: 'ok', pago_status: status });
+    const result = await preference.create({ body });
+
+    console.log('MP result keys:', Object.keys(result));
+    console.log('MP init_point:', result.init_point);
+    console.log('MP sandbox_init_point:', result.sandbox_init_point);
+
+    // El SDK v2 puede devolver los campos directamente o anidados
+    const initPoint = result.init_point || result.initPoint || result['init_point'];
+    const sandboxUrl = result.sandbox_init_point || result.sandboxInitPoint || result['sandbox_init_point'];
+
+    // Devolver las URLs de checkout
+    return res.status(200).json({
+      id:          result.id,
+      init_point:  initPoint,
+      sandbox_url: sandboxUrl,
+      raw:         result, // para debug
+    });
 
   } catch (error) {
-    console.error('Error procesando webhook MP:', error);
-    // MP reintenta si devolvés un error, no devolver 500 por errores menores
-    return res.status(200).json({ status: 'error_procesado', error: error.message });
+    console.error('Error creando preferencia MP:', error);
+    return res.status(500).json({
+      error:   'Error al crear el pago',
+      detalle: error.message,
+    });
   }
 };
