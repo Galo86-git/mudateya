@@ -56,6 +56,20 @@ module.exports = async function handler(req, res) {
       t.estado = accion === 'confirmar' ? 'confirmada' : 'rechazada';
       await setJSON(`transferencia:${id}`, t, 2592000);
 
+      // Actualizar estado de la mudanza asociada en Redis
+      try {
+        const clienteEmail = t.clienteEmail;
+        const clienteIds = await getJSON(`cliente:${clienteEmail}`) || [];
+        for (const mudId of clienteIds) {
+          const mudanza = await getJSON(`mudanza:${mudId}`);
+          if (mudanza && mudanza.tipoPago === 'transferencia' && mudanza.estado === 'pago_transferencia_pendiente') {
+            mudanza.estado = accion === 'confirmar' ? 'cotizacion_aceptada' : 'transferencia_rechazada';
+            await setJSON(`mudanza:${mudId}`, mudanza, 2592000);
+            break;
+          }
+        }
+      } catch(e) { console.error('Error actualizando mudanza:', e.message); }
+
       // Notificar al cliente
       const resend = new Resend(process.env.RESEND_API_KEY);
       if (t.clienteEmail) {
