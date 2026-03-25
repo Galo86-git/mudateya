@@ -1464,12 +1464,28 @@ async function initMaps(){
     // Helper: crear dropdown de sugerencias
     function makeDropdown(input,isDesde){
       var dropdown=document.createElement('ul');
-      dropdown.style.cssText='position:absolute;top:100%;left:0;right:0;z-index:9999;list-style:none;margin:4px 0 0;padding:0;background:#282420;border:1px solid #3A342C;border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.6);overflow:hidden;display:none;';
+      dropdown.style.cssText='position:absolute;top:100%;left:0;right:0;z-index:9999;list-style:none;margin:4px 0 0;padding:0;background:#1D2820;border:1px solid #2A3C32;border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.6);overflow:hidden;display:none;';
       input.parentElement.style.position='relative';
       input.parentElement.appendChild(dropdown);
 
       var debounce;
+      var activeIdx=-1;
+
+      function highlightItem(idx){
+        var items=dropdown.querySelectorAll('li');
+        items.forEach(function(li,i){
+          if(i===idx){
+            li.style.background='rgba(34,195,106,.12)';
+            li.style.color='#E8F5EE';
+          }else{
+            li.style.background='';
+            li.style.color='#7AADA0';
+          }
+        });
+      }
+
       input.addEventListener('input',function(){
+        activeIdx=-1;
         clearTimeout(debounce);
         var q=this.value.trim();
         if(q.length<2){dropdown.style.display='none';return;}
@@ -1483,29 +1499,59 @@ async function initMaps(){
               var pred=s.placePrediction;
               var li=document.createElement('li');
               li.textContent=pred.text.toString();
-              li.style.cssText='padding:10px 14px;font-size:13px;color:#A89880;cursor:pointer;border-top:1px solid #2E2A24;font-family:Outfit,sans-serif;';
-              li.addEventListener('mouseenter',function(){this.style.background='rgba(34,195,106,.08)';this.style.color='#F0EAE0';});
-              li.addEventListener('mouseleave',function(){this.style.background='';this.style.color='#A89880';});
+              li.style.cssText='padding:10px 14px;font-size:13px;color:#7AADA0;cursor:pointer;border-top:1px solid #213029;font-family:Outfit,sans-serif;transition:background .1s;';
+              li.addEventListener('mouseenter',function(){
+                activeIdx=Array.from(dropdown.querySelectorAll('li')).indexOf(this);
+                highlightItem(activeIdx);
+              });
+              li.addEventListener('mouseleave',function(){highlightItem(activeIdx);});
               li.addEventListener('mousedown',async function(e){
                 e.preventDefault();
-                var place=pred.toPlace();
-                await place.fetchFields({fields:['formattedAddress','location','displayName']});
-                var addr=place.formattedAddress||place.displayName||pred.text.toString();
-                input.value=addr;
-                dropdown.style.display='none';
-                if(isDesde&&place.location){
-                  fromLocation={lat:place.location.lat(),lng:place.location.lng()};
-                }
-                sessionToken=new google.maps.places.AutocompleteSessionToken();
+                await selectSuggestion(pred,input,isDesde,dropdown);
               });
               dropdown.appendChild(li);
             });
             dropdown.style.display='block';
+            activeIdx=-1;
           }catch(err){console.warn('Autocomplete error:',err);}
         },280);
       });
-      input.addEventListener('blur',function(){setTimeout(function(){dropdown.style.display='none';},150);});
-      input.addEventListener('keydown',function(e){if(e.key==='Enter')e.preventDefault();});
+
+      // Navegación con teclado
+      input.addEventListener('keydown',function(e){
+        var items=dropdown.querySelectorAll('li');
+        if(e.key==='ArrowDown'){
+          e.preventDefault();
+          activeIdx=Math.min(activeIdx+1,items.length-1);
+          highlightItem(activeIdx);
+        }else if(e.key==='ArrowUp'){
+          e.preventDefault();
+          activeIdx=Math.max(activeIdx-1,0);
+          highlightItem(activeIdx);
+        }else if(e.key==='Enter'){
+          e.preventDefault();
+          if(activeIdx>=0&&items[activeIdx]){
+            items[activeIdx].dispatchEvent(new MouseEvent('mousedown',{bubbles:true}));
+          }
+        }else if(e.key==='Escape'){
+          dropdown.style.display='none';
+          activeIdx=-1;
+        }
+      });
+
+      input.addEventListener('blur',function(){setTimeout(function(){dropdown.style.display='none';activeIdx=-1;},150);});
+    }
+
+    async function selectSuggestion(pred,input,isDesde,dropdown){
+      var place=pred.toPlace();
+      await place.fetchFields({fields:['formattedAddress','location','displayName']});
+      var addr=place.formattedAddress||place.displayName||pred.text.toString();
+      input.value=addr;
+      dropdown.style.display='none';
+      if(isDesde&&place.location){
+        fromLocation={lat:place.location.lat(),lng:place.location.lng()};
+      }
+      sessionToken=new google.maps.places.AutocompleteSessionToken();
     }
 
     makeDropdown(inputD,true);
