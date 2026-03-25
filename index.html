@@ -739,6 +739,9 @@ gmp-placeautocomplete input:focus,gmp-place-autocomplete input:focus{
   <a href="#para-quien" onclick="closeMenu()">Para quién</a>
   <a href="#zonas" onclick="closeMenu()">Zonas</a>
   <a href="#testimonios" onclick="closeMenu()">Reseñas</a>
+  <a href="/mi-mudanza" onclick="closeMenu()">🏠 Soy cliente</a>
+  <a href="/mi-cuenta" onclick="closeMenu()">🚛 Soy mudancero</a>
+  <a href="#" onclick="toggleTheme();closeMenu()" id="mobilethemeBtn" style="font-family:var(--mono);font-size:13px">☀ Modo claro</a>
   <a href="/mudanceros" class="m-cta" onclick="closeMenu()">Sumarme como mudancero →</a>
 </div>
 
@@ -1609,14 +1612,19 @@ function closeMenu(){
   if(saved === 'light'){
     document.body.classList.add('light');
     var btn = document.getElementById('themeBtn');
+    var mobileBtn = document.getElementById('mobilethemeBtn');
     if(btn) btn.textContent = '🌙 Modo oscuro';
+    if(mobileBtn) mobileBtn.textContent = '🌙 Modo oscuro';
   }
 })();
 
 function toggleTheme(){
   var isLight = document.body.classList.toggle('light');
+  var label = isLight ? '🌙 Modo oscuro' : '☀ Modo claro';
   var btn = document.getElementById('themeBtn');
-  if(btn) btn.textContent = isLight ? '🌙 Modo oscuro' : '☀ Modo claro';
+  var mobileBtn = document.getElementById('mobilethemeBtn');
+  if(btn) btn.textContent = label;
+  if(mobileBtn) mobileBtn.textContent = label;
   localStorage.setItem('mudateya-theme', isLight ? 'light' : 'dark');
 }
 
