@@ -499,7 +499,9 @@ function renderDashboard(){
   var pendientes = mudancerosData.filter(m => getEstado(m) === 'Pendiente').length;
   var aprobados = mudancerosData.filter(m => getEstado(m) === 'Aprobado').length;
   var totalPagos = pagosData.length + transferenciasData.filter(t => t.estado === 'confirmada' || t.estado === 'pendiente').length;
-  var gmv = pagosData.reduce((s, p) => s + (parseFloat(p[3]) || 0), 0);
+  var gmv = pagosData.reduce((s, p) => s + (parseFloat(p[3]) || 0), 0)
+          + transferenciasData.filter(t => t.estado === 'confirmada' || t.estado === 'pendiente')
+              .reduce((s, t) => s + (parseInt((t.monto||'0').replace(/\D/g,'')) || 0), 0);
   var revenue = gmv * 0.10;
   var transferenciasPendientes = transferenciasData.filter(t => t.estado === 'pendiente').length;
 
