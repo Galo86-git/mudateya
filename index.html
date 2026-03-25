@@ -606,7 +606,27 @@ gmp-placeautocomplete input:focus,gmp-place-autocomplete input:focus{
 .pm-explainer-icon{font-size:16px;flex-shrink:0;line-height:1.5}
 .pm-explainer p{font-size:12px;color:var(--text2);line-height:1.6;margin:0}
 .pm-explainer strong{color:var(--emerald)}
-.pm-options{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+/* TRANSFERENCIA */
+.pm-tabs{display:flex;gap:4px;margin-bottom:14px;background:var(--surface2);padding:4px;border-radius:10px;border:1px solid var(--border)}
+.pm-tab{flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;text-align:center;color:var(--text2);transition:all .2s;border:none;background:none;font-family:'Outfit',sans-serif}
+.pm-tab.active{background:var(--surface);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.pm-panel{display:none}.pm-panel.active{display:block}
+.transfer-box{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:1rem;margin-bottom:12px}
+.transfer-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.transfer-row:last-child{border-bottom:none}
+.transfer-label{color:var(--text3);font-family:var(--mono)}
+.transfer-val{color:var(--text);font-weight:500;font-family:var(--mono);display:flex;align-items:center;gap:6px}
+.copy-btn{font-size:10px;padding:2px 7px;border:1px solid var(--border2);border-radius:4px;background:none;color:var(--text3);cursor:pointer;font-family:var(--mono);transition:all .2s}
+.copy-btn:hover{border-color:var(--emerald);color:var(--emerald)}
+.transfer-monto{text-align:center;padding:12px;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:10px;margin-bottom:12px}
+.transfer-monto-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--emerald);letter-spacing:1px}
+.transfer-monto-sub{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+.upload-comprobante{border:2px dashed var(--border2);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px}
+.upload-comprobante:hover{border-color:var(--emerald);background:var(--emerald-subtle)}
+.upload-comprobante.has-file{border-color:var(--emerald);background:var(--emerald-subtle)}
+.btn-confirmar-transfer{width:100%;padding:13px;border-radius:10px;border:none;background:var(--emerald);color:#041A0E;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.btn-confirmar-transfer:hover{background:#2EDB7A}
+.btn-confirmar-transfer:disabled{opacity:.6;cursor:not-allowed}
 .pm-opt{
   display:flex;align-items:center;gap:12px;
   padding:12px 14px;border-radius:12px;
@@ -1357,10 +1377,10 @@ function appendMudanceroDB(m, list){
 }
 
 function estimarPrecioMudancero(m){
-  // Usar precio del mudancero según ambientes, con fallback al estimado general
   var precios = [m.precio1amb, m.precio2amb, m.precio3amb, m.precio4amb];
   var idx = Math.min(amb-1, 3);
-  var precioMud = parseInt((precios[idx]||'').replace(/\D/g,''));
+  var raw = precios[idx] || '';
+  var precioMud = parseInt(String(raw).replace(/\D/g,''));
   if(precioMud > 0) return precioMud;
   return estimarPrecio();
 }
@@ -1457,6 +1477,98 @@ function closePayModal(){
 }
 
 // Selección de opción de pago
+function selectPayTab(tab){
+  document.querySelectorAll('.pm-tab').forEach(function(t,i){t.classList.toggle('active', i===(tab==='mp'?0:1));});
+  document.getElementById('pm-panel-mp').classList.toggle('active', tab==='mp');
+  document.getElementById('pm-panel-transfer').classList.toggle('active', tab==='transfer');
+  // Actualizar monto en panel transferencia
+  if(tab==='transfer'){
+    var feeEl = document.getElementById('pm-fee');
+    document.getElementById('tr-monto').textContent = feeEl ? feeEl.textContent : '—';
+  }
+}
+
+function copiar(texto, btn){
+  navigator.clipboard.writeText(texto).then(function(){
+    var orig = btn.textContent;
+    btn.textContent = '✓';
+    btn.style.color = 'var(--emerald)';
+    setTimeout(function(){ btn.textContent = orig; btn.style.color = ''; }, 1500);
+  }).catch(function(){
+    // Fallback para browsers sin clipboard API
+    var el = document.createElement('textarea');
+    el.value = texto;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    btn.textContent = '✓';
+    setTimeout(function(){ btn.textContent = 'Copiar'; }, 1500);
+  });
+}
+
+function previewComprobante(input){
+  if(input.files && input.files[0]){
+    var area = document.getElementById('uploadComp');
+    var icon = document.getElementById('compIcon');
+    var text = document.getElementById('compText');
+    area.classList.add('has-file');
+    icon.textContent = '✅';
+    text.textContent = input.files[0].name;
+    document.getElementById('btnConfirmarTransfer').disabled = false;
+  }
+}
+
+async function confirmarTransferencia(){
+  var btn = document.getElementById('btnConfirmarTransfer');
+  var user = null;
+  try{ user = JSON.parse(sessionStorage.getItem('googleUser') || sessionStorage.getItem('clienteUser')); }catch(e){}
+
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+
+  // Convertir comprobante a base64
+  var compInput = document.getElementById('compInput');
+  var compBase64 = '';
+  if(compInput.files && compInput.files[0]){
+    compBase64 = await new Promise(function(resolve){
+      var r = new FileReader();
+      r.onload = function(e){ resolve(e.target.result); };
+      r.readAsDataURL(compInput.files[0]);
+    });
+  }
+
+  try{
+    await fetch('/api/registrar-transferencia', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        clienteEmail: user ? user.email : '',
+        clienteNombre: user ? user.name : '',
+        mudancero: document.getElementById('pm-mudancero-name').textContent,
+        desde: document.getElementById('pm-desde').textContent,
+        hasta: document.getElementById('pm-hasta').textContent,
+        monto: document.getElementById('tr-monto').textContent,
+        comprobante: compBase64,
+        fecha: new Date().toLocaleString('es-AR'),
+      })
+    });
+  }catch(e){ console.warn('Error registrando transferencia:', e); }
+
+  // Mostrar éxito
+  closePayModal();
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1rem';
+  overlay.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:2rem;max-width:400px;width:100%;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:12px">✅</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:1px;margin-bottom:8px">¡Comprobante recibido!</div>
+      <p style="font-size:13px;color:var(--text2);line-height:1.65;margin-bottom:1.2rem">Vamos a validar tu transferencia en las próximas <strong style="color:var(--text)">2 horas hábiles</strong>. Te avisamos por email cuando tu reserva esté confirmada.</p>
+      <button onclick="this.closest('div[style*=fixed]').remove()" style="background:var(--emerald);color:#041A0E;border:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Entendido</button>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
 var selectedPayOption='fee';
 function selectPayOption(opt){
   selectedPayOption=opt;
@@ -1885,46 +1997,135 @@ async function initMaps(){
       <p>El precio final para vos es el mismo. Podés pagar solo el <strong>fee de MudateYa (10%)</strong> ahora y el resto directamente al mudancero el día de la mudanza — o pagarlo todo acá.</p>
     </div>
 
-    <!-- Opciones de pago -->
-    <div class="pm-options">
-      <div class="pm-opt selected" id="pm-opt-fee" onclick="selectPayOption('fee')" style="position:relative">
-        <div style="position:absolute;top:-10px;left:12px;background:var(--emerald);color:#041A0E;font-size:9px;font-family:var(--mono);font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.4px">⭐ RECOMENDADO</div>
-        <div class="pm-opt-radio"></div>
-        <div class="pm-opt-body">
-          <div class="pm-opt-title">Pagar solo el fee ahora</div>
-          <div class="pm-opt-desc">Reservás tu lugar con menos dinero. El resto al mudancero el día de la mudanza.</div>
-        </div>
-        <div class="pm-opt-price" id="pm-fee">—</div>
-      </div>
-      <div class="pm-opt" id="pm-opt-total" onclick="selectPayOption('total')">
-        <div class="pm-opt-radio"></div>
-        <div class="pm-opt-body">
-          <div class="pm-opt-title">Pagar el total ahora</div>
-          <div class="pm-opt-desc">Todo cubierto. El mudancero recibe su parte automáticamente tras el servicio.</div>
-        </div>
-        <div class="pm-opt-price" id="pm-precio-total2">—</div>
-      </div>
+    <!-- Tabs de método de pago -->
+    <div class="pm-tabs">
+      <button class="pm-tab active" onclick="selectPayTab('mp')">💳 Mercado Pago</button>
+      <button class="pm-tab" onclick="selectPayTab('transfer')">🏦 Transferencia</button>
     </div>
 
-    <!-- Resto a pagar al mudancero -->
-    <div class="pm-resto-info" id="pm-resto-fee-info">
-      <span style="color:var(--text3);font-size:11px;font-family:var(--mono)">Resto a pagar al mudancero el día de la mudanza:</span>
-      <span id="pm-resto" style="color:var(--text2);font-size:11px;font-family:var(--mono);font-weight:500">—</span>
-    </div>
-    <div style="display:none;align-items:center;gap:8px;padding:8px 12px;background:rgba(34,195,106,.08);border:1px solid rgba(34,195,106,.2);border-radius:8px;margin-bottom:10px" id="pm-total-info">
-      <span style="font-size:14px">✅</span>
-      <span style="font-size:12px;color:var(--emerald);font-weight:500">Todo pagado — no abonás nada el día de la mudanza</span>
+    <!-- PANEL MERCADO PAGO -->
+    <div class="pm-panel active" id="pm-panel-mp">
+      <!-- Opciones de pago -->
+      <div class="pm-options">
+        <div class="pm-opt selected" id="pm-opt-fee" onclick="selectPayOption('fee')" style="position:relative">
+          <div style="position:absolute;top:-10px;left:12px;background:var(--emerald);color:#041A0E;font-size:9px;font-family:var(--mono);font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.4px">⭐ RECOMENDADO</div>
+          <div class="pm-opt-radio"></div>
+          <div class="pm-opt-body">
+            <div class="pm-opt-title">Pagar solo el fee ahora</div>
+            <div class="pm-opt-desc">Reservás tu lugar con menos dinero. El resto al mudancero el día de la mudanza.</div>
+          </div>
+          <div class="pm-opt-price" id="pm-fee">—</div>
+        </div>
+        <div class="pm-opt" id="pm-opt-total" onclick="selectPayOption('total')">
+          <div class="pm-opt-radio"></div>
+          <div class="pm-opt-body">
+            <div class="pm-opt-title">Pagar el total ahora</div>
+            <div class="pm-opt-desc">Todo cubierto. El mudancero recibe su parte automáticamente tras el servicio.</div>
+          </div>
+          <div class="pm-opt-price" id="pm-precio-total2">—</div>
+        </div>
+      </div>
+
+      <!-- Resto a pagar al mudancero -->
+      <div class="pm-resto-info" id="pm-resto-fee-info">
+        <span style="color:var(--text3);font-size:11px;font-family:var(--mono)">Resto a pagar al mudancero el día de la mudanza:</span>
+        <span id="pm-resto" style="color:var(--text2);font-size:11px;font-family:var(--mono);font-weight:500">—</span>
+      </div>
+      <div style="display:none;align-items:center;gap:8px;padding:8px 12px;background:rgba(34,195,106,.08);border:1px solid rgba(34,195,106,.2);border-radius:8px;margin-bottom:10px" id="pm-total-info">
+        <span style="font-size:14px">✅</span>
+        <span style="font-size:12px;color:var(--emerald);font-weight:500">Todo pagado — no abonás nada el día de la mudanza</span>
+      </div>
+
+      <!-- Botones MP -->
+      <button class="pm-btn-mp" id="pm-btn-fee">
+        <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.21.22/mercadopago/logo__large@2x.png" alt="Mercado Pago" style="height:18px;vertical-align:middle;margin-right:8px;filter:brightness(10)"/>
+        Pagar con Mercado Pago
+      </button>
+      <button class="pm-btn-total" id="pm-btn-total" style="display:none">
+        <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.21.22/mercadopago/logo__large@2x.png" alt="Mercado Pago" style="height:18px;vertical-align:middle;margin-right:8px;filter:brightness(10)"/>
+        Pagar total con Mercado Pago
+      </button>
     </div>
 
-    <!-- Botones MP -->
-    <button class="pm-btn-mp" id="pm-btn-fee">
-      <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.21.22/mercadopago/logo__large@2x.png" alt="Mercado Pago" style="height:18px;vertical-align:middle;margin-right:8px;filter:brightness(10)"/>
-      Pagar con Mercado Pago
-    </button>
-    <button class="pm-btn-total" id="pm-btn-total" style="display:none">
-      <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.21.22/mercadopago/logo__large@2x.png" alt="Mercado Pago" style="height:18px;vertical-align:middle;margin-right:8px;filter:brightness(10)"/>
-      Pagar total con Mercado Pago
-    </button>
+    <!-- PANEL TRANSFERENCIA -->
+    <div class="pm-panel" id="pm-panel-transfer">
+      <div class="transfer-monto">
+        <div class="transfer-monto-num" id="tr-monto">—</div>
+        <div class="transfer-monto-sub">fee de servicio MudateYa (10%)</div>
+      </div>
+      <div class="transfer-box">
+        <div class="transfer-row">
+          <span class="transfer-label">CBU</span>
+          <span class="transfer-val">
+            0000003100123456789012
+            <button class="copy-btn" onclick="copiar('0000003100123456789012', this)">Copiar</button>
+          </span>
+        </div>
+        <div class="transfer-row">
+          <span class="transfer-label">Alias</span>
+          <span class="transfer-val">
+            MUDATEYA.PAGOS
+            <button class="copy-btn" onclick="copiar('MUDATEYA.PAGOS', this)">Copiar</button>
+          </span>
+        </div>
+        <div class="transfer-row">
+          <span class="transfer-label">Titular</span>
+          <span class="transfer-val">MudateYa S.R.L.</span>
+        </div>
+        <div class="transfer-row">
+          <span class="transfer-label">Banco</span>
+          <span class="transfer-val">Banco Nación Argentina</span>
+        </div>
+        <div class="transfer-row">
+          <span class="transfer-label">CUIT</span>
+          <span class="transfer-val">30-12345678-9</span>
+        </div>
+      </div>
+
+      <!-- QR MP -->
+      <div style="text-align:center;margin-bottom:12px">
+        <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:8px">O escaneá el QR con tu app de Mercado Pago</div>
+        <div style="width:120px;height:120px;margin:0 auto;background:white;border-radius:10px;padding:8px;display:flex;align-items:center;justify-content:center">
+          <svg viewBox="0 0 100 100" width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+            <!-- QR ficticio decorativo -->
+            <rect width="100" height="100" fill="white"/>
+            <rect x="5" y="5" width="35" height="35" fill="none" stroke="#000" stroke-width="3"/>
+            <rect x="12" y="12" width="21" height="21" fill="#000"/>
+            <rect x="60" y="5" width="35" height="35" fill="none" stroke="#000" stroke-width="3"/>
+            <rect x="67" y="12" width="21" height="21" fill="#000"/>
+            <rect x="5" y="60" width="35" height="35" fill="none" stroke="#000" stroke-width="3"/>
+            <rect x="12" y="67" width="21" height="21" fill="#000"/>
+            <rect x="60" y="60" width="8" height="8" fill="#000"/>
+            <rect x="72" y="60" width="8" height="8" fill="#000"/>
+            <rect x="84" y="60" width="8" height="8" fill="#000"/>
+            <rect x="60" y="72" width="8" height="8" fill="#000"/>
+            <rect x="84" y="72" width="8" height="8" fill="#000"/>
+            <rect x="60" y="84" width="8" height="8" fill="#000"/>
+            <rect x="72" y="84" width="21" height="8" fill="#000"/>
+            <rect x="45" y="5" width="8" height="8" fill="#000"/>
+            <rect x="45" y="20" width="8" height="8" fill="#000"/>
+            <rect x="45" y="35" width="8" height="8" fill="#000"/>
+            <rect x="45" y="50" width="8" height="8" fill="#000"/>
+            <rect x="5" y="45" width="8" height="8" fill="#000"/>
+            <rect x="20" y="45" width="8" height="8" fill="#000"/>
+          </svg>
+        </div>
+        <div style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:6px">⚠ QR de ejemplo — reemplazar con el real</div>
+      </div>
+
+      <!-- Subir comprobante -->
+      <div class="upload-comprobante" id="uploadComp" onclick="document.getElementById('compInput').click()">
+        <div id="compIcon" style="font-size:1.5rem;margin-bottom:4px">📎</div>
+        <div id="compText" style="font-size:12px;color:var(--text2);font-weight:500">Subir comprobante de transferencia</div>
+        <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px">JPG, PNG o PDF · Máx. 5MB</div>
+      </div>
+      <input type="file" id="compInput" accept="image/*,.pdf" style="display:none" onchange="previewComprobante(this)"/>
+
+      <button class="btn-confirmar-transfer" id="btnConfirmarTransfer" onclick="confirmarTransferencia()" disabled>
+        Confirmar transferencia →
+      </button>
+      <p style="text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px">Tu reserva se confirma cuando validemos el pago (hasta 2hs hábiles)</p>
+    </div>
 
     <p style="text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:10px">🔒 Pago seguro · Tu info nunca se comparte sin tu permiso</p>
   </div>
