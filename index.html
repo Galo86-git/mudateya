@@ -905,7 +905,7 @@ gmp-placeautocomplete input:focus,gmp-place-autocomplete input:focus{
 <section class="how" id="como-funciona">
   <div class="section-inner">
     <div class="how-header">
-      <div><div class="eyebrow">El proceso</div><div class="s-title">3 PASOS Y LISTO</div><div class="s-sub">Sin llamadas, sin formularios eternos, sin sorpresas de precio.</div></div>
+      <div><div class="eyebrow">El proceso</div><div class="s-title">3 PASOS Y LISTO</div><div class="s-sub">Sin llamadas, sin formularios eternos, sin surpresas de precio.</div></div>
       <a href="#" class="btn-cta">Empezar gratis →</a>
     </div>
     <div class="steps">
@@ -1238,8 +1238,8 @@ async function searchRealProviders(){
   list.innerHTML='';
   errEl.classList.remove('show');
   loading.classList.add('show');
+  loading.textContent='🔍 Buscando mudanceros disponibles…';
 
-  // 1. Obtener texto de dirección origen
   var desdeVal=getInputVal('desde');
   if(!desdeVal){
     loading.classList.remove('show');
@@ -1248,18 +1248,30 @@ async function searchRealProviders(){
     return;
   }
 
-  // 2. Obtener coordenadas (del autocomplete o geocodificando)
-  var searchLoc=fromLocation;
-  if(!searchLoc){
-    try{
+  // 1. Intentar con mudanceros reales de la DB
+  try{
+    var r = await fetch('/api/buscar-mudanceros?zona='+encodeURIComponent(desdeVal));
+    var d = await r.json();
+    if(d.mudanceros && d.mudanceros.length > 0){
+      loading.classList.remove('show');
+      d.mudanceros.forEach(function(m){ appendMudanceroDB(m, list); });
+      return;
+    }
+  }catch(e){
+    console.warn('Error buscando mudanceros DB:', e.message);
+  }
+
+  // 2. Fallback a Google Maps si no hay mudanceros en la DB
+  loading.textContent='Buscando en Google Maps…';
+  try{
+    var searchLoc=fromLocation;
+    if(!searchLoc){
       var attempts=0;
       while(!geocoder&&attempts<20){
         await new Promise(function(r){setTimeout(r,300)});
         attempts++;
       }
-      if(!geocoder){
-        geocoder=new google.maps.Geocoder();
-      }
+      if(!geocoder) geocoder=new google.maps.Geocoder();
       var geoRes=await new Promise(function(resolve,reject){
         geocoder.geocode({address:desdeVal+', Argentina'},function(results,status){
           if(status==='OK'&&results[0])resolve(results[0]);
@@ -1268,30 +1280,13 @@ async function searchRealProviders(){
       });
       searchLoc={lat:geoRes.geometry.location.lat(),lng:geoRes.geometry.location.lng()};
       fromLocation=searchLoc;
-    }catch(e){
-      loading.classList.remove('show');
-      errEl.textContent='No pudimos ubicar "'+desdeVal+'". Probá con barrio y ciudad (ej: Palermo, CABA).';
-      errEl.classList.add('show');
-      return;
     }
-  }
 
-  // 3. Buscar mudanceros con la nueva Places API
-  try{
     var {Place}=await google.maps.importLibrary('places');
-
-    // Armar bounds correctos para locationRestriction
-    var R=0.11; // ~12km en grados
-    var bounds={
-      north:searchLoc.lat+R,
-      south:searchLoc.lat-R,
-      east:searchLoc.lng+R,
-      west:searchLoc.lng-R
-    };
-
+    var R=0.11;
+    var bounds={north:searchLoc.lat+R,south:searchLoc.lat-R,east:searchLoc.lng+R,west:searchLoc.lng-R};
     var found=false;
 
-    // Intento 1: searchNearby con tipo moving_company
     try{
       var res1=await Place.searchNearby({
         fields:['displayName','formattedAddress','rating','userRatingCount','photos','id'],
@@ -1304,11 +1299,8 @@ async function searchRealProviders(){
         res1.places.forEach(function(p){appendRealProvider(p,list)});
         found=true;
       }
-    }catch(e1){
-      console.warn('searchNearby failed:',e1.message);
-    }
+    }catch(e1){ console.warn('searchNearby failed:',e1.message); }
 
-    // Intento 2: searchByText si no encontró nada
     if(!found){
       try{
         var res2=await Place.searchByText({
@@ -1322,9 +1314,7 @@ async function searchRealProviders(){
           res2.places.forEach(function(p){appendRealProvider(p,list)});
           found=true;
         }
-      }catch(e2){
-        console.warn('searchByText failed:',e2.message);
-      }
+      }catch(e2){ console.warn('searchByText failed:',e2.message); }
     }
 
     if(!found){
@@ -1332,13 +1322,47 @@ async function searchRealProviders(){
       errEl.textContent='No encontramos mudanceros en esta zona. Probá con otra dirección.';
       errEl.classList.add('show');
     }
-
   }catch(e){
     loading.classList.remove('show');
-    console.error('Places API error:',e);
     errEl.textContent='Error al buscar: '+e.message;
     errEl.classList.add('show');
   }
+}
+
+function appendMudanceroDB(m, list){
+  var precio = estimarPrecioMudancero(m);
+  var serviciosCortos = (m.servicios||'').split(',').slice(0,3).map(function(s){return s.trim()}).filter(Boolean);
+  var badge = '<span style="background:var(--emerald-subtle);color:var(--emerald);font-size:9px;font-family:var(--mono);padding:2px 7px;border-radius:4px;border:1px solid rgba(34,195,106,.2);letter-spacing:.3px">✓ VERIFICADO</span>';
+  var el=document.createElement('div');
+  el.className='real-provider';
+  el.style.cursor='pointer';
+  el.innerHTML=
+    '<div class="rp-avatar" style="background:var(--emerald-subtle);color:var(--emerald);border:1px solid rgba(34,195,106,.3)">'+m.initials+'</div>'+
+    '<div class="rp-info">'+
+      '<div class="rp-name">'+(m.empresa||m.nombre)+'</div>'+
+      '<div style="display:flex;align-items:center;gap:6px;margin-top:2px">'+badge+
+        '<span style="font-size:10px;color:var(--text3);font-family:var(--mono)">'+m.zonaBase+'</span>'+
+      '</div>'+
+      (serviciosCortos.length ? '<div style="font-size:10px;color:var(--text3);margin-top:3px">'+serviciosCortos.join(' · ')+'</div>' : '')+
+      '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px">🚛 '+m.vehiculo+'</div>'+
+    '</div>'+
+    '<div style="text-align:right;flex-shrink:0">'+
+      '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.3rem;color:var(--emerald);letter-spacing:.5px">$'+precio.toLocaleString('es-AR')+'</div>'+
+      '<div style="font-size:9px;color:var(--text3);font-family:var(--mono);cursor:help" title="Precio base del mudancero. Puede ajustarse al cotizar.">desde ⓘ</div>'+
+    '</div>';
+  el.addEventListener('click', function(){
+    openPayModal(m.empresa||m.nombre, m.initials, null, precio, '');
+  });
+  list.appendChild(el);
+}
+
+function estimarPrecioMudancero(m){
+  // Usar precio del mudancero según ambientes, con fallback al estimado general
+  var precios = [m.precio1amb, m.precio2amb, m.precio3amb, m.precio4amb];
+  var idx = Math.min(amb-1, 3);
+  var precioMud = parseInt((precios[idx]||'').replace(/\D/g,''));
+  if(precioMud > 0) return precioMud;
+  return estimarPrecio();
 }
 
 function appendRealProvider(place,list){
