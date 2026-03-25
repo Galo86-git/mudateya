@@ -204,7 +204,7 @@ tr:hover td{background:rgba(34,195,106,.03)}
         <div class="metrics-grid" id="metricsGrid">
           <div class="metric-card green"><div class="metric-label">GMV Total</div><div class="metric-val" id="m-gmv">—</div><div class="metric-sub">acumulado</div></div>
           <div class="metric-card blue"><div class="metric-label">Revenue (fees)</div><div class="metric-val" id="m-revenue">—</div><div class="metric-sub">10% del GMV</div></div>
-          <div class="metric-card amber"><div class="metric-label">Mudanceros</div><div class="metric-val" id="m-mudanceros">—</div><div class="metric-sub" id="m-pendientes-sub">— pendientes</div></div>
+          <div class="metric-card amber"><div class="metric-label">Mudanceros activos</div><div class="metric-val" id="m-mudanceros">—</div><div class="metric-sub" id="m-pendientes-sub">— pendientes</div></div>
           <div class="metric-card red"><div class="metric-label">Mudanzas</div><div class="metric-val" id="m-mudanzas">—</div><div class="metric-sub">registradas</div></div>
         </div>
 
@@ -505,8 +505,8 @@ function renderDashboard(){
   var revenue = gmv * 0.10;
   var transferenciasPendientes = transferenciasData.filter(t => t.estado === 'pendiente').length;
 
-  document.getElementById('m-mudanceros').textContent = totalMudanceros;
-  document.getElementById('m-pendientes-sub').textContent = aprobados + ' activos · ' + pendientes + ' pendientes';
+  document.getElementById('m-mudanceros').textContent = aprobados;
+  document.getElementById('m-pendientes-sub').textContent = pendientes > 0 ? pendientes + ' pendientes de aprobar' : 'todos aprobados';
   document.getElementById('m-mudanzas').textContent = totalPagos;
   document.getElementById('m-gmv').textContent = gmv > 0 ? '$' + Math.round(gmv).toLocaleString('es-AR') : '—';
   document.getElementById('m-revenue').textContent = revenue > 0 ? '$' + Math.round(revenue).toLocaleString('es-AR') : '—';
