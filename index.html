@@ -31,7 +31,63 @@
   --text3:#3D6458;
   --mono:'DM Mono',monospace;
   --r:14px;--r2:20px;--r3:28px;
+  --nav-bg:rgba(13,11,8,.88);
 }
+
+/* TEMA CLARO */
+body.light{
+  --bg:#F8FAF9;
+  --bg2:#F0F5F2;
+  --bg3:#EAF0EC;
+  --surface:#FFFFFF;
+  --surface2:#F3F8F5;
+  --border:#D4E4DA;
+  --border2:#C0D8CA;
+  --emerald:#16A855;
+  --emerald-dim:#128A45;
+  --emerald-glow:rgba(22,168,85,.15);
+  --emerald-subtle:rgba(22,168,85,.08);
+  --sky:#0EA5E9;
+  --sky-dim:rgba(14,165,233,.12);
+  --sky-glow:rgba(14,165,233,.15);
+  --sky-subtle:rgba(14,165,233,.08);
+  --text:#0D1F16;
+  --text2:#3D6458;
+  --text3:#7AADA0;
+  --nav-bg:rgba(248,250,249,.95);
+}
+body.light nav{background:var(--nav-bg)}
+body.light .hero-wrap{background:var(--bg)}
+body.light .hero-glow{opacity:.3}
+body.light .hero-glow2{opacity:.2}
+body.light body::before{opacity:.1}
+body.light .wizard-card{box-shadow:0 8px 40px rgba(0,0,0,.08)}
+body.light .testi-card{background:var(--surface);border:1px solid var(--border)}
+body.light .zona-card{border:1px solid var(--border)}
+body.light .stats-bar{border-color:var(--border)}
+body.light .stat-item{border-color:var(--border)}
+body.light footer{background:var(--bg2);border-top:1px solid var(--border)}
+body.light .cta-section{background:var(--bg2)}
+body.light .login-dropdown-menu{background:var(--surface);border-color:var(--border2);box-shadow:0 8px 24px rgba(0,0,0,.1)}
+body.light .login-dropdown-item:hover{background:var(--emerald-subtle)}
+body.light .pay-modal{background:var(--surface);border-color:var(--border2)}
+body.light .pm-summary{background:var(--bg2);border-color:var(--border)}
+body.light .pm-explainer{background:var(--emerald-subtle);border-color:var(--border2)}
+body.light .pm-opt{background:var(--bg2);border-color:var(--border)}
+body.light .pm-opt.selected{background:var(--emerald-subtle);border-color:var(--emerald)}
+
+/* Transición suave entre temas */
+body,body *{transition:background-color .25s ease,border-color .25s ease,color .2s ease}
+body *{transition:background-color .25s ease,border-color .25s ease}
+
+/* Botón de tema */
+.theme-btn{
+  font-size:11px;color:var(--text3);background:none;
+  border:1px solid var(--border);padding:5px 10px;border-radius:6px;
+  cursor:pointer;font-family:var(--mono);transition:all .2s;white-space:nowrap;
+  letter-spacing:.3px;
+}
+.theme-btn:hover{color:var(--emerald);border-color:var(--emerald)}
 html{scroll-behavior:smooth}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
@@ -648,6 +704,7 @@ gmp-placeautocomplete input:focus,gmp-place-autocomplete input:focus{
     <li><a href="#testimonios">Reseñas</a></li>
   </ul>
   <div class="nav-actions">
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀ Modo claro</button>
     <div class="login-dropdown" id="loginDropdown">
       <a href="#" class="btn-ghost" id="navLogin" onclick="toggleLoginDropdown(event)">
         Iniciar sesión ▾
@@ -1544,6 +1601,23 @@ function toggleMenu(){
 function closeMenu(){
   document.getElementById('navBurger').classList.remove('open');
   document.getElementById('mobileMenu').classList.remove('open');
+}
+
+// ── TEMA CLARO / OSCURO ────────────────────────────────────────────────────
+(function initTheme(){
+  var saved = localStorage.getItem('mudateya-theme');
+  if(saved === 'light'){
+    document.body.classList.add('light');
+    var btn = document.getElementById('themeBtn');
+    if(btn) btn.textContent = '🌙 Modo oscuro';
+  }
+})();
+
+function toggleTheme(){
+  var isLight = document.body.classList.toggle('light');
+  var btn = document.getElementById('themeBtn');
+  if(btn) btn.textContent = isLight ? '🌙 Modo oscuro' : '☀ Modo claro';
+  localStorage.setItem('mudateya-theme', isLight ? 'light' : 'dark');
 }
 
 // ── LOGIN STATE ────────────────────────────────────────────────────────────
