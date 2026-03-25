@@ -304,13 +304,16 @@ async function loadMudanzas(){
   document.getElementById('mudanzasList').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando…</div>';
 
   try{
-    var r = await fetch('/api/cotizaciones?action=mis-mudanzas&email='+encodeURIComponent(currentUser.email));
+    // Timeout de 8 segundos
+    var controller = new AbortController();
+    var timeout = setTimeout(function(){ controller.abort(); }, 8000);
+    var r = await fetch('/api/cotizaciones?action=mis-mudanzas&email='+encodeURIComponent(currentUser.email), { signal: controller.signal });
+    clearTimeout(timeout);
     var d = await r.json();
     mudanzasData = d.mudanzas || [];
   }catch(e){
-    // Fallback a sessionStorage
-    var saved = sessionStorage.getItem('mudanzasCliente_' + currentUser.email);
-    mudanzasData = saved ? JSON.parse(saved) : [];
+    console.warn('Error cargando mudanzas:', e.message);
+    mudanzasData = [];
   }
 
   if(mudanzasData.length === 0){
