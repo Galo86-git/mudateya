@@ -60,6 +60,28 @@ nav{
 .btn-ghost:hover{background:var(--sky-subtle);color:var(--text);border-color:var(--sky)}
 .btn-cta{background:var(--emerald);color:#041A0E;border:none;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;text-decoration:none;transition:all .15s;display:inline-block;letter-spacing:.3px}
 .btn-cta:hover{background:#2EDB7A;transform:translateY(-1px);box-shadow:0 4px 20px var(--emerald-glow)}
+
+/* LOGIN DROPDOWN */
+.login-dropdown{position:relative}
+.login-dropdown-menu{
+  display:none;position:absolute;top:calc(100% + 8px);right:0;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:12px;overflow:hidden;min-width:200px;
+  box-shadow:0 16px 40px rgba(0,0,0,.5);z-index:300;
+}
+.login-dropdown.open .login-dropdown-menu{display:block;animation:fadeUp .15s ease}
+.login-dropdown-item{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;font-size:13px;color:var(--text2);
+  text-decoration:none;transition:background .15s;
+  border-bottom:1px solid var(--border);
+}
+.login-dropdown-item:last-child{border-bottom:none}
+.login-dropdown-item:hover{background:var(--emerald-subtle);color:var(--text)}
+.login-dropdown-icon{font-size:15px;width:18px;text-align:center}
+.login-dropdown-label{flex:1}
+.login-dropdown-sub{font-size:10px;color:var(--text3);font-family:var(--mono);display:block;margin-top:1px}
+
 /* Mobile nav burger */
 .nav-burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none}
 .nav-burger span{display:block;width:22px;height:2px;background:var(--text2);border-radius:2px;transition:all .3s}
@@ -616,7 +638,27 @@ gmp-placeautocomplete input:focus,gmp-place-autocomplete input:focus{
     <li><a href="#testimonios">Reseñas</a></li>
   </ul>
   <div class="nav-actions">
-    <a href="/mi-mudanza" class="btn-ghost" id="navLogin">Iniciar sesión</a>
+    <div class="login-dropdown" id="loginDropdown">
+      <a href="#" class="btn-ghost" id="navLogin" onclick="toggleLoginDropdown(event)">
+        Iniciar sesión ▾
+      </a>
+      <div class="login-dropdown-menu">
+        <a href="/mi-mudanza" class="login-dropdown-item">
+          <span class="login-dropdown-icon">🏠</span>
+          <span class="login-dropdown-label">
+            Soy cliente
+            <span class="login-dropdown-sub">Ver mis mudanzas</span>
+          </span>
+        </a>
+        <a href="/mi-cuenta" class="login-dropdown-item">
+          <span class="login-dropdown-icon">🚛</span>
+          <span class="login-dropdown-label">
+            Soy mudancero
+            <span class="login-dropdown-sub">Ver pedidos y cotizaciones</span>
+          </span>
+        </a>
+      </div>
+    </div>
     <a href="#" class="btn-cta" id="navPublicar" onclick="publicarMudanza(event)">Publicar mudanza</a>
   </div>
   <button class="nav-burger" id="navBurger" onclick="toggleMenu()" aria-label="Menú">
@@ -1335,6 +1377,17 @@ function renderStars(rating){
   return'★'.repeat(full)+(half?'½':'')+'☆'.repeat(empty);
 }
 
+function toggleLoginDropdown(e){
+  e.preventDefault();
+  var dd = document.getElementById('loginDropdown');
+  dd.classList.toggle('open');
+}
+// Cerrar al hacer click afuera
+document.addEventListener('click', function(e){
+  var dd = document.getElementById('loginDropdown');
+  if(dd && !dd.contains(e.target)) dd.classList.remove('open');
+});
+
 function toggleMenu(){
   var burger=document.getElementById('navBurger');
   var menu=document.getElementById('mobileMenu');
@@ -1348,18 +1401,35 @@ function closeMenu(){
 
 // ── LOGIN STATE ────────────────────────────────────────────────────────────
 (function initLoginState(){
-  var saved = sessionStorage.getItem('googleUser') || sessionStorage.getItem('clienteUser');
-  if(!saved) return;
-  try{
-    var user = JSON.parse(saved);
-    var navLogin = document.getElementById('navLogin');
-    var navPublicar = document.getElementById('navPublicar');
-    if(navLogin){
-      navLogin.textContent = user.name.split(' ')[0];
-      navLogin.href = '/mi-mudanza';
-    }
-    if(navPublicar) navPublicar.textContent = 'Mi mudanza →';
-  }catch(e){}
+  var clienteSaved = sessionStorage.getItem('googleUser') || sessionStorage.getItem('clienteUser');
+  var mudanceroSaved = sessionStorage.getItem('mudanceroUser');
+  var navLogin = document.getElementById('navLogin');
+  var navPublicar = document.getElementById('navPublicar');
+  var dd = document.getElementById('loginDropdown');
+
+  if(clienteSaved || mudanceroSaved){
+    try{
+      var user = JSON.parse(clienteSaved || mudanceroSaved);
+      var nombre = user.name.split(' ')[0];
+      if(navLogin){
+        navLogin.textContent = nombre + ' ▾';
+        navLogin.style.borderColor = 'var(--emerald)';
+        navLogin.style.color = 'var(--emerald)';
+      }
+      // Actualizar items del dropdown según quién está logueado
+      if(dd){
+        var items = dd.querySelectorAll('.login-dropdown-item');
+        if(clienteSaved && items[0]){
+          items[0].querySelector('.login-dropdown-sub').textContent = 'Ver mis mudanzas ✓';
+          items[0].style.borderLeft = '2px solid var(--emerald)';
+        }
+        if(mudanceroSaved && items[1]){
+          items[1].querySelector('.login-dropdown-sub').textContent = 'Ver pedidos ✓';
+          items[1].style.borderLeft = '2px solid var(--emerald)';
+        }
+      }
+    }catch(e){}
+  }
 })();
 
 function publicarMudanza(e){
