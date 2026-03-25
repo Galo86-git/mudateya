@@ -566,17 +566,24 @@ function renderDashboard(){
       + '</tbody></table>';
   document.getElementById('pendingList').innerHTML = html;
 
-  // Últimos pagos
-  var ultimos = pagosData.slice(-5).reverse();
-  var hpagos = ultimos.length === 0
+  // Últimos pagos — MP + transferencias confirmadas
+  var pagosMP = pagosData.slice(-5).reverse().map(p => ({
+    mudancero: p[0]||'—', tipo: p[1]||'MP', monto: parseFloat(p[3]||0), fecha: p[5]||'—', metodo: 'Mercado Pago'
+  }));
+  var pagosTransfer = transferenciasData.filter(t => t.estado === 'confirmada').map(t => ({
+    mudancero: t.mudancero||'—', tipo: 'Transferencia', monto: parseInt((t.monto||'0').replace(/\D/g,'')), fecha: t.fecha||'—', metodo: 'Transferencia'
+  }));
+  var todosLosPagos = [...pagosMP, ...pagosTransfer].sort((a,b) => b.fecha.localeCompare(a.fecha)).slice(0,5);
+
+  var hpagos = todosLosPagos.length === 0
     ? '<div class="empty"><div class="empty-icon">💳</div>Sin pagos aún</div>'
-    : '<table><thead><tr><th>Mudancero</th><th>Tipo</th><th>Monto</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>'
-      + ultimos.map(p => `
+    : '<table><thead><tr><th>Mudancero</th><th>Método</th><th>Monto</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>'
+      + todosLosPagos.map(p => `
         <tr>
-          <td class="td-name">${p[0]||'—'}</td>
-          <td class="td-mono">${p[1]||'—'}</td>
-          <td class="td-mono">$${parseFloat(p[3]||0).toLocaleString('es-AR')}</td>
-          <td class="td-mono">${p[5]||'—'}</td>
+          <td class="td-name">${p.mudancero}</td>
+          <td class="td-mono">${p.metodo}</td>
+          <td class="td-mono">$${p.monto.toLocaleString('es-AR')}</td>
+          <td class="td-mono">${p.fecha}</td>
           <td><span class="badge paid">Pagado</span></td>
         </tr>`).join('')
       + '</tbody></table>';
