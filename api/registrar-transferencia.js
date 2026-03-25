@@ -36,12 +36,35 @@ module.exports = async function handler(req, res) {
 
   // Guardar en Redis
   try {
-    const id = 'TRANS-' + Date.now();
-    const transferencia = { id, clienteEmail, clienteNombre, mudancero, desde, hasta, monto, fecha, estado: 'pendiente' };
-    await setJSON(`transferencia:${id}`, transferencia, 2592000); // 30 días
+    const id = 'MYA-TRANS-' + Date.now();
+    const transferencia = { id: 'TRANS-' + Date.now(), clienteEmail, clienteNombre, mudancero, desde, hasta, monto, fecha, estado: 'pendiente' };
+    const transId = transferencia.id;
+    await setJSON(`transferencia:${transId}`, transferencia, 2592000);
     const idx = await getJSON('transferencias:pendientes') || [];
-    idx.push(id);
+    idx.push(transId);
     await setJSON('transferencias:pendientes', idx, 2592000);
+
+    // También crear mudanza en el sistema para que aparezca en /mi-mudanza
+    const mudanza = {
+      id,
+      clienteEmail,
+      clienteNombre,
+      desde,
+      hasta,
+      ambientes: '—',
+      fecha,
+      estado: 'pago_transferencia_pendiente',
+      fechaPublicacion: new Date().toISOString(),
+      expira: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      cotizaciones: [],
+      cotizacionAceptada: { mudanceroNombre: mudancero, precio: parseInt((monto||'0').replace(/\D/g,'')), mudanceroTel: '' },
+      tipoPago: 'transferencia',
+      montoTransferencia: monto,
+    };
+    await setJSON(`mudanza:${id}`, mudanza, 2592000);
+    const clienteIdx = await getJSON(`cliente:${clienteEmail}`) || [];
+    clienteIdx.push(id);
+    await setJSON(`cliente:${clienteEmail}`, clienteIdx, 2592000);
   } catch (e) {
     console.error('Error guardando en Redis:', e.message);
   }
