@@ -480,21 +480,74 @@ function renderPagos(){
     return;
   }
 
-  var html = mudanzasData.filter(m=>m.precio).map(m => `
-    <div class="pago-card">
-      <div class="pago-row"><span class="pago-label">Mudanza</span><span class="pago-val">${m.desde} → ${m.hasta}</span></div>
-      <div class="pago-row"><span class="pago-label">Mudancero</span><span class="pago-val">${m.mudancero?.nombre||'—'}</span></div>
-      <div class="pago-row"><span class="pago-label">Tipo de pago</span><span class="pago-val">${m.tipoPago==='fee'?'Fee de servicio (10%)':'Pago total'}</span></div>
-      <div class="pago-row"><span class="pago-label">Monto pagado a MudateYa</span><span class="pago-val green">$${parseInt(m.montoMP||0).toLocaleString('es-AR')}</span></div>
-      ${m.tipoPago==='fee' ? `<div class="pago-row"><span class="pago-label">Resto a pagar al mudancero</span><span class="pago-val amber">$${(parseInt(m.precio||0)-parseInt(m.montoMP||0)).toLocaleString('es-AR')}</span></div>` : ''}
-      <div class="pago-row"><span class="pago-label">Precio total mudanza</span><span class="pago-val">$${parseInt(m.precio||0).toLocaleString('es-AR')}</span></div>
-      <div class="pago-row"><span class="pago-label">Fecha</span><span class="pago-val">${m.fechaPago||m.fecha||'—'}</span></div>
-      <div style="margin-top:10px">
-        <button class="btn btn-ghost" onclick="descargarComprobante(${JSON.stringify(m).replace(/"/g,'&quot;')})" style="font-size:12px">⬇ Descargar comprobante</button>
-      </div>
-    </div>`).join('');
+  var html = mudanzasData.map(m => {
+    // Transferencia bancaria
+    if(m.tipoPago === 'transferencia'){
+      var mud = m.cotizacionAceptada || {};
+      var estadoPago = m.estado === 'cotizacion_aceptada' ? 'Confirmada' : 'Pendiente de validación';
+      var estadoColor = m.estado === 'cotizacion_aceptada' ? 'green' : 'amber';
+      return `
+        <div class="pago-card">
+          <div class="pago-row"><span class="pago-label">Mudanza</span><span class="pago-val">${m.desde} → ${m.hasta}</span></div>
+          <div class="pago-row"><span class="pago-label">Mudancero</span><span class="pago-val">${mud.mudanceroNombre||'—'}</span></div>
+          <div class="pago-row"><span class="pago-label">Tipo de pago</span><span class="pago-val">🏦 Transferencia bancaria</span></div>
+          <div class="pago-row"><span class="pago-label">Monto transferido</span><span class="pago-val ${estadoColor}">${m.montoTransferencia||'—'}</span></div>
+          <div class="pago-row"><span class="pago-label">Estado</span><span class="pago-val ${estadoColor}">${estadoPago}</span></div>
+          <div class="pago-row"><span class="pago-label">Fecha</span><span class="pago-val">${m.fecha||'—'}</span></div>
+          <div style="margin-top:10px">
+            <button class="btn btn-ghost" onclick="descargarComprobanteTransfer(${JSON.stringify(m).replace(/"/g,'&quot;')})" style="font-size:12px">⬇ Descargar comprobante</button>
+          </div>
+        </div>`;
+    }
+    // Mercado Pago
+    if(m.cotizacionAceptada || m.precio){
+      var mud2 = m.cotizacionAceptada || {};
+      var precio = mud2.precio || parseInt(m.precio||0);
+      var monto = parseInt(m.montoMP||0) || Math.round(precio*0.1);
+      return `
+        <div class="pago-card">
+          <div class="pago-row"><span class="pago-label">Mudanza</span><span class="pago-val">${m.desde} → ${m.hasta}</span></div>
+          <div class="pago-row"><span class="pago-label">Mudancero</span><span class="pago-val">${mud2.mudanceroNombre||m.mudancero?.nombre||'—'}</span></div>
+          <div class="pago-row"><span class="pago-label">Tipo de pago</span><span class="pago-val">💳 Mercado Pago</span></div>
+          <div class="pago-row"><span class="pago-label">Monto pagado a MudateYa</span><span class="pago-val green">$${monto.toLocaleString('es-AR')}</span></div>
+          <div class="pago-row"><span class="pago-label">Precio total mudanza</span><span class="pago-val">$${precio.toLocaleString('es-AR')}</span></div>
+          <div class="pago-row"><span class="pago-label">Fecha</span><span class="pago-val">${m.fechaPago||m.fecha||'—'}</span></div>
+          <div style="margin-top:10px">
+            <button class="btn btn-ghost" onclick="descargarComprobante(${JSON.stringify(m).replace(/"/g,'&quot;')})" style="font-size:12px">⬇ Descargar comprobante</button>
+          </div>
+        </div>`;
+    }
+    return '';
+  }).filter(Boolean).join('');
 
   document.getElementById('pagosList').innerHTML = html || '<div class="empty"><div class="empty-icon">💳</div>Sin pagos aún</div>';
+}
+
+function descargarComprobanteTransfer(m){
+  var mud = m.cotizacionAceptada || {};
+  var contenido = `COMPROBANTE DE PAGO — MUDATEYA
+================================
+Fecha: ${m.fecha||'—'}
+Mudanza: ${m.desde} → ${m.hasta}
+Mudancero: ${mud.mudanceroNombre||'—'}
+
+DETALLE DE PAGO
+---------------
+Tipo: Transferencia bancaria
+Monto transferido: ${m.montoTransferencia||'—'}
+Estado: ${m.estado === 'cotizacion_aceptada' ? 'Confirmada' : 'Pendiente de validación'}
+
+Cliente: ${currentUser.name}
+Email: ${currentUser.email}
+
+================================
+mudateya.ar | soporte@mudateya.ar`;
+
+  var blob = new Blob([contenido], {type:'text/plain'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'comprobante-transferencia-mudateya.txt';
+  a.click();
 }
 
 function descargarComprobante(m){
