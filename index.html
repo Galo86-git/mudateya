@@ -608,8 +608,24 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:2rem 2.5r
           <a href="#" class="login-dropdown-item" onclick="iniciarSesionComo('mudancero',event)"><span class="login-dropdown-icon">🚛</span><span class="login-dropdown-label">Soy mudancero<span class="login-dropdown-sub">Ver pedidos y cotizaciones</span></span></a>
         </div>
         <div id="nav-with-session" style="display:none">
-          <a href="#" class="login-dropdown-item" id="nav-panel-link"><span class="login-dropdown-icon">👤</span><span class="login-dropdown-label"><span id="nav-user-name">Mi cuenta</span><span class="login-dropdown-sub" id="nav-user-email"></span></span></a>
-          <a href="#" class="login-dropdown-item" onclick="logoutNav(event)" style="border-top:1px solid var(--border)"><span class="login-dropdown-icon">🚪</span><span class="login-dropdown-label">Cerrar sesión</span></a>
+          <a href="#" class="login-dropdown-item" id="nav-panel-link">
+            <span class="login-dropdown-icon">👤</span>
+            <span class="login-dropdown-label">
+              <span id="nav-user-name">Mi cuenta</span>
+              <span class="login-dropdown-sub" id="nav-user-email"></span>
+            </span>
+          </a>
+          <a id="nav-ir-cuenta" href="/mi-mudanza" class="login-dropdown-item">
+            <span class="login-dropdown-icon">📦</span>
+            <span class="login-dropdown-label">
+              Mi mudanza
+              <span class="login-dropdown-sub">Ver cotizaciones recibidas</span>
+            </span>
+          </a>
+          <a href="#" class="login-dropdown-item" onclick="logoutNav(event)" style="border-top:1px solid var(--border)">
+            <span class="login-dropdown-icon">🚪</span>
+            <span class="login-dropdown-label">Cerrar sesión</span>
+          </a>
         </div>
       </div>
     </div>
@@ -1794,6 +1810,14 @@ function updateNavUser() {
     var nameEl = document.getElementById('nav-user-name'), emailEl = document.getElementById('nav-user-email');
     if (nameEl) nameEl.textContent = user.name;
     if (emailEl) emailEl.textContent = user.email;
+    // Link según rol
+    var isMudancero = sessionStorage.getItem('rolMudancero') === '1';
+    var cuentaLink = document.getElementById('nav-ir-cuenta');
+    if (cuentaLink) {
+      cuentaLink.href = isMudancero ? '/mi-cuenta' : '/mi-mudanza';
+      cuentaLink.querySelector('.login-dropdown-label').childNodes[0].textContent = isMudancero ? 'Mi panel' : 'Mi mudanza';
+      cuentaLink.querySelector('.login-dropdown-sub').textContent = isMudancero ? 'Ver pedidos y cotizaciones' : 'Ver cotizaciones recibidas';
+    }
   } else {
     if (noSession) noSession.style.display = 'block';
     if (withSession) withSession.style.display = 'none';
