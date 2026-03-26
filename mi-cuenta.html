@@ -442,6 +442,35 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
           </div>
         </div>
 
+        <!-- DATOS BANCARIOS -->
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-header"><span class="card-title">🏦 Datos para cobrar</span></div>
+          <div style="padding:1.2rem;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="field">
+              <label class="field-label">Método preferido</label>
+              <select id="pf-metodoCobro" onchange="toggleMetodoCobroPanel()">
+                <option value="cbu">CBU / Alias bancario</option>
+                <option value="mp">Cuenta Mercado Pago</option>
+              </select>
+            </div>
+            <div class="field" id="panel-wrap-cbu">
+              <label class="field-label">CBU o Alias</label>
+              <input type="text" id="pf-cbu" placeholder="Ej: MUDANZAS.JUAN o 0000003100..."/>
+            </div>
+            <div class="field" id="panel-wrap-mp" style="display:none">
+              <label class="field-label">Email de Mercado Pago</label>
+              <input type="email" id="pf-emailMP" placeholder="tu@email.com"/>
+            </div>
+            <div class="field">
+              <label class="field-label">Titular de la cuenta</label>
+              <input type="text" id="pf-titular" placeholder="Nombre completo o razón social"/>
+            </div>
+          </div>
+          <div style="padding:0 1.2rem 1rem;font-size:11px;color:var(--text3);font-family:var(--mono)">
+            🔒 Solo usamos estos datos para transferirte tus ganancias · Nunca se comparten con clientes
+          </div>
+        </div>
+
         <!-- NOTAS -->
         <div class="card" style="margin-bottom:1.5rem">
           <div class="card-header"><span class="card-title">📝 Presentación</span></div>
@@ -887,6 +916,14 @@ function loadPerfil(){
   // Notas
   setVal('pf-notas', m[20] || '');
 
+  // Datos bancarios (guardados en columnas extra del Sheet o en localStorage)
+  var banking = JSON.parse(localStorage.getItem('banking_' + currentUser.email) || '{}');
+  if(banking.metodoCobro) setSelect('pf-metodoCobro', banking.metodoCobro);
+  if(banking.cbu) setVal('pf-cbu', banking.cbu);
+  if(banking.emailMP) setVal('pf-emailMP', banking.emailMP);
+  if(banking.titular) setVal('pf-titular', banking.titular);
+  toggleMetodoCobroPanel();
+
   // Chips — servicios
   var serviciosGuardados = m[11] || '';
   document.querySelectorAll('#pf-servicios .chip').forEach(c=>{
@@ -905,6 +942,12 @@ function loadPerfil(){
   document.querySelectorAll('#pf-horarios .chip').forEach(c=>{
     if(horariosGuardados.includes(c.textContent.trim())) c.classList.add('sel');
   });
+}
+
+function toggleMetodoCobroPanel(){
+  var metodo = document.getElementById('pf-metodoCobro').value;
+  document.getElementById('panel-wrap-cbu').style.display = metodo === 'cbu' ? '' : 'none';
+  document.getElementById('panel-wrap-mp').style.display = metodo === 'mp' ? '' : 'none';
 }
 
 function setVal(id, val){
@@ -953,6 +996,15 @@ async function guardarPerfil(){
     precioFlete:  document.getElementById('pf-pflete').value,
     extra:        document.getElementById('pf-notas').value.trim(),
   };
+
+  // Guardar datos bancarios en localStorage (privado, no va al Sheet)
+  var banking = {
+    metodoCobro: document.getElementById('pf-metodoCobro').value,
+    cbu:         document.getElementById('pf-cbu').value.trim(),
+    emailMP:     document.getElementById('pf-emailMP').value.trim(),
+    titular:     document.getElementById('pf-titular').value.trim(),
+  };
+  localStorage.setItem('banking_' + currentUser.email, JSON.stringify(banking));
 
   try{
     var r = await fetch('/api/actualizar-mudancero', {
