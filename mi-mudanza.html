@@ -286,7 +286,7 @@ function showApp(){
 function logout(){
   sessionStorage.removeItem('clienteUser');
   sessionStorage.removeItem('googleUser');
-  location.reload();
+  window.location.href='/';
 }
 
 // ── MUDANZAS ───────────────────────────────────────────────────────────────
