@@ -1578,7 +1578,7 @@ async function confirmarTransferencia(){
   }
 
   try{
-    await fetch('/api/registrar-transferencia', {
+    await fetch('/api/transferencias', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
