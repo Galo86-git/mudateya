@@ -1039,6 +1039,8 @@ var routeMap=null, directionsRenderer=null;
 var _mudanzaPublicadaId=null, _loginRol=null, _pendingPayModal=null;
 var _googleLoginInited=false;
 var selectedPayOption='fee', transferOpcion='fee';
+// Flags para validar que las direcciones fueron elegidas del autocomplete
+var _desdeValida=false, _hastaValida=false;
 
 // ════════════════════════════════════════════════════
 // ── AUTO-AVANCE AL COMPLETAR AMBAS DIRECCIONES ──────
@@ -1064,7 +1066,7 @@ function checkAutoAdvance() {
     fechaOk = !!selectedFlex;
   }
 
-  if (d && h && fechaOk) {
+  if (d && h && _desdeValida && _hastaValida && fechaOk) {
     // Marcar ambos inputs como completados visualmente
     document.getElementById('desde').classList.add('filled');
     document.getElementById('hasta').classList.add('filled');
@@ -1106,8 +1108,14 @@ function goStep(n) {
   // Validación paso 1 → 2
   if (n === 2 && step === 1) {
     var d = getInputVal('desde'), h = getInputVal('hasta');
-    if (!d || !h) {
-      showFieldError('wrap-desde', !d ? '⚠ Ingresá la dirección de origen.' : '⚠ Ingresá la dirección de destino.');
+    if (!d || !_desdeValida) {
+      showFieldError('wrap-desde', '⚠ Elegí una dirección de origen de la lista.');
+      document.getElementById('desde').focus();
+      return;
+    }
+    if (!h || !_hastaValida) {
+      showFieldError('wrap-hasta', '⚠ Elegí una dirección de destino de la lista.');
+      document.getElementById('hasta').focus();
       return;
     }
     // Validar fecha — obligatoria
@@ -1367,6 +1375,10 @@ function initMaps() {
         input.value = text;
         dropdown.style.display = 'none';
         dropdown.innerHTML = '';
+        // Marcar dirección como válida (elegida del autocomplete)
+        if (isDesde) _desdeValida = true;
+        else _hastaValida = true;
+        input.style.borderColor = 'rgba(34,195,106,.5)';
         checkAutoAdvance();
       }
 
@@ -1379,9 +1391,7 @@ function initMaps() {
           var li = document.createElement('li');
           li.textContent = text;
           li.style.cssText = 'padding:12px 16px;font-size:14px;color:#7AADA0;cursor:pointer;border-top:1px solid #213029;font-family:Outfit,sans-serif;-webkit-tap-highlight-color:rgba(34,195,106,.2);';
-          // Mouse
           li.addEventListener('mousedown', function(e) { e.preventDefault(); selectItem(text); });
-          // Touch (móvil)
           li.addEventListener('touchend', function(e) { e.preventDefault(); selectItem(text); });
           li.addEventListener('mouseover', function() { this.style.background = 'rgba(34,195,106,.12)'; this.style.color = '#E8F5EE'; });
           li.addEventListener('mouseout', function() { this.style.background = ''; this.style.color = '#7AADA0'; });
@@ -1391,11 +1401,14 @@ function initMaps() {
       }
 
       input.addEventListener('input', function() {
+        // Si escribe manualmente, invalidar la dirección
+        if (isDesde) _desdeValida = false;
+        else _hastaValida = false;
+        input.style.borderColor = '';
         clearTimeout(debounce);
         var q = this.value.trim();
         if (q.length < 2) { dropdown.style.display = 'none'; return; }
         debounce = setTimeout(function() {
-          // Usar AutocompleteService (API clásica, funciona en todos lados)
           var svc = new google.maps.places.AutocompleteService();
           svc.getPlacePredictions(
             { input: q, componentRestrictions: { country: 'ar' }, types: ['geocode', 'establishment'] },
