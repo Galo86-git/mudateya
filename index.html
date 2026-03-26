@@ -1495,8 +1495,6 @@ function setDateMode(mode) {
 function toggleFlex(el) {
   document.querySelectorAll('.flex-chip').forEach(function(c) { c.classList.remove('sel'); });
   el.classList.add('sel'); selectedFlex = el.textContent;
-  // Verificar si ya podemos avanzar
-  checkAutoAdvance();
 }
 function getFechaLabel() {
   if (dateMode === 'flex') return selectedFlex || 'Fechas flexibles';
@@ -1839,8 +1837,7 @@ function closeLoginModal() { document.getElementById('loginModal').classList.rem
   if (f) {
     var h = new Date();
     f.min = h.getFullYear() + '-' + String(h.getMonth()+1).padStart(2,'0') + '-' + String(h.getDate()).padStart(2,'0');
-    // Cuando se selecciona fecha exacta, verificar auto-avance
-    f.addEventListener('change', function() { checkAutoAdvance(); });
+    // Sin auto-avance al cambiar fecha — solo es validación obligatoria
   }
 })();
 </script>
