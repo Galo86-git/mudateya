@@ -535,7 +535,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:2rem 2.5r
       </div>
       <div style="background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:14px;padding:.9rem 1rem;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
         <div><div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:3px">PRECIO ESTIMADO</div><div id="fsw-sum-precio" style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--emerald);letter-spacing:1px">—</div><div style="font-size:9px;color:var(--text3);font-family:var(--mono)">el precio final lo define el mudancero</div></div>
-        <div style="text-align:right"><div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:3px">FEE MUDATEYA</div><div id="fsw-sum-fee" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--text2)">—</div><div style="font-size:9px;color:var(--text3);font-family:var(--mono)">10% al concretar</div></div>
+        <div style="text-align:right"><div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:3px">PAGO VÍA</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--emerald)">Mercado Pago</div><div style="font-size:9px;color:var(--text3);font-family:var(--mono)">100% seguro</div></div>
       </div>
       <div id="fswMapWrap" style="height:180px;border-radius:12px;overflow:hidden;border:1px solid var(--border2);margin-bottom:10px;background:var(--surface2)"><div id="fswRouteMap" style="width:100%;height:100%"></div></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -574,7 +574,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:2rem 2.5r
           </div>
           <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
             <div style="width:30px;height:30px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;color:var(--emerald);font-weight:700;font-size:12px;flex-shrink:0">3</div>
-            <div><div style="font-size:13px;font-weight:500;color:var(--text)">Pagás seguro y listo</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Mercado Pago o transferencia</div></div>
+            <div><div style="font-size:13px;font-weight:500;color:var(--text)">Pagás seguro y listo</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">100% por Mercado Pago</div></div>
           </div>
         </div>
         <div style="display:flex;gap:10px">
@@ -799,7 +799,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:2rem 2.5r
               </div>
               <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
                 <div style="width:32px;height:32px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">3</div>
-                <div><div style="font-size:13px;font-weight:500;color:var(--text)">Pagás seguro y listo</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Mercado Pago o transferencia bancaria</div></div>
+                <div><div style="font-size:13px;font-weight:500;color:var(--text)">Pagás seguro y listo</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">100% por Mercado Pago</div></div>
               </div>
             </div>
           </div>
@@ -950,70 +950,16 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:2rem 2.5r
       <div class="pm-summary-row"><span class="pm-label">Desde</span><span class="pm-val" id="pm-desde">—</span></div>
       <div class="pm-summary-row"><span class="pm-label">Hasta</span><span class="pm-val" id="pm-hasta">—</span></div>
       <div class="pm-summary-row"><span class="pm-label">Tamaño</span><span class="pm-val" id="pm-ambientes">—</span></div>
-      <div class="pm-summary-row pm-summary-total"><span class="pm-label">Precio estimado</span><span class="pm-val" id="pm-precio-total" style="color:var(--emerald);font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.5px">—</span></div>
+      <div class="pm-summary-row pm-summary-total"><span class="pm-label">Total a pagar</span><span class="pm-val" id="pm-precio-total" style="color:var(--emerald);font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.5px">—</span></div>
     </div>
     <div class="pm-explainer">
-      <div class="pm-explainer-icon">💡</div>
-      <p>El precio final para vos es el mismo. Podés pagar solo el <strong>fee de MudateYa (10%)</strong> ahora y el resto directamente al mudancero el día de la mudanza.</p>
+      <div class="pm-explainer-icon">🔒</div>
+      <p>El pago es <strong>100% seguro vía Mercado Pago</strong>. MudateYa retiene el monto hasta confirmar el servicio.</p>
     </div>
-    <div class="pm-tabs">
-      <button class="pm-tab active" onclick="selectPayTab('mp')">💳 Mercado Pago</button>
-      <button class="pm-tab" onclick="selectPayTab('transfer')">🏦 Transferencia</button>
-    </div>
-    <div class="pm-panel active" id="pm-panel-mp">
-      <div class="pm-options">
-        <div class="pm-opt selected" id="pm-opt-fee" onclick="selectPayOption('fee')" style="position:relative">
-          <div style="position:absolute;top:-10px;left:12px;background:var(--emerald);color:#041A0E;font-size:9px;font-family:var(--mono);font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.4px">⭐ RECOMENDADO</div>
-          <div class="pm-opt-radio"></div>
-          <div class="pm-opt-body"><div class="pm-opt-title">Pagar solo el fee ahora</div><div class="pm-opt-desc">Reservás tu lugar con menos dinero.</div></div>
-          <div class="pm-opt-price" id="pm-fee">—</div>
-        </div>
-        <div class="pm-opt" id="pm-opt-total" onclick="selectPayOption('total')">
-          <div class="pm-opt-radio"></div>
-          <div class="pm-opt-body"><div class="pm-opt-title">Pagar el total ahora</div><div class="pm-opt-desc">Todo cubierto desde el inicio.</div></div>
-          <div class="pm-opt-price" id="pm-precio-total2">—</div>
-        </div>
-      </div>
-      <div class="pm-resto-info" id="pm-resto-fee-info">
-        <span style="color:var(--text3);font-size:11px;font-family:var(--mono)">Resto a pagar al mudancero el día:</span>
-        <span id="pm-resto" style="color:var(--text2);font-size:11px;font-family:var(--mono);font-weight:500">—</span>
-      </div>
-      <div style="display:none;align-items:center;gap:8px;padding:8px 12px;background:rgba(34,195,106,.08);border:1px solid rgba(34,195,106,.2);border-radius:8px;margin-bottom:10px" id="pm-total-info">
-        <span style="font-size:14px">✅</span>
-        <span style="font-size:12px;color:var(--emerald);font-weight:500">Todo pagado</span>
-      </div>
-      <button class="pm-btn-mp" id="pm-btn-fee">💳 Pagar con Mercado Pago</button>
-      <button class="pm-btn-total" id="pm-btn-total" style="display:none">💳 Pagar total con Mercado Pago</button>
-    </div>
-    <div class="pm-panel" id="pm-panel-transfer">
-      <div class="pm-options" style="margin-bottom:10px">
-        <div class="pm-opt selected" id="tr-opt-fee" onclick="selectTransferOption('fee')" style="position:relative">
-          <div style="position:absolute;top:-10px;left:12px;background:var(--emerald);color:#041A0E;font-size:9px;font-family:var(--mono);font-weight:700;padding:2px 8px;border-radius:4px">⭐ RECOMENDADO</div>
-          <div class="pm-opt-radio"></div>
-          <div class="pm-opt-body"><div class="pm-opt-title">Solo el fee (10%)</div><div class="pm-opt-desc">Reservás tu lugar.</div></div>
-          <div class="pm-opt-price" id="tr-fee-val">—</div>
-        </div>
-        <div class="pm-opt" id="tr-opt-total" onclick="selectTransferOption('total')">
-          <div class="pm-opt-radio"></div>
-          <div class="pm-opt-body"><div class="pm-opt-title">Total de la mudanza</div><div class="pm-opt-desc">Todo incluido.</div></div>
-          <div class="pm-opt-price" id="tr-total-val">—</div>
-        </div>
-      </div>
-      <div class="transfer-monto"><div class="transfer-monto-num" id="tr-monto">—</div><div class="transfer-monto-sub" id="tr-monto-sub">fee de servicio MudateYa (10%)</div></div>
-      <div class="transfer-box">
-        <div class="transfer-row"><span class="transfer-label">CBU</span><span class="transfer-val">0000003100123456789012<button class="copy-btn" onclick="copiar('0000003100123456789012',this)">Copiar</button></span></div>
-        <div class="transfer-row"><span class="transfer-label">Alias</span><span class="transfer-val">MUDATEYA.PAGOS<button class="copy-btn" onclick="copiar('MUDATEYA.PAGOS',this)">Copiar</button></span></div>
-        <div class="transfer-row"><span class="transfer-label">Titular</span><span class="transfer-val">MudateYa S.R.L.</span></div>
-        <div class="transfer-row"><span class="transfer-label">Banco</span><span class="transfer-val">Banco Nación Argentina</span></div>
-      </div>
-      <div class="upload-comprobante" id="uploadComp" onclick="document.getElementById('compInput').click()">
-        <div id="compIcon" style="font-size:1.5rem;margin-bottom:4px">📎</div>
-        <div id="compText" style="font-size:12px;color:var(--text2);font-weight:500">Subir comprobante de transferencia</div>
-        <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px">JPG, PNG o PDF · Máx. 5MB</div>
-      </div>
-      <input type="file" id="compInput" accept="image/*,.pdf" style="display:none" onchange="previewComprobante(this)"/>
-      <button class="btn-confirmar-transfer" id="btnConfirmarTransfer" onclick="confirmarTransferencia()" disabled>Confirmar transferencia →</button>
-    </div>
+    <button class="pm-btn-mp" id="pm-btn-pagar" onclick="initMercadoPago()">
+      <img src="https://http2.mlstatic.com/frontend-assets/mp-web-navigation/ui-navigation/5.21.22/mercadopago/logo__large@2x.png" alt="Mercado Pago" style="height:18px;vertical-align:middle;margin-right:8px;filter:brightness(10)"/>
+      Pagar con Mercado Pago
+    </button>
     <p style="text-align:center;font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:10px">🔒 Pago seguro · Tu info nunca se comparte sin tu permiso</p>
   </div>
 </div>
@@ -1300,7 +1246,7 @@ function fswBuildSummary() {
   document.getElementById('fsw-sum-amb').textContent = fswAmb + ' ambiente' + (fswAmb !== 1 ? 's' : '');
   var precio = 50000 + (fswAmb - 1) * 30000;
   document.getElementById('fsw-sum-precio').textContent = '$' + precio.toLocaleString('es-AR');
-  document.getElementById('fsw-sum-fee').textContent = '$' + Math.round(precio * 0.1).toLocaleString('es-AR');
+  
 }
 function fswSetupStep4() {
   var user = null;
@@ -1634,7 +1580,6 @@ function openPayModal(name, initials, rating, precio, placeId) {
   _doOpenPayModal(name, initials, rating, precio, placeId);
 }
 function _doOpenPayModal(name, initials, rating, precio, placeId) {
-  var fee = Math.round(precio * 0.10 / 100) * 100;
   var desde = getInputVal('desde') || 'Origen', hasta = getInputVal('hasta') || 'Destino';
   document.getElementById('pm-mudancero-name').textContent = name;
   document.getElementById('pm-mudancero-initials').textContent = initials;
@@ -1644,12 +1589,9 @@ function _doOpenPayModal(name, initials, rating, precio, placeId) {
   document.getElementById('pm-hasta').textContent = hasta;
   document.getElementById('pm-ambientes').textContent = amb + ' ambiente' + (amb !== 1 ? 's' : '');
   document.getElementById('pm-precio-total').textContent = '$' + precio.toLocaleString('es-AR');
-  document.getElementById('pm-precio-total2').textContent = '$' + precio.toLocaleString('es-AR');
-  document.getElementById('pm-fee').textContent = '$' + fee.toLocaleString('es-AR');
-  document.getElementById('pm-resto').textContent = '$' + (precio - fee).toLocaleString('es-AR');
-  document.getElementById('pm-btn-fee').onclick = function() { initMercadoPago('fee', fee, name, precio); };
-  document.getElementById('pm-btn-total').onclick = function() { initMercadoPago('total', precio, name, precio); };
-  selectPayOption('fee');
+  // Guardar precio para usar en initMercadoPago
+  document.getElementById('pm-btn-pagar')._precio = precio;
+  document.getElementById('pm-btn-pagar')._nombre = name;
   document.getElementById('payModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1707,15 +1649,40 @@ function selectPayOption(opt) {
   if (opt === 'fee') { if (feeInfo) feeInfo.style.display = 'flex'; if (totalInfo) totalInfo.style.display = 'none'; if (btnFee) btnFee.style.display = ''; if (btnTotal) btnTotal.style.display = 'none'; }
   else { if (feeInfo) feeInfo.style.display = 'none'; if (totalInfo) totalInfo.style.display = 'flex'; if (btnFee) btnFee.style.display = 'none'; if (btnTotal) btnTotal.style.display = ''; }
 }
-function initMercadoPago(tipo, monto, mudancero, precioTotal) {
-  var btn = document.getElementById('pm-btn-' + (tipo === 'fee' ? 'fee' : 'total'));
+function initMercadoPago() {
+  var btn = document.getElementById('pm-btn-pagar');
+  var precio = btn._precio || 0;
+  var mudancero = btn._nombre || '';
   var orig = btn.innerHTML;
   btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px;vertical-align:middle;display:inline-block"></span>Iniciando pago…';
   btn.disabled = true;
-  fetch('/api/crear-preferencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mudanceroNombre: mudancero, tipoPago: tipo, monto, precioTotal, desde: getInputVal('desde'), hasta: getInputVal('hasta'), ambientes: amb + ' ambiente' + (amb !== 1 ? 's' : '') }) })
-    .then(function(r) { return r.json(); })
-    .then(function(data) { if (data.error) throw new Error(data.error); var url = data.init_point || data.sandbox_url; if (!url) throw new Error('No se recibió URL de pago'); window.location.href = url; })
-    .catch(function(err) { btn.innerHTML = orig; btn.disabled = false; });
+  fetch('/api/crear-preferencia', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      mudanceroNombre: mudancero,
+      monto: precio,
+      desde: getInputVal('desde'),
+      hasta: getInputVal('hasta'),
+      ambientes: amb + ' ambiente' + (amb !== 1 ? 's' : ''),
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) throw new Error(data.error);
+    var url = data.init_point || data.sandbox_url;
+    if (!url) throw new Error('No se recibió URL de pago');
+    window.location.href = url;
+  })
+  .catch(function(err) {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+    var errEl = document.createElement('div');
+    errEl.style.cssText = 'color:#ff6b6b;font-size:11px;text-align:center;margin-top:8px;font-family:var(--mono)';
+    errEl.textContent = '⚠ ' + err.message;
+    btn.parentElement.appendChild(errEl);
+    setTimeout(function() { if (errEl.parentElement) errEl.remove(); }, 4000);
+  });
 }
 
 // ════════════════════════════════════════════════════
