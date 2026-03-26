@@ -71,7 +71,7 @@ async function generarPDFBase64(datos) {
   const extras        = datos.extras || '';
   const nota          = datos.nota || '';
   const precio        = parseInt(datos.precio || datos.precio_total || 0);
-  const fee           = Math.round(precio * 0.10 / 500) * 500;
+  const fee           = Math.round(precio * 0.15 / 500) * 500;
   const resto         = precio - fee;
   const fmt           = (n) => '$' + n.toLocaleString('es-AR');
   const starStr       = '★'.repeat(Math.floor(estrellas)) + '☆'.repeat(5 - Math.floor(estrellas));
@@ -231,19 +231,12 @@ async function generarPDFBase64(datos) {
 
       // ── PRECIO ───────────────────────────────────
       {
-        table: { widths: ['*', 130], body: [[
+        table: { widths: ['*'], body: [[
           { stack: [
             { text: fmt(precio), bold: true, fontSize: 30, color: VERDE },
-            { text: 'PRECIO TOTAL ESTIMADO', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.5, margin: [0,4,0,2] },
-            { text: 'El precio final puede ajustarse al coordinar con el mudancero.', fontSize: 7.5, color: DIM },
+            { text: 'PRECIO TOTAL', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.5, margin: [0,4,0,2] },
+            { text: 'Pago 100% por Mercado Pago. Seguro y protegido.', fontSize: 7.5, color: DIM },
           ]},
-          { stack: [
-            { text: 'FEE MUDATEYA (10%)', bold: true, fontSize: 7, color: MUTED, alignment: 'right', characterSpacing: 0.5 },
-            { text: fmt(fee), bold: true, fontSize: 13, color: WHITE, alignment: 'right', margin: [0,2,0,4] },
-            { canvas: [{ type: 'line', x1: 17, y1: 0, x2: 113, y2: 0, lineWidth: 0.4, lineColor: BORDER_C }], margin: [0,0,0,4] },
-            { text: 'AL MUDANCERO EL DÍA', bold: true, fontSize: 7, color: MUTED, alignment: 'right', characterSpacing: 0.5 },
-            { text: fmt(resto), bold: true, fontSize: 13, color: WHITE, alignment: 'right', margin: [0,2,0,0] },
-          ], alignment: 'right' },
         ]]},
         layout: {
           fillColor:    () => VERDE_BG,
@@ -263,7 +256,7 @@ async function generarPDFBase64(datos) {
           { text: 'PRÓXIMOS PASOS', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.8, margin: [0,0,0,10] },
           { columns: [
             { width: '25%', stack: [ numBadge('1'), { text: 'Aceptar cotización\nen MudateYa', fontSize: 7, color: MUTED, alignment: 'center' } ] },
-            { width: '25%', stack: [ numBadge('2'), { text: 'Pagar fee de reserva\ncon Mercado Pago', fontSize: 7, color: MUTED, alignment: 'center' } ] },
+            { width: '25%', stack: [ numBadge('2'), { text: 'Pagar el total\ncon Mercado Pago', fontSize: 7, color: MUTED, alignment: 'center' } ] },
             { width: '25%', stack: [ numBadge('3'), { text: 'Coordinar fecha\ny hora', fontSize: 7, color: MUTED, alignment: 'center' } ] },
             { width: '25%', stack: [ numBadge('4'), { text: '¡Mudanza lista!', fontSize: 7, color: MUTED, alignment: 'center' } ] },
           ], columnGap: 8 },
