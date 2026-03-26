@@ -480,7 +480,7 @@ async function loadAll(){
 
 async function loadMudanceros(){
   try{
-    var r = await fetch('/api/admin-data?type=mudanceros');
+    var r = await fetch('/api/admin?type=mudanceros');
     var d = await r.json();
     mudancerosData = d.rows || [];
     var pendientes = mudancerosData.filter(m => getEstado(m) === 'Pendiente').length;
@@ -494,7 +494,7 @@ async function loadMudanceros(){
 
 async function loadPagos(){
   try{
-    var r = await fetch('/api/admin-data?type=pagos');
+    var r = await fetch('/api/admin?type=pagos');
     var d = await r.json();
     pagosData = d.rows || [];
   }catch(e){
@@ -784,7 +784,7 @@ async function cambiarEstado(nuevoEstado){
   btn.textContent = 'Guardando…';
 
   try{
-    var r = await fetch('/api/admin-accion', {
+    var r = await fetch('/api/admin', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
