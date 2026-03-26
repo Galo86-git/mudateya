@@ -662,12 +662,12 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:2rem 2.5r
           <div class="input-stack">
             <div class="input-wrap" id="wrap-desde">
               <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-              <input class="addr-input" id="desde" type="text" placeholder="Desde… (ej: Palermo, CABA)" autocomplete="off"/>
+              <input class="addr-input" id="desde" type="text" placeholder="Desde… (ej: Palermo, CABA)" autocomplete="new-password"/>
             </div>
             <div class="dot-connector"></div>
             <div class="input-wrap" id="wrap-hasta">
               <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 5l7 7-7 7"/></svg>
-              <input class="addr-input" id="hasta" type="text" placeholder="Hasta… (ej: Quilmes, GBA)" autocomplete="off"/>
+              <input class="addr-input" id="hasta" type="text" placeholder="Hasta… (ej: Quilmes, GBA)" autocomplete="new-password"/>
             </div>
           </div>
           <div class="maps-note" id="maps-note">
@@ -1356,7 +1356,6 @@ function initMaps() {
     var inputD = document.getElementById('desde');
     var inputH = document.getElementById('hasta');
 
-    // Usar Autocomplete clásico — funciona en desktop y móvil
     function makeAC(input, isDesde) {
       var ac = new google.maps.places.Autocomplete(input, {
         componentRestrictions: { country: 'ar' },
@@ -1366,24 +1365,15 @@ function initMaps() {
 
       ac.addListener('place_changed', function() {
         var place = ac.getPlace();
-        if (!place.geometry) {
-          // El usuario escribió algo pero no eligió — dejar el texto como está
-          checkAutoAdvance();
-          return;
-        }
-        // Usar formatted_address si existe, si no el name
+        if (!place.geometry) { checkAutoAdvance(); return; }
         var addr = place.formatted_address || place.name || input.value;
         input.value = addr;
         if (isDesde) {
-          fromLocation = {
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng()
-          };
+          fromLocation = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
         }
         checkAutoAdvance();
       });
 
-      // Blur también verifica (para quien escribe a mano sin elegir sugerencia)
       input.addEventListener('blur', function() {
         setTimeout(function() { checkAutoAdvance(); }, 300);
       });
@@ -1391,6 +1381,11 @@ function initMaps() {
 
     makeAC(inputD, true);
     makeAC(inputH, false);
+
+    // Forzar z-index del pac-container que Google inyecta en el body
+    var style = document.createElement('style');
+    style.textContent = '.pac-container { z-index: 999999 !important; pointer-events: all !important; }';
+    document.head.appendChild(style);
 
     placesService = 'classic';
     if (note) note.style.display = 'none';
