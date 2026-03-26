@@ -40,13 +40,13 @@ module.exports = async function handler(req, res) {
     if (!clienteEmail || !desde || !hasta) return res.status(400).json({ error: 'Faltan datos' });
     const id = 'MYA-' + Date.now();
     const mudanza = { id, clienteEmail, clienteNombre, desde, hasta, ambientes, fecha, servicios, extras, zonaBase, precio_estimado, estado: 'buscando', fechaPublicacion: new Date().toISOString(), expira: new Date(Date.now() + 24*60*60*1000).toISOString(), cotizaciones: [] };
-    await setJSON(`mudanza:${id}`, mudanza, 172800);
+    await setJSON(`mudanza:${id}`, mudanza, 604800); // 7 días
     const clienteIdx = await getJSON(`cliente:${clienteEmail}`) || [];
-    clienteIdx.push(id);
+    if (!clienteIdx.includes(id)) clienteIdx.push(id);
     await setJSON(`cliente:${clienteEmail}`, clienteIdx, 2592000);
     const globalIdx = await getJSON('mudanzas:activas') || [];
-    globalIdx.push(id);
-    await setJSON('mudanzas:activas', globalIdx, 172800);
+    if (!globalIdx.includes(id)) globalIdx.push(id);
+    await setJSON('mudanzas:activas', globalIdx, 604800);
     try { await notificarMudanceros(mudanza); } catch(e) { console.error(e.message); }
     return res.status(200).json({ ok: true, id, mudanza });
   }
