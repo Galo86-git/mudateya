@@ -408,6 +408,7 @@ function renderMudanzaCard(m, idx){
   var expira = new Date(m.expira);
   var ahorita = new Date();
   var horasRestantes = Math.max(0, Math.round((expira - ahorita) / 3600000));
+  var mud = m.cotizacionAceptada || {};
 
   return `
     <div class="mudanza-card">
