@@ -188,8 +188,7 @@ nav{position:sticky;top:0;z-index:200;background:rgba(13,11,8,.88);backdrop-filt
 .flex-chip{padding:7px 5px;border-radius:8px;text-align:center;border:1px solid var(--border);background:var(--surface2);font-size:11px;font-weight:500;color:var(--text3);cursor:pointer;transition:all .2s;user-select:none}
 .flex-chip:hover{border-color:var(--border2);color:var(--text2)}
 .flex-chip.sel{border-color:var(--emerald);background:var(--emerald-subtle);color:var(--emerald)}
-.result-summary{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 13px;margin-bottom:10px;font-size:11px;color:var(--text2);line-height:1.7;font-family:var(--mono)}
-.result-summary strong{color:var(--text)}
+.result-summary{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:4px 14px 0;margin-bottom:14px;}
 .section-divider{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:10px 0 8px;padding-top:10px;border-top:1px solid var(--border);font-family:var(--mono)}
 .providers-loading{text-align:center;padding:1.2rem 0;font-size:12px;color:var(--text3);display:none}
 .providers-loading.show{display:block}
@@ -1474,9 +1473,24 @@ function buildSummary() {
   var objs = Array.from(document.querySelectorAll('.obj-chip.sel .obj-label')).map(function(e) { return e.textContent; });
   var extras = Array.from(document.querySelectorAll('.extra-chip.sel span:nth-child(2)')).map(function(e) { return e.textContent.trim(); });
   var fecha = getFechaLabel();
-  var html = '<strong>' + desde + ' → ' + hasta + '</strong> · ' + amb + ' ambiente' + (amb !== 1 ? 's' : '') + ' · 📅 ' + fecha;
-  if (objs.length) html += '<br>Objetos: ' + objs.join(', ');
-  if (extras.length) html += '<br>Extras: ' + extras.join(', ');
+  var ambTxt = amb + ' ambiente' + (amb !== 1 ? 's' : '');
+
+  function row(label, value, icon) {
+    return '<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">' +
+      '<span style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono);min-width:70px;padding-top:1px">' + label + '</span>' +
+      '<span style="font-size:13px;color:var(--text);font-weight:400;flex:1;line-height:1.4">' + (icon ? icon + ' ' : '') + value + '</span>' +
+    '</div>';
+  }
+
+  var html = '<div style="display:flex;flex-direction:column;">';
+  html += row('Desde', desde, '📍');
+  html += row('Hasta', hasta, '🏁');
+  html += row('Fecha', fecha, '📅');
+  html += row('Ambientes', ambTxt, '🏠');
+  if (objs.length) html += row('Objetos', objs.join(', '), '📦');
+  if (extras.length) html += row('Extras', extras.join(', '), '✅');
+  html += '</div>';
+
   document.getElementById('summaryBox').innerHTML = html;
 }
 function solicitarPresupuestos() {
