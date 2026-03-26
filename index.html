@@ -1205,6 +1205,8 @@ window.addEventListener('load', function(){
 var step=1,amb=2,dateMode='exact',selectedFlex='';
 var placesService=null,geocoder=null,fromLocation=null;
 var routeMap=null,directionsRenderer=null;
+var _mudanzaPublicadaId = null;
+var _loginRol = null;
 
 // Actualizar nav si hay sesión guardada
 document.addEventListener('DOMContentLoaded', function(){ updateNavUser(); });
@@ -1272,8 +1274,6 @@ function goStep(n){
   }
   else{hero.classList.remove('step3-active');document.getElementById('mapPanel').classList.remove('show')}
 }
-
-var _loginRol = null; // 'cliente' | 'mudancero'
 
 function iniciarSesionComo(rol, e){
   e.preventDefault();
