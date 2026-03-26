@@ -857,42 +857,93 @@ gmp-placeautocomplete input:focus,gmp-place-autocomplete input:focus{
     </div>
 
     <!-- PASO 3: PUBLICAR / LOGIN -->
+    <!-- PASO 3: RESUMEN + PRECIO + MAPA -->
     <div class="fsw-panel" id="fsw-p3">
+      <div class="fsw-title">Resumen de tu mudanza</div>
+      <div class="fsw-sub">Revisá todo antes de publicar y recibir cotizaciones</div>
+      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:.8rem 1rem;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="color:var(--text3);font-family:var(--mono)">Desde</span>
+          <span id="fsw-sum-desde" style="color:var(--text);font-weight:500;text-align:right;max-width:60%;font-size:12px">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="color:var(--text3);font-family:var(--mono)">Hasta</span>
+          <span id="fsw-sum-hasta" style="color:var(--text);font-weight:500;text-align:right;max-width:60%;font-size:12px">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="color:var(--text3);font-family:var(--mono)">Fecha</span>
+          <span id="fsw-sum-fecha" style="color:var(--text);font-weight:500">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px">
+          <span style="color:var(--text3);font-family:var(--mono)">Ambientes</span>
+          <span id="fsw-sum-amb" style="color:var(--text);font-weight:500">—</span>
+        </div>
+      </div>
+      <div style="background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:14px;padding:.9rem 1rem;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:3px">PRECIO ESTIMADO</div>
+          <div id="fsw-sum-precio" style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--emerald);letter-spacing:1px">—</div>
+          <div style="font-size:9px;color:var(--text3);font-family:var(--mono)">el precio final lo define el mudancero</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:3px">FEE MUDATEYA</div>
+          <div id="fsw-sum-fee" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--text2)">—</div>
+          <div style="font-size:9px;color:var(--text3);font-family:var(--mono)">10% al concretar</div>
+        </div>
+      </div>
+      <div id="fswMapWrap" style="height:180px;border-radius:12px;overflow:hidden;border:1px solid var(--border2);margin-bottom:10px;background:var(--surface2)">
+        <div id="fswRouteMap" style="width:100%;height:100%"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px">
+          <div style="font-size:9px;color:var(--text3);font-family:var(--mono)">DISTANCIA</div>
+          <div id="fsw-sum-dist" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--text)">—</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px">
+          <div style="font-size:9px;color:var(--text3);font-family:var(--mono)">TIEMPO EST.</div>
+          <div id="fsw-sum-dur" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--text)">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 4: LOGIN + ÉXITO -->
+    <div class="fsw-panel" id="fsw-p4">
       <div id="fsw-login-state" style="display:none;text-align:center;padding:1rem 0">
         <div style="font-size:2.5rem;margin-bottom:14px">🔐</div>
-        <div class="fsw-title">Iniciá sesión para publicar</div>
-        <div class="fsw-sub">Es gratis. Solo necesitamos tu email para avisarte cuando lleguen cotizaciones.</div>
+        <div class="fsw-title">Casi listo</div>
+        <div class="fsw-sub">Iniciá sesión para publicar tu mudanza y recibir cotizaciones gratis.</div>
         <div id="fsw-google-btn" style="display:flex;justify-content:center;margin:1.4rem 0"></div>
         <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">🔒 No publicamos nada en tu cuenta de Google</div>
       </div>
-      <div id="fsw-publishing-state" style="display:none;text-align:center;padding:2rem 0">
-        <span class="spinner" style="width:28px;height:28px;border-width:3px;display:block;margin:0 auto 16px"></span>
+      <div id="fsw-publishing-state" style="display:none;text-align:center;padding:3rem 0">
+        <span class="spinner" style="width:32px;height:32px;border-width:3px;display:block;margin:0 auto 20px"></span>
         <div class="fsw-title">Publicando tu mudanza…</div>
+        <div class="fsw-sub">Notificando a los mudanceros de tu zona</div>
       </div>
       <div id="fsw-published-state" style="display:none">
         <div style="text-align:center;padding:1rem 0 1.4rem">
           <div style="font-size:3rem;margin-bottom:12px">🚀</div>
           <div class="fsw-title">¡Mudanza publicada!</div>
-          <div class="fsw-sub">Los mudanceros verificados de tu zona ya pueden cotizarte.</div>
+          <div class="fsw-sub">Los mudanceros ya pueden verte. Te avisamos por email con cada cotización.</div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.2rem">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.4rem">
           <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
-            <div style="width:32px;height:32px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;color:var(--emerald);font-weight:700">1</div>
-            <div><div style="font-size:13px;font-weight:500;color:var(--text)">Los mudanceros te cotizan</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Recibís notificación por email</div></div>
+            <div style="width:30px;height:30px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;color:var(--emerald);font-weight:700;font-size:12px;flex-shrink:0">1</div>
+            <div><div style="font-size:13px;font-weight:500;color:var(--text)">Los mudanceros te cotizan</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Email por cada cotización recibida</div></div>
             <div style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--emerald)">~15min</div>
           </div>
           <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
-            <div style="width:32px;height:32px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;color:var(--emerald);font-weight:700">2</div>
-            <div><div style="font-size:13px;font-weight:500;color:var(--text)">Comparás y elegís el mejor</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Precio, reseñas, tiempo estimado</div></div>
+            <div style="width:30px;height:30px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;color:var(--emerald);font-weight:700;font-size:12px;flex-shrink:0">2</div>
+            <div><div style="font-size:13px;font-weight:500;color:var(--text)">Comparás y elegís</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Precio, reseñas, tiempo estimado</div></div>
           </div>
           <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
-            <div style="width:32px;height:32px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;color:var(--emerald);font-weight:700">3</div>
+            <div style="width:30px;height:30px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;color:var(--emerald);font-weight:700;font-size:12px;flex-shrink:0">3</div>
             <div><div style="font-size:13px;font-weight:500;color:var(--text)">Pagás seguro y listo</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Mercado Pago o transferencia</div></div>
           </div>
         </div>
         <div style="display:flex;gap:10px">
-          <a href="/" style="flex:1;text-align:center;padding:12px;border:1px solid var(--border2);border-radius:10px;color:var(--text2);text-decoration:none;font-size:13px">← Volver al inicio</a>
-          <a href="/mi-mudanza" style="flex:2;text-align:center;padding:12px;background:var(--emerald);border-radius:10px;color:#041A0E;text-decoration:none;font-size:14px;font-weight:700">Ver cotizaciones →</a>
+          <a href="/" onclick="closeFSW()" style="flex:1;text-align:center;padding:13px;border:1px solid var(--border2);border-radius:10px;color:var(--text2);text-decoration:none;font-size:13px;font-weight:500">← Inicio</a>
+          <a href="/mi-mudanza" style="flex:2;text-align:center;padding:13px;background:var(--emerald);border-radius:10px;color:#041A0E;text-decoration:none;font-size:14px;font-weight:700">Ver cotizaciones →</a>
         </div>
       </div>
     </div>
@@ -1422,11 +1473,15 @@ function fswGoStep(n){
   var footer=document.getElementById('fsw-footer');
   var back=document.getElementById('fsw-back');
   var next=document.getElementById('fsw-next');
-  if(n===3||n===4){footer.style.display='none';if(n===3)fswSetupStep3();}
-  else{
+  if(n===4){
+    footer.style.display='none';
+    fswSetupStep4();
+  } else {
     footer.style.display='flex';
     back.style.visibility=n===1?'hidden':'visible';
-    next.textContent=n===2?'Solicitar presupuestos →':'Continuar →';
+    if(n===3){next.textContent='Solicitar presupuestos →';fswBuildSummary();}
+    else if(n===2){next.textContent='Ver resumen →';}
+    else{next.textContent='Continuar →';}
   }
   fswStep=n;
   var body=document.querySelector('#fswOverlay .fsw-body');
@@ -1443,32 +1498,50 @@ function fswNext(){
   }else if(fswStep===2){
     if(!document.querySelectorAll('#fsw-obj-grid .obj-chip.sel').length){alert('Seleccioná al menos un objeto');return;}
     fswGoStep(3);
+  }else if(fswStep===3){
+    fswGoStep(4);
   }
 }
 function fswBack(){if(fswStep>1)fswGoStep(fswStep-1);else closeFSW();}
-function fswSetDateMode(mode){
-  fswDateMode=mode;
-  document.getElementById('fsw-tab-exact').classList.toggle('active',mode==='exact');
-  document.getElementById('fsw-tab-flex').classList.toggle('active',mode==='flex');
-  document.getElementById('fsw-date-exact').style.display=mode==='exact'?'block':'none';
-  document.getElementById('fsw-date-flex').style.display=mode==='flex'?'block':'none';
+function fswBuildSummary(){
+  var desde=document.getElementById('fsw-desde').value.trim();
+  var hasta=document.getElementById('fsw-hasta').value.trim();
+  document.getElementById('fsw-sum-desde').textContent=desde||'—';
+  document.getElementById('fsw-sum-hasta').textContent=hasta||'—';
+  document.getElementById('fsw-sum-fecha').textContent=fswGetFechaLabel();
+  document.getElementById('fsw-sum-amb').textContent=fswAmb+' ambiente'+(fswAmb!==1?'s':'');
+  var precio=50000+(fswAmb-1)*30000;
+  document.getElementById('fsw-sum-precio').textContent='$'+precio.toLocaleString('es-AR');
+  document.getElementById('fsw-sum-fee').textContent='$'+Math.round(precio*0.1).toLocaleString('es-AR');
+  if(window.google&&desde&&hasta){
+    setTimeout(function(){
+      try{
+        var mapEl=document.getElementById('fswRouteMap');
+        if(!mapEl)return;
+        var map=new google.maps.Map(mapEl,{zoom:11,disableDefaultUI:true,styles:[{featureType:'all',stylers:[{saturation:-80}]}]});
+        var geo=new google.maps.Geocoder();
+        geo.geocode({address:desde},function(r1){
+          if(!r1||!r1[0])return;
+          geo.geocode({address:hasta},function(r2){
+            if(!r2||!r2[0])return;
+            var svc=new google.maps.DirectionsService();
+            var rend=new google.maps.DirectionsRenderer({suppressMarkers:false,polylineOptions:{strokeColor:'#22C36A',strokeWeight:4}});
+            rend.setMap(map);
+            svc.route({origin:r1[0].geometry.location,destination:r2[0].geometry.location,travelMode:'DRIVING'},function(res,status){
+              if(status==='OK'){
+                rend.setDirections(res);
+                var leg=res.routes[0].legs[0];
+                document.getElementById('fsw-sum-dist').textContent=leg.distance.text;
+                document.getElementById('fsw-sum-dur').textContent=leg.duration.text;
+              }
+            });
+          });
+        });
+      }catch(e){console.warn('Map error:',e);}
+    },300);
+  }
 }
-function fswToggleFlex(el){
-  document.querySelectorAll('#fsw-date-flex .flex-chip').forEach(function(c){c.classList.remove('sel');});
-  el.classList.add('sel');fswSelectedFlex=el.textContent;
-}
-function fswChangeAmb(d){
-  fswAmb=Math.max(1,Math.min(10,fswAmb+d));
-  document.getElementById('fsw-ambVal').textContent=fswAmb;
-}
-function fswGetFechaLabel(){
-  if(fswDateMode==='flex')return fswSelectedFlex||'Fechas flexibles';
-  var v=document.getElementById('fsw-fecha').value;
-  if(!v)return 'Sin fecha';
-  var d=new Date(v+'T12:00:00');
-  return d.toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});
-}
-function fswSetupStep3(){
+function fswSetupStep4(){
   var user=null;
   try{user=JSON.parse(sessionStorage.getItem('googleUser')||sessionStorage.getItem('clienteUser'));}catch(e){}
   document.getElementById('fsw-login-state').style.display='none';
@@ -1492,8 +1565,9 @@ async function fswPublicar(user){
   var hasta=document.getElementById('fsw-hasta').value.trim();
   var objetos=Array.from(document.querySelectorAll('#fsw-obj-grid .obj-chip.sel .obj-label')).map(function(e){return e.textContent;}).join(', ');
   var extras=Array.from(document.querySelectorAll('#fsw-p2 .extra-chip')).filter(function(e){return e.querySelector('input')&&e.querySelector('input').checked;}).map(function(e){return e.textContent.trim();}).join(', ');
+  var precio=50000+(fswAmb-1)*30000;
   try{
-    var r=await fetch('/api/cotizaciones?action=publicar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clienteEmail:user.email,clienteNombre:user.name,desde,hasta,ambientes:fswAmb+' ambiente'+(fswAmb!==1?'s':''),fecha:fswGetFechaLabel(),servicios:objetos,extras,zonaBase:desde,precio_estimado:0})});
+    var r=await fetch('/api/cotizaciones?action=publicar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({clienteEmail:user.email,clienteNombre:user.name,desde,hasta,ambientes:fswAmb+' ambiente'+(fswAmb!==1?'s':''),fecha:fswGetFechaLabel(),servicios:objetos,extras,zonaBase:desde,precio_estimado:precio})});
     var d=await r.json();
     if(d.id)fswPublicadaId=d.id;
   }catch(e){console.warn('Error publicando:',e.message);}
@@ -1501,7 +1575,28 @@ async function fswPublicar(user){
   document.getElementById('fsw-published-state').style.display='block';
 }
 function fswOnLogin(user){
-  if(document.getElementById('fswOverlay').classList.contains('open')&&fswStep===3){fswPublicar(user);}
+  if(document.getElementById('fswOverlay').classList.contains('open')&&fswStep===4){fswPublicar(user);}
+}
+  fswDateMode=mode;
+  document.getElementById('fsw-tab-exact').classList.toggle('active',mode==='exact');
+  document.getElementById('fsw-tab-flex').classList.toggle('active',mode==='flex');
+  document.getElementById('fsw-date-exact').style.display=mode==='exact'?'block':'none';
+  document.getElementById('fsw-date-flex').style.display=mode==='flex'?'block':'none';
+}
+function fswToggleFlex(el){
+  document.querySelectorAll('#fsw-date-flex .flex-chip').forEach(function(c){c.classList.remove('sel');});
+  el.classList.add('sel');fswSelectedFlex=el.textContent;
+}
+function fswChangeAmb(d){
+  fswAmb=Math.max(1,Math.min(10,fswAmb+d));
+  document.getElementById('fsw-ambVal').textContent=fswAmb;
+}
+function fswGetFechaLabel(){
+  if(fswDateMode==='flex')return fswSelectedFlex||'Fechas flexibles';
+  var v=document.getElementById('fsw-fecha').value;
+  if(!v)return 'Sin fecha';
+  var d=new Date(v+'T12:00:00');
+  return d.toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});
 }
 function fswInitMaps(){
   var inputD=document.getElementById('fsw-desde');
