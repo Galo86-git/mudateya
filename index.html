@@ -219,7 +219,10 @@ nav{
 .wp-step.active .wp-label{color:var(--text)}
 .wp-step.done .wp-label{color:var(--emerald-dim)}
 
-.wizard-body{padding:1rem 1.4rem 1.4rem}
+.wizard-body{padding:1rem 1.4rem 1.4rem;max-height:520px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.wizard-body::-webkit-scrollbar{width:4px}
+.wizard-body::-webkit-scrollbar-track{background:transparent}
+.wizard-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 .wstep{display:none}
 .wstep.active{display:block;animation:fadeUp .3s ease both}
 
@@ -1274,8 +1277,8 @@ function goStep(n){
   }
   step=n;
   document.getElementById('step'+n).classList.add('active');
-  // Scroll al wizard
-  document.getElementById('heroGrid').scrollIntoView({behavior:'smooth', block:'start'});
+  // Scroll al top para simular cambio de página
+  window.scrollTo({top: 0, behavior: 'smooth'});
   var hero=document.getElementById('heroGrid');
   if(n===3){
     buildSummary();
