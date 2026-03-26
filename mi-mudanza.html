@@ -290,15 +290,6 @@ function logout(){
   location.reload();
 }
 
-function showPage(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  if(event) event.currentTarget.classList.add('active');
-  if(name==='pagos') renderPagos();
-  if(name==='calificaciones') renderCalificaciones();
-}
-
 // ── MUDANZAS ───────────────────────────────────────────────────────────────
 async function loadMudanzas(){
   document.getElementById('mudanzasList').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando…</div>';
@@ -578,25 +569,121 @@ mudateya.ar | soporte@mudateya.ar`;
 }
 
 // ── CHAT ───────────────────────────────────────────────────────────────────
-function sendMsg(){
-  var input = document.getElementById('chatInput');
-  var text = input.value.trim();
-  if(!text) return;
-  chatMsgs.push({from:'me', text, time: new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})});
-  input.value = '';
-  renderChat();
+var chatMudanzaActiva = null;
+var chatPolling = null;
+var chatUltimoId = 0;
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(event) event.currentTarget.classList.add('active');
+  if(name==='pagos') renderPagos();
+  if(name==='calificaciones') renderCalificaciones();
+  if(name==='chat') loadConversaciones();
+  // Detener polling si salimos del chat
+  if(name!=='chat' && chatPolling){ clearInterval(chatPolling); chatPolling=null; }
 }
 
-function renderChat(){
-  if(chatMsgs.length === 0) return;
-  var html = chatMsgs.map(m => `
-    <div class="chat-msg ${m.from==='me'?'mine':'other'}">
-      ${m.text}
-      <div class="chat-msg-time">${m.time}</div>
-    </div>`).join('');
-  var list = document.getElementById('chatList');
-  list.innerHTML = html;
-  list.scrollTop = list.scrollHeight;
+async function loadConversaciones(){
+  try{
+    var r = await fetch('/api/chat?action=conversaciones&email='+encodeURIComponent(currentUser.email));
+    var d = await r.json();
+    var convs = d.conversaciones || [];
+
+    // También mostrar mudanzas activas sin mensajes
+    var todasMudanzas = mudanzasData.filter(m => m.cotizacionAceptada || m.tipoPago === 'transferencia');
+
+    if(todasMudanzas.length === 0 && convs.length === 0){
+      document.getElementById('chatList').innerHTML = '<div class="empty" style="margin:auto"><div class="empty-icon">💬</div>Cuando tengas una mudanza confirmada podés chatear con tu mudancero acá</div>';
+      return;
+    }
+
+    // Armar lista de contactos
+    var contactosHtml = todasMudanzas.map(m => {
+      var mud = m.cotizacionAceptada || {};
+      var conv = convs.find(c => c.mudanzaId === m.id);
+      var ultimo = conv?.ultimoMensaje?.texto || 'Sin mensajes aún';
+      return `
+        <div class="chat-contact ${chatMudanzaActiva===m.id?'active':''}" onclick="abrirChat('${m.id}','${(mud.mudanceroNombre||'Mudancero').replace(/'/g,"\\'")}')">
+          <div class="chat-contact-name">${mud.mudanceroNombre||'Mudancero'}</div>
+          <div class="chat-contact-last">${m.desde?.split(',')[0]||'—'} → ${m.hasta?.split(',')[0]||'—'}</div>
+          <div class="chat-contact-last" style="color:var(--text3)">${ultimo.substring(0,40)}${ultimo.length>40?'…':''}</div>
+        </div>`;
+    }).join('');
+
+    document.querySelector('.chat-contacts') && (document.querySelector('.chat-contacts').innerHTML = contactosHtml || '<div class="empty" style="padding:1rem">Sin conversaciones</div>');
+
+    // Abrir primera si hay
+    if(todasMudanzas.length > 0 && !chatMudanzaActiva){
+      var mud = todasMudanzas[0].cotizacionAceptada || {};
+      abrirChat(todasMudanzas[0].id, mud.mudanceroNombre||'Mudancero');
+    }
+  }catch(e){
+    console.warn('Error cargando conversaciones:', e.message);
+  }
+}
+
+async function abrirChat(mudanzaId, nombreMudancero){
+  chatMudanzaActiva = mudanzaId;
+  document.getElementById('chatHeader').textContent = '💬 ' + nombreMudancero;
+  await cargarMensajes();
+  // Polling cada 4 segundos
+  if(chatPolling) clearInterval(chatPolling);
+  chatPolling = setInterval(cargarMensajes, 4000);
+  // Actualizar contactos
+  loadConversaciones();
+}
+
+async function cargarMensajes(){
+  if(!chatMudanzaActiva) return;
+  try{
+    var r = await fetch('/api/chat?action=leer&mudanzaId='+chatMudanzaActiva);
+    var d = await r.json();
+    var msgs = d.mensajes || [];
+    if(msgs.length === chatUltimoId) return; // Sin cambios
+    chatUltimoId = msgs.length;
+    var list = document.getElementById('chatList');
+    if(msgs.length === 0){
+      list.innerHTML = '<div class="empty" style="margin:auto"><div class="empty-icon">💬</div>Empezá la conversación con tu mudancero</div>';
+      return;
+    }
+    list.innerHTML = msgs.map(m => {
+      var esMio = m.fromEmail === currentUser.email;
+      var hora = new Date(m.fecha).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+      return `<div class="chat-msg ${esMio?'mine':'other'}">
+        ${!esMio?`<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:3px">${m.fromNombre}</div>`:''}
+        ${m.texto}
+        <div class="chat-msg-time">${hora}</div>
+      </div>`;
+    }).join('');
+    list.scrollTop = list.scrollHeight;
+  }catch(e){ console.warn('Error cargando mensajes:', e.message); }
+}
+
+async function sendMsg(){
+  var input = document.getElementById('chatInput');
+  var text = input.value.trim();
+  if(!text || !chatMudanzaActiva) return;
+  input.value = '';
+  try{
+    await fetch('/api/chat?action=enviar', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mudanzaId: chatMudanzaActiva,
+        fromEmail: currentUser.email,
+        fromNombre: currentUser.name,
+        fromRol: 'cliente',
+        texto: text,
+      })
+    });
+    await cargarMensajes();
+  }catch(e){
+    console.warn('Error enviando mensaje:', e.message);
+    // Mostrar error temporal
+    input.value = text;
+  }
 }
 
 // ── CALIFICACIONES ────────────────────────────────────────────────────────
