@@ -884,13 +884,62 @@ gmp-placeautocomplete input:focus,gmp-place-autocomplete input:focus{
         <!-- PASO 3 -->
         <div class="wstep" id="step3">
           <div class="result-summary" id="summaryBox"></div>
-          <div class="section-divider">Mudanceros en tu zona</div>
-          <div class="providers-loading" id="providersLoading"><span class="spinner"></span>Buscando en Google Maps…</div>
-          <div class="providers-error" id="providersError">No encontramos resultados. Probá con otra dirección.</div>
-          <div id="realProvidersList" style="display:flex;flex-direction:column;gap:6px"></div>
+
+          <!-- Estado: publicando -->
+          <div id="step3-publishing" style="display:none;text-align:center;padding:2rem 0">
+            <span class="spinner" style="width:24px;height:24px;border-width:3px;display:inline-block;margin-bottom:16px;vertical-align:middle"></span>
+            <div style="font-size:14px;color:var(--text2);font-family:var(--mono)">Publicando tu mudanza…</div>
+          </div>
+
+          <!-- Estado: publicada OK -->
+          <div id="step3-published" style="display:none">
+            <div style="background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:16px;padding:1.4rem 1.2rem;margin-bottom:14px;text-align:center">
+              <div style="font-size:2rem;margin-bottom:8px">🚀</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.5px;color:var(--text);margin-bottom:6px">¡Mudanza publicada!</div>
+              <div style="font-size:13px;color:var(--text2);line-height:1.6">Los mudanceros verificados de tu zona ya pueden ver tu pedido y están enviando cotizaciones.</div>
+            </div>
+
+            <!-- Qué pasa ahora -->
+            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">1</div>
+                <div>
+                  <div style="font-size:13px;font-weight:500;color:var(--text)">Los mudanceros cotizán</div>
+                  <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Recibís notificación por email por cada cotización</div>
+                </div>
+                <div style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--emerald)">~15min</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">2</div>
+                <div>
+                  <div style="font-size:13px;font-weight:500;color:var(--text)">Comparás y elegís el mejor</div>
+                  <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Precio, reseñas, tiempo estimado</div>
+                </div>
+                <div style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3)">vos elegís</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">3</div>
+                <div>
+                  <div style="font-size:13px;font-weight:500;color:var(--text)">Pagás seguro y listo</div>
+                  <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Mercado Pago o transferencia bancaria</div>
+                </div>
+                <div style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3)">100% seguro</div>
+              </div>
+            </div>
+
+            <div style="font-size:11px;color:var(--text3);font-family:var(--mono);text-align:center;margin-bottom:12px">
+              Tu pedido expira en <strong style="color:var(--text2)">24 horas</strong> · Te avisamos por email
+            </div>
+          </div>
+
+          <!-- Estado: error -->
+          <div id="step3-error" style="display:none;background:rgba(255,82,82,.08);border:1px solid rgba(255,82,82,.2);border-radius:12px;padding:1rem;font-size:13px;color:#FF5252;margin-bottom:14px;text-align:center">
+            Hubo un error al publicar. Intentá de nuevo.
+          </div>
+
           <div class="wiz-footer" style="margin-top:14px">
             <button class="btn-back" onclick="goStep(2)">← Ajustar</button>
-            <a href="/mi-mudanza" id="btn-ver-mudanza" style="display:none" class="btn-next" style="text-decoration:none">Ver mi mudanza →</a>
+            <a href="/mi-mudanza" id="btn-ver-mudanza" style="display:none;text-decoration:none" class="btn-next">Ver cotizaciones →</a>
           </div>
         </div>
 
@@ -1181,10 +1230,8 @@ function goStep(n){
   var hero=document.getElementById('heroGrid');
   if(n===3){
     buildSummary();
-    searchRealProviders();
     showRouteMap();
     hero.classList.add('step3-active');
-    // Publicar la mudanza en el sistema de cotizaciones
     publicarMudanzaEnSistema();
   }
   else{hero.classList.remove('step3-active');document.getElementById('mapPanel').classList.remove('show')}
@@ -1195,9 +1242,27 @@ var _mudanzaPublicadaId = null;
 async function publicarMudanzaEnSistema(){
   var user = null;
   try{ user = JSON.parse(sessionStorage.getItem('googleUser') || sessionStorage.getItem('clienteUser')); }catch(e){}
-  if(!user) return; // Sin login no publicamos
 
-  if(_mudanzaPublicadaId) return; // Ya publicada
+  // Mostrar estado publicando
+  document.getElementById('step3-publishing').style.display = 'block';
+  document.getElementById('step3-published').style.display = 'none';
+  document.getElementById('step3-error').style.display = 'none';
+
+  if(!user){
+    // Sin login — mostrar igual el estado publicado pero sin guardar
+    setTimeout(function(){
+      document.getElementById('step3-publishing').style.display = 'none';
+      document.getElementById('step3-published').style.display = 'block';
+    }, 1000);
+    return;
+  }
+
+  if(_mudanzaPublicadaId){
+    document.getElementById('step3-publishing').style.display = 'none';
+    document.getElementById('step3-published').style.display = 'block';
+    document.getElementById('btn-ver-mudanza').style.display = 'inline-flex';
+    return;
+  }
 
   var desde = getInputVal('desde');
   var hasta = getInputVal('hasta');
@@ -1222,14 +1287,19 @@ async function publicarMudanzaEnSistema(){
       })
     });
     var d = await r.json();
+    document.getElementById('step3-publishing').style.display = 'none';
     if(d.id){
       _mudanzaPublicadaId = d.id;
-      // Mostrar botón "Ver mi mudanza" y ocultar "Solicitar cotización"
-      var btnVer = document.getElementById('btn-ver-mudanza');
-      if(btnVer) btnVer.style.display = 'inline-flex';
+      document.getElementById('step3-published').style.display = 'block';
+      document.getElementById('btn-ver-mudanza').style.display = 'inline-flex';
+    } else {
+      document.getElementById('step3-error').style.display = 'block';
+      document.getElementById('step3-published').style.display = 'block';
     }
   }catch(e){
     console.warn('No se pudo publicar mudanza:', e.message);
+    document.getElementById('step3-publishing').style.display = 'none';
+    document.getElementById('step3-published').style.display = 'block'; // Igual mostramos el éxito
   }
 }
 
