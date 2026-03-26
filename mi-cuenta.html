@@ -562,8 +562,9 @@ function showScreen(name){
 }
 
 function logout(){
-  sessionStorage.removeItem('mudanceroUser');
-  location.reload();
+  sessionStorage.removeItem('clienteUser');
+  sessionStorage.removeItem('googleUser');
+  window.location.href='/';
 }
 
 // ── NAVEGACIÓN ─────────────────────────────────────────────────────────────
