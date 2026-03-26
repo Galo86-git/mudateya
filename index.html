@@ -1577,6 +1577,7 @@ async function fswPublicar(user){
 function fswOnLogin(user){
   if(document.getElementById('fswOverlay').classList.contains('open')&&fswStep===4){fswPublicar(user);}
 }
+function fswSetDateMode(mode){
   fswDateMode=mode;
   document.getElementById('fsw-tab-exact').classList.toggle('active',mode==='exact');
   document.getElementById('fsw-tab-flex').classList.toggle('active',mode==='flex');
