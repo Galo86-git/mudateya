@@ -1,4 +1,4 @@
-// api/cotizaciones.js — con Upstash Redis + PDF inline (sin archivos extra)
+// api/cotizaciones.js — Upstash Redis + PDF con pdfmake
 const { Resend } = require('resend');
 
 // ════════════════════════════════════════════════════
@@ -15,13 +15,11 @@ async function redisCall(method, ...args) {
   if (data.error) throw new Error(data.error);
   return data.result;
 }
-
 async function getJSON(key) {
   const val = await redisCall('GET', key);
   if (!val) return null;
   return JSON.parse(val);
 }
-
 async function setJSON(key, value, exSeconds) {
   const str = JSON.stringify(value);
   if (exSeconds) await redisCall('SET', key, str, 'EX', String(exSeconds));
@@ -29,328 +27,297 @@ async function setJSON(key, value, exSeconds) {
 }
 
 // ════════════════════════════════════════════════════
-// GENERADOR DE PDF (inline, sin archivo separado)
-// Genera un PDF en base64 usando solo código nativo
+// GENERADOR PDF con pdfmake
 // ════════════════════════════════════════════════════
-function generarPDFBase64(datos) {
-  // Usamos jsPDF via CDN-style inline — en Node usamos una versión simplificada
-  // Genera un PDF válido con estructura mínima usando Buffer
-  
-  const lines = [];
-  const add = (s) => lines.push(s);
+async function generarPDFBase64(datos) {
+  const PdfPrinter = require('pdfmake');
 
-  // Datos del PDF
-  const nro = datos.id || 'MYA-0001';
-  const fechaEmision = datos.fechaEmision || new Date().toLocaleDateString('es-AR');
-  const mudanceroNombre = (datos.mudanceroNombre || 'Mudancero').replace(/[()\\]/g, '');
-  const clienteNombre = (datos.clienteNombre || 'Cliente').replace(/[()\\]/g, '');
-  const desde = (datos.desde || '—').replace(/[()\\]/g, '').slice(0, 60);
-  const hasta = (datos.hasta || '—').replace(/[()\\]/g, '').slice(0, 60);
-  const fecha = (datos.fecha || '—').replace(/[()\\]/g, '');
-  const ambientes = (datos.ambientes || '—').replace(/[()\\]/g, '');
-  const objetos = (datos.objetos || '—').replace(/[()\\]/g, '').slice(0, 80);
-  const extras = (datos.extras || '').replace(/[()\\]/g, '').slice(0, 60);
-  const precio = parseInt(datos.precio || 0);
-  const fee = Math.round(precio * 0.10 / 500) * 500;
-  const resto = precio - fee;
-  const precioFmt = '$' + precio.toLocaleString('es-AR');
-  const feeFmt = '$' + fee.toLocaleString('es-AR');
-  const restoFmt = '$' + resto.toLocaleString('es-AR');
-  const nota = (datos.nota || '').replace(/[()\\]/g, '').slice(0, 100);
+  const fonts = {
+    Helvetica: {
+      normal:      'Helvetica',
+      bold:        'Helvetica-Bold',
+      italics:     'Helvetica-Oblique',
+      bolditalics: 'Helvetica-BoldOblique',
+    },
+  };
+  const printer = new PdfPrinter(fonts);
 
-  // ── Construir PDF manualmente ──────────────────────
-  const objects = [];
-  let objNum = 1;
+  const VERDE     = '#22C36A';
+  const VERDE_BG  = '#0D2018';
+  const VERDE_DIM = '#1A9A52';
+  const BG        = '#0A1410';
+  const CARD      = '#101C16';
+  const CARD2     = '#152018';
+  const WHITE     = '#E8F5EE';
+  const MUTED     = '#5A8A78';
+  const DIM       = '#2E4A3A';
+  const GOLD      = '#F5A623';
+  const BORDER_C  = '#1E3028';
 
-  function pdfStr(s) { return `(${s})`; }
-  function addObj(content) {
-    const num = objNum++;
-    objects.push({ num, content });
-    return num;
+  const nro          = datos.id || 'MYA-0001';
+  const fechaEmision = datos.fechaEmision || new Date().toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' });
+  const clienteNombre = datos.clienteNombre || '—';
+  const clienteEmail  = datos.clienteEmail  || '—';
+  const mudNombre     = datos.mudanceroNombre || '—';
+  const mudInits      = (datos.mudancero_initials || datos.mudanceroNombre || 'MV').slice(0,2).toUpperCase();
+  const estrellas     = parseFloat(datos.estrellas || 4.8);
+  const nroResenas    = datos.nro_resenas || '';
+  const vehiculo      = datos.vehiculo || '';
+  const desde         = datos.desde || '—';
+  const hasta         = datos.hasta || '—';
+  const fechaMud      = datos.fecha || datos.fecha_mudanza || '—';
+  const ambientes     = datos.ambientes || '—';
+  const objetos       = datos.objetos || datos.servicios || '—';
+  const extras        = datos.extras || '';
+  const nota          = datos.nota || '';
+  const precio        = parseInt(datos.precio || datos.precio_total || 0);
+  const fee           = Math.round(precio * 0.10 / 500) * 500;
+  const resto         = precio - fee;
+  const fmt           = (n) => '$' + n.toLocaleString('es-AR');
+  const starStr       = '★'.repeat(Math.floor(estrellas)) + '☆'.repeat(5 - Math.floor(estrellas));
+
+  function rowBorder() {
+    return { canvas: [{ type: 'line', x1: 0, y1: 4, x2: 467, y2: 4, lineWidth: 0.3, lineColor: BORDER_C }] };
   }
 
-  // Página content stream
-  const pageContent = `
-BT
-/F1 20 Tf
-0.133 0.765 0.416 rg
-56 780 Td
-(MudateYa) Tj
-0.91 0.96 0.93 rg
-/F1 8 Tf
-0 -16 Td
-(El marketplace de mudanzas de Argentina) Tj
-
-% Numero cotizacion
-0.133 0.765 0.416 rg
-/F1 14 Tf
-350 796 Td
-(${nro}) Tj
-0.35 0.54 0.47 rg
-/F1 7 Tf
-0 -14 Td
-(COTIZACION OFICIAL) Tj
-0.56 0.69 0.63 rg
-/F1 8 Tf
-0 -12 Td
-(${fechaEmision}) Tj
-
-% Linea separadora
-ET
-0.118 0.176 0.149 rg
-56 748 612 2 re f
-BT
-
-% MUDANCERO
-0.56 0.69 0.63 rg
-/F1 7 Tf
-56 730 Td
-(MUDANCERO ASIGNADO) Tj
-0.91 0.96 0.93 rg
-/F1 13 Tf
-0 -18 Td
-(${mudanceroNombre}) Tj
-0.133 0.765 0.416 rg
-/F1 8 Tf
-0 -14 Td
-(Verificado  |  MudateYa) Tj
-
-% LINEA
-ET
-0.118 0.176 0.149 rg
-56 690 500 1 re f
-BT
-
-% DETALLE
-0.56 0.69 0.63 rg
-/F1 7 Tf
-56 678 Td
-(DETALLE DE LA MUDANZA) Tj
-
-0.91 0.96 0.93 rg
-/F1 8 Tf
-56 660 Td
-(DESDE) Tj
-/F1 9 Tf
-150 660 Td
-(${desde}) Tj
-
-0.91 0.96 0.93 rg
-/F1 8 Tf
-56 642 Td
-(HASTA) Tj
-/F1 9 Tf
-150 642 Td
-(${hasta}) Tj
-
-0.91 0.96 0.93 rg
-/F1 8 Tf
-56 624 Td
-(FECHA) Tj
-/F1 9 Tf
-150 624 Td
-(${fecha}) Tj
-
-0.91 0.96 0.93 rg
-/F1 8 Tf
-56 606 Td
-(AMBIENTES) Tj
-/F1 9 Tf
-150 606 Td
-(${ambientes}) Tj
-
-0.91 0.96 0.93 rg
-/F1 8 Tf
-56 588 Td
-(OBJETOS) Tj
-/F1 9 Tf
-150 588 Td
-(${objetos}) Tj
-
-${extras ? `
-0.91 0.96 0.93 rg
-/F1 8 Tf
-56 570 Td
-(SERVICIOS) Tj
-/F1 9 Tf
-150 570 Td
-(${extras}) Tj
-` : ''}
-
-${nota ? `
-0.56 0.69 0.63 rg
-/F1 8 Tf
-56 552 Td
-(NOTA DEL MUDANCERO) Tj
-0.91 0.96 0.93 rg
-/F1 9 Tf
-150 552 Td
-(${nota}) Tj
-` : ''}
-
-% PRECIO BOX
-ET
-0.051 0.125 0.094 rg
-56 480 500 80 re f
-0.082 0.306 0.196 rg
-56 480 500 80 re S
-BT
-
-0.133 0.765 0.416 rg
-/F1 30 Tf
-66 525 Td
-(${precioFmt}) Tj
-
-0.56 0.69 0.63 rg
-/F1 7 Tf
-0 -18 Td
-(PRECIO TOTAL ESTIMADO) Tj
-0.35 0.54 0.47 rg
-/F1 7 Tf
-0 -12 Td
-(El precio final puede ajustarse al coordinar.) Tj
-
-% Desglose
-0.56 0.69 0.63 rg
-/F1 7 Tf
-380 548 Td
-(FEE MUDATEYA (10%)) Tj
-0.91 0.96 0.93 rg
-/F1 11 Tf
-0 -14 Td
-(${feeFmt}) Tj
-
-ET
-0.118 0.176 0.149 rg
-378 528 144 1 re f
-BT
-
-0.56 0.69 0.63 rg
-/F1 7 Tf
-380 522 Td
-(AL MUDANCERO EL DIA) Tj
-0.91 0.96 0.93 rg
-/F1 11 Tf
-0 -14 Td
-(${restoFmt}) Tj
-
-% PROXIMOS PASOS
-ET
-0.078 0.157 0.118 rg
-56 420 500 52 re f
-0.118 0.176 0.149 rg
-56 420 500 52 re S
-BT
-
-0.56 0.69 0.63 rg
-/F1 7 Tf
-66 462 Td
-(PROXIMOS PASOS) Tj
-
-0.91 0.96 0.93 rg
-/F1 8 Tf
-66 446 Td
-(1. Aceptar cotizacion en MudateYa) Tj
-0 -14 Td
-(2. Pagar fee de reserva con Mercado Pago) Tj
-0 -14 Td
-(3. Coordinar fecha y hora con el mudancero) Tj
-
-% FOOTER
-ET
-0.118 0.176 0.149 rg
-56 60 500 1 re f
-BT
-0.133 0.765 0.416 rg
-/F1 9 Tf
-56 48 Td
-(MudateYa) Tj
-0.35 0.54 0.47 rg
-/F1 8 Tf
-110 48 Td
-( - El marketplace de mudanzas de Argentina) Tj
-0.118 0.176 0.149 rg
-/F1 7 Tf
-56 36 Td
-(Cotizacion valida por 24 horas  |  ${nro}  |  mudateya.com.ar) Tj
-
-ET
-`.trim();
-
-  // Construir PDF binario como string
-  const catalog_id = 1;
-  const pages_id = 2;
-  const page_id = 3;
-  const content_id = 4;
-  const font_id = 5;
-
-  let pdf = '%PDF-1.4\n';
-  const offsets = {};
-
-  function writeObj(id, content) {
-    offsets[id] = pdf.length;
-    pdf += `${id} 0 obj\n${content}\nendobj\n`;
+  function detalleRow(lbl, val, isLast) {
+    return {
+      stack: [
+        {
+          columns: [
+            { text: lbl.toUpperCase(), font: 'Helvetica', bold: true, fontSize: 7.5, color: MUTED, width: 90 },
+            { text: String(val || '—'), font: 'Helvetica', fontSize: 8.5, color: WHITE, width: '*' },
+          ],
+        },
+        isLast ? { text: '' } : rowBorder(),
+      ],
+      margin: [0, 5, 0, isLast ? 0 : 5],
+    };
   }
 
-  // Font
-  writeObj(font_id, `<<
-  /Type /Font
-  /Subtype /Type1
-  /BaseFont /Helvetica
-  /Encoding /WinAnsiEncoding
->>`);
+  const filasDet = [
+    ['Desde',     desde],
+    ['Hasta',     hasta],
+    ['Fecha',     fechaMud],
+    ['Ambientes', ambientes],
+    ['Objetos',   objetos],
+  ];
+  if (extras) filasDet.push(['Servicios', extras]);
+  if (nota)   filasDet.push(['Nota del mudancero', nota]);
 
-  // Content stream — fondo negro primero
-  const bgAndContent = `0.039 0.078 0.063 rg\n0 0 612 792 re\nf\n` + pageContent;
-  const streamBytes = Buffer.from(bgAndContent, 'latin1');
-  
-  writeObj(content_id, `<<\n  /Length ${streamBytes.length}\n>>\nstream\n${bgAndContent}\nendstream`);
-
-  // Page
-  writeObj(page_id, `<<
-  /Type /Page
-  /Parent ${pages_id} 0 R
-  /MediaBox [0 0 612 792]
-  /Contents ${content_id} 0 R
-  /Resources <<
-    /Font << /F1 ${font_id} 0 R >>
-  >>
->>`);
-
-  // Pages
-  writeObj(pages_id, `<<
-  /Type /Pages
-  /Kids [${page_id} 0 R]
-  /Count 1
->>`);
-
-  // Catalog
-  writeObj(catalog_id, `<<
-  /Type /Catalog
-  /Pages ${pages_id} 0 R
->>`);
-
-  // xref
-  const xrefOffset = pdf.length;
-  const allIds = [catalog_id, pages_id, page_id, content_id, font_id];
-  const maxId = Math.max(...allIds);
-
-  pdf += 'xref\n';
-  pdf += `0 ${maxId + 1}\n`;
-  pdf += '0000000000 65535 f \n';
-  for (let i = 1; i <= maxId; i++) {
-    const off = offsets[i];
-    if (off !== undefined) {
-      pdf += String(off).padStart(10, '0') + ' 00000 n \n';
-    } else {
-      pdf += '0000000000 65535 f \n';
-    }
+  function cardLayout(fillC, borderC) {
+    return {
+      fillColor:    () => fillC,
+      hLineColor:   () => borderC,
+      vLineColor:   () => borderC,
+      hLineWidth:   () => 0.5,
+      vLineWidth:   () => 0.5,
+      paddingLeft:  () => 14,
+      paddingRight: () => 14,
+      paddingTop:   () => 12,
+      paddingBottom:() => 12,
+    };
   }
 
-  pdf += `trailer\n<<\n  /Size ${maxId + 1}\n  /Root ${catalog_id} 0 R\n>>\n`;
-  pdf += `startxref\n${xrefOffset}\n%%EOF`;
+  function badgeLayout(fillC, borderC) {
+    return {
+      fillColor:    () => fillC,
+      hLineColor:   () => borderC,
+      vLineColor:   () => borderC,
+      hLineWidth:   () => 0.5,
+      vLineWidth:   () => 0.5,
+      paddingLeft:  () => 6,
+      paddingRight: () => 6,
+      paddingTop:   () => 2,
+      paddingBottom:() => 2,
+    };
+  }
 
-  return Buffer.from(pdf, 'latin1').toString('base64');
+  function numBadge(num) {
+    return {
+      table: { body: [[{ text: num, bold: true, fontSize: 10, color: VERDE, alignment: 'center' }]] },
+      layout: {
+        fillColor: () => VERDE_BG, hLineColor: () => VERDE_DIM, vLineColor: () => VERDE_DIM,
+        hLineWidth: () => 0.6, vLineWidth: () => 0.6,
+        paddingLeft: () => 8, paddingRight: () => 8, paddingTop: () => 4, paddingBottom: () => 4,
+      },
+      margin: [0, 0, 0, 5],
+    };
+  }
+
+  const dd = {
+    pageSize: 'A4',
+    pageMargins: [36, 36, 36, 36],
+    background: () => [
+      { canvas: [{ type: 'rect', x: 0, y: 0, w: 595, h: 842, color: BG }] },
+      { canvas: [{ type: 'rect', x: 0, y: 0, w: 4,   h: 842, color: VERDE }] },
+    ],
+    defaultStyle: { font: 'Helvetica', fontSize: 9, color: WHITE },
+
+    content: [
+
+      // ── HEADER ──────────────────────────────────
+      {
+        table: { widths: ['*', 'auto'], body: [[
+          { stack: [
+            { columns: [
+              { text: 'Mudate', bold: true, fontSize: 24, color: WHITE, width: 'auto' },
+              { text: 'Ya',     bold: true, fontSize: 24, color: VERDE,  width: 'auto' },
+            ], columnGap: 0 },
+            { text: 'El marketplace de mudanzas de Argentina', fontSize: 8, color: MUTED, margin: [0, 3, 0, 6] },
+            { table: { body: [[{ text: '● PRESUPUESTO OFICIAL  ·  válido 24hs', bold: true, fontSize: 7, color: VERDE }]] },
+              layout: badgeLayout(VERDE_BG, VERDE_DIM), margin: [0,0,0,0] },
+          ]},
+          { stack: [
+            { text: nro, bold: true, fontSize: 14, color: VERDE, alignment: 'right' },
+            { text: 'COTIZACIÓN', bold: true, fontSize: 7, color: MUTED, alignment: 'right', characterSpacing: 0.8, margin: [0, 3, 0, 2] },
+            { text: fechaEmision, fontSize: 8, color: MUTED, alignment: 'right' },
+          ], alignment: 'right' },
+        ]]},
+        layout: cardLayout(CARD, BORDER_C),
+        margin: [0, 0, 0, 8],
+      },
+
+      // ── CLIENTE + MUDANCERO ──────────────────────
+      {
+        columns: [
+          { width: '48%', table: { widths: ['*'], body: [[{ stack: [
+            { text: 'CLIENTE', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.8, margin: [0,0,0,8] },
+            { text: clienteNombre, bold: true, fontSize: 11, color: WHITE },
+            { text: clienteEmail, fontSize: 8, color: MUTED, margin: [0,3,0,0] },
+          ]}]]}, layout: cardLayout(CARD2, BORDER_C) },
+          { width: '4%', text: '' },
+          { width: '48%', table: { widths: ['*'], body: [[{ stack: [
+            { text: 'MUDANCERO', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.8, margin: [0,0,0,8] },
+            { columns: [
+              { width: 34, stack: [
+                { table: { body: [[{ text: mudInits, bold: true, fontSize: 10, color: VERDE, alignment: 'center' }]] },
+                  layout: { fillColor: () => VERDE_BG, hLineColor: () => VERDE_DIM, vLineColor: () => VERDE_DIM,
+                    hLineWidth: () => 0.8, vLineWidth: () => 0.8,
+                    paddingLeft: () => 5, paddingRight: () => 5, paddingTop: () => 6, paddingBottom: () => 6 } },
+              ], margin: [0, 0, 8, 0] },
+              { stack: [
+                { text: mudNombre, bold: true, fontSize: 11, color: WHITE },
+                { columns: [
+                  { text: starStr, fontSize: 9, color: GOLD, width: 'auto' },
+                  { text: `  ${estrellas}${nroResenas ? '  ·  ' + nroResenas + ' reseñas' : ''}`, fontSize: 7, color: MUTED, width: '*', margin: [0,1,0,0] },
+                ], margin: [0,3,0,4] },
+                { columns: [
+                  { table: { body: [[{ text: '✓ VERIFICADO', bold: true, fontSize: 6.5, color: VERDE }]] },
+                    layout: badgeLayout(VERDE_BG, VERDE_DIM), width: 'auto' },
+                  vehiculo ? { width: 4, text: '' } : null,
+                  vehiculo ? { table: { body: [[{ text: vehiculo, fontSize: 6.5, color: MUTED }]] },
+                    layout: badgeLayout(CARD, BORDER_C), width: 'auto' } : null,
+                ].filter(Boolean) },
+              ]},
+            ], columnGap: 0 },
+          ]}]]}, layout: cardLayout(CARD2, BORDER_C) },
+        ],
+        columnGap: 0,
+        margin: [0, 0, 0, 8],
+      },
+
+      // ── DETALLE MUDANZA ──────────────────────────
+      {
+        table: { widths: ['*'], body: [[{ stack: [
+          { text: 'DETALLE DE LA MUDANZA', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.8, margin: [0,0,0,6] },
+          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 467, y2: 0, lineWidth: 0.4, lineColor: BORDER_C }] },
+          { text: '', margin: [0, 4, 0, 0] },
+          ...filasDet.map(([lbl, val], i) => detalleRow(lbl, val, i === filasDet.length - 1)),
+        ]}]]},
+        layout: cardLayout(CARD, BORDER_C),
+        margin: [0, 0, 0, 8],
+      },
+
+      // ── PRECIO ───────────────────────────────────
+      {
+        table: { widths: ['*', 130], body: [[
+          { stack: [
+            { text: fmt(precio), bold: true, fontSize: 30, color: VERDE },
+            { text: 'PRECIO TOTAL ESTIMADO', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.5, margin: [0,4,0,2] },
+            { text: 'El precio final puede ajustarse al coordinar con el mudancero.', fontSize: 7.5, color: DIM },
+          ]},
+          { stack: [
+            { text: 'FEE MUDATEYA (10%)', bold: true, fontSize: 7, color: MUTED, alignment: 'right', characterSpacing: 0.5 },
+            { text: fmt(fee), bold: true, fontSize: 13, color: WHITE, alignment: 'right', margin: [0,2,0,4] },
+            { canvas: [{ type: 'line', x1: 17, y1: 0, x2: 113, y2: 0, lineWidth: 0.4, lineColor: BORDER_C }], margin: [0,0,0,4] },
+            { text: 'AL MUDANCERO EL DÍA', bold: true, fontSize: 7, color: MUTED, alignment: 'right', characterSpacing: 0.5 },
+            { text: fmt(resto), bold: true, fontSize: 13, color: WHITE, alignment: 'right', margin: [0,2,0,0] },
+          ], alignment: 'right' },
+        ]]},
+        layout: {
+          fillColor:    () => VERDE_BG,
+          hLineColor:   () => VERDE_DIM,
+          vLineColor:   () => VERDE_DIM,
+          hLineWidth:   () => 0.7,
+          vLineWidth:   () => 0.7,
+          paddingLeft:  () => 14, paddingRight:  () => 14,
+          paddingTop:   () => 14, paddingBottom: () => 14,
+        },
+        margin: [0, 0, 0, 8],
+      },
+
+      // ── PRÓXIMOS PASOS ───────────────────────────
+      {
+        table: { widths: ['*'], body: [[{ stack: [
+          { text: 'PRÓXIMOS PASOS', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.8, margin: [0,0,0,10] },
+          { columns: [
+            { width: '25%', stack: [ numBadge('1'), { text: 'Aceptar cotización\nen MudateYa', fontSize: 7, color: MUTED, alignment: 'center' } ] },
+            { width: '25%', stack: [ numBadge('2'), { text: 'Pagar fee de reserva\ncon Mercado Pago', fontSize: 7, color: MUTED, alignment: 'center' } ] },
+            { width: '25%', stack: [ numBadge('3'), { text: 'Coordinar fecha\ny hora', fontSize: 7, color: MUTED, alignment: 'center' } ] },
+            { width: '25%', stack: [ numBadge('4'), { text: '¡Mudanza lista!', fontSize: 7, color: MUTED, alignment: 'center' } ] },
+          ], columnGap: 8 },
+        ]}]]},
+        layout: cardLayout(CARD2, BORDER_C),
+        margin: [0, 0, 0, 8],
+      },
+
+      // ── GARANTÍAS ────────────────────────────────
+      {
+        columns: [
+          ['🔒', 'Pago seguro',    'Mercado Pago'],
+          ['✓',  'Verificado',     'ID confirmada'],
+          ['★',  '4.8★ promedio',  'Miles de reseñas'],
+          ['↩',  'Sin sorpresas',  'Precio acordado'],
+        ].map(([icon, title, sub]) => ({
+          width: '25%',
+          table: { widths: ['*'], body: [[{ stack: [
+            { text: icon,  fontSize: 16, color: VERDE, alignment: 'center', margin: [0,0,0,4] },
+            { text: title, bold: true, fontSize: 7.5, color: WHITE, alignment: 'center', margin: [0,0,0,2] },
+            { text: sub,   fontSize: 6.5, color: MUTED, alignment: 'center' },
+          ]}]]},
+          layout: {
+            fillColor: () => CARD, hLineColor: () => BORDER_C, vLineColor: () => BORDER_C,
+            hLineWidth: () => 0.4, vLineWidth: () => 0.4,
+            paddingLeft: () => 6, paddingRight: () => 6, paddingTop: () => 10, paddingBottom: () => 10,
+          },
+        })),
+        columnGap: 4,
+        margin: [0, 0, 0, 10],
+      },
+
+      // ── FOOTER ───────────────────────────────────
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 523, y2: 0, lineWidth: 0.4, lineColor: BORDER_C }], margin: [0,0,0,6] },
+      { columns: [
+        { columns: [
+          { text: 'MudateYa', bold: true, fontSize: 9, color: VERDE, width: 'auto' },
+          { text: ' · El marketplace de mudanzas de Argentina · mudateya.com.ar', fontSize: 8, color: MUTED, width: '*', margin: [0,1,0,0] },
+        ]},
+        { text: `Válida 24hs · ${nro}`, fontSize: 7, color: DIM, alignment: 'right', margin: [0,1,0,0] },
+      ]},
+    ],
+  };
+
+  return new Promise((resolve, reject) => {
+    try {
+      const pdfDoc = printer.createPdfKitDocument(dd);
+      const chunks = [];
+      pdfDoc.on('data', chunk => chunks.push(chunk));
+      pdfDoc.on('end', () => resolve(Buffer.concat(chunks).toString('base64')));
+      pdfDoc.on('error', reject);
+      pdfDoc.end();
+    } catch(e) { reject(e); }
+  });
 }
 
 // ════════════════════════════════════════════════════
@@ -409,7 +376,7 @@ module.exports = async function handler(req, res) {
       mudanza.cotizacionAceptada = cot;
       cot.estado = 'aceptada';
       await setJSON(`mudanza:${mudanzaId}`, mudanza, 604800);
-      try { await enviarEmailAceptacion(mudanza, cot); } catch(e) { console.error('Error email aceptacion:', e.message); }
+      try { await enviarEmailAceptacion(mudanza, cot); } catch(e) { console.error('Error email:', e.message); }
       return res.status(200).json({ ok: true, mudanza, cotizacion: cot });
     }
 
@@ -423,9 +390,7 @@ module.exports = async function handler(req, res) {
           try { const m = await getJSON(`mudanza:${id}`); if (m) mudanzas.push(m); } catch(e) {}
         }
         return res.status(200).json({ mudanzas });
-      } catch(e) {
-        return res.status(200).json({ mudanzas: [] });
-      }
+      } catch(e) { return res.status(200).json({ mudanzas: [] }); }
     }
 
     if (action === 'por-zona' && req.method === 'GET') {
@@ -517,24 +482,23 @@ async function enviarEmailAceptacion(mudanza, cot) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   if (!process.env.RESEND_API_KEY) return;
 
-  // Generar PDF inline — sin llamada externa
   let attachments = [];
   try {
-    const pdfBase64 = generarPDFBase64({
-      id: mudanza.id,
-      fechaEmision: new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }),
-      clienteNombre: mudanza.clienteNombre,
-      clienteEmail: mudanza.clienteEmail,
-      mudanceroNombre: cot.mudanceroNombre,
-      mudanceroTel: cot.mudanceroTel,
-      desde: mudanza.desde,
-      hasta: mudanza.hasta,
-      fecha: mudanza.fecha,
-      ambientes: mudanza.ambientes,
-      objetos: mudanza.servicios,
-      extras: mudanza.extras,
-      precio: cot.precio,
-      nota: cot.nota,
+    const pdfBase64 = await generarPDFBase64({
+      id:                mudanza.id,
+      fechaEmision:      new Date().toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' }),
+      clienteNombre:     mudanza.clienteNombre,
+      clienteEmail:      mudanza.clienteEmail,
+      mudanceroNombre:   cot.mudanceroNombre,
+      mudancero_initials:(cot.mudanceroNombre||'MV').slice(0,2).toUpperCase(),
+      desde:             mudanza.desde,
+      hasta:             mudanza.hasta,
+      fecha:             mudanza.fecha,
+      ambientes:         mudanza.ambientes,
+      objetos:           mudanza.servicios,
+      extras:            mudanza.extras,
+      precio:            cot.precio,
+      nota:              cot.nota,
     });
     attachments = [{ filename: `cotizacion-${mudanza.id}.pdf`, content: pdfBase64 }];
   } catch(e) {
@@ -561,7 +525,6 @@ async function enviarEmailAceptacion(mudanza, cot) {
     </div>
   </div>`;
 
-  // Email al cliente
   if (mudanza.clienteEmail) {
     await resend.emails.send({
       from: 'MudateYa <onboarding@resend.dev>',
@@ -572,7 +535,6 @@ async function enviarEmailAceptacion(mudanza, cot) {
     });
   }
 
-  // Email al mudancero
   if (cot.mudanceroEmail) {
     await resend.emails.send({
       from: 'MudateYa <onboarding@resend.dev>',
@@ -581,7 +543,7 @@ async function enviarEmailAceptacion(mudanza, cot) {
       html: `<div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
         <div style="background:#22C36A;padding:18px 22px"><h2 style="margin:0;color:#041A0E">🎉 ¡Te eligieron!</h2></div>
         <div style="padding:22px">
-          <p style="color:#7AADA0;line-height:1.7"><strong style="color:#E8F5EE">${mudanza.clienteNombre}</strong> aceptó tu cotización de <strong style="color:#22C36A">$${parseInt(cot.precio).toLocaleString('es-AR')}</strong>.</p>
+          <p style="color:#7AADA0"><strong style="color:#E8F5EE">${mudanza.clienteNombre}</strong> aceptó tu cotización de <strong style="color:#22C36A">$${parseInt(cot.precio).toLocaleString('es-AR')}</strong>.</p>
           <div style="background:#172018;border-radius:10px;padding:14px 18px;margin:14px 0">
             <table style="width:100%">
               <tr><td style="color:#7AADA0;padding:5px 0;width:35%">Ruta</td><td>${mudanza.desde} → ${mudanza.hasta}</td></tr>
