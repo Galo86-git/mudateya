@@ -77,7 +77,13 @@ module.exports = async function handler(req, res) {
     mudanza.estado = 'cotizacion_aceptada';
     mudanza.cotizacionAceptada = cot;
     cot.estado = 'aceptada';
-    await setJSON(`mudanza:${mudanzaId}`, mudanza, 172800);
+    await setJSON(`mudanza:${mudanzaId}`, mudanza, 604800);
+
+    // Enviar emails con PDF adjunto
+    try {
+      await enviarEmailAceptacion(mudanza, cot);
+    } catch(e) { console.error('Error enviando email aceptacion:', e.message); }
+
     return res.status(200).json({ ok: true, mudanza, cotizacion: cot });
   }
 
@@ -133,7 +139,106 @@ module.exports = async function handler(req, res) {
   }
 };
 
-async function notificarMudanceros(mudanza) {
+async function enviarEmailAceptacion(mudanza, cot) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  if (!process.env.RESEND_API_KEY) return;
+
+  // Generar PDF
+  let pdfBase64 = null;
+  let pdfFilename = `cotizacion-mudateya-${mudanza.id}.pdf`;
+  try {
+    const siteUrl = process.env.SITE_URL || 'https://mudateya.vercel.app';
+    const pdfRes = await fetch(`${siteUrl}/api/generar-pdf`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: mudanza.id,
+        fechaEmision: new Date().toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' }),
+        clienteNombre: mudanza.clienteNombre || '—',
+        clienteEmail: mudanza.clienteEmail || '—',
+        mudanceroNombre: cot.mudanceroNombre || '—',
+        mudanceroTel: cot.mudanceroTel || '—',
+        desde: mudanza.desde,
+        hasta: mudanza.hasta,
+        fecha: mudanza.fecha,
+        ambientes: mudanza.ambientes,
+        objetos: mudanza.servicios || '—',
+        extras: mudanza.extras || '',
+        precio: cot.precio,
+        nota: cot.nota || '',
+      }),
+    });
+    const pdfData = await pdfRes.json();
+    if (pdfData.pdf) pdfBase64 = pdfData.pdf;
+  } catch(e) { console.error('Error generando PDF:', e.message); }
+
+  const attachments = pdfBase64 ? [{ filename: pdfFilename, content: pdfBase64 }] : [];
+
+  const emailHtml = `
+    <div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
+      <div style="background:#22C36A;padding:18px 22px">
+        <h2 style="margin:0;color:#041A0E">✅ ¡Cotización aceptada!</h2>
+      </div>
+      <div style="padding:22px">
+        <p style="color:#7AADA0;line-height:1.7">Hola <strong style="color:#E8F5EE">${mudanza.clienteNombre}</strong>,</p>
+        <p style="color:#7AADA0;line-height:1.7">Aceptaste la cotización de <strong style="color:#E8F5EE">${cot.mudanceroNombre}</strong> por <strong style="color:#22C36A">$${parseInt(cot.precio).toLocaleString('es-AR')}</strong>.</p>
+        <div style="background:#172018;border-radius:10px;padding:14px 18px;margin:14px 0">
+          <table style="width:100%">
+            <tr><td style="color:#7AADA0;padding:5px 0;width:35%">Mudancero</td><td><strong>${cot.mudanceroNombre}</strong></td></tr>
+            <tr><td style="color:#7AADA0;padding:5px 0">Teléfono</td><td>${cot.mudanceroTel || '—'}</td></tr>
+            <tr><td style="color:#7AADA0;padding:5px 0">Ruta</td><td>${mudanza.desde} → ${mudanza.hasta}</td></tr>
+            <tr><td style="color:#7AADA0;padding:5px 0">Fecha</td><td>${mudanza.fecha}</td></tr>
+            <tr><td style="color:#7AADA0;padding:5px 0">Precio</td><td style="color:#22C36A;font-weight:700">$${parseInt(cot.precio).toLocaleString('es-AR')}</td></tr>
+            ${cot.nota ? `<tr><td style="color:#7AADA0;padding:5px 0">Nota</td><td style="font-style:italic">${cot.nota}</td></tr>` : ''}
+          </table>
+        </div>
+        <p style="color:#7AADA0">Encontrás el comprobante de cotización adjunto en PDF.</p>
+        <a href="https://mudateya.vercel.app/mi-mudanza" style="display:inline-block;margin-top:12px;background:#22C36A;color:#041A0E;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700">Ver mi mudanza →</a>
+      </div>
+    </div>`;
+
+  // Email al cliente
+  if (mudanza.clienteEmail) {
+    await resend.emails.send({
+      from: 'MudateYa <onboarding@resend.dev>',
+      to: mudanza.clienteEmail,
+      subject: `✅ Cotización aceptada — ${cot.mudanceroNombre} · $${parseInt(cot.precio).toLocaleString('es-AR')}`,
+      html: emailHtml,
+      attachments,
+    });
+  }
+
+  // Email al mudancero
+  if (cot.mudanceroEmail) {
+    await resend.emails.send({
+      from: 'MudateYa <onboarding@resend.dev>',
+      to: cot.mudanceroEmail,
+      subject: `🎉 ¡Aceptaron tu cotización! — ${mudanza.desde} → ${mudanza.hasta}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
+          <div style="background:#22C36A;padding:18px 22px">
+            <h2 style="margin:0;color:#041A0E">🎉 ¡Te eligieron!</h2>
+          </div>
+          <div style="padding:22px">
+            <p style="color:#7AADA0;line-height:1.7"><strong style="color:#E8F5EE">${mudanza.clienteNombre}</strong> aceptó tu cotización de <strong style="color:#22C36A">$${parseInt(cot.precio).toLocaleString('es-AR')}</strong>.</p>
+            <div style="background:#172018;border-radius:10px;padding:14px 18px;margin:14px 0">
+              <table style="width:100%">
+                <tr><td style="color:#7AADA0;padding:5px 0;width:35%">Ruta</td><td>${mudanza.desde} → ${mudanza.hasta}</td></tr>
+                <tr><td style="color:#7AADA0;padding:5px 0">Fecha</td><td>${mudanza.fecha}</td></tr>
+                <tr><td style="color:#7AADA0;padding:5px 0">Tamaño</td><td>${mudanza.ambientes}</td></tr>
+                <tr><td style="color:#7AADA0;padding:5px 0">Precio acordado</td><td style="color:#22C36A;font-weight:700">$${parseInt(cot.precio).toLocaleString('es-AR')}</td></tr>
+              </table>
+            </div>
+            <p style="color:#7AADA0">Coordina con el cliente los detalles del día.</p>
+            <a href="https://mudateya.vercel.app/mi-cuenta" style="display:inline-block;margin-top:12px;background:#22C36A;color:#041A0E;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700">Ver en mi panel →</a>
+          </div>
+        </div>`,
+      attachments,
+    });
+  }
+}
+
+
   const resend = new Resend(process.env.RESEND_API_KEY);
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!process.env.RESEND_API_KEY || !adminEmail) return;
