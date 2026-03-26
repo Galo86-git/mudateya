@@ -390,6 +390,39 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.9);backdrop-filte
       </div>
     </div>
 
+    <!-- SECCIÓN 9: DATOS BANCARIOS -->
+    <div class="form-section">
+      <div class="section-title">Datos para cobrar</div>
+      <div class="section-sub">Así te transferimos tus ganancias — 24hs después de cada trabajo confirmado</div>
+      <div class="field-grid cols2">
+        <div class="field">
+          <label class="field-label">Método preferido</label>
+          <select id="metodoCobro" onchange="toggleMetodoCobro()">
+            <option value="cbu">CBU / Alias bancario</option>
+            <option value="mp">Cuenta Mercado Pago</option>
+          </select>
+        </div>
+        <div class="field" id="wrap-cbu">
+          <label class="field-label">CBU o Alias</label>
+          <input type="text" id="cbu" placeholder="Ej: MUDANZAS.JUAN o 0000003100..."/>
+          <span class="field-hint">Podés ingresar el CBU (22 dígitos) o el alias</span>
+        </div>
+        <div class="field" id="wrap-mp" style="display:none">
+          <label class="field-label">Email de Mercado Pago</label>
+          <input type="email" id="emailMP" placeholder="tu@email.com"/>
+          <span class="field-hint">El email con el que te registraste en MP</span>
+        </div>
+        <div class="field">
+          <label class="field-label">Titular de la cuenta</label>
+          <input type="text" id="titularCuenta" placeholder="Nombre completo o razón social"/>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:8px;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:8px;padding:10px 12px;margin-top:10px">
+        <span style="font-size:14px;flex-shrink:0">🔒</span>
+        <span style="font-size:11px;color:var(--text2);font-family:var(--mono);line-height:1.6">Tus datos bancarios están cifrados y solo se usan para transferirte tus ganancias. Nunca se comparten con clientes.</span>
+      </div>
+    </div>
+
     <!-- FOOTER -->
     <div class="form-footer">
       <span class="footer-note">🔒 Tus datos están seguros · Solo MudateYa los ve</span>
@@ -418,6 +451,12 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.9);backdrop-filte
 </div>
 
 <script>
+function toggleMetodoCobro(){
+  var metodo = document.getElementById('metodoCobro').value;
+  document.getElementById('wrap-cbu').style.display = metodo === 'cbu' ? '' : 'none';
+  document.getElementById('wrap-mp').style.display = metodo === 'mp' ? '' : 'none';
+}
+
 // ── CHIPS ──────────────────────────────────────────────────────────────────
 function toggleChip(el, group){
   if(group==='distancia'){
@@ -516,6 +555,10 @@ document.getElementById('regForm').addEventListener('submit', async function(e){
     extra:         document.getElementById('extra').value.trim(),
     foto:          fotoBase64,
     fecha:         new Date().toLocaleString('es-AR'),
+    metodoCobro:   document.getElementById('metodoCobro').value,
+    cbu:           document.getElementById('cbu').value.trim(),
+    emailMP:       document.getElementById('emailMP').value.trim(),
+    titularCuenta: document.getElementById('titularCuenta').value.trim(),
   };
 
   try{
