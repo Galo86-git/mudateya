@@ -391,8 +391,9 @@ function showAdmin(){
 }
 
 function logout(){
-  sessionStorage.removeItem('adminUser');
-  location.reload();
+  sessionStorage.removeItem('clienteUser');
+  sessionStorage.removeItem('googleUser');
+  window.location.href='/';
 }
 
   if(name === 'transferencias') loadTransferencias();
