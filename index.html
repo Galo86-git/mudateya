@@ -120,7 +120,10 @@ nav{position:sticky;top:0;z-index:200;background:rgba(13,11,8,.88);backdrop-filt
 .wizard-body::-webkit-scrollbar{width:4px}
 .wizard-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 .wstep{display:none}
-.wstep.active{display:block;animation:fadeUp .3s ease both}
+.wstep.active{display:block;animation:slideInStep .35s cubic-bezier(0.22,1,0.36,1) both}
+.wstep.slide-back{animation:slideInStepBack .35s cubic-bezier(0.22,1,0.36,1) both}
+@keyframes slideInStep{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInStepBack{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
 .field-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-family:var(--mono)}
 .input-stack{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
 .input-wrap{position:relative;display:flex;align-items:center}
@@ -770,6 +773,21 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:2rem 2.5r
         <!-- PASO 3 -->
         <div class="wstep" id="step3">
           <div class="result-summary" id="summaryBox"></div>
+
+          <!-- Precio estimado destacado -->
+          <div id="step3-precio-box" style="background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.25);border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:2px">PRECIO ESTIMADO</div>
+              <div id="step3-precio-val" style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--emerald);letter-spacing:1px">—</div>
+              <div style="font-size:9px;color:var(--text3);font-family:var(--mono)">el mudancero define el precio final</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:2px">PAGO VÍA</div>
+              <div style="font-size:12px;font-weight:600;color:var(--text)">Mercado Pago</div>
+              <div style="font-size:9px;color:var(--text3);font-family:var(--mono)">100% seguro</div>
+            </div>
+          </div>
+
           <div id="step3-login" style="display:none;text-align:center;padding:1.2rem 0">
             <div style="font-size:1.8rem;margin-bottom:10px">🔐</div>
             <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.5px;color:var(--text);margin-bottom:6px">Iniciá sesión para publicar</div>
@@ -777,32 +795,40 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:2rem 2.5r
             <div id="step3-google-btn" style="display:flex;justify-content:center;margin-bottom:12px"></div>
             <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">🔒 No publicamos nada en tu cuenta de Google</div>
           </div>
-          <div id="step3-publishing" style="display:none;text-align:center;padding:2rem 0">
-            <span class="spinner" style="width:24px;height:24px;border-width:3px;display:inline-block;margin-bottom:16px;vertical-align:middle"></span>
-            <div style="font-size:14px;color:var(--text2);font-family:var(--mono)">Publicando tu mudanza…</div>
-          </div>
-          <div id="step3-published" style="display:none">
-            <div style="background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:16px;padding:1.4rem 1.2rem;margin-bottom:14px;text-align:center">
-              <div style="font-size:2rem;margin-bottom:8px">🚀</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.5px;color:var(--text);margin-bottom:6px">¡Mudanza publicada!</div>
-              <div style="font-size:13px;color:var(--text2);line-height:1.6">Los mudanceros verificados de tu zona ya pueden ver tu pedido.</div>
+
+          <div id="step3-publishing" style="display:none;text-align:center;padding:1.5rem 0">
+            <div style="position:relative;width:48px;height:48px;margin:0 auto 14px">
+              <span class="spinner" style="position:absolute;inset:0;width:48px;height:48px;border-width:3px;display:block"></span>
+              <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px">🚛</span>
             </div>
-            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
-              <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
-                <div style="width:32px;height:32px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">1</div>
-                <div><div style="font-size:13px;font-weight:500;color:var(--text)">Los mudanceros cotizán</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Recibís notificación por email</div></div>
-                <div style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--emerald)">~15min</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text)">Publicando tu mudanza…</div>
+            <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:4px">Notificando a mudanceros de tu zona</div>
+          </div>
+
+          <div id="step3-published" style="display:none;animation:slideInStep .4s cubic-bezier(0.22,1,0.36,1) both">
+            <div style="background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.3);border-radius:14px;padding:1.2rem;margin-bottom:12px;text-align:center">
+              <div style="font-size:2.2rem;margin-bottom:6px">🚀</div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.5px;color:var(--text);margin-bottom:4px">¡Mudanza publicada!</div>
+              <div style="font-size:12px;color:var(--text2)">Los mudanceros ya pueden ver tu pedido</div>
+            </div>
+            <!-- Timeline de qué pasa ahora -->
+            <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;animation:slideInStep .4s .05s cubic-bezier(0.22,1,0.36,1) both">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.3);display:flex;align-items:center;justify-content:center;color:var(--emerald);font-weight:700;font-size:11px;flex-shrink:0;font-family:var(--mono)">1</div>
+                <div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--text)">Recibís cotizaciones por email</div><div style="font-size:10px;color:var(--text3);font-family:var(--mono)">Con PDF adjunto por cada una</div></div>
+                <div style="font-family:var(--mono);font-size:10px;color:var(--emerald);background:rgba(34,195,106,.08);padding:3px 8px;border-radius:4px">~15min</div>
               </div>
-              <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
-                <div style="width:32px;height:32px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">2</div>
-                <div><div style="font-size:13px;font-weight:500;color:var(--text)">Comparás y elegís el mejor</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Precio, reseñas, tiempo estimado</div></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;animation:slideInStep .4s .1s cubic-bezier(0.22,1,0.36,1) both">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.3);display:flex;align-items:center;justify-content:center;color:var(--emerald);font-weight:700;font-size:11px;flex-shrink:0;font-family:var(--mono)">2</div>
+                <div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--text)">Comparás y elegís el mejor</div><div style="font-size:10px;color:var(--text3);font-family:var(--mono)">Precio, reseñas y tiempo estimado</div></div>
               </div>
-              <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
-                <div style="width:32px;height:32px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">3</div>
-                <div><div style="font-size:13px;font-weight:500;color:var(--text)">Pagás seguro y listo</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">100% por Mercado Pago</div></div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;animation:slideInStep .4s .15s cubic-bezier(0.22,1,0.36,1) both">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.3);display:flex;align-items:center;justify-content:center;color:var(--emerald);font-weight:700;font-size:11px;flex-shrink:0;font-family:var(--mono)">3</div>
+                <div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--text)">Pagás 100% por Mercado Pago</div><div style="font-size:10px;color:var(--text3);font-family:var(--mono)">Seguro y protegido por MudateYa</div></div>
               </div>
             </div>
           </div>
+
           <div id="step3-error" style="display:none;background:rgba(255,82,82,.08);border:1px solid rgba(255,82,82,.2);border-radius:12px;padding:1rem;font-size:13px;color:#FF5252;margin-bottom:14px;text-align:center">Hubo un error al publicar. Intentá de nuevo.</div>
           <div class="wiz-footer" style="margin-top:14px">
             <button class="btn-back" onclick="goStep(2)">← Ajustar</button>
@@ -1134,9 +1160,12 @@ function goStep(n) {
     document.getElementById('wp' + n).classList.add('active');
   }
 
-  // Mostrar paso
-  document.querySelectorAll('.wstep').forEach(function(s) { s.classList.remove('active'); });
-  document.getElementById('step' + n).classList.add('active');
+  // Mostrar paso con animación direccional
+  var goingForward = n > step;
+  document.querySelectorAll('.wstep').forEach(function(s) { s.classList.remove('active', 'slide-back'); });
+  var nextStep = document.getElementById('step' + n);
+  nextStep.classList.add('active');
+  if (!goingForward) nextStep.classList.add('slide-back');
   step = n;
 
   // Scroll suave al card
@@ -1465,8 +1494,13 @@ function buildSummary() {
   if (objs.length) html += row('Objetos', objs.join(', '), '📦');
   if (extras.length) html += row('Extras', extras.join(', '), '✅');
   html += '</div>';
-
   document.getElementById('summaryBox').innerHTML = html;
+
+  // Actualizar precio estimado — se calcula en goStep(3) después del mapa
+  // Usamos el estimado actual y lo actualizamos cuando el mapa cargue
+  var precioActual = estimarPrecio();
+  var precioEl = document.getElementById('step3-precio-val');
+  if (precioEl) precioEl.textContent = '$' + precioActual.toLocaleString('es-AR');
 }
 function solicitarPresupuestos() {
   document.getElementById('step3-btn-solicitar').style.display = 'none';
@@ -1536,13 +1570,40 @@ async function publicarMudanzaEnSistema() {
   }
 }
 function estimarPrecio() {
-  var base = 45000, porAmb = 18000;
+  // Base por ambientes (mercado AR 2024)
+  var precioBase = [0, 55000, 90000, 135000, 180000, 225000];
+  var base = precioBase[Math.min(amb, 5)] || (225000 + (amb - 5) * 40000);
+
+  // Distancia
   var distEl = document.getElementById('mapDist');
   var km = 0;
-  if (distEl && distEl.textContent) { var match = distEl.textContent.match(/[\d,.]+/); if (match) km = parseFloat(match[0].replace(',', '.')); }
-  var extras = document.querySelectorAll('.extra-chip.sel').length;
-  var precio = base + (amb * porAmb) + (km * 800) + (extras * 8000);
-  return Math.round(precio / 500) * 500;
+  if (distEl && distEl.textContent) {
+    var match = distEl.textContent.match(/[\d,.]+/);
+    if (match) km = parseFloat(match[0].replace(',', '.'));
+  }
+  var porKm = km > 30 ? 1200 : 900; // larga distancia más caro
+  var costoDist = km * porKm;
+
+  // Objetos especiales
+  var objetos = Array.from(document.querySelectorAll('.obj-chip.sel .obj-label')).map(function(e){ return e.textContent; });
+  var costoObjetos = 0;
+  if (objetos.includes('Vehículo / moto'))  costoObjetos += 35000;
+  if (objetos.includes('Muebles grandes'))   costoObjetos += 15000;
+  if (objetos.includes('Pesados'))           costoObjetos += 12000;
+  if (objetos.includes('Frágiles'))          costoObjetos += 8000;
+  if (objetos.includes('Arte / cuadros'))    costoObjetos += 8000;
+  if (objetos.includes('Electrónica'))       costoObjetos += 5000;
+
+  // Servicios adicionales
+  var extras = Array.from(document.querySelectorAll('.extra-chip.sel span:nth-child(2)')).map(function(e){ return e.textContent.trim(); });
+  var costoExtras = 0;
+  if (extras.includes('Embalaje incluido')) costoExtras += 18000;
+  if (extras.includes('Desmontaje'))        costoExtras += 12000;
+  if (extras.includes('Sube / escalera'))   costoExtras += 10000;
+  if (extras.includes('Seguro de mudanza')) costoExtras += 8000;
+
+  var total = base + costoDist + costoObjetos + costoExtras;
+  return Math.round(total / 1000) * 1000; // redondear a miles
 }
 async function showRouteMap() {
   var desde = getInputVal('desde'), hasta = getInputVal('hasta');
@@ -1564,6 +1625,13 @@ async function showRouteMap() {
         document.getElementById('mapDist').innerHTML = leg.distance.text + '<span>por ruta</span>';
         document.getElementById('mapDur').innerHTML = leg.duration.text + '<span>aprox. en auto</span>';
         document.getElementById('mapGoogleLink').href = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(desde) + '&destination=' + encodeURIComponent(hasta) + '&travelmode=driving';
+        // Actualizar precio con distancia real
+        var precioReal = estimarPrecio();
+        var precioEl = document.getElementById('step3-precio-val');
+        if (precioEl) {
+          precioEl.style.transition = 'all .4s ease';
+          precioEl.textContent = '$' + precioReal.toLocaleString('es-AR');
+        }
       }
     });
   }, 80);
