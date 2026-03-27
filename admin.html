@@ -22,24 +22,15 @@
 html{scroll-behavior:smooth}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 
-/* ── LOGIN SCREEN ── */
 #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem;flex-direction:column;gap:2rem}
 .login-card{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:2.5rem 2rem;max-width:380px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.5)}
 .login-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;margin-bottom:.3rem}
 .login-logo span{color:var(--emerald)}
 .login-sub{font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:1.8rem}
-.login-divider{font-size:11px;color:var(--text3);margin:1.2rem 0;font-family:var(--mono)}
 .login-note{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:1rem}
 
-/* ── ADMIN LAYOUT ── */
 #adminApp{display:none;min-height:100vh}
-.admin-nav{
-  position:sticky;top:0;z-index:200;
-  background:rgba(8,14,12,.92);backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 2rem;height:58px;
-}
+.admin-nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:58px}
 .admin-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px}
 .admin-logo span{color:var(--emerald)}
 .admin-logo small{font-family:var(--mono);font-size:9px;color:var(--text3);display:block;letter-spacing:.5px;margin-top:-4px}
@@ -51,7 +42,6 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 
 .admin-body{display:flex;min-height:calc(100vh - 58px)}
 
-/* SIDEBAR */
 .sidebar{width:200px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:1.2rem 0;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto}
 .sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 1.2rem;font-size:13px;color:var(--text2);cursor:pointer;transition:all .2s;border-left:2px solid transparent;text-decoration:none}
 .sidebar-item:hover{background:var(--surface);color:var(--text)}
@@ -59,14 +49,12 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .sidebar-icon{font-size:14px;width:18px;text-align:center}
 .sidebar-badge{margin-left:auto;background:var(--red);color:white;font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:10px;font-weight:700}
 
-/* MAIN */
 .admin-main{flex:1;padding:2rem;overflow-x:hidden;min-width:0}
 .page{display:none}
 .page.active{display:block;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .page-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:1px;margin-bottom:1.5rem}
 
-/* METRICS */
 .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:2rem}
 .metric-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem}
 .metric-label{font-size:10px;color:var(--text3);font-family:var(--mono);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
@@ -77,7 +65,6 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .metric-card.amber .metric-val{color:var(--amber)}
 .metric-card.red .metric-val{color:var(--red)}
 
-/* TABLES */
 .table-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.5rem}
 .table-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;border-bottom:1px solid var(--border)}
 .table-title{font-size:13px;font-weight:600;color:var(--text)}
@@ -97,23 +84,19 @@ tr:hover td{background:rgba(34,195,106,.03)}
 .td-name{font-weight:500;color:var(--text)}
 .td-mono{font-family:var(--mono);font-size:11px}
 
-/* BADGES */
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:.3px}
 .badge.pending{background:var(--amber-subtle);color:var(--amber);border:1px solid rgba(255,179,0,.2)}
 .badge.approved{background:var(--emerald-subtle);color:var(--emerald);border:1px solid rgba(34,195,106,.2)}
 .badge.rejected{background:var(--red-subtle);color:var(--red);border:1px solid rgba(255,82,82,.2)}
 .badge.paid{background:var(--sky-subtle);color:var(--sky);border:1px solid rgba(41,182,246,.2)}
 
-/* LOADING */
 .loading{text-align:center;padding:3rem;color:var(--text3);font-family:var(--mono);font-size:12px}
 .spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--emerald);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* EMPTY */
 .empty{text-align:center;padding:3rem;color:var(--text3);font-size:13px}
 .empty-icon{font-size:2rem;margin-bottom:8px}
 
-/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:1rem}
 .modal-overlay.open{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1.8rem;max-width:500px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.6)}
@@ -124,24 +107,13 @@ tr:hover td{background:rgba(34,195,106,.03)}
 .modal-val{color:var(--text2);text-align:right;max-width:280px}
 .modal-footer{display:flex;gap:8px;margin-top:1.2rem;justify-content:flex-end}
 
-/* CHARTS PLACEHOLDER */
-.chart-placeholder{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:center;min-height:200px;flex-direction:column;gap:8px;color:var(--text3);font-size:12px;font-family:var(--mono)}
-
-/* SEARCH */
 .search-bar{display:flex;gap:8px;margin-bottom:1rem}
 .search-input{flex:1;padding:9px 14px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);background:var(--surface2);outline:none;transition:border-color .2s}
 .search-input:focus{border-color:var(--emerald)}
 .search-input::placeholder{color:var(--text3)}
 
-/* RESPONSIVE */
-@media(max-width:900px){
-  .metrics-grid{grid-template-columns:repeat(2,1fr)}
-  .sidebar{display:none}
-}
-@media(max-width:600px){
-  .metrics-grid{grid-template-columns:1fr 1fr}
-  .admin-main{padding:1rem}
-}
+@media(max-width:900px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.sidebar{display:none}}
+@media(max-width:600px){.metrics-grid{grid-template-columns:1fr 1fr}.admin-main{padding:1rem}}
 </style>
 </head>
 <body>
@@ -171,31 +143,29 @@ tr:hover td{background:rgba(34,195,106,.03)}
   </nav>
 
   <div class="admin-body">
-    <!-- SIDEBAR -->
     <div class="sidebar">
-      <a class="sidebar-item active" onclick="showPage('dashboard')" href="#">
+      <a class="sidebar-item active" onclick="showPage('dashboard',event)" href="#">
         <span class="sidebar-icon">📊</span> Dashboard
       </a>
-      <a class="sidebar-item" onclick="showPage('mudanceros')" href="#">
+      <a class="sidebar-item" onclick="showPage('mudanceros',event)" href="#">
         <span class="sidebar-icon">🚛</span> Mudanceros
         <span class="sidebar-badge" id="badgePendientes">0</span>
       </a>
-      <a class="sidebar-item" onclick="showPage('pagos')" href="#">
+      <a class="sidebar-item" onclick="showPage('pagos',event)" href="#">
         <span class="sidebar-icon">💳</span> Pagos
       </a>
-      <a class="sidebar-item" onclick="showPage('transferencias')" href="#">
+      <a class="sidebar-item" onclick="showPage('transferencias',event)" href="#">
         <span class="sidebar-icon">🏦</span> Transferencias
         <span class="sidebar-badge" id="badgeTransfer" style="display:none">0</span>
       </a>
-      <a class="sidebar-item" onclick="showPage('usuarios')" href="#">
+      <a class="sidebar-item" onclick="showPage('usuarios',event)" href="#">
         <span class="sidebar-icon">👥</span> Usuarios
       </a>
-      <a class="sidebar-item" onclick="showPage('zonas')" href="#">
+      <a class="sidebar-item" onclick="showPage('zonas',event)" href="#">
         <span class="sidebar-icon">🗺️</span> Zonas
       </a>
     </div>
 
-    <!-- MAIN -->
     <div class="admin-main">
 
       <!-- DASHBOARD -->
@@ -203,21 +173,17 @@ tr:hover td{background:rgba(34,195,106,.03)}
         <div class="page-title">Dashboard</div>
         <div class="metrics-grid" id="metricsGrid">
           <div class="metric-card green"><div class="metric-label">GMV Total</div><div class="metric-val" id="m-gmv">—</div><div class="metric-sub">acumulado</div></div>
-          <div class="metric-card blue"><div class="metric-label">Revenue (fees)</div><div class="metric-val" id="m-revenue">—</div><div class="metric-sub">10% del GMV</div></div>
+          <div class="metric-card blue"><div class="metric-label">Revenue (fees)</div><div class="metric-val" id="m-revenue">—</div><div class="metric-sub">15% del GMV</div></div>
           <div class="metric-card amber"><div class="metric-label">Mudanceros activos</div><div class="metric-val" id="m-mudanceros">—</div><div class="metric-sub" id="m-pendientes-sub">— pendientes</div></div>
           <div class="metric-card red"><div class="metric-label">Mudanzas</div><div class="metric-val" id="m-mudanzas">—</div><div class="metric-sub">registradas</div></div>
         </div>
-
-        <!-- Transferencias pendientes -->
         <div class="table-card" id="dash-transfer-section" style="display:none">
           <div class="table-header">
             <span class="table-title">💸 Transferencias pendientes de validación</span>
-            <button class="btn-sm primary" onclick="showPage('transferencias')">Ver todas →</button>
+            <button class="btn-sm primary" onclick="showPage('transferencias',event)">Ver todas →</button>
           </div>
           <div id="dashTransferList"></div>
         </div>
-
-        <!-- Mudanceros pendientes -->
         <div class="table-card">
           <div class="table-header">
             <span class="table-title">🔔 Mudanceros pendientes de aprobación</span>
@@ -225,12 +191,8 @@ tr:hover td{background:rgba(34,195,106,.03)}
           </div>
           <div id="pendingList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
         </div>
-
-        <!-- Últimos pagos -->
         <div class="table-card">
-          <div class="table-header">
-            <span class="table-title">💳 Últimos pagos</span>
-          </div>
+          <div class="table-header"><span class="table-title">💳 Últimos pagos</span></div>
           <div id="latestPagos"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
         </div>
       </div>
@@ -267,20 +229,15 @@ tr:hover td{background:rgba(34,195,106,.03)}
       <!-- PAGOS -->
       <div class="page" id="page-pagos">
         <div class="page-title">Pagos</div>
-
-        <!-- Liquidaciones pendientes -->
         <div class="table-card" style="margin-bottom:1.5rem">
           <div class="table-header">
             <span class="table-title">💰 Liquidaciones pendientes a mudanceros</span>
-            <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">Pagos totales recibidos → 90% a transferir al mudancero</span>
+            <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">85% del total a transferir al mudancero</span>
           </div>
           <div id="liquidacionesList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
         </div>
-
         <div class="table-card">
-          <div class="table-header">
-            <span class="table-title">Historial de pagos</span>
-          </div>
+          <div class="table-header"><span class="table-title">Historial de pagos</span></div>
           <div id="pagosList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
         </div>
       </div>
@@ -288,7 +245,7 @@ tr:hover td{background:rgba(34,195,106,.03)}
       <!-- USUARIOS -->
       <div class="page" id="page-usuarios">
         <div class="page-title">Usuarios</div>
-        <div class="empty"><div class="empty-icon">👥</div>Base de datos de usuarios próximamente.<br>Por ahora los usuarios se registran al solicitar una mudanza.</div>
+        <div class="empty"><div class="empty-icon">👥</div>Base de datos de usuarios próximamente.</div>
       </div>
 
       <!-- ZONAS -->
@@ -303,9 +260,9 @@ tr:hover td{background:rgba(34,195,106,.03)}
         </div>
       </div>
 
-    </div><!-- /admin-main -->
-  </div><!-- /admin-body -->
-</div><!-- /adminApp -->
+    </div>
+  </div>
+</div>
 
 <!-- MODAL DETALLE MUDANCERO -->
 <div class="modal-overlay" id="mudanceroModal">
@@ -321,64 +278,46 @@ tr:hover td{background:rgba(34,195,106,.03)}
 </div>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────────────────────
-var GOOGLE_CLIENT_ID = ''; // Se carga desde /api/admin-config
-var ADMIN_EMAILS = [];     // Se carga desde /api/admin-config
+var GOOGLE_CLIENT_ID = '';
+var ADMIN_EMAILS = [];
 var currentUser = null;
 var mudancerosData = [];
 var pagosData = [];
+var transferenciasData = [];
 var currentMudanceroIdx = null;
 
-// ── INIT ──────────────────────────────────────────────────────────────────
 window.onload = async function(){
-  // Cargar config del servidor
   try{
     var r = await fetch('/api/admin-config');
     var cfg = await r.json();
     GOOGLE_CLIENT_ID = cfg.googleClientId;
     ADMIN_EMAILS = cfg.adminEmails || [];
-  }catch(e){
-    console.error('Error cargando config:', e);
-  }
+  }catch(e){ console.error('Error cargando config:', e); }
 
-  // Verificar sesión guardada
   var saved = sessionStorage.getItem('adminUser');
   if(saved){
     try{
       currentUser = JSON.parse(saved);
-      if(isAuthorized(currentUser.email)){
-        showAdmin();
-        return;
-      }
+      if(isAuthorized(currentUser.email)){ showAdmin(); return; }
     }catch(e){}
   }
 
-  // Mostrar login con Google
   if(GOOGLE_CLIENT_ID){
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleCredential,
-    });
-    google.accounts.id.renderButton(
-      document.getElementById('googleBtn'),
-      { theme:'filled_black', size:'large', text:'signin_with', width:280 }
-    );
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredential });
+    google.accounts.id.renderButton(document.getElementById('googleBtn'), { theme:'filled_black', size:'large', text:'signin_with', width:280 });
   }
 };
 
 function handleCredential(response){
   var payload = JSON.parse(atob(response.credential.split('.')[1]));
-  if(!isAuthorized(payload.email)){
-    alert('⚠ Tu email (' + payload.email + ') no tiene acceso al panel de admin.');
-    return;
-  }
+  if(!isAuthorized(payload.email)){ alert('⚠ Tu email (' + payload.email + ') no tiene acceso.'); return; }
   currentUser = { name: payload.name, email: payload.email, picture: payload.picture };
   sessionStorage.setItem('adminUser', JSON.stringify(currentUser));
   showAdmin();
 }
 
 function isAuthorized(email){
-  if(ADMIN_EMAILS.length === 0) return true; // si no hay lista, permitir todo (dev)
+  if(ADMIN_EMAILS.length === 0) return true;
   return ADMIN_EMAILS.includes(email);
 }
 
@@ -391,81 +330,19 @@ function showAdmin(){
 }
 
 function logout(){
+  sessionStorage.removeItem('adminUser');
   sessionStorage.removeItem('clienteUser');
   sessionStorage.removeItem('googleUser');
-  window.location.href='/';
+  window.location.href = '/';
 }
 
-  if(name === 'transferencias') loadTransferencias();
-
-// ── TRANSFERENCIAS ─────────────────────────────────────────────────────────
-var transferenciasData = [];
-
-async function loadTransferencias(){
-  try{
-    var r = await fetch('/api/transferencias');
-    var d = await r.json();
-    transferenciasData = d.transferencias || [];
-    var pendientes = transferenciasData.filter(t => t.estado === 'pendiente').length;
-    var badge = document.getElementById('badgeTransfer');
-    badge.textContent = pendientes;
-    badge.style.display = pendientes > 0 ? '' : 'none';
-    renderTransferencias();
-  }catch(e){
-    console.error('Error cargando transferencias:', e);
-  }
-}
-
-function renderTransferencias(){
-  if(transferenciasData.length === 0){
-    document.getElementById('transferList').innerHTML = '<div class="empty"><div class="empty-icon">🏦</div>Sin transferencias pendientes</div>';
-    return;
-  }
-  var html = '<table><thead><tr><th>Cliente</th><th>Mudancero</th><th>Ruta</th><th>Monto</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>'
-    + transferenciasData.map(t => `
-      <tr>
-        <td class="td-name">${t.clienteNombre||'—'}<br><span class="td-mono" style="font-size:10px">${t.clienteEmail||''}</span></td>
-        <td>${t.mudancero||'—'}</td>
-        <td style="font-size:11px">${t.desde||'—'} → ${t.hasta||'—'}</td>
-        <td class="td-mono" style="color:var(--amber);font-weight:600">${t.monto||'—'}</td>
-        <td class="td-mono">${t.fecha||'—'}</td>
-        <td><span class="badge ${t.estado==='confirmada'?'approved':t.estado==='rechazada'?'rejected':'pending'}">${t.estado==='confirmada'?'Confirmada':t.estado==='rechazada'?'Rechazada':'Pendiente'}</span></td>
-        <td>
-          ${t.estado==='pendiente'?`
-            <div style="display:flex;gap:6px">
-              <button class="btn-sm danger" onclick="accionTransfer('${t.id}','rechazar')">✗</button>
-              <button class="btn-sm primary" onclick="accionTransfer('${t.id}','confirmar')">✓ Confirmar</button>
-            </div>` : '—'}
-        </td>
-      </tr>`).join('')
-    + '</tbody></table>';
-  document.getElementById('transferList').innerHTML = html;
-}
-
-async function accionTransfer(id, accion){
-  var btn = event.currentTarget;
-  btn.disabled = true;
-  btn.textContent = '…';
-  try{
-    var r = await fetch('/api/transferencias', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ id, accion })
-    });
-    var d = await r.json();
-    if(d.error) throw new Error(d.error);
-    await loadTransferencias();
-  }catch(e){
-    alert('Error: ' + e.message);
-    btn.disabled = false;
-    btn.textContent = accion === 'confirmar' ? '✓ Confirmar' : '✗';
-  }
-}
-function showPage(name){
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+// ── NAVEGACIÓN ─────────────────────────────────────────────────────────────
+function showPage(name, e){
+  if(e) e.preventDefault();
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.sidebar-item').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById('page-' + name).classList.add('active');
-  event.currentTarget.classList.add('active');
+  if(e && e.currentTarget) e.currentTarget.classList.add('active');
   if(name === 'mudanceros') renderMudancerosFull();
   if(name === 'pagos') renderPagosFull();
   if(name === 'zonas') renderZonas();
@@ -483,7 +360,7 @@ async function loadMudanceros(){
     var r = await fetch('/api/admin?type=mudanceros');
     var d = await r.json();
     mudancerosData = d.rows || [];
-    var pendientes = mudancerosData.filter(m => getEstado(m) === 'Pendiente').length;
+    var pendientes = mudancerosData.filter(function(m){ return getEstado(m) === 'Pendiente'; }).length;
     document.getElementById('badgePendientes').textContent = pendientes;
     document.getElementById('badgePendientes').style.display = pendientes > 0 ? '' : 'none';
   }catch(e){
@@ -503,18 +380,34 @@ async function loadPagos(){
   }
 }
 
+async function loadTransferencias(){
+  try{
+    var r = await fetch('/api/transferencias');
+    var d = await r.json();
+    transferenciasData = d.transferencias || [];
+    var pendientes = transferenciasData.filter(function(t){ return t.estado === 'pendiente'; }).length;
+    var badge = document.getElementById('badgeTransfer');
+    badge.textContent = pendientes;
+    badge.style.display = pendientes > 0 ? '' : 'none';
+    renderTransferencias();
+  }catch(e){
+    console.error('Error cargando transferencias:', e);
+  }
+}
+
 // ── DASHBOARD ──────────────────────────────────────────────────────────────
 function renderDashboard(){
-  // Métricas
-  var totalMudanceros = mudancerosData.length;
-  var pendientes = mudancerosData.filter(m => getEstado(m) === 'Pendiente').length;
-  var aprobados = mudancerosData.filter(m => getEstado(m) === 'Aprobado').length;
-  var totalPagos = pagosData.length + transferenciasData.filter(t => t.estado === 'confirmada' || t.estado === 'pendiente').length;
-  var gmv = pagosData.reduce((s, p) => s + (parseFloat(p[3]) || 0), 0)
-          + transferenciasData.filter(t => t.estado === 'confirmada' || t.estado === 'pendiente')
-              .reduce((s, t) => s + (parseInt((t.monto||'0').replace(/\D/g,'')) || 0), 0);
-  var revenue = gmv * 0.10;
-  var transferenciasPendientes = transferenciasData.filter(t => t.estado === 'pendiente').length;
+  var pendientes = mudancerosData.filter(function(m){ return getEstado(m) === 'Pendiente'; }).length;
+  var aprobados  = mudancerosData.filter(function(m){ return getEstado(m) === 'Aprobado'; }).length;
+  var totalPagos = pagosData.length + transferenciasData.filter(function(t){ return t.estado === 'confirmada' || t.estado === 'pendiente'; }).length;
+  var gmv = pagosData.reduce(function(s,p){ return s + (parseFloat(p[3])||0); }, 0)
+          + transferenciasData.filter(function(t){ return t.estado === 'confirmada' || t.estado === 'pendiente'; })
+              .reduce(function(s,t){ return s + (parseInt((t.monto||'0').replace(/\D/g,''))||0); }, 0);
+
+  // ── CAMBIO: 15% ──
+  var revenue = gmv * 0.15;
+
+  var transferenciasPendientes = transferenciasData.filter(function(t){ return t.estado === 'pendiente'; }).length;
 
   document.getElementById('m-mudanceros').textContent = aprobados;
   document.getElementById('m-pendientes-sub').textContent = pendientes > 0 ? pendientes + ' pendientes de aprobar' : 'todos aprobados';
@@ -522,7 +415,6 @@ function renderDashboard(){
   document.getElementById('m-gmv').textContent = gmv > 0 ? '$' + Math.round(gmv).toLocaleString('es-AR') : '—';
   document.getElementById('m-revenue').textContent = revenue > 0 ? '$' + Math.round(revenue).toLocaleString('es-AR') : '—';
 
-  // Badge transferencias en dashboard
   if(transferenciasPendientes > 0){
     var existing = document.getElementById('dash-transfer-card');
     if(!existing){
@@ -531,7 +423,7 @@ function renderDashboard(){
       card.id = 'dash-transfer-card';
       card.className = 'metric-card amber';
       card.style.cursor = 'pointer';
-      card.onclick = function(){ document.querySelector('[onclick*="transferencias"]').click(); };
+      card.onclick = function(){ showPage('transferencias', {preventDefault:function(){},currentTarget:document.querySelector('[onclick*="transferencias"]')}); };
       card.innerHTML = '<div class="metric-label">Transferencias</div><div class="metric-val">'+transferenciasPendientes+'</div><div class="metric-sub">pendientes de validar</div>';
       grid.appendChild(card);
     } else {
@@ -539,207 +431,156 @@ function renderDashboard(){
     }
   }
 
-  // Transferencias pendientes en dashboard
-  var pendientesTransfer = transferenciasData.filter(t => t.estado === 'pendiente');
+  var pendientesTransfer = transferenciasData.filter(function(t){ return t.estado === 'pendiente'; });
   var seccion = document.getElementById('dash-transfer-section');
   if(pendientesTransfer.length > 0){
     seccion.style.display = '';
     document.getElementById('dashTransferList').innerHTML = '<table><thead><tr><th>Cliente</th><th>Mudancero</th><th>Monto</th><th>Fecha</th><th>Acción</th></tr></thead><tbody>'
-      + pendientesTransfer.slice(0,3).map(t => `
-        <tr>
-          <td class="td-name">${t.clienteNombre||'—'}</td>
-          <td>${t.mudancero||'—'}</td>
-          <td class="td-mono" style="color:var(--amber)">${t.monto||'—'}</td>
-          <td class="td-mono">${t.fecha||'—'}</td>
-          <td><button class="btn-sm primary" onclick="accionTransfer('${t.id}','confirmar')">✓ Confirmar</button></td>
-        </tr>`).join('')
+      + pendientesTransfer.slice(0,3).map(function(t){
+          return '<tr><td class="td-name">'+( t.clienteNombre||'—')+'</td><td>'+(t.mudancero||'—')+'</td><td class="td-mono" style="color:var(--amber)">'+(t.monto||'—')+'</td><td class="td-mono">'+(t.fecha||'—')+'</td><td><button class="btn-sm primary" onclick="accionTransfer(\''+t.id+'\',\'confirmar\')">✓ Confirmar</button></td></tr>';
+        }).join('')
       + '</tbody></table>';
   } else {
     seccion.style.display = 'none';
   }
 
-  // Color dinámico según aprobados
   var cardMud = document.querySelector('#page-dashboard .metric-card.amber');
   if(cardMud && aprobados > 0) cardMud.className = 'metric-card green';
   else if(cardMud) cardMud.className = 'metric-card amber';
-  var pending = mudancerosData.filter(m => getEstado(m) === 'Pendiente').slice(0, 5);
-  var html = pending.length === 0
+
+  var pending = mudancerosData.filter(function(m){ return getEstado(m) === 'Pendiente'; }).slice(0,5);
+  document.getElementById('pendingList').innerHTML = pending.length === 0
     ? '<div class="empty"><div class="empty-icon">✓</div>Sin pendientes</div>'
     : '<table><thead><tr><th>Nombre</th><th>Zona</th><th>Vehículo</th><th>Fecha</th><th>Acción</th></tr></thead><tbody>'
-      + pending.map((m, i) => `
-        <tr>
-          <td class="td-name">${m[1]||'—'}</td>
-          <td>${m[5]||'—'}</td>
-          <td>${m[8]||'—'}</td>
-          <td class="td-mono">${m[0]||'—'}</td>
-          <td><button class="btn-sm primary" onclick="openModal(${mudancerosData.indexOf(m)})">Ver</button></td>
-        </tr>`).join('')
+      + pending.map(function(m){
+          return '<tr><td class="td-name">'+(m[1]||'—')+'</td><td>'+(m[5]||'—')+'</td><td>'+(m[8]||'—')+'</td><td class="td-mono">'+(m[0]||'—')+'</td><td><button class="btn-sm primary" onclick="openModal('+mudancerosData.indexOf(m)+')">Ver</button></td></tr>';
+        }).join('')
       + '</tbody></table>';
-  document.getElementById('pendingList').innerHTML = html;
 
-  // Últimos pagos — MP + transferencias confirmadas
-  var pagosMP = pagosData.slice(-5).reverse().map(p => ({
-    mudancero: p[0]||'—', tipo: p[1]||'MP', monto: parseFloat(p[3]||0), fecha: p[5]||'—', metodo: 'Mercado Pago'
-  }));
-  var pagosTransfer = transferenciasData.filter(t => t.estado === 'confirmada').map(t => ({
-    mudancero: t.mudancero||'—', tipo: 'Transferencia', monto: parseInt((t.monto||'0').replace(/\D/g,'')), fecha: t.fecha||'—', metodo: 'Transferencia'
-  }));
-  var todosLosPagos = [...pagosMP, ...pagosTransfer].sort((a,b) => b.fecha.localeCompare(a.fecha)).slice(0,5);
+  var pagosMP = pagosData.slice(-5).reverse().map(function(p){ return { mudancero:p[0]||'—', monto:parseFloat(p[3]||0), fecha:p[5]||'—', metodo:'Mercado Pago' }; });
+  var pagosTransfer = transferenciasData.filter(function(t){ return t.estado === 'confirmada'; }).map(function(t){ return { mudancero:t.mudancero||'—', monto:parseInt((t.monto||'0').replace(/\D/g,'')), fecha:t.fecha||'—', metodo:'Transferencia' }; });
+  var todosLosPagos = pagosMP.concat(pagosTransfer).sort(function(a,b){ return b.fecha.localeCompare(a.fecha); }).slice(0,5);
 
-  var hpagos = todosLosPagos.length === 0
+  document.getElementById('latestPagos').innerHTML = todosLosPagos.length === 0
     ? '<div class="empty"><div class="empty-icon">💳</div>Sin pagos aún</div>'
     : '<table><thead><tr><th>Mudancero</th><th>Método</th><th>Monto</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>'
-      + todosLosPagos.map(p => `
-        <tr>
-          <td class="td-name">${p.mudancero}</td>
-          <td class="td-mono">${p.metodo}</td>
-          <td class="td-mono">$${p.monto.toLocaleString('es-AR')}</td>
-          <td class="td-mono">${p.fecha}</td>
-          <td><span class="badge paid">Pagado</span></td>
-        </tr>`).join('')
+      + todosLosPagos.map(function(p){
+          return '<tr><td class="td-name">'+p.mudancero+'</td><td class="td-mono">'+p.metodo+'</td><td class="td-mono">$'+p.monto.toLocaleString('es-AR')+'</td><td class="td-mono">'+p.fecha+'</td><td><span class="badge paid">Pagado</span></td></tr>';
+        }).join('')
       + '</tbody></table>';
-  document.getElementById('latestPagos').innerHTML = hpagos;
 }
 
 // ── MUDANCEROS PAGE ────────────────────────────────────────────────────────
-function renderMudancerosFull(){
-  filterMudanceros();
-}
+function renderMudancerosFull(){ filterMudanceros(); }
 
 function filterMudanceros(){
   var q = (document.getElementById('searchMudanceros').value || '').toLowerCase();
   var estado = document.getElementById('filterEstado').value;
-  var filtered = mudancerosData.filter(m => {
+  var filtered = mudancerosData.filter(function(m){
     var matchQ = !q || (m[1]||'').toLowerCase().includes(q) || (m[4]||'').toLowerCase().includes(q) || (m[5]||'').toLowerCase().includes(q);
     var matchE = !estado || getEstado(m) === estado;
     return matchQ && matchE;
   });
-
-  var html = filtered.length === 0
+  document.getElementById('mudancerosList').innerHTML = filtered.length === 0
     ? '<div class="empty"><div class="empty-icon">🔍</div>Sin resultados</div>'
     : '<table><thead><tr><th>Nombre</th><th>Empresa</th><th>Zona</th><th>Vehículo</th><th>Teléfono</th><th>Estado</th><th></th></tr></thead><tbody>'
-      + filtered.map(m => {
+      + filtered.map(function(m){
           var idx = mudancerosData.indexOf(m);
-          var estado = getEstado(m);
-          return `<tr>
-            <td class="td-name">${m[1]||'—'}</td>
-            <td>${m[2]||'—'}</td>
-            <td>${m[5]||'—'}</td>
-            <td>${m[8]||'—'}</td>
-            <td class="td-mono">${m[3]||'—'}</td>
-            <td><span class="badge ${estado.toLowerCase()}">${estado}</span></td>
-            <td><button class="btn-sm" onclick="openModal(${idx})">Ver →</button></td>
-          </tr>`;
+          var est = getEstado(m);
+          return '<tr><td class="td-name">'+(m[1]||'—')+'</td><td>'+(m[2]||'—')+'</td><td>'+(m[5]||'—')+'</td><td>'+(m[8]||'—')+'</td><td class="td-mono">'+(m[3]||'—')+'</td><td><span class="badge '+est.toLowerCase()+'">'+est+'</span></td><td><button class="btn-sm" onclick="openModal('+idx+')">Ver →</button></td></tr>';
         }).join('')
       + '</tbody></table>';
-  document.getElementById('mudancerosList').innerHTML = html;
+}
+
+// ── TRANSFERENCIAS ─────────────────────────────────────────────────────────
+function renderTransferencias(){
+  document.getElementById('transferList').innerHTML = transferenciasData.length === 0
+    ? '<div class="empty"><div class="empty-icon">🏦</div>Sin transferencias pendientes</div>'
+    : '<table><thead><tr><th>Cliente</th><th>Mudancero</th><th>Ruta</th><th>Monto</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>'
+      + transferenciasData.map(function(t){
+          return '<tr>'
+            +'<td class="td-name">'+(t.clienteNombre||'—')+'<br><span class="td-mono" style="font-size:10px">'+(t.clienteEmail||'')+'</span></td>'
+            +'<td>'+(t.mudancero||'—')+'</td>'
+            +'<td style="font-size:11px">'+(t.desde||'—')+' → '+(t.hasta||'—')+'</td>'
+            +'<td class="td-mono" style="color:var(--amber);font-weight:600">'+(t.monto||'—')+'</td>'
+            +'<td class="td-mono">'+(t.fecha||'—')+'</td>'
+            +'<td><span class="badge '+(t.estado==='confirmada'?'approved':t.estado==='rechazada'?'rejected':'pending')+'">'+(t.estado==='confirmada'?'Confirmada':t.estado==='rechazada'?'Rechazada':'Pendiente')+'</span></td>'
+            +'<td>'+(t.estado==='pendiente'?'<div style="display:flex;gap:6px"><button class="btn-sm danger" onclick="accionTransfer(\''+t.id+'\',\'rechazar\')">✗</button><button class="btn-sm primary" onclick="accionTransfer(\''+t.id+'\',\'confirmar\')">✓ Confirmar</button></div>':'—')+'</td>'
+            +'</tr>';
+        }).join('')
+      + '</tbody></table>';
+}
+
+async function accionTransfer(id, accion){
+  var btns = document.querySelectorAll('button');
+  try{
+    var r = await fetch('/api/transferencias', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ id, accion }) });
+    var d = await r.json();
+    if(d.error) throw new Error(d.error);
+    await loadTransferencias();
+  }catch(e){ alert('Error: ' + e.message); }
 }
 
 // ── PAGOS PAGE ─────────────────────────────────────────────────────────────
-function renderPagosFull(){
-  renderLiquidaciones();
-  renderHistorialPagos();
-}
+function renderPagosFull(){ renderLiquidaciones(); renderHistorialPagos(); }
 
 function renderLiquidaciones(){
-  // Calcular liquidaciones pendientes: pagos totales donde MudateYa tiene que pagar al mudancero
   var liquidaciones = {};
-
-  // Pagos MP totales (tipo 'total')
   pagosData.forEach(function(p){
-    var tipo = (p[1]||'').toLowerCase();
-    if(tipo.includes('total')){
-      var mudancero = p[0]||'—';
-      var monto = parseFloat(p[3]||0);
-      var fee = Math.round(monto * 0.10);
-      var aTransferir = monto - fee;
-      if(!liquidaciones[mudancero]) liquidaciones[mudancero] = { mudancero, total: 0, trabajos: 0, pendiente: true };
-      liquidaciones[mudancero].total += aTransferir;
-      liquidaciones[mudancero].trabajos++;
-    }
+    var mudancero = p[0]||'—';
+    var monto = parseFloat(p[3]||0);
+    // ── CAMBIO: 15% fee, 85% al mudancero ──
+    var fee = Math.round(monto * 0.15);
+    var aTransferir = monto - fee;
+    if(!liquidaciones[mudancero]) liquidaciones[mudancero] = { mudancero, total:0, trabajos:0 };
+    liquidaciones[mudancero].total += aTransferir;
+    liquidaciones[mudancero].trabajos++;
   });
-
-  // Transferencias totales confirmadas
-  transferenciasData.filter(t => t.estado === 'confirmada').forEach(function(t){
-    var monto = parseInt((t.monto||'0').replace(/\D/g,''));
-    // Si el monto es cercano al total (no al fee), hay que liquidar
+  transferenciasData.filter(function(t){ return t.estado === 'confirmada'; }).forEach(function(t){
     var mudancero = t.mudancero||'—';
-    // Detectar si es pago total o fee: fee es ~10% del precio estimado
-    // Por ahora mostramos todas las transferencias confirmadas como liquidaciones
-    if(!liquidaciones[mudancero]) liquidaciones[mudancero] = { mudancero, total: 0, trabajos: 0, pendiente: true };
-    liquidaciones[mudancero].total += Math.round(monto * 0.90);
+    var monto = parseInt((t.monto||'0').replace(/\D/g,''));
+    // ── CAMBIO: 85% al mudancero ──
+    if(!liquidaciones[mudancero]) liquidaciones[mudancero] = { mudancero, total:0, trabajos:0 };
+    liquidaciones[mudancero].total += Math.round(monto * 0.85);
     liquidaciones[mudancero].trabajos++;
   });
 
   var items = Object.values(liquidaciones);
-
-  if(items.length === 0){
-    document.getElementById('liquidacionesList').innerHTML = '<div class="empty"><div class="empty-icon">✓</div>Sin liquidaciones pendientes</div>';
-    return;
-  }
-
-  var html = '<table><thead><tr><th>Mudancero</th><th>Trabajos</th><th>Total a transferir (90%)</th><th>Estado</th></tr></thead><tbody>'
-    + items.map(l => `
-      <tr>
-        <td class="td-name">${l.mudancero}</td>
-        <td class="td-mono">${l.trabajos}</td>
-        <td class="td-mono" style="color:var(--emerald);font-weight:600;font-size:14px">$${Math.round(l.total).toLocaleString('es-AR')}</td>
-        <td><span class="badge pending">Pendiente de pago</span></td>
-      </tr>`).join('')
-    + '</tbody></table>'
-    + `<div style="padding:12px 14px;background:var(--bg2);border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:var(--mono)">
-        Total a liquidar: <strong style="color:var(--emerald)">$${items.reduce((s,l)=>s+l.total,0).toLocaleString('es-AR')}</strong>
-       </div>`;
-
-  document.getElementById('liquidacionesList').innerHTML = html;
+  document.getElementById('liquidacionesList').innerHTML = items.length === 0
+    ? '<div class="empty"><div class="empty-icon">✓</div>Sin liquidaciones pendientes</div>'
+    : '<table><thead><tr><th>Mudancero</th><th>Trabajos</th><th>Total a transferir (85%)</th><th>Estado</th></tr></thead><tbody>'
+      + items.map(function(l){
+          return '<tr><td class="td-name">'+l.mudancero+'</td><td class="td-mono">'+l.trabajos+'</td><td class="td-mono" style="color:var(--emerald);font-weight:600;font-size:14px">$'+Math.round(l.total).toLocaleString('es-AR')+'</td><td><span class="badge pending">Pendiente de pago</span></td></tr>';
+        }).join('')
+      + '</tbody></table>'
+      + '<div style="padding:12px 14px;background:var(--bg2);border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:var(--mono)">Total a liquidar: <strong style="color:var(--emerald)">$'+items.reduce(function(s,l){ return s+l.total; },0).toLocaleString('es-AR')+'</strong></div>';
 }
 
 function renderHistorialPagos(){
-  var html = pagosData.length === 0
+  document.getElementById('pagosList').innerHTML = pagosData.length === 0
     ? '<div class="empty"><div class="empty-icon">💳</div>Sin pagos registrados aún</div>'
-    : '<table><thead><tr><th>Mudancero</th><th>Tipo</th><th>Desde</th><th>Monto</th><th>Precio Total</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>'
-      + pagosData.slice().reverse().map(p => `
-        <tr>
-          <td class="td-name">${p[0]||'—'}</td>
-          <td class="td-mono">${p[1]||'—'}</td>
-          <td>${p[2]||'—'}</td>
-          <td class="td-mono">$${parseFloat(p[3]||0).toLocaleString('es-AR')}</td>
-          <td class="td-mono">$${parseFloat(p[4]||0).toLocaleString('es-AR')}</td>
-          <td class="td-mono">${p[5]||'—'}</td>
-          <td><span class="badge paid">Pagado</span></td>
-        </tr>`).join('')
+    : '<table><thead><tr><th>Mudancero</th><th>Tipo</th><th>Desde</th><th>Monto</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>'
+      + pagosData.slice().reverse().map(function(p){
+          return '<tr><td class="td-name">'+(p[0]||'—')+'</td><td class="td-mono">'+(p[1]||'—')+'</td><td>'+(p[2]||'—')+'</td><td class="td-mono">$'+parseFloat(p[3]||0).toLocaleString('es-AR')+'</td><td class="td-mono">'+(p[5]||'—')+'</td><td><span class="badge paid">Pagado</span></td></tr>';
+        }).join('')
       + '</tbody></table>';
-  document.getElementById('pagosList').innerHTML = html;
 }
 
 // ── ZONAS ──────────────────────────────────────────────────────────────────
 function renderZonas(){
   var zonaCount = {};
-  mudancerosData.forEach(m => {
-    var z = m[5] || 'Sin zona';
-    zonaCount[z] = (zonaCount[z] || 0) + 1;
-  });
-  var sorted = Object.entries(zonaCount).sort((a,b) => b[1]-a[1]);
-
-  var metricsHtml = sorted.slice(0,4).map(([z,c]) => `
-    <div class="metric-card green">
-      <div class="metric-label">${z}</div>
-      <div class="metric-val">${c}</div>
-      <div class="metric-sub">mudanceros</div>
-    </div>`).join('');
-  document.getElementById('zonasMetrics').innerHTML = metricsHtml || '<div class="loading">Sin datos</div>';
-
-  var tableHtml = sorted.length === 0
+  mudancerosData.forEach(function(m){ var z = m[5]||'Sin zona'; zonaCount[z] = (zonaCount[z]||0)+1; });
+  var sorted = Object.entries(zonaCount).sort(function(a,b){ return b[1]-a[1]; });
+  document.getElementById('zonasMetrics').innerHTML = sorted.slice(0,4).map(function(entry){
+    return '<div class="metric-card green"><div class="metric-label">'+entry[0]+'</div><div class="metric-val">'+entry[1]+'</div><div class="metric-sub">mudanceros</div></div>';
+  }).join('') || '<div class="loading">Sin datos</div>';
+  document.getElementById('zonasList').innerHTML = sorted.length === 0
     ? '<div class="empty"><div class="empty-icon">🗺️</div>Sin datos de zonas</div>'
     : '<table><thead><tr><th>Zona</th><th>Mudanceros</th><th>% del total</th></tr></thead><tbody>'
-      + sorted.map(([z,c]) => `
-        <tr>
-          <td class="td-name">${z}</td>
-          <td class="td-mono">${c}</td>
-          <td class="td-mono">${((c/mudancerosData.length)*100).toFixed(1)}%</td>
-        </tr>`).join('')
+      + sorted.map(function(entry){
+          return '<tr><td class="td-name">'+entry[0]+'</td><td class="td-mono">'+entry[1]+'</td><td class="td-mono">'+((entry[1]/mudancerosData.length)*100).toFixed(1)+'%</td></tr>';
+        }).join('')
       + '</tbody></table>';
-  document.getElementById('zonasList').innerHTML = tableHtml;
 }
 
 // ── MODAL MUDANCERO ────────────────────────────────────────────────────────
@@ -751,23 +592,17 @@ function openModal(idx){
   currentMudanceroIdx = idx;
   var m = mudancerosData[idx];
   document.getElementById('modalNombre').textContent = m[1] || 'Mudancero';
-  var html = CAMPOS.map((label, i) => {
+  document.getElementById('modalContent').innerHTML = CAMPOS.map(function(label, i){
     if(!m[i] && i > 0) return '';
-    return `<div class="modal-row"><span class="modal-label">${label}</span><span class="modal-val">${m[i]||'—'}</span></div>`;
+    return '<div class="modal-row"><span class="modal-label">'+label+'</span><span class="modal-val">'+(m[i]||'—')+'</span></div>';
   }).join('');
-  document.getElementById('modalContent').innerHTML = html;
   var estado = getEstado(m);
-
-  // Resetear botones siempre
   var btnA = document.getElementById('btnAprobar');
   var btnR = document.getElementById('btnRechazar');
-  btnA.disabled = false;
-  btnR.disabled = false;
-  btnA.textContent = '✓ Aprobar';
-  btnR.textContent = '✗ Rechazar';
-  btnA.style.display = estado === 'Aprobado' ? 'none' : '';
+  btnA.disabled = false; btnR.disabled = false;
+  btnA.textContent = '✓ Aprobar'; btnR.textContent = '✗ Rechazar';
+  btnA.style.display = estado === 'Aprobado'  ? 'none' : '';
   btnR.style.display = estado === 'Rechazado' ? 'none' : '';
-
   document.getElementById('mudanceroModal').classList.add('open');
 }
 
@@ -780,21 +615,12 @@ async function cambiarEstado(nuevoEstado){
   if(currentMudanceroIdx === null) return;
   var m = mudancerosData[currentMudanceroIdx];
   var btn = nuevoEstado === 'Aprobado' ? document.getElementById('btnAprobar') : document.getElementById('btnRechazar');
-  btn.disabled = true;
-  btn.textContent = 'Guardando…';
-
+  btn.disabled = true; btn.textContent = 'Guardando…';
   try{
     var r = await fetch('/api/admin', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        tipo: 'cambiar-estado-mudancero',
-        email: m[4],
-        nombre: m[1],
-        telefono: m[3],
-        nuevoEstado,
-        rowIndex: currentMudanceroIdx + 2, // +2 por header y 0-index
-      })
+      body: JSON.stringify({ tipo:'cambiar-estado-mudancero', email:m[4], nombre:m[1], telefono:m[3], nuevoEstado, rowIndex: currentMudanceroIdx + 2 })
     });
     var d = await r.json();
     if(d.error) throw new Error(d.error);
