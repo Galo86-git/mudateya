@@ -359,6 +359,37 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, cotizacion });
     }
 
+    if (action === 'pdf' && req.method === 'GET') {
+      const { mudanzaId, cotizacionId } = req.query;
+      if (!mudanzaId || !cotizacionId) return res.status(400).json({ error: 'Faltan parámetros' });
+      const mudanza = await getJSON(`mudanza:${mudanzaId}`);
+      if (!mudanza) return res.status(404).json({ error: 'Mudanza no encontrada' });
+      const cot = mudanza.cotizaciones.find(c => c.id === cotizacionId);
+      if (!cot) return res.status(404).json({ error: 'Cotización no encontrada' });
+      const pdfBase64 = await generarPDFBase64({
+        id:                cot.id,
+        fechaEmision:      new Date().toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' }),
+        clienteNombre:     mudanza.clienteNombre,
+        clienteEmail:      mudanza.clienteEmail,
+        mudanceroNombre:   cot.mudanceroNombre,
+        mudancero_initials:(cot.mudanceroNombre||'MV').slice(0,2).toUpperCase(),
+        desde:             mudanza.desde,
+        hasta:             mudanza.hasta,
+        fecha:             mudanza.fecha,
+        ambientes:         mudanza.ambientes,
+        objetos:           mudanza.servicios,
+        extras:            mudanza.extras,
+        precio:            cot.precio,
+        nota:              cot.nota,
+        tiempoEstimado:    cot.tiempoEstimado,
+      });
+      const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="presupuesto-${cot.id}.pdf"`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      return res.status(200).end(pdfBuffer);
+    }
+
     if (action === 'aceptar' && req.method === 'POST') {
       const { mudanzaId, cotizacionId } = req.body;
       const mudanza = await getJSON(`mudanza:${mudanzaId}`);
