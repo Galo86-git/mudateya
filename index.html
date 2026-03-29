@@ -2136,25 +2136,28 @@ async function analizarConIA() {
   document.getElementById('iaLoading').classList.add('show');
   document.getElementById('iaResult').classList.remove('show');
   try {
-    var imageContent = fleteFotos.slice(0,2).map(function(f){
-      return { type:'image', source:{ type:'base64', media_type: f.file.type || 'image/jpeg', data: f.base64 } };
+    // Llamar al proxy del backend — nunca directo a Anthropic desde el browser
+    var images = fleteFotos.slice(0, 2).map(function(f) {
+      return { data: f.base64, mediaType: f.file.type || 'image/jpeg' };
     });
-    imageContent.push({ type:'text', text:'Analizá este objeto que necesita ser flete/mudado. Respondé SOLO con JSON válido (sin markdown) con estos campos: {"tipo":"nombre del objeto","peso_kg":número estimado,"dimensiones":"ancho x alto x prof en cm aprox","dificultad":"baja|media|alta","fragil":true/false,"requiere_desmontaje":true/false,"personas_necesarias":número,"notas":"observación breve"}' });
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:400, messages:[{ role:'user', content: imageContent }] })
+    var response = await fetch('/api/analizar-foto', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ images })
     });
     var data = await response.json();
-    var text = (data.content || []).map(function(b){ return b.text || ''; }).join('');
-    var clean = text.replace(/```json|```/g,'').trim();
-    var obj = JSON.parse(clean);
-    fleteData.iaAnalisis = obj;
-    mostrarIAResult(obj);
+    if (data.error && !data.analisis) throw new Error(data.error);
+    if (data.analisis) {
+      fleteData.iaAnalisis = data.analisis;
+      mostrarIAResult(data.analisis);
+    } else {
+      throw new Error('Sin resultado');
+    }
   } catch(e) {
     console.warn('Error IA:', e.message);
     document.getElementById('iaLoading').classList.remove('show');
     document.getElementById('iaDesc').textContent = 'No se pudo analizar automáticamente. Continuá de todas formas.';
+    document.getElementById('iaTags').innerHTML = '';
     document.getElementById('iaResult').classList.add('show');
   }
 }
