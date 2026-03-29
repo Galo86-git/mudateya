@@ -2076,6 +2076,23 @@ function fleteNext() {
     fleteData.desde = d; fleteData.hasta = h;
     fleteGoStep(2);
   } else if (fleteStep === 2) {
+    if (!fleteFotos.length) {
+      var area = document.getElementById('fotoUploadArea');
+      area.style.borderColor = 'var(--emerald)';
+      area.style.background = 'rgba(34,195,106,.06)';
+      area.innerHTML = '<div style="font-size:1.8rem;margin-bottom:8px">📷</div>'
+        + '<div style="font-size:13px;font-weight:600;color:var(--emerald)">Necesitás subir al menos una foto</div>'
+        + '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:4px">La IA necesita ver el objeto para calcular el precio</div>';
+      setTimeout(function(){
+        area.style.borderColor = '';
+        area.style.background = '';
+        area.innerHTML = '<div style="font-size:2rem;margin-bottom:8px">📷</div>'
+          + '<div style="font-size:13px;font-weight:500;color:var(--text2)">Tocá para subir fotos</div>'
+          + '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:4px">Hasta 4 fotos · JPG o PNG</div>';
+        area.onclick = function(){ document.getElementById('fotoInput').click(); };
+      }, 2500);
+      return;
+    }
     fleteGoStep(3);
   } else if (fleteStep === 3) {
     fleteSolicitar();
