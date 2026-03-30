@@ -2019,7 +2019,7 @@ function selectService(tipo) {
 // WIZARD FLETE
 // ════════════════════════════════════════════════════
 var fleteStep = 1;
-var fleteData = { desde:'', hasta:'', fecha:'hoy', pisoOrigen:0, pisoDestino:0, ascOrigen:true, ascDestino:true, fotos:[], iaAnalisis:null, precio:0, km:0 };
+var fleteData = { desde:'', hasta:'', fecha:'hoy', pisoOrigen:0, pisoDestino:0, ascOrigen:true, ascDestino:true, fotos:[], iaAnalisis:null, precio:0, km:0, descripcionManual:'' };
 
 function openFlete() {
   document.getElementById('fleteOverlay').classList.add('open');
@@ -2125,21 +2125,17 @@ function fleteNext() {
     fleteData.desde = d; fleteData.hasta = h;
     fleteGoStep(2);
   } else if (fleteStep === 2) {
-    if (!fleteFotos.length) {
-      var area = document.getElementById('fotoUploadArea');
-      area.style.borderColor = 'var(--emerald)';
-      area.style.background = 'rgba(34,195,106,.06)';
-      area.innerHTML = '<div style="font-size:1.8rem;margin-bottom:8px">📷</div>'
-        + '<div style="font-size:13px;font-weight:600;color:var(--emerald)">Necesitás subir al menos una foto</div>'
-        + '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:4px">La IA necesita ver el objeto para calcular el precio</div>';
-      setTimeout(function(){
-        area.style.borderColor = '';
-        area.style.background = '';
-        area.innerHTML = '<div style="font-size:2rem;margin-bottom:8px">📷</div>'
-          + '<div style="font-size:13px;font-weight:500;color:var(--text2)">Tocá para subir fotos</div>'
-          + '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:4px">Hasta 4 fotos · JPG o PNG</div>';
-        area.onclick = function(){ document.getElementById('fotoInput').click(); };
-      }, 2500);
+    var tieneDescripcion = (fleteData.descripcionManual || '').trim().length >= 10;
+    if (!fleteFotos.length && !tieneDescripcion) {
+      // Mostrar el box de descripción si no está visible
+      var sinFotoBox = document.getElementById('sinFotoBox');
+      if (sinFotoBox.style.display === 'none') toggleSinFoto();
+      var ta = document.getElementById('flete-descripcion-manual');
+      ta.style.borderColor = 'var(--emerald)';
+      ta.style.boxShadow = '0 0 0 3px rgba(34,195,106,.15)';
+      ta.placeholder = 'Describí el objeto (mínimo 10 caracteres)…';
+      ta.focus();
+      setTimeout(function(){ ta.style.borderColor = ''; ta.style.boxShadow = ''; }, 2500);
       return;
     }
     fleteGoStep(3);
@@ -2241,7 +2237,31 @@ async function analizarConIA() {
   }
 }
 
-function mostrarIAResult(obj) {
+function toggleSinFoto() {
+  var box = document.getElementById('sinFotoBox');
+  var btn = document.querySelector('#sinFotoToggle button');
+  var visible = box.style.display !== 'none';
+  box.style.display = visible ? 'none' : 'block';
+  btn.textContent = visible ? 'No tengo foto — describir a mano' : '✕ Cerrar descripción manual';
+  if (!visible) {
+    setTimeout(function(){ document.getElementById('flete-descripcion-manual').focus(); }, 100);
+  } else {
+    document.getElementById('flete-descripcion-manual').value = '';
+    fleteData.descripcionManual = '';
+  }
+}
+
+function onDescripcionManual() {
+  var val = document.getElementById('flete-descripcion-manual').value.trim();
+  fleteData.descripcionManual = val;
+  // Si hay descripción pero no hay fotos, simular un análisis básico
+  if (val && !fleteFotos.length) {
+    document.getElementById('iaResult').classList.add('show');
+    document.getElementById('iaTags').innerHTML = '<span class="ia-tag">✏️ Descripción manual</span>';
+    document.getElementById('iaDesc').textContent = val;
+    fleteData.iaAnalisis = { tipo: val, peso_kg: null, dificultad: 'media', fragil: false, requiere_desmontaje: false, personas_necesarias: 1, notas: val };
+  }
+}
   document.getElementById('iaLoading').classList.remove('show');
   var tags = '';
   if (obj.tipo)       tags += '<span class="ia-tag">📦 ' + obj.tipo + '</span>';
@@ -2470,6 +2490,21 @@ function fleteInitMaps() {
       </div>
       <input type="file" id="fotoInput" accept="image/*" multiple style="display:none" onchange="onFotosSelected(this)"/>
       <div class="foto-grid" id="fotoGrid" style="display:none"></div>
+
+      <!-- Opción sin foto -->
+      <div id="sinFotoToggle" style="text-align:center;margin:-4px 0 10px">
+        <button onclick="toggleSinFoto()" style="background:none;border:none;font-size:11px;color:var(--text3);font-family:var(--mono);cursor:pointer;text-decoration:underline;padding:4px 0">No tengo foto — describir a mano</button>
+      </div>
+      <div id="sinFotoBox" style="display:none;margin-bottom:1rem">
+        <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:1rem">
+          <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono);margin-bottom:8px">✏️ Describí el objeto</div>
+          <textarea id="flete-descripcion-manual" rows="3"
+            placeholder="Ej: Sillón de 3 cuerpos color gris, aprox 2m de largo y 90cm de fondo, pesa bastante, no necesita desmontaje"
+            oninput="onDescripcionManual()"
+            style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:9px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);background:var(--bg);outline:none;resize:vertical;line-height:1.55;transition:border-color .2s"></textarea>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:5px">El precio se calculará con esta descripción. Podés subir fotos igual para mayor precisión.</div>
+        </div>
+      </div>
 
       <!-- Análisis IA -->
       <div class="ia-loading" id="iaLoading">
