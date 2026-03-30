@@ -387,16 +387,18 @@ function renderMudanzaCard(m, idx){
     + cotzHtml
     + (m.cotizacionAceptada ? '<div class="mudanza-mudancero">'
         + '<div class="mud-avatar">'+m.cotizacionAceptada.mudanceroNombre.split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)+'</div>'
-        + '<div><div class="mud-name">'+m.cotizacionAceptada.mudanceroNombre+'</div>'
-        + '<div class="mud-tel">📱 '+(m.cotizacionAceptada.mudanceroTel||'—')+'</div></div>'
-        + (m.cotizacionAceptada.mudanceroTel ? '<a href="https://wa.me/'+String(m.cotizacionAceptada.mudanceroTel).replace(/\D/g,'')+'" target="_blank" class="btn btn-green" style="margin-left:auto;font-size:12px;padding:7px 14px">WhatsApp</a>' : '')
+        + '<div style="flex:1"><div class="mud-name">'+m.cotizacionAceptada.mudanceroNombre+'</div>'
+        + '<div class="mud-tel">📱 '+(m.cotizacionAceptada.mudanceroTel||'Sin teléfono registrado')+'</div></div>'
+        + (m.cotizacionAceptada.mudanceroTel
+            ? '<a href="https://wa.me/54'+String(m.cotizacionAceptada.mudanceroTel).replace(/\D/g,'')+'?text=Hola+'+encodeURIComponent((m.cotizacionAceptada.mudanceroNombre||'').split(' ')[0])+'%2C+te+contacto+por+mi+mudanza+aceptada+en+MudateYa+%28'+encodeURIComponent(m.desde)+'+a+'+encodeURIComponent(m.hasta)+'%29+%F0%9F%9A%9B" target="_blank" rel="noopener" class="btn btn-green" style="margin-left:auto;font-size:12px;padding:8px 16px;flex-shrink:0;white-space:nowrap">💬 WhatsApp</a>'
+            : '<span style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-left:auto;text-align:right">Te contactará<br>por email</span>')
         + '</div>' : '')
     + '<div class="mudanza-meta">'
     +   (m.extras ? '<span class="meta-tag">📦 '+m.extras+'</span>' : '')
     +   (m.precio_estimado ? '<span class="meta-tag">Estimado: $'+parseInt(m.precio_estimado).toLocaleString('es-AR')+'</span>' : '')
     + '</div>'
     + '<div class="mudanza-actions" style="margin-top:8px">'
-    +   (mud.mudanceroTel ? '<a href="https://wa.me/'+String(mud.mudanceroTel).replace(/\D/g,'')+'" target="_blank" class="btn btn-green" style="font-size:13px;padding:10px 20px">📱 Coordinar por WhatsApp</a>' : '')
+    +   (mud.mudanceroTel ? '<a href="https://wa.me/54'+String(mud.mudanceroTel).replace(/\D/g,'')+'?text=Hola+'+encodeURIComponent((mud.mudanceroNombre||'').split(' ')[0])+'%2C+te+contacto+por+mi+mudanza+en+MudateYa+%F0%9F%9A%9B" target="_blank" rel="noopener" class="btn btn-green" style="font-size:13px;padding:10px 20px">💬 Coordinar por WhatsApp</a>' : '')
     +   '<button class="btn btn-ghost" style="font-size:12px" onclick="loadMudanzas()">↻ Actualizar</button>'
     + '</div>'
     + '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px">ID: '+m.id+'</div>'
