@@ -888,6 +888,25 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:2rem 2.5r
             <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">🔒 No publicamos nada en tu cuenta de Google</div>
           </div>
 
+          <!-- PASO CELULAR — aparece después del login, antes de publicar -->
+          <div id="step3-celular" style="display:none;padding:.8rem 0">
+            <div style="font-size:1.8rem;text-align:center;margin-bottom:10px">📱</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.5px;color:var(--text);margin-bottom:6px;text-align:center">Un último dato</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px;text-align:center">Tu celular para que el mudancero que elijas pueda coordinarse con vos.</div>
+            <div class="input-wrap" style="margin-bottom:8px">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1"/></svg>
+              <input class="addr-input" id="step3-celular-input" type="tel" placeholder="+54 9 11 1234-5678" style="padding-left:34px"/>
+            </div>
+            <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:14px;text-align:center">🔒 Solo visible para el mudancero que aceptés · No se comparte con nadie más</div>
+            <button class="btn-next" style="width:100%;justify-content:center" onclick="confirmarCelularYPublicar()">
+              Publicar y recibir cotizaciones 
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <button onclick="confirmarCelularYPublicar(true)" style="width:100%;margin-top:8px;background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;font-family:var(--mono);text-decoration:underline">
+              Continuar sin celular
+            </button>
+          </div>
+
           <div id="step3-publishing" style="display:none;text-align:center;padding:1.5rem 0">
             <div style="position:relative;width:48px;height:48px;margin:0 auto 14px">
               <span class="spinner" style="position:absolute;inset:0;width:48px;height:48px;border-width:3px;display:block"></span>
@@ -1629,6 +1648,17 @@ function mostrarLoginStep3() { solicitarPresupuestos(); }
 function onStep3Login(user) {
   document.getElementById('step3-login').style.display = 'none';
   document.getElementById('step3-btn-solicitar').style.display = 'none';
+  // Mostrar paso de celular antes de publicar
+  var celularBox = document.getElementById('step3-celular');
+  celularBox.style.display = 'block';
+  setTimeout(function(){ document.getElementById('step3-celular-input').focus(); }, 200);
+}
+
+function confirmarCelularYPublicar(skip) {
+  var cel = skip ? '' : (document.getElementById('step3-celular-input').value.trim());
+  // Guardar celular para enviarlo en la publicación
+  window._clienteWA = cel;
+  document.getElementById('step3-celular').style.display = 'none';
   publicarMudanzaEnSistema();
 }
 async function publicarMudanzaEnSistema() {
@@ -1650,7 +1680,7 @@ async function publicarMudanzaEnSistema() {
   var desde = getInputVal('desde'), hasta = getInputVal('hasta');
   var objetos = Array.from(document.querySelectorAll('.obj-chip.sel .obj-label')).map(function(e) { return e.textContent; }).join(', ');
   var precio = estimarPrecio();
-  var clienteWA = getInputVal('clienteWA');
+  var clienteWA = window._clienteWA !== undefined ? window._clienteWA : getInputVal('clienteWA');
   try {
     var r = await fetch('/api/cotizaciones?action=publicar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clienteEmail: user.email, clienteNombre: user.name, desde, hasta, ambientes: amb + ' ambiente' + (amb !== 1 ? 's' : ''), fecha: getFechaLabel(), servicios: objetos, zonaBase: desde, precio_estimado: precio, clienteWA: clienteWA }) });
     var d = await r.json();
