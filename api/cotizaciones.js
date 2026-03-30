@@ -398,6 +398,9 @@ module.exports = async function handler(req, res) {
       if (!cot) return res.status(404).json({ error: 'Cotización no encontrada' });
       mudanza.estado = 'cotizacion_aceptada';
       mudanza.cotizacionAceptada = cot;
+      // Agregar datos del cliente para que el mudancero pueda contactarlo
+      mudanza.cotizacionAceptada.clienteNombre = mudanza.clienteNombre;
+      mudanza.cotizacionAceptada.clienteEmail  = mudanza.clienteEmail;
       cot.estado = 'aceptada';
       await setJSON(`mudanza:${mudanzaId}`, mudanza, 604800);
       try { await enviarEmailAceptacion(mudanza, cot); } catch(e) { console.error('Error email:', e.message); }
