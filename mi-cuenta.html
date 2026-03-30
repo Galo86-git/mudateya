@@ -21,8 +21,6 @@
 }
 html{scroll-behavior:smooth}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
-
-/* LOGIN */
 #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
 .login-card{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:2.5rem 2rem;max-width:380px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.5)}
 .login-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;margin-bottom:.3rem}
@@ -30,19 +28,13 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .login-sub{font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:1.8rem}
 .login-note{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:1rem;line-height:1.6}
 .login-note a{color:var(--emerald);text-decoration:none}
-
-/* NOT FOUND */
 #notFoundScreen{display:none;align-items:center;justify-content:center;min-height:100vh;padding:2rem;flex-direction:column;gap:1rem;text-align:center}
 .nf-icon{font-size:3rem}
 .nf-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px}
 .nf-sub{font-size:14px;color:var(--text2);line-height:1.7;max-width:360px}
 .btn-register{display:inline-block;margin-top:.5rem;background:var(--emerald);color:#041A0E;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;transition:all .2s}
 .btn-register:hover{background:#2EDB7A}
-
-/* APP */
 #appScreen{display:none;min-height:100vh}
-
-/* NAV */
 .nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:58px}
 .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;text-decoration:none;color:var(--text)}
 .nav-logo span{color:var(--emerald)}
@@ -51,34 +43,24 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .nav-name{font-size:12px;color:var(--text2)}
 .btn-logout{font-size:11px;color:var(--text3);background:none;border:1px solid var(--border);padding:5px 10px;border-radius:6px;cursor:pointer;font-family:var(--mono);transition:all .2s}
 .btn-logout:hover{color:var(--red);border-color:var(--red)}
-
-/* STATUS BADGE */
 .status-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:.7rem 1.5rem;display:flex;align-items:center;gap:10px}
 .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .status-dot.approved{background:var(--emerald);box-shadow:0 0 8px var(--emerald-glow)}
 .status-dot.pending{background:var(--amber)}
 .status-dot.rejected{background:var(--red)}
 .status-text{font-size:12px;color:var(--text2);font-family:var(--mono)}
-
-/* BODY */
 .app-body{display:flex;min-height:calc(100vh - 58px)}
-
-/* SIDEBAR */
 .sidebar{width:200px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:1.2rem 0;position:sticky;top:58px;height:calc(100vh - 58px)}
 .sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 1.2rem;font-size:13px;color:var(--text2);cursor:pointer;transition:all .2s;border-left:2px solid transparent;text-decoration:none}
 .sidebar-item:hover{background:var(--surface);color:var(--text)}
 .sidebar-item.active{background:var(--emerald-subtle);color:var(--emerald);border-left-color:var(--emerald)}
 .sidebar-icon{font-size:14px;width:18px;text-align:center}
 .sidebar-badge{margin-left:auto;background:var(--red);color:white;font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:10px;font-weight:700}
-
-/* MAIN */
 .main{flex:1;padding:1.8rem;overflow-x:hidden;min-width:0}
 .page{display:none}
 .page.active{display:block;animation:fadeIn .2s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .page-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:1px;margin-bottom:1.5rem}
-
-/* METRICS */
 .metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:2rem}
 .metric-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem}
 .metric-label{font-size:10px;color:var(--text3);font-family:var(--mono);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
@@ -87,13 +69,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .metric-card.green .metric-val{color:var(--emerald)}
 .metric-card.blue .metric-val{color:var(--sky)}
 .metric-card.amber .metric-val{color:var(--amber)}
-
-/* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.2rem}
 .card-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;border-bottom:1px solid var(--border)}
 .card-title{font-size:13px;font-weight:600;color:var(--text)}
-
-/* PEDIDOS */
 .pedido-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:1.2rem;margin-bottom:10px;transition:border-color .2s}
 .pedido-card:hover{border-color:rgba(34,195,106,.3)}
 .pedido-card.nuevo{border-left:3px solid var(--emerald)}
@@ -107,8 +85,6 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .pedido-precio{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--emerald);letter-spacing:.5px}
 .pedido-precio-sub{font-size:10px;color:var(--text3);font-family:var(--mono)}
 .pedido-actions{display:flex;gap:8px;margin-top:12px}
-
-/* BUTTONS */
 .btn{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
 .btn-green{background:var(--emerald);color:#041A0E}
 .btn-green:hover{background:#2EDB7A;transform:translateY(-1px)}
@@ -117,50 +93,16 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
 .btn-ghost:hover{border-color:var(--emerald);color:var(--emerald)}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
-
-/* EMPTY / LOADING */
 .empty{text-align:center;padding:3rem;color:var(--text3);font-size:13px}
 .empty-icon{font-size:2.5rem;margin-bottom:8px}
 .loading{text-align:center;padding:3rem;color:var(--text3);font-family:var(--mono);font-size:12px}
 .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--emerald);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* BADGE */
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:10px;font-family:var(--mono);font-weight:600}
 .badge.nuevo{background:var(--emerald-subtle);color:var(--emerald);border:1px solid rgba(34,195,106,.2)}
 .badge.aceptado{background:var(--sky-subtle);color:var(--sky);border:1px solid rgba(41,182,246,.2)}
 .badge.rechazado{background:var(--red-subtle);color:var(--red);border:1px solid rgba(255,82,82,.2)}
 .badge.pagado{background:var(--amber-subtle);color:var(--amber);border:1px solid rgba(255,179,0,.2)}
-
-/* CHAT */
-.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 160px);min-height:500px}
-.chat-container{display:flex;height:100%;overflow:hidden;border-radius:14px;border:1px solid var(--border)}
-.chat-contacts{width:260px;border-right:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;background:var(--bg2)}
-.chat-contacts-header{padding:14px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;color:var(--text)}
-.chat-contact{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}
-.chat-contact:hover,.chat-contact.active{background:var(--emerald-subtle)}
-.chat-contact.active{border-left:3px solid var(--emerald)}
-.chat-contact-av{width:40px;height:40px;border-radius:50%;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--emerald);font-family:var(--mono);flex-shrink:0}
-.chat-contact-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chat-contact-last{font-size:11px;color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chat-area{display:flex;flex-direction:column;flex:1;min-width:0}
-.chat-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface)}
-.chat-header-av{width:34px;height:34px;border-radius:50%;background:var(--emerald-subtle);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--emerald);font-family:var(--mono);flex-shrink:0}
-.chat-list{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
-.chat-msg{max-width:68%;padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.55;word-break:break-word}
-.chat-msg.mine{align-self:flex-end;background:#1A5A30;color:#E8F5EE;border-bottom-right-radius:3px}
-.chat-msg.other{align-self:flex-start;background:var(--surface);border:1px solid var(--border);color:var(--text2);border-bottom-left-radius:3px}
-.chat-msg-sender{font-size:10px;color:var(--emerald);font-family:var(--mono);margin-bottom:3px;font-weight:600}
-.chat-msg-time{font-size:10px;opacity:.4;text-align:right;margin-top:3px}
-.chat-input-wrap{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);background:var(--surface);align-items:center}
-.chat-input{flex:1;padding:10px 16px;border:1px solid var(--border2);border-radius:22px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);background:var(--surface2);outline:none;transition:border-color .2s}
-.chat-input:focus{border-color:var(--emerald)}
-.chat-input::placeholder{color:var(--text3)}
-.chat-send{width:38px;height:38px;border-radius:50%;background:var(--emerald);border:none;color:#041A0E;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
-.chat-send:hover{background:#2EDB7A}
-
-/* PERFIL */
-.perfil-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .field{display:flex;flex-direction:column;gap:6px}
 .field-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono)}
 .field input,.field select,.field textarea{width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);background:var(--surface2);outline:none;transition:border-color .2s}
@@ -169,13 +111,9 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .chips-grid{display:flex;flex-wrap:wrap;gap:6px}
 .chip{display:flex;align-items:center;gap:5px;padding:6px 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:12px;color:var(--text2);transition:all .2s;user-select:none}
 .chip.sel{border-color:var(--emerald);background:var(--emerald-subtle);color:var(--emerald)}
-
-/* RESPONSIVE */
 @media(max-width:768px){
   .sidebar{display:none}
   .metrics-grid{grid-template-columns:1fr 1fr}
-  .perfil-grid{grid-template-columns:1fr}
-  .chat-contacts{display:none}
   .main{padding:1rem}
 }
 </style>
@@ -192,7 +130,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       ¿Todavía no te registraste?<br>
       <a href="/mudanceros">Sumate como mudancero →</a>
     </div>
-    <a href="/" style="display:inline-block;margin-top:1rem;font-size:11px;color:var(--text3);text-decoration:none;font-family:var(--mono);transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">← Volver al inicio</a>
+    <a href="/" style="display:inline-block;margin-top:1rem;font-size:11px;color:var(--text3);text-decoration:none;font-family:var(--mono)" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">← Volver al inicio</a>
   </div>
 </div>
 
@@ -200,7 +138,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 <div id="notFoundScreen">
   <div class="nf-icon">🚛</div>
   <div class="nf-title">Perfil no encontrado</div>
-  <p class="nf-sub">Tu email no está registrado como mudancero todavía. Completá el formulario para sumarte.</p>
+  <p class="nf-sub">Tu email no está registrado como mudancero todavía.</p>
   <a href="/mudanceros" class="btn-register">Registrarme como mudancero →</a>
 </div>
 
@@ -214,33 +152,28 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <button class="btn-logout" onclick="logout()">Salir</button>
     </div>
   </nav>
-
-  <!-- STATUS BAR -->
   <div class="status-bar">
     <div class="status-dot" id="statusDot"></div>
     <span class="status-text" id="statusText">Cargando…</span>
   </div>
-
   <div class="app-body">
-    <!-- SIDEBAR -->
     <div class="sidebar">
-      <a class="sidebar-item active" onclick="showPage('pedidos')" href="#">
+      <a class="sidebar-item active" onclick="showPage('pedidos',event)" href="#">
         <span class="sidebar-icon">📋</span> Pedidos
         <span class="sidebar-badge" id="badgeNuevos" style="display:none">0</span>
       </a>
-      <a class="sidebar-item" onclick="showPage('historial')" href="#">
+      <a class="sidebar-item" onclick="showPage('historial',event)" href="#">
         <span class="sidebar-icon">📅</span> Historial
       </a>
-      <a class="sidebar-item" onclick="showPage('ganancias')" href="#">
+      <a class="sidebar-item" onclick="showPage('ganancias',event)" href="#">
         <span class="sidebar-icon">💰</span> Ganancias
       </a>
-      <a class="sidebar-item" onclick="showPage('perfil')" href="#">
+      <a class="sidebar-item" onclick="showPage('perfil',event)" href="#">
         <span class="sidebar-icon">⚙️</span> Mi perfil
       </a>
     </div>
 
     <div class="main">
-
       <!-- PEDIDOS -->
       <div class="page active" id="page-pedidos">
         <div class="page-title">Pedidos nuevos</div>
@@ -270,19 +203,15 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <!-- PERFIL -->
       <div class="page" id="page-perfil">
         <div class="page-title">Mi perfil</div>
-
-        <!-- DATOS PERSONALES -->
         <div class="card" style="margin-bottom:1rem">
           <div class="card-header"><span class="card-title">👤 Datos personales</span></div>
-          <div style="padding:1.2rem;display:grid;grid-template-columns:1fr 1fr;gap:12px" id="secPersonal">
+          <div style="padding:1.2rem;display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <div class="field"><label class="field-label">Nombre completo</label><input type="text" id="pf-nombre" placeholder="Juan González"/></div>
             <div class="field"><label class="field-label">Empresa / razón social</label><input type="text" id="pf-empresa" placeholder="Mudanzas González (opcional)"/></div>
             <div class="field"><label class="field-label">WhatsApp / teléfono</label><input type="tel" id="pf-tel" placeholder="+54 9 11 1234-5678"/></div>
             <div class="field"><label class="field-label">Email</label><input type="email" id="pf-email" disabled style="opacity:.5;cursor:not-allowed"/></div>
           </div>
         </div>
-
-        <!-- ZONA -->
         <div class="card" style="margin-bottom:1rem">
           <div class="card-header"><span class="card-title">📍 Zona de cobertura</span></div>
           <div style="padding:1.2rem;display:grid;gap:12px">
@@ -290,32 +219,22 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
               <label class="field-label">Zona base</label>
               <select id="pf-zona">
                 <option value="">Seleccioná tu zona principal</option>
-                <option>CABA — zona norte</option>
-                <option>CABA — zona sur</option>
-                <option>CABA — zona oeste</option>
-                <option>CABA — zona centro</option>
+                <option>CABA — zona norte</option><option>CABA — zona sur</option>
+                <option>CABA — zona oeste</option><option>CABA — zona centro</option>
                 <option>GBA Norte (San Isidro, Vicente López, etc.)</option>
                 <option>GBA Sur (Quilmes, Avellaneda, etc.)</option>
                 <option>GBA Oeste (Morón, Ituzaingó, etc.)</option>
                 <option>GBA Este (Lanús, Lomas de Zamora, etc.)</option>
-                <option>Rosario</option>
-                <option>Córdoba Capital</option>
-                <option>Otra ciudad</option>
+                <option>Rosario</option><option>Córdoba Capital</option><option>Otra ciudad</option>
               </select>
             </div>
-            <div class="field">
-              <label class="field-label">Zonas adicionales</label>
-              <input type="text" id="pf-zonas-extra" placeholder="Ej: Tigre, San Fernando, Escobar"/>
-            </div>
+            <div class="field"><label class="field-label">Zonas adicionales</label><input type="text" id="pf-zonas-extra" placeholder="Ej: Tigre, San Fernando, Escobar"/></div>
           </div>
         </div>
-
-        <!-- VEHÍCULO -->
         <div class="card" style="margin-bottom:1rem">
           <div class="card-header"><span class="card-title">🚛 Vehículo y equipo</span></div>
           <div style="padding:1.2rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-            <div class="field">
-              <label class="field-label">Tipo de vehículo</label>
+            <div class="field"><label class="field-label">Tipo de vehículo</label>
               <select id="pf-vehiculo">
                 <option value="">Seleccioná</option>
                 <option>Camioneta / furgón pequeño (hasta 1.5t)</option>
@@ -325,22 +244,14 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
                 <option>Múltiples vehículos</option>
               </select>
             </div>
-            <div class="field">
-              <label class="field-label">Cantidad de vehículos</label>
-              <select id="pf-cant-vehiculos">
-                <option>1</option><option>2</option><option>3</option><option>4 o más</option>
-              </select>
+            <div class="field"><label class="field-label">Cantidad de vehículos</label>
+              <select id="pf-cant-vehiculos"><option>1</option><option>2</option><option>3</option><option>4 o más</option></select>
             </div>
-            <div class="field">
-              <label class="field-label">Personas en el equipo</label>
-              <select id="pf-equipo">
-                <option>Solo yo</option><option>2 personas</option><option>3 personas</option><option>4 o más personas</option>
-              </select>
+            <div class="field"><label class="field-label">Personas en el equipo</label>
+              <select id="pf-equipo"><option>Solo yo</option><option>2 personas</option><option>3 personas</option><option>4 o más personas</option></select>
             </div>
           </div>
         </div>
-
-        <!-- SERVICIOS -->
         <div class="card" style="margin-bottom:1rem">
           <div class="card-header"><span class="card-title">🛠️ Servicios que ofrecés</span></div>
           <div style="padding:1.2rem">
@@ -357,8 +268,6 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
             </div>
           </div>
         </div>
-
-        <!-- DISPONIBILIDAD -->
         <div class="card" style="margin-bottom:1rem">
           <div class="card-header"><span class="card-title">🗓️ Disponibilidad</span></div>
           <div style="padding:1.2rem;display:grid;gap:14px">
@@ -386,103 +295,55 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
             </div>
             <div class="field" style="max-width:280px">
               <label class="field-label">Anticipación mínima</label>
-              <select id="pf-anticipacion">
-                <option>Mismo día</option>
-                <option>24 horas</option>
-                <option>48 horas</option>
-                <option>1 semana</option>
-              </select>
+              <select id="pf-anticipacion"><option>Mismo día</option><option>24 horas</option><option>48 horas</option><option>1 semana</option></select>
             </div>
           </div>
         </div>
-
-        <!-- PRECIOS -->
         <div class="card" style="margin-bottom:1rem">
           <div class="card-header"><span class="card-title">💰 Precios base ($ARS)</span></div>
           <div style="padding:1.2rem;display:grid;gap:8px">
-            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
-              <span style="flex:1;font-size:13px;color:var(--text2)">Monoambiente / 1 ambiente</span>
-              <div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-p1" placeholder="45.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:var(--bg);outline:none"/></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
-              <span style="flex:1;font-size:13px;color:var(--text2)">2 ambientes</span>
-              <div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-p2" placeholder="65.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:var(--bg);outline:none"/></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
-              <span style="flex:1;font-size:13px;color:var(--text2)">3 ambientes</span>
-              <div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-p3" placeholder="85.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:var(--bg);outline:none"/></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
-              <span style="flex:1;font-size:13px;color:var(--text2)">4+ ambientes</span>
-              <div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-p4" placeholder="110.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:var(--bg);outline:none"/></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
-              <span style="flex:1;font-size:13px;color:var(--text2)">Flete / envío chico</span>
-              <div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-pflete" placeholder="18.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:var(--bg);outline:none"/></div>
-            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)"><span style="flex:1;font-size:13px;color:var(--text2)">Monoambiente / 1 ambiente</span><div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-p1" placeholder="55.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:var(--bg);outline:none"/></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)"><span style="flex:1;font-size:13px;color:var(--text2)">2 ambientes</span><div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-p2" placeholder="90.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:var(--bg);outline:none"/></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)"><span style="flex:1;font-size:13px;color:var(--text2)">3 ambientes</span><div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-p3" placeholder="135.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:var(--bg);outline:none"/></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)"><span style="flex:1;font-size:13px;color:var(--text2)">4+ ambientes</span><div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-p4" placeholder="180.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:var(--bg);outline:none"/></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)"><span style="flex:1;font-size:13px;color:var(--text2)">Flete / envío chico</span><div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-pflete" placeholder="18.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:var(--bg);outline:none"/></div></div>
           </div>
         </div>
-
-        <!-- DATOS BANCARIOS -->
         <div class="card" style="margin-bottom:1rem">
           <div class="card-header"><span class="card-title">🏦 Datos para cobrar</span></div>
           <div style="padding:1.2rem;display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div class="field">
-              <label class="field-label">Método preferido</label>
-              <select id="pf-metodoCobro" onchange="toggleMetodoCobroPanel()">
-                <option value="cbu">CBU / Alias bancario</option>
-                <option value="mp">Cuenta Mercado Pago</option>
-              </select>
-            </div>
-            <div class="field" id="panel-wrap-cbu">
-              <label class="field-label">CBU o Alias</label>
-              <input type="text" id="pf-cbu" placeholder="Ej: MUDANZAS.JUAN o 0000003100..."/>
-            </div>
-            <div class="field" id="panel-wrap-mp" style="display:none">
-              <label class="field-label">Cuenta Mercado Pago</label>
-              <input type="text" id="pf-emailMP" placeholder="Email, CVU o alias de MP"/>
-              <span style="font-size:10px;color:var(--text3);font-family:var(--mono)">Email, CVU (22 dígitos) o alias</span>
-            </div>
-            <div class="field">
-              <label class="field-label">Titular de la cuenta</label>
-              <input type="text" id="pf-titular" placeholder="Nombre completo o razón social"/>
-            </div>
+            <div class="field"><label class="field-label">Método preferido</label><select id="pf-metodoCobro" onchange="toggleMetodoCobroPanel()"><option value="cbu">CBU / Alias bancario</option><option value="mp">Cuenta Mercado Pago</option></select></div>
+            <div class="field" id="panel-wrap-cbu"><label class="field-label">CBU o Alias</label><input type="text" id="pf-cbu" placeholder="Ej: MUDANZAS.JUAN o 0000003100..."/></div>
+            <div class="field" id="panel-wrap-mp" style="display:none"><label class="field-label">Cuenta Mercado Pago</label><input type="text" id="pf-emailMP" placeholder="Email, CVU o alias de MP"/><span style="font-size:10px;color:var(--text3);font-family:var(--mono)">Email, CVU (22 dígitos) o alias</span></div>
+            <div class="field"><label class="field-label">Titular de la cuenta</label><input type="text" id="pf-titular" placeholder="Nombre completo o razón social"/></div>
           </div>
-          <div style="padding:0 1.2rem 1rem;font-size:11px;color:var(--text3);font-family:var(--mono)">
-            🔒 Solo usamos estos datos para transferirte tus ganancias · Nunca se comparten con clientes
-          </div>
+          <div style="padding:0 1.2rem 1rem;font-size:11px;color:var(--text3);font-family:var(--mono)">🔒 Solo usamos estos datos para transferirte tus ganancias · Nunca se comparten con clientes</div>
         </div>
-
-        <!-- NOTAS -->
         <div class="card" style="margin-bottom:1.5rem">
           <div class="card-header"><span class="card-title">📝 Presentación</span></div>
           <div style="padding:1.2rem">
-            <div class="field">
-              <textarea id="pf-notas" rows="4" placeholder="Contá tu experiencia, especialidades, qué te diferencia…" style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);background:var(--surface2);outline:none;resize:vertical;transition:border-color .2s;line-height:1.55"></textarea>
-            </div>
+            <div class="field"><textarea id="pf-notas" rows="4" placeholder="Contá tu experiencia, especialidades, qué te diferencia…" style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);background:var(--surface2);outline:none;resize:vertical;transition:border-color .2s;line-height:1.55"></textarea></div>
           </div>
         </div>
-
-        <!-- FOOTER -->
         <div style="display:flex;justify-content:flex-end;gap:10px;padding-bottom:2rem">
           <span id="perfilMsg" style="font-size:12px;color:var(--text3);font-family:var(--mono);align-self:center"></span>
           <button class="btn btn-green" onclick="guardarPerfil()" id="btnGuardar">Guardar cambios</button>
         </div>
       </div>
-
-    </div><!-- /main -->
-  </div><!-- /app-body -->
-</div><!-- /appScreen -->
+    </div>
+  </div>
+</div>
 
 <script>
 var GOOGLE_CLIENT_ID = '';
 var currentUser = null;
 var mudanceroData = null;
-var pedidosSimulados = [];
-var chatContactoActivo = null;
-var mensajes = {};
+var mudanzasDisponibles = [];
+var misCotizaciones = [];
 
-// ── INIT ──────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════
+// INIT — busca sesión en cualquier storage
+// ════════════════════════════════════════════════════
 window.onload = async function(){
   try{
     var r = await fetch('/api/admin-config');
@@ -490,15 +351,21 @@ window.onload = async function(){
     GOOGLE_CLIENT_ID = cfg.googleClientId;
   }catch(e){}
 
-  var saved = sessionStorage.getItem('mudanceroUser');
+  // FIX: acepta sesión de cualquier storage (mudanceroUser, googleUser o clienteUser)
+  var saved = sessionStorage.getItem('mudanceroUser')
+    || sessionStorage.getItem('googleUser')
+    || sessionStorage.getItem('clienteUser');
   if(saved){
     try{
       currentUser = JSON.parse(saved);
+      // Sincronizar en mudanceroUser para próximas cargas
+      sessionStorage.setItem('mudanceroUser', saved);
       await initApp();
       return;
     }catch(e){}
   }
 
+  // Sin sesión — mostrar botón de Google
   if(GOOGLE_CLIENT_ID){
     google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
@@ -514,23 +381,23 @@ window.onload = async function(){
 function handleCredential(response){
   var payload = JSON.parse(atob(response.credential.split('.')[1]));
   currentUser = {name:payload.name, email:payload.email, picture:payload.picture};
-  sessionStorage.setItem('mudanceroUser', JSON.stringify(currentUser));
+  var userStr = JSON.stringify(currentUser);
+  // FIX: guardar en todos los storages para que landing y mi-mudanza también lo reconozcan
+  sessionStorage.setItem('mudanceroUser', userStr);
+  sessionStorage.setItem('googleUser', userStr);
+  sessionStorage.setItem('clienteUser', userStr);
+  sessionStorage.setItem('rolMudancero', '1');
   initApp();
 }
 
 async function initApp(){
-  // Buscar mudancero por email
   try{
-    var r = await fetch('/api/mudancero-data?email=' + encodeURIComponent(currentUser.email));
+    var r = await fetch('/api/mudancero-data?email='+encodeURIComponent(currentUser.email));
     var d = await r.json();
-    if(!d.found){
-      showScreen('notFound');
-      return;
-    }
+    if(!d.found){ showScreen('notFound'); return; }
     mudanceroData = d.mudancero;
   }catch(e){
-    // En desarrollo mostrar igual
-    mudanceroData = {nombre: currentUser.name, estado: 'Pendiente', zona: 'CABA'};
+    mudanceroData = {nombre:currentUser.name, estado:'Pendiente', zona:'CABA'};
   }
 
   showScreen('app');
@@ -561,27 +428,31 @@ function showScreen(name){
   document.getElementById('appScreen').style.display = name==='app'?'block':'none';
 }
 
+// FIX: logout limpia TODOS los storages
 function logout(){
-  sessionStorage.removeItem('clienteUser');
+  sessionStorage.removeItem('mudanceroUser');
   sessionStorage.removeItem('googleUser');
+  sessionStorage.removeItem('clienteUser');
+  sessionStorage.removeItem('rolMudancero');
   window.location.href='/';
 }
 
-// ── NAVEGACIÓN ─────────────────────────────────────────────────────────────
-function showPage(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+// ════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ════════════════════════════════════════════════════
+function showPage(name, e){
+  if(e) e.preventDefault();
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.sidebar-item').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById('page-'+name).classList.add('active');
-  if(event) event.currentTarget.classList.add('active');
+  if(e && e.currentTarget) e.currentTarget.classList.add('active');
   if(name==='historial') loadHistorial();
   if(name==='ganancias') loadGanancias();
-  if(name==='chat') loadChat();
 }
 
-// ── PEDIDOS / MUDANZAS DISPONIBLES ────────────────────────────────────────
-var mudanzasDisponibles = [];
-var misCotizaciones = [];
-
+// ════════════════════════════════════════════════════
+// PEDIDOS
+// ════════════════════════════════════════════════════
 async function loadPedidos(){
   document.getElementById('pedidosList').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando mudanzas disponibles…</div>';
   try{
@@ -589,15 +460,11 @@ async function loadPedidos(){
     var r = await fetch('/api/cotizaciones?action=por-zona&email='+encodeURIComponent(currentUser.email)+'&zona='+encodeURIComponent(zona));
     var d = await r.json();
     mudanzasDisponibles = d.mudanzas || [];
-
-    // También cargar mis cotizaciones enviadas
     var r2 = await fetch('/api/cotizaciones?action=mis-cotizaciones&email='+encodeURIComponent(currentUser.email));
     var d2 = await r2.json();
     misCotizaciones = d2.mudanzas || [];
-
     renderPedidos();
   }catch(e){
-    // Si falla la API, mostrar estado vacío
     mudanzasDisponibles = [];
     misCotizaciones = [];
     renderPedidos();
@@ -608,113 +475,81 @@ function renderPedidos(){
   var badge = document.getElementById('badgeNuevos');
   badge.textContent = mudanzasDisponibles.length;
   badge.style.display = mudanzasDisponibles.length > 0 ? '' : 'none';
-
   var html = '';
 
-  // Mudanzas disponibles para cotizar
   if(mudanzasDisponibles.length > 0){
     html += '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📋 Mudanzas disponibles en tu zona</div>';
-    html += mudanzasDisponibles.map(m => {
+    mudanzasDisponibles.forEach(function(m){
       var expira = new Date(m.expira);
-      var ahorita = new Date();
-      var horasRestantes = Math.max(0, Math.round((expira - ahorita) / 3600000));
-      return `
-        <div class="pedido-card nuevo" style="margin-bottom:10px">
-          <div class="pedido-header">
-            <div>
-              <div class="pedido-ruta">${m.desde} → ${m.hasta}</div>
-              <div class="pedido-fecha">📅 ${m.fecha||'A confirmar'} · ${m.ambientes||'—'}</div>
-            </div>
-            <span class="badge nuevo">Disponible</span>
-          </div>
-          ${m.extras ? `<div class="pedido-meta"><span class="pedido-tag">📦 ${m.extras}</span></div>` : ''}
-          <div style="display:flex;align-items:flex-end;justify-content:space-between">
-            <div>
-              <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Precio estimado del cliente</div>
-              <div class="pedido-precio">$${parseInt(m.precio_estimado||0).toLocaleString('es-AR')}</div>
-              <div style="font-size:10px;color:${horasRestantes < 4 ? 'var(--red)':'var(--amber)'};font-family:var(--mono);margin-top:3px">⏱ Expira en ${horasRestantes}hs</div>
-            </div>
-            <div class="pedido-actions">
-              <button class="btn btn-green" onclick="abrirCotizacion(${JSON.stringify(m).replace(/"/g,'&quot;')})">💰 Enviar cotización</button>
-            </div>
-          </div>
-          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px">ID: ${m.id}</div>
-        </div>`;
-    }).join('');
+      var hs = Math.max(0, Math.round((expira - new Date()) / 3600000));
+      var mStr = JSON.stringify(m).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      html += '<div class="pedido-card nuevo">'
+        +'<div class="pedido-header"><div>'
+        +'<div class="pedido-ruta">'+m.desde+' → '+m.hasta+'</div>'
+        +'<div class="pedido-fecha">📅 '+(m.fecha||'A confirmar')+' · '+(m.ambientes||'—')+'</div>'
+        +'</div><span class="badge nuevo">Disponible</span></div>'
+        +(m.extras?'<div class="pedido-meta"><span class="pedido-tag">📦 '+m.extras+'</span></div>':'')
+        +'<div style="display:flex;align-items:flex-end;justify-content:space-between">'
+        +'<div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Precio estimado del cliente</div>'
+        +'<div class="pedido-precio">$'+parseInt(m.precio_estimado||0).toLocaleString('es-AR')+'</div>'
+        +'<div style="font-size:10px;color:'+(hs<4?'var(--red)':'var(--amber)')+';font-family:var(--mono);margin-top:3px">⏱ Expira en '+hs+'hs</div>'
+        +'</div><div class="pedido-actions">'
+        +'<button class="btn btn-green" onclick="abrirCotizacion(mudanzasDisponibles.find(function(x){return x.id===\''+m.id+'\'}))">💰 Enviar cotización</button>'
+        +'</div></div>'
+        +'<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px">ID: '+m.id+'</div>'
+        +'</div>';
+    });
   }
 
-  // Mis cotizaciones enviadas
   if(misCotizaciones.length > 0){
     html += '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px">✉️ Cotizaciones enviadas</div>';
-    html += misCotizaciones.map(m => {
+    misCotizaciones.forEach(function(m){
       var cot = m.miCotizacion;
-      var estadoBadge = m.estado === 'cotizacion_aceptada' && m.cotizacionAceptada?.id === cot?.id
+      var isAcept = m.estado==='cotizacion_aceptada' && m.cotizacionAceptada && m.cotizacionAceptada.id===cot?.id;
+      var estadoBadge = isAcept
         ? '<span class="badge aceptado">✓ Aceptada</span>'
-        : m.estado === 'cotizacion_aceptada'
+        : m.estado==='cotizacion_aceptada'
         ? '<span class="badge rechazado">No elegida</span>'
         : '<span class="badge nuevo">Pendiente</span>';
-      return `
-        <div class="pedido-card ${m.estado === 'cotizacion_aceptada' && m.cotizacionAceptada?.id === cot?.id ? 'aceptado' : ''}">
-          <div class="pedido-header">
-            <div>
-              <div class="pedido-ruta">${m.desde} → ${m.hasta}</div>
-              <div class="pedido-fecha">📅 ${m.fecha||'—'} · ${m.ambientes||'—'}</div>
-            </div>
-            ${estadoBadge}
-          </div>
-          <div class="pedido-precio">$${cot?.precio?.toLocaleString('es-AR')||'—'}</div>
-          <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">tu cotización</div>
-          ${cot?.nota ? `<div style="font-size:12px;color:var(--text2);margin-top:6px;font-style:italic">"${cot.nota}"</div>` : ''}
-        </div>`;
-    }).join('');
+      html += '<div class="pedido-card '+(isAcept?'aceptado':'')+'">'
+        +'<div class="pedido-header"><div>'
+        +'<div class="pedido-ruta">'+m.desde+' → '+m.hasta+'</div>'
+        +'<div class="pedido-fecha">📅 '+(m.fecha||'—')+' · '+(m.ambientes||'—')+'</div>'
+        +'</div>'+estadoBadge+'</div>'
+        +'<div class="pedido-precio">$'+(cot?.precio?.toLocaleString('es-AR')||'—')+'</div>'
+        +'<div style="font-size:11px;color:var(--text3);font-family:var(--mono)">tu cotización</div>'
+        +(cot?.nota?'<div style="font-size:12px;color:var(--text2);margin-top:6px;font-style:italic">"'+cot.nota+'"</div>':'')
+        +'</div>';
+    });
   }
 
-  if(!html){
-    html = '<div class="empty"><div class="empty-icon">📋</div>No hay mudanzas disponibles en tu zona por ahora.<br>Te avisamos por email cuando aparezca una.</div>';
-  }
-
+  if(!html) html = '<div class="empty"><div class="empty-icon">📋</div>No hay mudanzas disponibles en tu zona por ahora.<br>Te avisamos por email cuando aparezca una.</div>';
   document.getElementById('pedidosList').innerHTML = html;
 }
 
 function abrirCotizacion(mudanza){
-  var precioSugerido = parseInt(mudanza.precio_estimado || 0);
+  if(!mudanza) return;
+  var ps = parseInt(mudanza.precio_estimado||0);
   var modal = document.createElement('div');
   modal.id = 'cotModal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem';
-  modal.innerHTML = `
-    <div style="background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1.8rem;max-width:460px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.6)">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:.4rem">Enviar cotización</div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:1.2rem">${mudanza.desde} → ${mudanza.hasta} · ${mudanza.ambientes||''}</div>
-
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div>
-          <label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Tu precio ($ARS) <span style="color:var(--emerald)">*</span></label>
-          <div style="position:relative;display:flex;align-items:center">
-            <span style="position:absolute;left:12px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span>
-            <input type="number" id="cot-precio" value="${precioSugerido}" min="0"
-              style="width:100%;padding:11px 14px 11px 26px;border:1px solid var(--border2);border-radius:10px;font-size:14px;font-family:var(--mono);color:var(--text);background:var(--surface2);outline:none;font-weight:600"/>
-          </div>
-          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px">Precio estimado del cliente: $${precioSugerido.toLocaleString('es-AR')}</div>
-        </div>
-
-        <div>
-          <label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Tiempo estimado</label>
-          <input type="text" id="cot-tiempo" placeholder="Ej: 3-4 horas" 
-            style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);background:var(--surface2);outline:none"/>
-        </div>
-
-        <div>
-          <label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Nota para el cliente</label>
-          <textarea id="cot-nota" rows="3" placeholder="Describí tu propuesta: experiencia, qué incluye, condiciones…"
-            style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);background:var(--surface2);outline:none;resize:vertical;line-height:1.55"></textarea>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:8px;margin-top:1.2rem;justify-content:flex-end">
-        <button class="btn btn-ghost" onclick="document.getElementById('cotModal').remove()">Cancelar</button>
-        <button class="btn btn-green" id="btnEnviarCot" onclick="enviarCotizacion('${mudanza.id}')">Enviar cotización →</button>
-      </div>
-    </div>`;
+  modal.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:1.8rem;max-width:460px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.6)">'
+    +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:.4rem">Enviar cotización</div>'
+    +'<div style="font-size:13px;color:var(--text2);margin-bottom:1.2rem">'+mudanza.desde+' → '+mudanza.hasta+' · '+(mudanza.ambientes||'')+'</div>'
+    +'<div style="display:flex;flex-direction:column;gap:12px">'
+    +'<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Tu precio ($ARS) <span style="color:var(--emerald)">*</span></label>'
+    +'<div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:12px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span>'
+    +'<input type="number" id="cot-precio" value="'+ps+'" min="0" style="width:100%;padding:11px 14px 11px 26px;border:1px solid var(--border2);border-radius:10px;font-size:14px;font-family:var(--mono);color:var(--text);background:var(--surface2);outline:none;font-weight:600"/></div>'
+    +'<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px">Precio estimado del cliente: $'+ps.toLocaleString('es-AR')+'</div></div>'
+    +'<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Tiempo estimado</label>'
+    +'<input type="text" id="cot-tiempo" placeholder="Ej: 3-4 horas" style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:Outfit,sans-serif;color:var(--text);background:var(--surface2);outline:none"/></div>'
+    +'<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Nota para el cliente</label>'
+    +'<textarea id="cot-nota" rows="3" placeholder="Describí tu propuesta: experiencia, qué incluye, condiciones…" style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:Outfit,sans-serif;color:var(--text);background:var(--surface2);outline:none;resize:vertical;line-height:1.55"></textarea></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:1.2rem;justify-content:flex-end">'
+    +'<button class="btn btn-ghost" onclick="document.getElementById(\'cotModal\').remove()">Cancelar</button>'
+    +'<button class="btn btn-green" id="btnEnviarCot" onclick="enviarCotizacion(\''+mudanza.id+'\')">Enviar cotización →</button>'
+    +'</div></div>';
   document.body.appendChild(modal);
 }
 
@@ -722,31 +557,15 @@ async function enviarCotizacion(mudanzaId){
   var precio = document.getElementById('cot-precio').value;
   var nota = document.getElementById('cot-nota').value.trim();
   var tiempo = document.getElementById('cot-tiempo').value.trim();
-
-  if(!precio || parseInt(precio) <= 0){
-    alert('Ingresá un precio válido');
-    return;
-  }
-
+  if(!precio || parseInt(precio)<=0){ alert('Ingresá un precio válido'); return; }
   var btn = document.getElementById('btnEnviarCot');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px;vertical-align:middle;display:inline-block"></span>Enviando…';
-
   var m = Array.isArray(mudanceroData) ? mudanceroData : [];
-
   try{
-    var r = await fetch('/api/cotizaciones?action=cotizar', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        mudanzaId,
-        mudanceroEmail: currentUser.email,
-        mudanceroNombre: m[1] || currentUser.name,
-        mudanceroTel: m[3] || '',
-        precio: parseInt(precio),
-        nota,
-        tiempoEstimado: tiempo,
-      })
+    var r = await fetch('/api/cotizaciones?action=cotizar',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({mudanzaId, mudanceroEmail:currentUser.email, mudanceroNombre:m[1]||currentUser.name, mudanceroTel:m[3]||'', precio:parseInt(precio), nota, tiempoEstimado:tiempo})
     });
     var d = await r.json();
     if(d.error) throw new Error(d.error);
@@ -755,311 +574,132 @@ async function enviarCotizacion(mudanzaId){
   }catch(e){
     btn.disabled = false;
     btn.innerHTML = 'Enviar cotización →';
-    alert('Error: ' + e.message);
+    alert('Error: '+e.message);
   }
 }
 
-
-// ── HISTORIAL ──────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════
+// HISTORIAL
+// ════════════════════════════════════════════════════
 function loadHistorial(){
-  var aceptadas = misCotizaciones.filter(m =>
-    m.estado === 'cotizacion_aceptada' && m.cotizacionAceptada?.id === m.miCotizacion?.id
-  );
-  if(aceptadas.length === 0){
-    document.getElementById('historialList').innerHTML = '<div class="empty"><div class="empty-icon">📅</div>Aún no tenés trabajos aceptados.</div>';
+  var aceptadas = misCotizaciones.filter(function(m){
+    return m.estado==='cotizacion_aceptada' && m.cotizacionAceptada && m.cotizacionAceptada.id===m.miCotizacion?.id;
+  });
+  if(aceptadas.length===0){
+    document.getElementById('historialList').innerHTML='<div class="empty"><div class="empty-icon">📅</div>Aún no tenés trabajos aceptados.</div>';
     return;
   }
-  var html = aceptadas.map(m => {
+  document.getElementById('historialList').innerHTML = aceptadas.map(function(m){
     var cot = m.miCotizacion;
-    var fee = Math.round(cot.precio * 0.10);
-    return `
-      <div class="pedido-card aceptado">
-        <div class="pedido-header">
-          <div>
-            <div class="pedido-ruta">${m.desde} → ${m.hasta}</div>
-            <div class="pedido-fecha">📅 ${m.fecha||'—'} · ${m.ambientes||'—'}</div>
-          </div>
-          <span class="badge aceptado">✓ Aceptado</span>
-        </div>
-        <div class="pedido-precio">$${(cot.precio-fee).toLocaleString('es-AR')}</div>
-        <div class="pedido-precio-sub">vos cobrás · fee MudateYa: $${fee.toLocaleString('es-AR')}</div>
-      </div>`;
+    var fee = Math.round(cot.precio*0.15);
+    return '<div class="pedido-card aceptado">'
+      +'<div class="pedido-header"><div>'
+      +'<div class="pedido-ruta">'+m.desde+' → '+m.hasta+'</div>'
+      +'<div class="pedido-fecha">📅 '+(m.fecha||'—')+' · '+(m.ambientes||'—')+'</div>'
+      +'</div><span class="badge aceptado">✓ Aceptado</span></div>'
+      +'<div class="pedido-precio">$'+(cot.precio-fee).toLocaleString('es-AR')+'</div>'
+      +'<div class="pedido-precio-sub">vos cobrás · fee MYA (15%): $'+fee.toLocaleString('es-AR')+'</div>'
+      +'</div>';
   }).join('');
-  document.getElementById('historialList').innerHTML = html;
 }
 
-// ── GANANCIAS ──────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════
+// GANANCIAS
+// ════════════════════════════════════════════════════
 function loadGanancias(){
-  var aceptadas = misCotizaciones.filter(m =>
-    m.estado === 'cotizacion_aceptada' && m.cotizacionAceptada?.id === m.miCotizacion?.id
-  );
-  var total = aceptadas.reduce((s,m) => s + (m.miCotizacion?.precio||0) * 0.90, 0);
-  var promedio = aceptadas.length > 0 ? Math.round(total/aceptadas.length) : 0;
-  document.getElementById('g-total').textContent = '$'+Math.round(total).toLocaleString('es-AR');
-  document.getElementById('g-trabajos').textContent = aceptadas.length;
-  document.getElementById('g-promedio').textContent = '$'+promedio.toLocaleString('es-AR');
-
-  if(aceptadas.length === 0){
-    document.getElementById('gananciasList').innerHTML = '<div class="empty"><div class="empty-icon">💰</div>Cuando el cliente acepte tu cotización, tus ganancias aparecen acá.</div>';
+  var aceptadas = misCotizaciones.filter(function(m){
+    return m.estado==='cotizacion_aceptada' && m.cotizacionAceptada && m.cotizacionAceptada.id===m.miCotizacion?.id;
+  });
+  var total = aceptadas.reduce(function(s,m){ return s+(m.miCotizacion?.precio||0)*0.85; },0);
+  var prom = aceptadas.length>0 ? Math.round(total/aceptadas.length) : 0;
+  document.getElementById('g-total').textContent='$'+Math.round(total).toLocaleString('es-AR');
+  document.getElementById('g-trabajos').textContent=aceptadas.length;
+  document.getElementById('g-promedio').textContent='$'+prom.toLocaleString('es-AR');
+  if(aceptadas.length===0){
+    document.getElementById('gananciasList').innerHTML='<div class="empty"><div class="empty-icon">💰</div>Cuando el cliente acepte tu cotización, tus ganancias aparecen acá.</div>';
     return;
   }
-  var html = '<table style="width:100%;border-collapse:collapse">'
-    + '<thead><tr style="border-bottom:1px solid var(--border)"><th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Trabajo</th><th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Precio total</th><th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Fee MYA</th><th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Vos cobrás</th></tr></thead><tbody>'
-    + aceptadas.map(m => {
-        var cot = m.miCotizacion;
-        var fee = Math.round(cot.precio * 0.10);
-        return `<tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:11px 14px;font-size:12px;color:var(--text2)">${m.desde.split(',')[0]} → ${m.hasta.split(',')[0]}</td>
-          <td style="padding:11px 14px;font-size:12px;font-family:var(--mono)">$${cot.precio.toLocaleString('es-AR')}</td>
-          <td style="padding:11px 14px;font-size:12px;font-family:var(--mono);color:var(--red)">-$${fee.toLocaleString('es-AR')}</td>
-          <td style="padding:11px 14px;font-size:13px;font-family:var(--mono);color:var(--emerald);font-weight:600">$${(cot.precio-fee).toLocaleString('es-AR')}</td>
-        </tr>`;
-      }).join('')
-    + '</tbody></table>';
-  document.getElementById('gananciasList').innerHTML = html;
+  var html='<table style="width:100%;border-collapse:collapse">'
+    +'<thead><tr style="border-bottom:1px solid var(--border)">'
+    +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Trabajo</th>'
+    +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Precio total</th>'
+    +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Fee MYA (15%)</th>'
+    +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Vos cobrás</th>'
+    +'</tr></thead><tbody>'
+    +aceptadas.map(function(m){
+      var cot=m.miCotizacion, fee=Math.round(cot.precio*0.15);
+      return '<tr style="border-bottom:1px solid var(--border)">'
+        +'<td style="padding:11px 14px;font-size:12px;color:var(--text2)">'+m.desde.split(',')[0]+' → '+m.hasta.split(',')[0]+'</td>'
+        +'<td style="padding:11px 14px;font-size:12px;font-family:var(--mono)">$'+cot.precio.toLocaleString('es-AR')+'</td>'
+        +'<td style="padding:11px 14px;font-size:12px;font-family:var(--mono);color:var(--red)">-$'+fee.toLocaleString('es-AR')+'</td>'
+        +'<td style="padding:11px 14px;font-size:13px;font-family:var(--mono);color:var(--emerald);font-weight:600">$'+(cot.precio-fee).toLocaleString('es-AR')+'</td>'
+        +'</tr>';
+    }).join('')
+    +'</tbody></table>';
+  document.getElementById('gananciasList').innerHTML=html;
 }
 
-// ── CHAT ───────────────────────────────────────────────────────────────────
-var chatMudanzaActiva = null;
-var chatPolling = null;
-var chatUltimoId = 0;
-
-async function loadChat(){
-  try{
-    var r = await fetch('/api/chat?action=conversaciones&email='+encodeURIComponent(currentUser.email));
-    var d = await r.json();
-    var convs = d.conversaciones || [];
-    var aceptadas = misCotizaciones.filter(m =>
-      m.estado === 'cotizacion_aceptada' && m.cotizacionAceptada?.id === m.miCotizacion?.id
-    );
-
-    if(aceptadas.length === 0 && convs.length === 0){
-      document.getElementById('chatContactsList').innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text3);font-size:12px"><div style="font-size:2rem;opacity:.3;margin-bottom:8px">💬</div>Cuando acepten tu cotización podés chatear acá</div>';
-      return;
-    }
-
-    var contactosHtml = aceptadas.map(m => {
-      var conv = convs.find(c => c.mudanzaId === m.id);
-      var ultimo = conv?.ultimoMensaje?.texto || 'Sin mensajes aún';
-      var ruta = (m.desde?.split(',')[0]||'—') + ' → ' + (m.hasta?.split(',')[0]||'—');
-      return `
-        <div class="chat-contact ${chatMudanzaActiva===m.id?'active':''}" onclick="abrirChatMudancero('${m.id}','${ruta.replace(/'/g,"\\'")}')">
-          <div class="chat-contact-av">CL</div>
-          <div style="flex:1;min-width:0">
-            <div class="chat-contact-name">Cliente</div>
-            <div class="chat-contact-last">${ruta}</div>
-            <div class="chat-contact-last">${ultimo.substring(0,30)}${ultimo.length>30?'…':''}</div>
-          </div>
-        </div>`;
-    }).join('');
-
-    document.getElementById('chatContactsList').innerHTML = contactosHtml || '<div style="padding:1rem;text-align:center;color:var(--text3);font-size:12px">Sin conversaciones</div>';
-
-    if(aceptadas.length > 0 && !chatMudanzaActiva){
-      var ruta = (aceptadas[0].desde?.split(',')[0]||'—') + ' → ' + (aceptadas[0].hasta?.split(',')[0]||'—');
-      abrirChatMudancero(aceptadas[0].id, ruta);
-    }
-  }catch(e){ console.warn('Error cargando chat:', e.message); }
-}
-
-async function abrirChatMudancero(mudanzaId, nombre){
-  chatMudanzaActiva = mudanzaId;
-  document.getElementById('chatHeader').innerHTML = `
-    <div class="chat-header-av">CL</div>
-    <div>
-      <div style="font-size:13px;font-weight:600;color:var(--text)">Cliente</div>
-      <div style="font-size:11px;color:var(--emerald);font-family:var(--mono)">${nombre}</div>
-    </div>`;
-  chatUltimoId = 0;
-  await cargarMensajesMudancero();
-  if(chatPolling) clearInterval(chatPolling);
-  chatPolling = setInterval(cargarMensajesMudancero, 4000);
-  loadChat();
-}
-
-async function cargarMensajesMudancero(){
-  if(!chatMudanzaActiva) return;
-  try{
-    var r = await fetch('/api/chat?action=leer&mudanzaId='+chatMudanzaActiva);
-    var d = await r.json();
-    var msgs = d.mensajes || [];
-    if(msgs.length === chatUltimoId) return;
-    chatUltimoId = msgs.length;
-    var list = document.getElementById('chatList');
-    if(msgs.length === 0){
-      list.innerHTML = '<div class="empty" style="margin:auto"><div style="font-size:2rem;opacity:.2">💬</div>Iniciá la conversación</div>';
-      return;
-    }
-    list.innerHTML = msgs.map(m => {
-      var esMio = m.fromEmail === currentUser.email;
-      var hora = new Date(m.fecha).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-      return `<div class="chat-msg ${esMio?'mine':'other'}">
-        ${!esMio?`<div class="chat-msg-sender">${m.fromNombre}</div>`:''}
-        ${m.texto}
-        <div class="chat-msg-time">${hora}</div>
-      </div>`;
-    }).join('');
-    list.scrollTop = list.scrollHeight;
-  }catch(e){ console.warn('Error:', e.message); }
-}
-
-function sendMsg(){
-  var input = document.getElementById('chatInput');
-  var text = input.value.trim();
-  if(!text || !chatMudanzaActiva) return;
-  input.value = '';
-  fetch('/api/chat?action=enviar', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      mudanzaId: chatMudanzaActiva,
-      fromEmail: currentUser.email,
-      fromNombre: Array.isArray(mudanceroData) ? (mudanceroData[1]||currentUser.name) : currentUser.name,
-      fromRol: 'mudancero',
-      texto: text,
-    })
-  }).then(function(){ cargarMensajesMudancero(); })
-    .catch(function(e){ console.warn('Error:', e.message); input.value = text; });
-}
-
-// ── PERFIL ─────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════
+// PERFIL
+// ════════════════════════════════════════════════════
 function loadPerfil(){
   var m = Array.isArray(mudanceroData) ? mudanceroData : [];
-
-  // Datos personales
-  setVal('pf-nombre',   m[1]  || currentUser.name || '');
-  setVal('pf-empresa',  m[2]  || '');
-  setVal('pf-tel',      m[3]  || '');
-  setVal('pf-email',    m[4]  || currentUser.email || '');
-
-  // Zona
-  setSelect('pf-zona',           m[5]  || '');
-  setVal('pf-zonas-extra',       m[6]  || '');
-
-  // Vehículo
-  setSelect('pf-vehiculo',       m[8]  || '');
-  setSelect('pf-cant-vehiculos', m[9]  || '1');
-  setSelect('pf-equipo',         m[10] || 'Solo yo');
-  setSelect('pf-anticipacion',   m[14] || '48 horas');
-
-  // Precios
-  setVal('pf-p1',     m[15] || '');
-  setVal('pf-p2',     m[16] || '');
-  setVal('pf-p3',     m[17] || '');
-  setVal('pf-p4',     m[18] || '');
-  setVal('pf-pflete', m[19] || '');
-
-  // Notas
-  setVal('pf-notas', m[20] || '');
-
-  // Datos bancarios (guardados en columnas extra del Sheet o en localStorage)
-  var banking = JSON.parse(localStorage.getItem('banking_' + currentUser.email) || '{}');
-  if(banking.metodoCobro) setSelect('pf-metodoCobro', banking.metodoCobro);
-  if(banking.cbu) setVal('pf-cbu', banking.cbu);
-  if(banking.emailMP) setVal('pf-emailMP', banking.emailMP);
-  if(banking.titular) setVal('pf-titular', banking.titular);
+  setVal('pf-nombre', m[1]||currentUser.name||'');
+  setVal('pf-empresa', m[2]||'');
+  setVal('pf-tel', m[3]||'');
+  setVal('pf-email', m[4]||currentUser.email||'');
+  setSelect('pf-zona', m[5]||'');
+  setVal('pf-zonas-extra', m[6]||'');
+  setSelect('pf-vehiculo', m[8]||'');
+  setSelect('pf-cant-vehiculos', m[9]||'1');
+  setSelect('pf-equipo', m[10]||'Solo yo');
+  setSelect('pf-anticipacion', m[14]||'48 horas');
+  setVal('pf-p1', m[15]||''); setVal('pf-p2', m[16]||'');
+  setVal('pf-p3', m[17]||''); setVal('pf-p4', m[18]||'');
+  setVal('pf-pflete', m[19]||''); setVal('pf-notas', m[20]||'');
+  var bk = JSON.parse(localStorage.getItem('banking_'+currentUser.email)||'{}');
+  if(bk.metodoCobro) setSelect('pf-metodoCobro', bk.metodoCobro);
+  if(bk.cbu) setVal('pf-cbu', bk.cbu);
+  if(bk.emailMP) setVal('pf-emailMP', bk.emailMP);
+  if(bk.titular) setVal('pf-titular', bk.titular);
   toggleMetodoCobroPanel();
-
-  // Chips — servicios
-  var serviciosGuardados = m[11] || '';
-  document.querySelectorAll('#pf-servicios .chip').forEach(c=>{
-    if(serviciosGuardados.includes(c.textContent.trim().replace(/^[^\s]+\s/,'')))
-      c.classList.add('sel');
-  });
-
-  // Chips — días
-  var diasGuardados = m[12] || '';
-  document.querySelectorAll('#pf-dias .chip').forEach(c=>{
-    if(diasGuardados.includes(c.textContent.trim())) c.classList.add('sel');
-  });
-
-  // Chips — horarios
-  var horariosGuardados = m[13] || '';
-  document.querySelectorAll('#pf-horarios .chip').forEach(c=>{
-    if(horariosGuardados.includes(c.textContent.trim())) c.classList.add('sel');
-  });
+  var sv = m[11]||'';
+  document.querySelectorAll('#pf-servicios .chip').forEach(function(c){ if(sv.includes(c.textContent.trim().replace(/^[^\s]+\s/,''))) c.classList.add('sel'); });
+  var sd = m[12]||'';
+  document.querySelectorAll('#pf-dias .chip').forEach(function(c){ if(sd.includes(c.textContent.trim())) c.classList.add('sel'); });
+  var sh = m[13]||'';
+  document.querySelectorAll('#pf-horarios .chip').forEach(function(c){ if(sh.includes(c.textContent.trim())) c.classList.add('sel'); });
 }
 
 function toggleMetodoCobroPanel(){
-  var metodo = document.getElementById('pf-metodoCobro').value;
-  document.getElementById('panel-wrap-cbu').style.display = metodo === 'cbu' ? '' : 'none';
-  document.getElementById('panel-wrap-mp').style.display = metodo === 'mp' ? '' : 'none';
+  var v = document.getElementById('pf-metodoCobro').value;
+  document.getElementById('panel-wrap-cbu').style.display = v==='cbu'?'':'none';
+  document.getElementById('panel-wrap-mp').style.display = v==='mp'?'':'none';
 }
 
-function setVal(id, val){
-  var el = document.getElementById(id);
-  if(el) el.value = val;
-}
-
-function setSelect(id, val){
-  var el = document.getElementById(id);
-  if(!el) return;
-  for(var i=0;i<el.options.length;i++){
-    if(el.options[i].value === val || el.options[i].text === val){
-      el.selectedIndex = i; break;
-    }
-  }
-}
+function setVal(id,val){ var e=document.getElementById(id); if(e) e.value=val; }
+function setSelect(id,val){ var e=document.getElementById(id); if(!e) return; for(var i=0;i<e.options.length;i++){ if(e.options[i].value===val||e.options[i].text===val){ e.selectedIndex=i; break; } } }
 
 async function guardarPerfil(){
-  var btn = document.getElementById('btnGuardar');
-  var msg = document.getElementById('perfilMsg');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px;vertical-align:middle;display:inline-block"></span>Guardando…';
-
-  var servicios = Array.from(document.querySelectorAll('#pf-servicios .sel')).map(c=>c.textContent.trim()).join(', ');
-  var dias = Array.from(document.querySelectorAll('#pf-dias .sel')).map(c=>c.textContent.trim()).join(', ');
-  var horarios = Array.from(document.querySelectorAll('#pf-horarios .sel')).map(c=>c.textContent.trim()).join(', ');
-
-  var datos = {
-    nombre:       document.getElementById('pf-nombre').value.trim(),
-    empresa:      document.getElementById('pf-empresa').value.trim(),
-    telefono:     document.getElementById('pf-tel').value.trim(),
-    email:        currentUser.email,
-    zonaBase:     document.getElementById('pf-zona').value,
-    zonasExtra:   document.getElementById('pf-zonas-extra').value.trim(),
-    vehiculo:     document.getElementById('pf-vehiculo').value,
-    cantVehiculos:document.getElementById('pf-cant-vehiculos').value,
-    equipo:       document.getElementById('pf-equipo').value,
-    servicios,
-    dias,
-    horarios,
-    anticipacion: document.getElementById('pf-anticipacion').value,
-    precio1amb:   document.getElementById('pf-p1').value,
-    precio2amb:   document.getElementById('pf-p2').value,
-    precio3amb:   document.getElementById('pf-p3').value,
-    precio4amb:   document.getElementById('pf-p4').value,
-    precioFlete:  document.getElementById('pf-pflete').value,
-    extra:        document.getElementById('pf-notas').value.trim(),
-  };
-
-  // Guardar datos bancarios en localStorage (privado, no va al Sheet)
-  var banking = {
-    metodoCobro: document.getElementById('pf-metodoCobro').value,
-    cbu:         document.getElementById('pf-cbu').value.trim(),
-    emailMP:     document.getElementById('pf-emailMP').value.trim(),
-    titular:     document.getElementById('pf-titular').value.trim(),
-  };
-  localStorage.setItem('banking_' + currentUser.email, JSON.stringify(banking));
-
+  var btn=document.getElementById('btnGuardar'), msg=document.getElementById('perfilMsg');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px;vertical-align:middle;display:inline-block"></span>Guardando…';
+  var servicios=Array.from(document.querySelectorAll('#pf-servicios .sel')).map(function(c){return c.textContent.trim();}).join(', ');
+  var dias=Array.from(document.querySelectorAll('#pf-dias .sel')).map(function(c){return c.textContent.trim();}).join(', ');
+  var horarios=Array.from(document.querySelectorAll('#pf-horarios .sel')).map(function(c){return c.textContent.trim();}).join(', ');
+  var datos={nombre:document.getElementById('pf-nombre').value.trim(),empresa:document.getElementById('pf-empresa').value.trim(),telefono:document.getElementById('pf-tel').value.trim(),email:currentUser.email,zonaBase:document.getElementById('pf-zona').value,zonasExtra:document.getElementById('pf-zonas-extra').value.trim(),vehiculo:document.getElementById('pf-vehiculo').value,cantVehiculos:document.getElementById('pf-cant-vehiculos').value,equipo:document.getElementById('pf-equipo').value,servicios,dias,horarios,anticipacion:document.getElementById('pf-anticipacion').value,precio1amb:document.getElementById('pf-p1').value,precio2amb:document.getElementById('pf-p2').value,precio3amb:document.getElementById('pf-p3').value,precio4amb:document.getElementById('pf-p4').value,precioFlete:document.getElementById('pf-pflete').value,extra:document.getElementById('pf-notas').value.trim()};
+  localStorage.setItem('banking_'+currentUser.email, JSON.stringify({metodoCobro:document.getElementById('pf-metodoCobro').value,cbu:document.getElementById('pf-cbu').value.trim(),emailMP:document.getElementById('pf-emailMP').value.trim(),titular:document.getElementById('pf-titular').value.trim()}));
   try{
-    var r = await fetch('/api/actualizar-mudancero', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(datos)
-    });
-    var d = await r.json();
+    var r=await fetch('/api/actualizar-mudancero',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
+    var d=await r.json();
     if(d.error) throw new Error(d.error);
-    btn.disabled = false;
-    btn.innerHTML = '✓ Guardado';
-    msg.textContent = 'Cambios guardados ' + new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-    setTimeout(()=>{btn.innerHTML='Guardar cambios';msg.textContent='';},3000);
+    btn.disabled=false; btn.innerHTML='✓ Guardado';
+    msg.textContent='Cambios guardados '+new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+    setTimeout(function(){ btn.innerHTML='Guardar cambios'; msg.textContent=''; },3000);
   }catch(err){
-    btn.disabled = false;
-    btn.innerHTML = 'Guardar cambios';
-    msg.style.color = 'var(--red)';
-    msg.textContent = '⚠ Error: ' + err.message;
-    setTimeout(()=>{msg.textContent='';msg.style.color='var(--text3)';},4000);
+    btn.disabled=false; btn.innerHTML='Guardar cambios';
+    msg.style.color='var(--red)'; msg.textContent='⚠ Error: '+err.message;
+    setTimeout(function(){ msg.textContent=''; msg.style.color='var(--text3)'; },4000);
   }
 }
 </script>
