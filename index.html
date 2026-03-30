@@ -1690,7 +1690,8 @@ async function publicarMudanzaEnSistema() {
   var desde = getInputVal('desde'), hasta = getInputVal('hasta');
   var objetos = Array.from(document.querySelectorAll('.obj-chip.sel .obj-label')).map(function(e) { return e.textContent; }).join(', ');
   var precio = estimarPrecio();
-  var clienteWA = window._clienteWA !== undefined ? window._clienteWA : getInputVal('clienteWA');
+  var clienteWA = window._clienteWA !== undefined ? window._clienteWA
+    : (localStorage.getItem('clienteWA_'+(user ? user.email : '')) || getInputVal('clienteWA'));
   try {
     var r = await fetch('/api/cotizaciones?action=publicar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clienteEmail: user.email, clienteNombre: user.name, desde, hasta, ambientes: amb + ' ambiente' + (amb !== 1 ? 's' : ''), fecha: getFechaLabel(), servicios: objetos, zonaBase: desde, precio_estimado: precio, clienteWA: clienteWA }) });
     var d = await r.json();
@@ -2012,6 +2013,11 @@ function openLoginModal() {
           if (_loginRol === 'mudancero') { sessionStorage.setItem('rolMudancero', '1'); window.location.href = '/mi-cuenta'; return; }
           if (step === 3) onStep3Login(user);
           if (_pendingPayModal) { var p = _pendingPayModal; _pendingPayModal = null; _doOpenPayModal(p.name, p.initials, p.rating, p.precio, p.placeId); }
+          // Pedir celular si no lo tiene guardado (clientes, no mudanceros)
+          if (_loginRol !== 'mudancero') {
+            var waGuardado = localStorage.getItem('clienteWA_' + user.email);
+            if (!waGuardado) setTimeout(function(){ pedirCelularModal(user); }, 800);
+          }
         }
       });
       google.accounts.id.renderButton(document.getElementById('loginModalBtn'), { theme: 'filled_black', size: 'large', text: 'signin_with', width: 260 });
@@ -2047,7 +2053,43 @@ function closeLoginModal() {
   }
 })();
 
-// ── TAP CORRECTO EN MOBILE — ignora scroll ──────────────
+function pedirCelularModal(user) {
+  if (document.getElementById('celModal')) return;
+  var modal = document.createElement('div');
+  modal.id = 'celModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1.2rem';
+  modal.innerHTML = '<div style="background:var(--surface);border:1px solid var(--border2);border-radius:22px;padding:2rem 1.6rem;max-width:360px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.6)">'
+    +'<div style="font-size:2rem;margin-bottom:10px">📱</div>'
+    +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.5rem;letter-spacing:1px;color:var(--text);margin-bottom:6px">Tu celular</div>'
+    +'<div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:1.2rem">Para que el mudancero que elijas pueda coordinarse con vos.</div>'
+    +'<input id="celInput" type="tel" placeholder="+54 9 11 1234-5678"'
+    +' style="width:100%;padding:12px 14px;border:1px solid var(--border2);border-radius:10px;font-size:15px;font-family:\'Outfit\',sans-serif;color:var(--text);background:var(--surface2);outline:none;text-align:center;margin-bottom:8px"'
+    +' onkeydown="if(event.key===\'Enter\') guardarCelularModal()"/>'
+    +'<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:1.2rem">🔒 Solo lo ve el mudancero que aceptés</div>'
+    +'<button onclick="guardarCelularModal()" style="width:100%;padding:13px;border-radius:10px;border:none;background:var(--emerald);color:#041A0E;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Outfit\',sans-serif;margin-bottom:8px">Guardar →</button>'
+    +'<button onclick="document.getElementById(\'celModal\').remove()" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border2);background:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:var(--mono)">Ahora no</button>'
+    +'</div>';
+  document.body.appendChild(modal);
+  setTimeout(function(){ var i = document.getElementById('celInput'); if(i) i.focus(); }, 100);
+  window._celModalUser = user;
+}
+
+function guardarCelularModal() {
+  var val = (document.getElementById('celInput')||{}).value||'';
+  val = val.trim();
+  if (val.length < 8) {
+    var i = document.getElementById('celInput');
+    if(i){ i.style.borderColor='var(--emerald)'; setTimeout(function(){i.style.borderColor='';},1500); }
+    return;
+  }
+  var u = window._celModalUser || currentUser || {};
+  if (u.email) {
+    localStorage.setItem('clienteWA_'+u.email, val);
+    window._clienteWA = val;
+  }
+  var m = document.getElementById('celModal');
+  if(m) m.remove();
+}
 (function() {
   var cards = document.querySelectorAll('.service-card');
   cards.forEach(function(card) {
