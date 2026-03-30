@@ -482,13 +482,17 @@ function renderPedidos(){
     mudanzasDisponibles.forEach(function(m){
       var expira = new Date(m.expira);
       var hs = Math.max(0, Math.round((expira - new Date()) / 3600000));
-      var mStr = JSON.stringify(m).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      var esFlete = m.ambientes === 'Flete';
       html += '<div class="pedido-card nuevo">'
         +'<div class="pedido-header"><div>'
         +'<div class="pedido-ruta">'+m.desde+' → '+m.hasta+'</div>'
-        +'<div class="pedido-fecha">📅 '+(m.fecha||'A confirmar')+' · '+(m.ambientes||'—')+'</div>'
+        +'<div class="pedido-fecha">📅 '+(m.fecha||'A confirmar')+' · '+(esFlete ? '🚛 Flete' : m.ambientes||'—')+'</div>'
         +'</div><span class="badge nuevo">Disponible</span></div>'
-        +(m.extras?'<div class="pedido-meta"><span class="pedido-tag">📦 '+m.extras+'</span></div>':'')
+        // Info del objeto/mudanza
+        +'<div class="pedido-meta">'
+        +(m.servicios ? '<span class="pedido-tag">'+(esFlete?'📦':'🏠')+' '+m.servicios+'</span>' : '')
+        +(m.extras    ? '<span class="pedido-tag" style="color:var(--amber)">⚠ '+m.extras+'</span>' : '')
+        +'</div>'
         +'<div style="display:flex;align-items:flex-end;justify-content:space-between">'
         +'<div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Precio estimado del cliente</div>'
         +'<div class="pedido-precio">$'+parseInt(m.precio_estimado||0).toLocaleString('es-AR')+'</div>'
