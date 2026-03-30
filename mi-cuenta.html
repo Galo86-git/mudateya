@@ -673,6 +673,8 @@ async function rechazarPedido(mudanzaId, btn) {
     console.warn('Error rechazando:', e.message);
   }
 }
+
+function abrirCotizacion(mudanza){
   if(!mudanza) return;
   var ps = parseInt(mudanza.precio_estimado||0);
   var modal = document.createElement('div');
