@@ -732,13 +732,13 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:2rem 2.5r
 
       <!-- SELECTOR — elegís primero qué necesitás -->
       <div class="service-selector">
-        <div class="service-card sel" id="sc-mudanza" onclick="selectService('mudanza')" ontouchend="selectService('mudanza');event.preventDefault()">
+        <div class="service-card sel" id="sc-mudanza" onclick="selectService('mudanza')">
           <span class="service-card-icon">🏠</span>
           <div class="service-card-title">Mudanza</div>
           <div class="service-card-sub">Varios ambientes<br>Recibís múltiples cotizaciones</div>
           <span class="service-card-arrow">→</span>
         </div>
-        <div class="service-card" id="sc-flete" onclick="selectService('flete')" ontouchend="selectService('flete');event.preventDefault()">
+        <div class="service-card" id="sc-flete" onclick="selectService('flete')">
           <span class="service-card-icon">📦</span>
           <div class="service-card-title">Flete</div>
           <div class="service-card-sub">Objeto puntual<br>Precio fijo en el momento</div>
@@ -2047,8 +2047,30 @@ function closeLoginModal() {
   }
 })();
 
-// ════════════════════════════════════════════════════
-// SELECTOR TIPO SERVICIO
+// ── TAP CORRECTO EN MOBILE — ignora scroll ──────────────
+(function() {
+  var cards = document.querySelectorAll('.service-card');
+  cards.forEach(function(card) {
+    var startX, startY, moved;
+    card.addEventListener('touchstart', function(e) {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      moved = false;
+    }, { passive: true });
+    card.addEventListener('touchmove', function(e) {
+      var dx = Math.abs(e.touches[0].clientX - startX);
+      var dy = Math.abs(e.touches[0].clientY - startY);
+      if (dx > 8 || dy > 8) moved = true;
+    }, { passive: true });
+    card.addEventListener('touchend', function(e) {
+      if (!moved) {
+        e.preventDefault();
+        var tipo = card.id === 'sc-mudanza' ? 'mudanza' : 'flete';
+        selectService(tipo);
+      }
+    });
+  });
+})();
 // ════════════════════════════════════════════════════
 var tipoServicio = 'mudanza';
 function selectService(tipo) {
