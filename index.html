@@ -2086,6 +2086,12 @@ function guardarCelularModal() {
   if (u.email) {
     localStorage.setItem('clienteWA_'+u.email, val);
     window._clienteWA = val;
+    // Guardar en Redis para que el mudancero lo vea
+    fetch('/api/cotizaciones?action=update-wa', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email: u.email, clienteWA: val })
+    }).catch(function(e){ console.warn('Error guardando WA:', e.message); });
   }
   var m = document.getElementById('celModal');
   if(m) m.remove();
