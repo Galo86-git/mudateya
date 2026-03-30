@@ -420,7 +420,16 @@ module.exports = async function handler(req, res) {
       } catch(e) { return res.status(200).json({ mudanzas: [] }); }
     }
 
-    // Actualizar celular del cliente en todas sus mudanzas
+    // Rechazar pedido — el mudancero no quiere cotizar esta mudanza
+    if (action === 'rechazar' && req.method === 'POST') {
+      const { mudanzaId, mudanceroEmail } = req.body;
+      if (!mudanzaId || !mudanceroEmail) return res.status(400).json({ error: 'Faltan datos' });
+      // Guardar en lista de rechazados del mudancero para no mostrarlo más
+      const rechazados = await getJSON(`rechazados:${mudanceroEmail}`) || [];
+      if (!rechazados.includes(mudanzaId)) rechazados.push(mudanzaId);
+      await setJSON(`rechazados:${mudanceroEmail}`, rechazados, 604800);
+      return res.status(200).json({ ok: true });
+    }
     if (action === 'update-wa' && req.method === 'POST') {
       const { email, clienteWA } = req.body;
       if (!email || !clienteWA) return res.status(400).json({ error: 'Faltan datos' });
@@ -441,12 +450,14 @@ module.exports = async function handler(req, res) {
     if (action === 'por-zona' && req.method === 'GET') {
       const { email } = req.query;
       const ids = await getJSON('mudanzas:activas') || [];
+      const rechazados = email ? (await getJSON(`rechazados:${email}`) || []) : [];
       const disponibles = [];
       const ahora = new Date();
       for (const id of ids) {
         const m = await getJSON(`mudanza:${id}`);
         if (!m || m.estado !== 'buscando' || new Date(m.expira) < ahora) continue;
         if (email && m.cotizaciones.find(c => c.mudanceroEmail === email)) continue;
+        if (rechazados.includes(id)) continue; // ocultar rechazados
         disponibles.push(m);
       }
       return res.status(200).json({ mudanzas: disponibles });
