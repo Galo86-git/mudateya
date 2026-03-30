@@ -2262,6 +2262,8 @@ function onDescripcionManual() {
     fleteData.iaAnalisis = { tipo: val, peso_kg: null, dificultad: 'media', fragil: false, requiere_desmontaje: false, personas_necesarias: 1, notas: val };
   }
 }
+
+function mostrarIAResult(obj) {
   document.getElementById('iaLoading').classList.remove('show');
   var tags = '';
   if (obj.tipo)       tags += '<span class="ia-tag">📦 ' + obj.tipo + '</span>';
