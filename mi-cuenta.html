@@ -483,12 +483,21 @@ function renderPedidos(){
       var expira = new Date(m.expira);
       var hs = Math.max(0, Math.round((expira - new Date()) / 3600000));
       var esFlete = m.ambientes === 'Flete';
+      // Fotos del cliente
+      var fotosHtml = '';
+      if (m.fotos && m.fotos.length) {
+        fotosHtml = '<div style="display:flex;gap:6px;margin-bottom:10px">'
+          + m.fotos.map(function(f){
+              return '<img src="'+f+'" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--border2);cursor:pointer" onclick="window.open(\''+f+'\',\'_blank\')" title="Ver foto">';
+            }).join('')
+          + '</div>';
+      }
       html += '<div class="pedido-card nuevo">'
         +'<div class="pedido-header"><div>'
         +'<div class="pedido-ruta">'+m.desde+' → '+m.hasta+'</div>'
         +'<div class="pedido-fecha">📅 '+(m.fecha||'A confirmar')+' · '+(esFlete ? '🚛 Flete' : m.ambientes||'—')+'</div>'
         +'</div><span class="badge nuevo">Disponible</span></div>'
-        // Info del objeto/mudanza
+        + fotosHtml
         +'<div class="pedido-meta">'
         +(m.servicios ? '<span class="pedido-tag">'+(esFlete?'📦':'🏠')+' '+m.servicios+'</span>' : '')
         +(m.extras    ? '<span class="pedido-tag" style="color:var(--amber)">⚠ '+m.extras+'</span>' : '')
