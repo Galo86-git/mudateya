@@ -341,8 +341,6 @@ module.exports = async function handler(req, res) {
       if (!globalIdx.includes(id)) globalIdx.push(id);
       await setJSON('mudanzas:activas', globalIdx, 604800);
       try { await notificarMudanceros(mudanza); } catch(e) { console.error(e.message); }
-      // Loguear en Google Sheets
-      try { await logPedidoSheets(mudanza); } catch(e) { console.warn('Sheets log error:', e.message); }
       return res.status(200).json({ ok: true, id, mudanza });
     }
 
@@ -447,7 +445,11 @@ module.exports = async function handler(req, res) {
       // Bloquear si el anticipo no fue pagado
       if (!m.anticipoPagado) return res.status(400).json({ error: 'El cliente aún no pagó el anticipo. No podés avanzar hasta que se confirme el pago.' });
       m.estado = estado;
-      if (estado === 'completada') m.fechaCompletada = new Date().toISOString();
+      if (estado === 'completada') {
+        m.fechaCompletada = new Date().toISOString();
+        // Loguear en Google Sheets cuando se completa
+        try { await logPedidoSheets(m); } catch(e) { console.warn('Sheets log error:', e.message); }
+      }
       if (estado === 'en_curso') m.fechaInicio = new Date().toISOString();
       await setJSON(`mudanza:${mudanzaId}`, m, 604800);
       return res.status(200).json({ ok: true, estado });
@@ -765,31 +767,47 @@ async function enviarEmailAceptacion(mudanza, cot) {
 }
 
 // ════════════════════════════════════════════════════
-// GOOGLE SHEETS — LOG DE PEDIDOS DE CLIENTES
+// GOOGLE SHEETS — LOG DE MUDANZAS COMPLETADAS
 // ════════════════════════════════════════════════════
 async function logPedidoSheets(mudanza) {
   const webhookUrl = process.env.GOOGLE_SHEETS_PEDIDOS_URL;
   if (!webhookUrl) return;
 
-  const fecha = new Date(mudanza.fechaPublicacion).toLocaleString('es-AR', {
+  const cot = mudanza.cotizacionAceptada || {};
+  const esFlete = mudanza.tipo === 'flete' || mudanza.ambientes === 'Flete';
+  const feePct = esFlete ? 0.20 : 0.15;
+  const precio = parseInt(cot.precio || 0);
+  const fee = Math.round(precio * feePct);
+  const neto = precio - fee;
+
+  const fmt = (n) => n ? '$' + parseInt(n).toLocaleString('es-AR') : '—';
+  const fmtFecha = (iso) => iso ? new Date(iso).toLocaleString('es-AR', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit', timeZone: 'America/Argentina/Buenos_Aires'
-  });
+  }) : '—';
 
   const row = {
-    ID:               mudanza.id,
-    Fecha:            fecha,
-    Tipo:             (mudanza.tipo || 'mudanza').toUpperCase(),
-    Desde:            mudanza.desde,
-    Hasta:            mudanza.hasta,
-    Ambientes:        mudanza.ambientes || '—',
-    Objeto:           mudanza.servicios || '—',
-    'Precio estimado': mudanza.precio_estimado ? `$${parseInt(mudanza.precio_estimado).toLocaleString('es-AR')}` : '—',
-    Cliente:          mudanza.clienteNombre || '—',
-    Email:            mudanza.clienteEmail || '—',
-    Celular:          mudanza.clienteWA || '—',
-    Estado:           'Buscando',
-    Expira:           new Date(mudanza.expira).toLocaleString('es-AR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', timeZone:'America/Argentina/Buenos_Aires' }),
+    ID:                mudanza.id,
+    'Fecha publicación': fmtFecha(mudanza.fechaPublicacion),
+    'Fecha completada':  fmtFecha(mudanza.fechaCompletada),
+    Tipo:              (mudanza.tipo || 'mudanza').toUpperCase(),
+    Desde:             mudanza.desde,
+    Hasta:             mudanza.hasta,
+    Ambientes:         mudanza.ambientes || '—',
+    Objeto:            mudanza.servicios || '—',
+    Cliente:           mudanza.clienteNombre || '—',
+    'Email cliente':   mudanza.clienteEmail || '—',
+    'Celular cliente': mudanza.clienteWA || '—',
+    Mudancero:         cot.mudanceroNombre || '—',
+    'Email mudancero': cot.mudanceroEmail || '—',
+    'Tel mudancero':   cot.mudanceroTel || '—',
+    'Precio total':    fmt(precio),
+    'Fee MudateYa':    fmt(fee),
+    'Neto mudancero':  fmt(neto),
+    '% Fee':           esFlete ? '20%' : '15%',
+    'Anticipo pagado': mudanza.anticipoPagado ? 'SI' : 'NO',
+    'Saldo pagado':    mudanza.saldoPagado    ? 'SI' : 'NO',
+    Estado:            'COMPLETADA',
   };
 
   await fetch(webhookUrl, {
