@@ -1510,6 +1510,8 @@ async function fswPublicar(user) {
   } catch(e) { console.warn('Error publicando:', e.message); }
   document.getElementById('fsw-publishing-state').style.display = 'none';
   document.getElementById('fsw-published-state').style.display = 'block';
+  // Redirigir automáticamente a mi-mudanza después de 2 segundos
+  setTimeout(function(){ window.location.href = '/mi-mudanza'; }, 2000);
 }
 function fswOnLogin(user) {
   if (document.getElementById('fswOverlay').classList.contains('open') && fswStep === 4) { fswPublicar(user); }
@@ -1869,11 +1871,18 @@ async function publicarMudanzaEnSistema() {
     var r = await fetch('/api/cotizaciones?action=publicar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clienteEmail: user.email, clienteNombre: user.name, desde, hasta, ambientes: amb + ' ambiente' + (amb !== 1 ? 's' : ''), fecha: getFechaLabel(), servicios: objetos, zonaBase: desde, precio_estimado: precio, clienteWA: clienteWA }) });
     var d = await r.json();
     document.getElementById('step3-publishing').style.display = 'none';
-    if (d.id) { _mudanzaPublicadaId = d.id; document.getElementById('step3-published').style.display = 'block'; document.getElementById('btn-ver-mudanza').style.display = 'inline-flex'; }
-    else { document.getElementById('step3-error').style.display = 'block'; document.getElementById('step3-published').style.display = 'block'; }
+    if (d.id) {
+      _mudanzaPublicadaId = d.id;
+      document.getElementById('step3-published').style.display = 'block';
+      setTimeout(function(){ window.location.href = '/mi-mudanza'; }, 2000);
+    } else {
+      document.getElementById('step3-error').style.display = 'block';
+      document.getElementById('step3-published').style.display = 'block';
+    }
   } catch(e) {
     document.getElementById('step3-publishing').style.display = 'none';
     document.getElementById('step3-published').style.display = 'block';
+    setTimeout(function(){ window.location.href = '/mi-mudanza'; }, 2000);
   }
 }
 function estimarPrecio() {
@@ -2677,6 +2686,8 @@ async function fleteSolicitar() {
   document.getElementById('flete-publishing').style.display = 'none';
   document.getElementById('flete-published').style.display = 'block';
   document.getElementById('flete-footer').style.display = 'none';
+  // Redirigir automáticamente a mi-mudanza después de 2 segundos
+  setTimeout(function(){ window.location.href = '/mi-mudanza'; }, 2000);
 }
 
 // Comprimir foto a max ancho px en base64
