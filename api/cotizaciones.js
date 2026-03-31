@@ -442,6 +442,8 @@ module.exports = async function handler(req, res) {
       // Verificar que este mudancero es el aceptado
       const cot = m.cotizacionAceptada;
       if (!cot || cot.mudanceroEmail !== mudanceroEmail) return res.status(403).json({ error: 'Sin permiso' });
+      // Bloquear si el anticipo no fue pagado
+      if (!m.anticipoPagado) return res.status(400).json({ error: 'El cliente aún no pagó el anticipo. No podés avanzar hasta que se confirme el pago.' });
       m.estado = estado;
       if (estado === 'completada') m.fechaCompletada = new Date().toISOString();
       if (estado === 'en_curso') m.fechaInicio = new Date().toISOString();
