@@ -569,24 +569,28 @@ async function loadPedidos(){
 var _tabActiva = 'disponibles';
 
 function renderPedidos(){
-  // Clasificar cotizaciones
+  var ESTADOS_ACTIVOS = ['cotizacion_aceptada','en_curso','completada'];
+
   var enviados = misCotizaciones.filter(function(m){
     var cot = m.miCotizacion;
-    var isAcept = m.estado==='cotizacion_aceptada' && m.cotizacionAceptada && m.cotizacionAceptada.id===cot?.id;
+    var esActivo = ESTADOS_ACTIVOS.indexOf(m.estado) !== -1;
+    var isAcept = esActivo && m.cotizacionAceptada && m.cotizacionAceptada.id===cot?.id;
     var expirado = new Date(m.expira) < new Date();
     var noElegido = m.estado==='cotizacion_aceptada' && !isAcept;
     return !isAcept && !noElegido && !expirado;
   });
   var expirados = misCotizaciones.filter(function(m){
     var cot = m.miCotizacion;
-    var isAcept = m.estado==='cotizacion_aceptada' && m.cotizacionAceptada && m.cotizacionAceptada.id===cot?.id;
+    var esActivo = ESTADOS_ACTIVOS.indexOf(m.estado) !== -1;
+    var isAcept = esActivo && m.cotizacionAceptada && m.cotizacionAceptada.id===cot?.id;
     var expirado = new Date(m.expira) < new Date();
     var noElegido = m.estado==='cotizacion_aceptada' && !isAcept;
     return !isAcept && (noElegido || expirado);
   });
   var aceptados = misCotizaciones.filter(function(m){
     var cot = m.miCotizacion;
-    return m.estado==='cotizacion_aceptada' && m.cotizacionAceptada && m.cotizacionAceptada.id===cot?.id;
+    var esActivo = ESTADOS_ACTIVOS.indexOf(m.estado) !== -1;
+    return esActivo && m.cotizacionAceptada && m.cotizacionAceptada.id===cot?.id;
   });
 
   // Badge sidebar
@@ -858,7 +862,8 @@ async function enviarCotizacion(mudanzaId){
 // ════════════════════════════════════════════════════
 function loadHistorial(){
   var aceptadas = misCotizaciones.filter(function(m){
-    return m.estado==='cotizacion_aceptada' && m.cotizacionAceptada && m.cotizacionAceptada.id===m.miCotizacion?.id;
+    var ACTIVOS = ['cotizacion_aceptada','en_curso','completada'];
+    return ACTIVOS.indexOf(m.estado)!==-1 && m.cotizacionAceptada && m.cotizacionAceptada.id===m.miCotizacion?.id;
   });
   if(aceptadas.length===0){
     document.getElementById('historialList').innerHTML='<div class="empty"><div class="empty-icon">📅</div>Aún no tenés trabajos aceptados.</div>';
@@ -867,11 +872,12 @@ function loadHistorial(){
   document.getElementById('historialList').innerHTML = aceptadas.map(function(m){
     var cot = m.miCotizacion;
     var fee = Math.round(calcFee(cot.precio, m.ambientes));
+    var estadoLabel = m.estado==='completada'?'✓ Completado':m.estado==='en_curso'?'▶ En curso':'✓ Aceptado';
     return '<div class="pedido-card aceptado">'
       +'<div class="pedido-header"><div>'
       +'<div class="pedido-ruta">'+m.desde+' → '+m.hasta+'</div>'
       +'<div class="pedido-fecha">📅 '+(m.fecha||'—')+' · '+(m.ambientes||'—')+'</div>'
-      +'</div><span class="badge aceptado">✓ Aceptado</span></div>'
+      +'</div><span class="badge aceptado">'+estadoLabel+'</span></div>'
       +'<div class="pedido-precio">$'+(cot.precio-fee).toLocaleString('es-AR')+'</div>'
       +'<div class="pedido-precio-sub">vos cobrás · fee MYA ('+calcFeeLabel(m.ambientes)+'): $'+fee.toLocaleString('es-AR')+'</div>'
       +'</div>';
@@ -882,8 +888,9 @@ function loadHistorial(){
 // GANANCIAS
 // ════════════════════════════════════════════════════
 function loadGanancias(){
+  var ACTIVOS = ['cotizacion_aceptada','en_curso','completada'];
   var aceptadas = misCotizaciones.filter(function(m){
-    return m.estado==='cotizacion_aceptada' && m.cotizacionAceptada && m.cotizacionAceptada.id===m.miCotizacion?.id;
+    return ACTIVOS.indexOf(m.estado)!==-1 && m.cotizacionAceptada && m.cotizacionAceptada.id===m.miCotizacion?.id;
   });
   var total = aceptadas.reduce(function(s,m){ return s+((m.miCotizacion?.precio||0)*calcNeto(m.ambientes)); },0);
   var prom = aceptadas.length>0 ? Math.round(total/aceptadas.length) : 0;
