@@ -805,7 +805,7 @@ function loadGanancias(){
   var aceptadas = misCotizaciones.filter(function(m){
     return m.estado==='cotizacion_aceptada' && m.cotizacionAceptada && m.cotizacionAceptada.id===m.miCotizacion?.id;
   });
-  var total = aceptadas.reduce(function(s,m){ return s+((m.miCotizacion?.precio||0)*calcNeto(m.ambientes); },0);
+  var total = aceptadas.reduce(function(s,m){ return s+((m.miCotizacion?.precio||0)*calcNeto(m.ambientes)); },0);
   var prom = aceptadas.length>0 ? Math.round(total/aceptadas.length) : 0;
   document.getElementById('g-total').textContent='$'+Math.round(total).toLocaleString('es-AR');
   document.getElementById('g-trabajos').textContent=aceptadas.length;
