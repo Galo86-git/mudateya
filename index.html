@@ -326,6 +326,8 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:2rem 2.5r
 .pac-item-query{font-weight:500!important;color:var(--text)!important}
 .pac-matched{color:var(--emerald)!important}
 .pac-icon,.pac-logo{display:none!important}
+/* Keyboard navigation en autocomplete */
+li.kb-active{background:rgba(34,195,106,.18)!important;color:#E8F5EE!important}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 /* ── SELECTOR TIPO SERVICIO ── */
 .service-selector{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:2rem;animation:fadeUp .6s .3s ease both;max-width:620px;width:100%}
@@ -1581,6 +1583,26 @@ function fswInitMaps() {
     input.addEventListener('blur', function() {
       setTimeout(function(){ dropdown.style.display='none'; }, 250);
     });
+    input.addEventListener('keydown', function(e) {
+      var items = dropdown.querySelectorAll('li');
+      var active = dropdown.querySelector('li.kb-active');
+      var idx = active ? Array.from(items).indexOf(active) : -1;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (active) active.classList.remove('kb-active');
+        var next = items[idx+1] || items[0];
+        if (next) { next.classList.add('kb-active'); next.scrollIntoView({block:'nearest'}); }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (active) active.classList.remove('kb-active');
+        var prev = items[idx-1] || items[items.length-1];
+        if (prev) { prev.classList.add('kb-active'); prev.scrollIntoView({block:'nearest'}); }
+      } else if (e.key === 'Enter') {
+        if (active) { e.preventDefault(); active.dispatchEvent(new MouseEvent('mousedown')); }
+      } else if (e.key === 'Escape') {
+        dropdown.style.display = 'none';
+      }
+    });
     input.addEventListener('focus', function() {
       setTimeout(function(){ input.scrollIntoView({ behavior:'smooth', block:'center' }); }, 350);
     });
@@ -1663,7 +1685,24 @@ function initMaps() {
       });
 
       input.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') { dropdown.style.display = 'none'; }
+        var items = dropdown.querySelectorAll('li');
+        var active = dropdown.querySelector('li.kb-active');
+        var idx = active ? Array.from(items).indexOf(active) : -1;
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (active) active.classList.remove('kb-active');
+          var next = items[idx + 1] || items[0];
+          if (next) { next.classList.add('kb-active'); next.scrollIntoView({ block:'nearest' }); }
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (active) active.classList.remove('kb-active');
+          var prev = items[idx - 1] || items[items.length - 1];
+          if (prev) { prev.classList.add('kb-active'); prev.scrollIntoView({ block:'nearest' }); }
+        } else if (e.key === 'Enter') {
+          if (active) { e.preventDefault(); active.dispatchEvent(new MouseEvent('mousedown')); }
+        } else if (e.key === 'Escape') {
+          dropdown.style.display = 'none';
+        }
       });
 
       input.addEventListener('blur', function() {
@@ -2699,6 +2738,26 @@ function fleteInitMaps() {
           }
         );
       }, 300);
+    });
+    input.addEventListener('keydown', function(e) {
+      var items = dropdown.querySelectorAll('li');
+      var active = dropdown.querySelector('li.kb-active');
+      var idx = active ? Array.from(items).indexOf(active) : -1;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (active) active.classList.remove('kb-active');
+        var next = items[idx+1] || items[0];
+        if (next) { next.classList.add('kb-active'); next.scrollIntoView({block:'nearest'}); }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (active) active.classList.remove('kb-active');
+        var prev = items[idx-1] || items[items.length-1];
+        if (prev) { prev.classList.add('kb-active'); prev.scrollIntoView({block:'nearest'}); }
+      } else if (e.key === 'Enter') {
+        if (active) { e.preventDefault(); active.dispatchEvent(new MouseEvent('mousedown')); }
+      } else if (e.key === 'Escape') {
+        dropdown.style.display = 'none';
+      }
     });
     input.addEventListener('blur', function() { setTimeout(function(){ dropdown.style.display='none'; }, 250); });
   }
