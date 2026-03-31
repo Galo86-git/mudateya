@@ -422,7 +422,22 @@ module.exports = async function handler(req, res) {
       } catch(e) { return res.status(200).json({ mudanzas: [] }); }
     }
 
-    // Eliminar mudanza — solo el cliente puede eliminar sus propias mudanzas en estado buscando
+    // Cambiar estado de mudanza — el mudancero marca en curso o completada
+    if (action === 'cambiar-estado' && req.method === 'POST') {
+      const { mudanzaId, estado, mudanceroEmail } = req.body;
+      const estadosValidos = ['en_curso', 'completada'];
+      if (!mudanzaId || !estado || !estadosValidos.includes(estado)) return res.status(400).json({ error: 'Datos inválidos' });
+      const m = await getJSON(`mudanza:${mudanzaId}`);
+      if (!m) return res.status(404).json({ error: 'No encontrada' });
+      // Verificar que este mudancero es el aceptado
+      const cot = m.cotizacionAceptada;
+      if (!cot || cot.mudanceroEmail !== mudanceroEmail) return res.status(403).json({ error: 'Sin permiso' });
+      m.estado = estado;
+      if (estado === 'completada') m.fechaCompletada = new Date().toISOString();
+      if (estado === 'en_curso') m.fechaInicio = new Date().toISOString();
+      await setJSON(`mudanza:${mudanzaId}`, m, 604800);
+      return res.status(200).json({ ok: true, estado });
+    }
     if (action === 'eliminar' && req.method === 'POST') {
       const { mudanzaId, clienteEmail } = req.body;
       if (!mudanzaId || !clienteEmail) return res.status(400).json({ error: 'Faltan datos' });
