@@ -493,7 +493,10 @@ function renderMudanzasTabs() {
 function renderMudanzaCard(m, idx){
   var cotizaciones = m.cotizaciones || [];
   var tieneCotz = cotizaciones.length > 0;
-  var pasoActual = m.estado === 'cotizacion_aceptada' ? 2 : tieneCotz ? 1 : 0;
+  var pasoActual = m.estado === 'completada' ? 4
+    : m.estado === 'en_curso' ? 3
+    : m.estado === 'cotizacion_aceptada' ? 2
+    : tieneCotz ? 1 : 0;
   var pasos = ['Publicada','Cotizaciones recibidas','Mudancero confirmado','En curso','Completada'];
 
   var stepperHtml = pasos.map(function(p, i){
