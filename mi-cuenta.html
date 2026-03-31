@@ -96,6 +96,20 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .empty{text-align:center;padding:3rem;color:var(--text3);font-size:13px}
 .empty-icon{font-size:2.5rem;margin-bottom:8px}
 .loading{text-align:center;padding:3rem;color:var(--text3);font-family:var(--mono);font-size:12px}
+/* ── TRUCK LOADER ── */
+.truck-loader{text-align:center;padding:3rem 1rem}
+.truck-scene{position:relative;width:220px;height:80px;margin:0 auto 1rem}
+.truck-body{position:absolute;bottom:18px;left:0;animation:truckDrive 1.2s ease-in-out infinite alternate}
+.truck-road{position:absolute;bottom:8px;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent 0%,var(--border2) 20%,var(--border2) 80%,transparent 100%);overflow:hidden}
+.truck-road::after{content:'';position:absolute;top:0;left:-60px;width:40px;height:3px;background:var(--emerald);opacity:.4;animation:roadLine 0.6s linear infinite}
+.truck-wheel{position:absolute;bottom:-8px;width:14px;height:14px;border-radius:50%;background:var(--surface2);border:2px solid var(--border2);animation:wheelSpin .5s linear infinite}
+.truck-wheel.front{right:6px}
+.truck-wheel.rear{left:18px}
+.truck-msg{font-size:12px;color:var(--text3);font-family:var(--mono);letter-spacing:.3px;animation:msgFade 2s ease-in-out infinite}
+@keyframes truckDrive{0%{transform:translateY(0)}50%{transform:translateY(-3px)}100%{transform:translateY(0)}}
+@keyframes wheelSpin{to{transform:rotate(360deg)}}
+@keyframes roadLine{to{left:220px}}
+@keyframes msgFade{0%,100%{opacity:.4}50%{opacity:1}}
 .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--emerald);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:10px;font-family:var(--mono);font-weight:600}
@@ -429,7 +443,17 @@ function showScreen(name){
 }
 
 // FIX: logout limpia TODOS los storages
-function verFotoGrande(mudanzaId, fotoIdx) {
+// Fee diferenciado: 20% fletes, 15% mudanzas
+function calcFee(precio, ambientes) {
+  var pct = (ambientes === 'Flete') ? 0.20 : 0.15;
+  return Math.round(precio * pct);
+}
+function calcNeto(ambientes) {
+  return (ambientes === 'Flete') ? 0.80 : 0.85;
+}
+function calcFeeLabel(ambientes) {
+  return (ambientes === 'Flete') ? '20%' : '15%';
+}
   var m = mudanzasDisponibles.find(function(x){ return x.id === mudanzaId; })
        || misCotizaciones.find(function(x){ return x.id === mudanzaId; });
   if (!m || !m.fotos || !m.fotos[fotoIdx]) return;
@@ -466,11 +490,34 @@ function showPage(name, e){
   if(name==='ganancias') loadGanancias();
 }
 
+function truckLoader(msg) {
+  msg = msg || 'Cargando…';
+  return '<div class="truck-loader">'
+    +'<div class="truck-scene">'
+    +'<div class="truck-road"></div>'
+    +'<div class="truck-body">'
+    +'<svg width="90" height="44" viewBox="0 0 90 44" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    +'<rect x="0" y="6" width="58" height="28" rx="3" fill="#1D2820" stroke="#2A3C32" stroke-width="1.5"/>'
+    +'<rect x="3" y="9" width="52" height="10" rx="2" fill="#213029" opacity=".6"/>'
+    +'<rect x="58" y="12" width="26" height="22" rx="3" fill="#172018" stroke="#2A3C32" stroke-width="1.5"/>'
+    +'<rect x="67" y="15" width="13" height="10" rx="2" fill="#22C36A" opacity=".25"/>'
+    +'<rect x="81" y="20" width="5" height="4" rx="1" fill="#22C36A" opacity=".8"/>'
+    +'<circle cx="72" cy="36" r="7" fill="#172018" stroke="#2A3C32" stroke-width="2"/>'
+    +'<circle cx="72" cy="36" r="3" fill="#22C36A" opacity=".3"/>'
+    +'<circle cx="16" cy="36" r="7" fill="#172018" stroke="#2A3C32" stroke-width="2"/>'
+    +'<circle cx="16" cy="36" r="3" fill="#22C36A" opacity=".3"/>'
+    +'<text x="6" y="25" font-family="Bebas Neue,sans-serif" font-size="9" fill="#22C36A" opacity=".5" letter-spacing="1">MUDATEYA</text>'
+    +'</svg>'
+    +'</div></div>'
+    +'<div class="truck-msg">'+msg+'</div>'
+    +'</div>';
+}
+
 // ════════════════════════════════════════════════════
 // PEDIDOS
 // ════════════════════════════════════════════════════
 async function loadPedidos(){
-  document.getElementById('pedidosList').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando mudanzas disponibles…</div>';
+  document.getElementById('pedidosList').innerHTML = truckLoader('Cargando pedidos…');
   try{
     var zona = mudanceroData ? (mudanceroData[5]||'') : '';
     var r = await fetch('/api/cotizaciones?action=por-zona&email='+encodeURIComponent(currentUser.email)+'&zona='+encodeURIComponent(zona));
@@ -738,14 +785,14 @@ function loadHistorial(){
   }
   document.getElementById('historialList').innerHTML = aceptadas.map(function(m){
     var cot = m.miCotizacion;
-    var fee = Math.round(cot.precio*0.15);
+    var fee = Math.round(calcFee(cot.precio, m.ambientes));
     return '<div class="pedido-card aceptado">'
       +'<div class="pedido-header"><div>'
       +'<div class="pedido-ruta">'+m.desde+' → '+m.hasta+'</div>'
       +'<div class="pedido-fecha">📅 '+(m.fecha||'—')+' · '+(m.ambientes||'—')+'</div>'
       +'</div><span class="badge aceptado">✓ Aceptado</span></div>'
       +'<div class="pedido-precio">$'+(cot.precio-fee).toLocaleString('es-AR')+'</div>'
-      +'<div class="pedido-precio-sub">vos cobrás · fee MYA (15%): $'+fee.toLocaleString('es-AR')+'</div>'
+      +'<div class="pedido-precio-sub">vos cobrás · fee MYA ('+calcFeeLabel(m.ambientes)+'): $'+fee.toLocaleString('es-AR')+'</div>'
       +'</div>';
   }).join('');
 }
@@ -757,7 +804,7 @@ function loadGanancias(){
   var aceptadas = misCotizaciones.filter(function(m){
     return m.estado==='cotizacion_aceptada' && m.cotizacionAceptada && m.cotizacionAceptada.id===m.miCotizacion?.id;
   });
-  var total = aceptadas.reduce(function(s,m){ return s+(m.miCotizacion?.precio||0)*0.85; },0);
+  var total = aceptadas.reduce(function(s,m){ return s+((m.miCotizacion?.precio||0)*calcNeto(m.ambientes); },0);
   var prom = aceptadas.length>0 ? Math.round(total/aceptadas.length) : 0;
   document.getElementById('g-total').textContent='$'+Math.round(total).toLocaleString('es-AR');
   document.getElementById('g-trabajos').textContent=aceptadas.length;
@@ -770,11 +817,11 @@ function loadGanancias(){
     +'<thead><tr style="border-bottom:1px solid var(--border)">'
     +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Trabajo</th>'
     +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Precio total</th>'
-    +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Fee MYA (15%)</th>'
+    +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Fee MYA</th>'
     +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Vos cobrás</th>'
     +'</tr></thead><tbody>'
     +aceptadas.map(function(m){
-      var cot=m.miCotizacion, fee=Math.round(cot.precio*0.15);
+      var cot=m.miCotizacion, fee=Math.round(calcFee(cot.precio, m.ambientes));
       return '<tr style="border-bottom:1px solid var(--border)">'
         +'<td style="padding:11px 14px;font-size:12px;color:var(--text2)">'+m.desde.split(',')[0]+' → '+m.hasta.split(',')[0]+'</td>'
         +'<td style="padding:11px 14px;font-size:12px;font-family:var(--mono)">$'+cot.precio.toLocaleString('es-AR')+'</td>'
