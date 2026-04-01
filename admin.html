@@ -589,8 +589,10 @@ function renderHistorialPagos(){
 
 // ── ZONAS ──────────────────────────────────────────────────────────────────
 function renderZonas(){
+  var aprobados = mudancerosData.filter(function(m){ return getEstado(m) === 'Aprobado'; });
   var zonaCount = {};
-  mudancerosData.filter(function(m){ return getEstado(m) === 'Aprobado'; }).forEach(function(m){ var z = m[5]||'Sin zona'; zonaCount[z] = (zonaCount[z]||0)+1; });
+  aprobados.forEach(function(m){ var z = m[5]||'Sin zona'; zonaCount[z] = (zonaCount[z]||0)+1; });
+  var totalAprobados = aprobados.length || 1;
   var sorted = Object.entries(zonaCount).sort(function(a,b){ return b[1]-a[1]; });
   document.getElementById('zonasMetrics').innerHTML = sorted.slice(0,4).map(function(entry){
     return '<div class="metric-card green"><div class="metric-label">'+entry[0]+'</div><div class="metric-val">'+entry[1]+'</div><div class="metric-sub">mudanceros</div></div>';
@@ -599,7 +601,7 @@ function renderZonas(){
     ? '<div class="empty"><div class="empty-icon">🗺️</div>Sin datos de zonas</div>'
     : '<table><thead><tr><th>Zona</th><th>Mudanceros</th><th>% del total</th></tr></thead><tbody>'
       + sorted.map(function(entry){
-          return '<tr><td class="td-name">'+entry[0]+'</td><td class="td-mono">'+entry[1]+'</td><td class="td-mono">'+((entry[1]/mudancerosData.length)*100).toFixed(1)+'%</td></tr>';
+          return '<tr><td class="td-name">'+entry[0]+'</td><td class="td-mono">'+entry[1]+'</td><td class="td-mono">'+((entry[1]/totalAprobados)*100).toFixed(1)+'%</td></tr>';
         }).join('')
       + '</tbody></table>';
 }
