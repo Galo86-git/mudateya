@@ -468,7 +468,7 @@ function renderDashboard(){
         }).join('')
       + '</tbody></table>';
 
-  var pagosMP = pagosData.slice(-5).reverse().map(function(p){ return { mudancero:p[0]||'—', monto:parseFloat(p[3]||0), fecha:p[5]||'—', metodo:'Mercado Pago' }; });
+  var pagosMP = pagosData.slice(-5).reverse().map(function(p){ return { mudancero:p.mudancero||'—', monto:parseFloat(p.precio||0), fecha:p.fecha||'—', metodo:'Mercado Pago', tipo:p.tipo||'mudanza' }; });
   var pagosTransfer = transferenciasData.filter(function(t){ return t.estado === 'confirmada'; }).map(function(t){ return { mudancero:t.mudancero||'—', monto:parseInt((t.monto||'0').replace(/\D/g,'')), fecha:t.fecha||'—', metodo:'Transferencia' }; });
   var todosLosPagos = pagosMP.concat(pagosTransfer).sort(function(a,b){ return b.fecha.localeCompare(a.fecha); }).slice(0,5);
 
@@ -538,10 +538,11 @@ function renderPagosFull(){ renderLiquidaciones(); renderHistorialPagos(); }
 function renderLiquidaciones(){
   var liquidaciones = {};
   pagosData.forEach(function(p){
-    var mudancero = p[0]||'—';
-    var monto = parseFloat(p[3]||0);
-    // ── CAMBIO: 15% fee, 85% al mudancero ──
-    var fee = Math.round(monto * 0.15);
+    var mudancero = p.mudancero || '—';
+    var monto = parseFloat(p.precio || 0);
+    var esFlete = (p.tipo||'').toUpperCase() === 'FLETE';
+    var feePct = esFlete ? 0.20 : 0.15;
+    var fee = Math.round(monto * feePct);
     var aTransferir = monto - fee;
     if(!liquidaciones[mudancero]) liquidaciones[mudancero] = { mudancero, total:0, trabajos:0 };
     liquidaciones[mudancero].total += aTransferir;
@@ -550,7 +551,6 @@ function renderLiquidaciones(){
   transferenciasData.filter(function(t){ return t.estado === 'confirmada'; }).forEach(function(t){
     var mudancero = t.mudancero||'—';
     var monto = parseInt((t.monto||'0').replace(/\D/g,''));
-    // ── CAMBIO: 85% al mudancero ──
     if(!liquidaciones[mudancero]) liquidaciones[mudancero] = { mudancero, total:0, trabajos:0 };
     liquidaciones[mudancero].total += Math.round(monto * 0.85);
     liquidaciones[mudancero].trabajos++;
@@ -559,7 +559,7 @@ function renderLiquidaciones(){
   var items = Object.values(liquidaciones);
   document.getElementById('liquidacionesList').innerHTML = items.length === 0
     ? '<div class="empty"><div class="empty-icon">✓</div>Sin liquidaciones pendientes</div>'
-    : '<table><thead><tr><th>Mudancero</th><th>Trabajos</th><th>Total a transferir (85%)</th><th>Estado</th></tr></thead><tbody>'
+    : '<table><thead><tr><th>Mudancero</th><th>Trabajos</th><th>Total a transferir</th><th>Estado</th></tr></thead><tbody>'
       + items.map(function(l){
           return '<tr><td class="td-name">'+l.mudancero+'</td><td class="td-mono">'+l.trabajos+'</td><td class="td-mono" style="color:var(--emerald);font-weight:600;font-size:14px">$'+Math.round(l.total).toLocaleString('es-AR')+'</td><td><span class="badge pending">Pendiente de pago</span></td></tr>';
         }).join('')
@@ -570,9 +570,19 @@ function renderLiquidaciones(){
 function renderHistorialPagos(){
   document.getElementById('pagosList').innerHTML = pagosData.length === 0
     ? '<div class="empty"><div class="empty-icon">💳</div>Sin pagos registrados aún</div>'
-    : '<table><thead><tr><th>Mudancero</th><th>Tipo</th><th>Desde</th><th>Monto</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>'
+    : '<table><thead><tr><th>Mudancero</th><th>Tipo</th><th>Desde → Hasta</th><th>Monto</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>'
       + pagosData.slice().reverse().map(function(p){
-          return '<tr><td class="td-name">'+(p[0]||'—')+'</td><td class="td-mono">'+(p[1]||'—')+'</td><td>'+(p[2]||'—')+'</td><td class="td-mono">$'+parseFloat(p[3]||0).toLocaleString('es-AR')+'</td><td class="td-mono">'+(p[5]||'—')+'</td><td><span class="badge paid">Pagado</span></td></tr>';
+          var estadoBadge = p.estado === 'completada'
+            ? '<span class="badge paid">Completada</span>'
+            : '<span class="badge pending">'+( p.estado||'—')+'</span>';
+          return '<tr>'
+            +'<td class="td-name">'+(p.mudancero||'—')+'</td>'
+            +'<td class="td-mono">'+(p.tipo||'mudanza')+'</td>'
+            +'<td style="font-size:11px">'+(p.desde||'—')+' → '+(p.hasta||'—')+'</td>'
+            +'<td class="td-mono" style="color:var(--emerald)">$'+parseFloat(p.precio||0).toLocaleString('es-AR')+'</td>'
+            +'<td class="td-mono">'+(p.fecha ? new Date(p.fecha).toLocaleDateString('es-AR') : '—')+'</td>'
+            +'<td>'+estadoBadge+'</td>'
+            +'</tr>';
         }).join('')
       + '</tbody></table>';
 }
