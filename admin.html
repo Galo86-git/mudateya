@@ -590,7 +590,7 @@ function renderHistorialPagos(){
 // ── ZONAS ──────────────────────────────────────────────────────────────────
 function renderZonas(){
   var zonaCount = {};
-  mudancerosData.forEach(function(m){ var z = m[5]||'Sin zona'; zonaCount[z] = (zonaCount[z]||0)+1; });
+  mudancerosData.filter(function(m){ return getEstado(m) === 'Aprobado'; }).forEach(function(m){ var z = m[5]||'Sin zona'; zonaCount[z] = (zonaCount[z]||0)+1; });
   var sorted = Object.entries(zonaCount).sort(function(a,b){ return b[1]-a[1]; });
   document.getElementById('zonasMetrics').innerHTML = sorted.slice(0,4).map(function(entry){
     return '<div class="metric-card green"><div class="metric-label">'+entry[0]+'</div><div class="metric-val">'+entry[1]+'</div><div class="metric-sub">mudanceros</div></div>';
