@@ -678,16 +678,15 @@ async function verificarCUIL() {
     var d = await r.json();
 
     if (d.valido === true) {
-      var nombreAfip = [d.nombre, d.apellido].filter(Boolean).join(' ').trim() || d.razonSocial || '';
-      setBadgeCuil('ok', '✓ ' + (nombreAfip || 'Verificado en AFIP'));
+      var tipo = d.esEmpresa ? 'Empresa' : 'Persona Física';
+      setBadgeCuil('ok', '✓ ' + tipo + ' · ' + (d.formateado || ''));
       document.getElementById('f-cuil').classList.remove('has-error');
     } else if (d.valido === false) {
-      setBadgeCuil('err', '✗ ' + (d.error || 'No encontrado'));
-      document.getElementById('cuil-error').textContent = d.error || 'CUIL no encontrado en AFIP';
+      setBadgeCuil('err', '✗ ' + (d.error || 'CUIL/CUIT inválido'));
+      document.getElementById('cuil-error').textContent = d.error || 'CUIL/CUIT inválido';
       document.getElementById('f-cuil').classList.add('has-error');
     } else {
-      // AFIP no disponible — advertencia pero no bloqueamos
-      setBadgeCuil('warn', '⚠ AFIP no disponible');
+      setBadgeCuil('warn', '⚠ No se pudo verificar');
     }
   } catch(e) {
     setBadgeCuil('warn', '⚠ Sin conexión');
