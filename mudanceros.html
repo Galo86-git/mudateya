@@ -97,6 +97,9 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.9);backdrop-filte
 .field.has-error .field-error{display:block}
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(4,26,14,.3);border-top-color:#041A0E;border-radius:50%;animation:spin .7s linear infinite}
 .spinner-dark{display:inline-block;border-radius:50%;border:2px solid var(--border2);border-top-color:var(--emerald);animation:spin .7s linear infinite}
+.cuil-ok{background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.3);color:var(--emerald)}
+.cuil-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);color:#F59E0B}
+.cuil-error{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);color:#ff6b6b}
 @keyframes spin{to{transform:rotate(360deg)}}
 /* ── DNI ANALYSIS RESULT ── */
 .dni-result{display:none;background:var(--surface2);border:1px solid rgba(34,195,106,.25);border-radius:12px;padding:1rem 1.2rem;margin-top:1rem;animation:fadeUp .3s ease}
@@ -166,6 +169,18 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.9);backdrop-filte
           <label class="field-label">Email <span>*</span></label>
           <input type="email" id="email" placeholder="juan@email.com"/>
           <span class="field-error">Ingresá un email válido</span>
+        </div>
+        <div class="field" id="f-cuil" style="grid-column:1/-1">
+          <label class="field-label">CUIL <span>*</span></label>
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <input type="text" id="cuil" placeholder="20-12345678-9" maxlength="13"
+              oninput="formatCUIL(this)"
+              onblur="verificarCUIL()"
+              style="flex:1"/>
+            <div id="cuil-badge" style="display:none;padding:9px 14px;border-radius:10px;font-size:12px;font-family:var(--mono);white-space:nowrap;flex-shrink:0"></div>
+          </div>
+          <span class="field-error" id="cuil-error">CUIL inválido o no encontrado en AFIP</span>
+          <span style="font-size:10px;color:var(--text3);font-family:var(--mono)" id="cuil-hint">Formato: 20-12345678-9 · Se verifica en AFIP automáticamente</span>
         </div>
       </div>
     </div>
@@ -637,6 +652,90 @@ function previewFotoPatente(input){
   }
 }
 
+// ── CUIL: FORMATO Y VALIDACIÓN AFIP ─────────────────────────────
+function formatCUIL(input) {
+  // Auto-formatea mientras escribe: "20123456789" → "20-12345678-9"
+  var v = input.value.replace(/\D/g, '').slice(0, 11);
+  if (v.length > 10)      input.value = v.slice(0,2) + '-' + v.slice(2,10) + '-' + v.slice(10);
+  else if (v.length > 2)  input.value = v.slice(0,2) + '-' + v.slice(2);
+  else                    input.value = v;
+  // Resetear badge si cambia
+  setBadgeCuil('', '');
+}
+
+var _cuilUltimoVerificado = '';
+
+async function verificarCUIL() {
+  var raw = document.getElementById('cuil').value.replace(/[-\s]/g, '');
+  if (raw.length !== 11) return;
+  if (raw === _cuilUltimoVerificado) return; // no repetir misma consulta
+  _cuilUltimoVerificado = raw;
+
+  setBadgeCuil('load', '');
+
+  try {
+    var r = await fetch('/api/validar-cuil?cuil=' + raw);
+    var d = await r.json();
+
+    if (d.valido === true) {
+      var nombreAfip = [d.nombre, d.apellido].filter(Boolean).join(' ').trim() || d.razonSocial || '';
+      setBadgeCuil('ok', '✓ ' + (nombreAfip || 'Verificado en AFIP'));
+      document.getElementById('f-cuil').classList.remove('has-error');
+    } else if (d.valido === false) {
+      setBadgeCuil('err', '✗ ' + (d.error || 'No encontrado'));
+      document.getElementById('cuil-error').textContent = d.error || 'CUIL no encontrado en AFIP';
+      document.getElementById('f-cuil').classList.add('has-error');
+    } else {
+      // AFIP no disponible — advertencia pero no bloqueamos
+      setBadgeCuil('warn', '⚠ AFIP no disponible');
+    }
+  } catch(e) {
+    setBadgeCuil('warn', '⚠ Sin conexión');
+  }
+}
+
+function setBadgeCuil(tipo, texto) {
+  var badge = document.getElementById('cuil-badge');
+  badge.className = '';
+  if (tipo === 'load') {
+    badge.style.display = 'flex';
+    badge.style.alignItems = 'center';
+    badge.style.gap = '6px';
+    badge.innerHTML = '<span class="spinner-dark" style="width:12px;height:12px"></span> Consultando AFIP…';
+    badge.style.background = 'var(--surface2)';
+    badge.style.border = '1px solid var(--border)';
+    badge.style.color = 'var(--text3)';
+  } else if (tipo === 'ok') {
+    badge.style.display = 'block';
+    badge.className = 'cuil-ok';
+    badge.style.padding = '9px 14px';
+    badge.style.borderRadius = '10px';
+    badge.style.fontSize = '12px';
+    badge.style.fontFamily = 'var(--mono)';
+    badge.textContent = texto;
+  } else if (tipo === 'warn') {
+    badge.style.display = 'block';
+    badge.className = 'cuil-warn';
+    badge.style.padding = '9px 14px';
+    badge.style.borderRadius = '10px';
+    badge.style.fontSize = '12px';
+    badge.style.fontFamily = 'var(--mono)';
+    badge.textContent = texto;
+  } else if (tipo === 'err') {
+    badge.style.display = 'block';
+    badge.className = 'cuil-error';
+    badge.style.padding = '9px 14px';
+    badge.style.borderRadius = '10px';
+    badge.style.fontSize = '12px';
+    badge.style.fontFamily = 'var(--mono)';
+    badge.textContent = texto;
+  } else {
+    badge.style.display = 'none';
+    badge.textContent = '';
+  }
+}
+// ── FIN CUIL ─────────────────────────────────────────────────────
+
 // ── HELPERS ──────────────────────────────────────────────────────
 function toggleMetodoCobro(){
   var metodo=document.getElementById('metodoCobro').value;
@@ -723,6 +822,7 @@ document.getElementById('regForm').addEventListener('submit',async function(e){
 
   var data={
     nombre,telefono,email,
+    cuil:document.getElementById('cuil').value.trim(),
     empresa:document.getElementById('empresa').value.trim(),
     zonaBase,
     zonasExtra:document.getElementById('zonasExtra').value.trim(),
