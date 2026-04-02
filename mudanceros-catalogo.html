@@ -23,19 +23,15 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.92);backdrop-filt
 .logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--text);text-decoration:none}
 .logo span{color:var(--emerald)}
 .nav-right{display:flex;align-items:center;gap:1rem}
-.btn-back{font-size:12px;color:var(--text2);text-decoration:none;font-family:var(--mono);transition:color .2s}
+.btn-back{font-size:12px;color:var(--text2);text-decoration:none;font-family:var(--mono);transition:color .2s;cursor:pointer;background:none;border:none;padding:0}
 .btn-back:hover{color:var(--text)}
 .btn-continuar{background:var(--emerald);color:#041A0E;border:none;padding:9px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;display:none;align-items:center;gap:6px;transition:all .2s}
 .btn-continuar.show{display:flex}
 .btn-continuar:hover{background:#2EDB7A}
-
-/* HERO */
 .hero{max-width:900px;margin:0 auto;padding:3rem 2rem 2rem;text-align:center}
 .hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,5vw,4.5rem);line-height:.95;letter-spacing:2px;margin-bottom:.8rem}
 .hero h1 em{color:var(--emerald);font-style:normal}
 .hero p{font-size:14px;color:var(--text2);max-width:520px;margin:0 auto 1.5rem;line-height:1.7}
-
-/* FILTROS */
 .filtros{max-width:900px;margin:0 auto;padding:0 2rem 1.5rem;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .filtro-input{flex:1;min-width:200px;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);background:var(--surface);outline:none;transition:border-color .2s}
 .filtro-input:focus{border-color:var(--emerald)}
@@ -44,18 +40,13 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.92);backdrop-filt
 .filtro-select option{background:var(--surface)}
 .sel-count{font-size:12px;color:var(--emerald);font-family:var(--mono);padding:8px 14px;background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:8px;display:none}
 .sel-count.show{display:block}
-
-/* GRID */
 .grid{max-width:900px;margin:0 auto;padding:0 2rem 5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
-
-/* CARD */
 .card{background:var(--surface);border:1px solid var(--border2);border-radius:16px;overflow:hidden;cursor:pointer;transition:all .25s;position:relative}
 .card:hover{border-color:rgba(34,195,106,.3);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
 .card.selected{border-color:var(--emerald);box-shadow:0 0 0 2px var(--emerald),0 12px 40px rgba(34,195,106,.15)}
 .card-check{position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;background:var(--emerald);color:#041A0E;font-size:13px;font-weight:700;display:none;align-items:center;justify-content:center;z-index:2}
 .card.selected .card-check{display:flex}
 .card-foto{width:100%;height:140px;object-fit:cover;background:var(--surface2);display:block}
-.card-foto-placeholder{width:100%;height:140px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:3rem}
 .card-body{padding:1rem}
 .card-nombre{font-weight:600;font-size:15px;color:var(--text);margin-bottom:2px}
 .card-empresa{font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:8px}
@@ -70,18 +61,12 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.92);backdrop-filt
 .card-precios{display:flex;gap:6px;flex-wrap:wrap}
 .precio-chip{font-size:10px;color:var(--text3);font-family:var(--mono)}
 .card-trabajos{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:6px}
-
-/* CAMION FOTO */
 .card-camion{width:100%;height:80px;object-fit:cover;background:var(--bg2);border-top:1px solid var(--border);display:block}
 .card-camion-placeholder{width:100%;height:80px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--text3)}
-
-/* EMPTY */
 .empty{text-align:center;padding:4rem 2rem;color:var(--text3);font-family:var(--mono);font-size:13px}
 .spinner-wrap{text-align:center;padding:4rem;color:var(--text3);font-family:var(--mono);font-size:12px}
-.spinner{display:inline-block;width:24px;height:24px;border:2px solid var(--border2);border-top-color:var(--emerald);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:10px;display:block;margin:0 auto 10px}
+.spinner{display:inline-block;width:24px;height:24px;border:2px solid var(--border2);border-top-color:var(--emerald);border-radius:50%;animation:spin .7s linear infinite;display:block;margin:0 auto 10px}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* BOTTOM BAR */
 .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(8,14,12,.96);backdrop-filter:blur(20px);border-top:1px solid var(--border2);padding:1rem 2rem;display:none;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;z-index:100}
 .bottom-bar.show{display:flex}
 .bottom-info{font-size:13px;color:var(--text2)}
@@ -90,8 +75,6 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.92);backdrop-filt
 .btn-pedir:hover{background:#2EDB7A;transform:translateY(-1px)}
 .btn-omitir{background:none;border:1px solid var(--border2);color:var(--text2);padding:12px 20px;border-radius:12px;font-size:13px;cursor:pointer;font-family:var(--mono);transition:all .2s}
 .btn-omitir:hover{border-color:var(--text3);color:var(--text)}
-
-/* MODAL CONFIRMACION */
 .modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:1rem}
 .modal-overlay.show{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r3);padding:2rem;max-width:440px;width:100%;box-shadow:0 40px 100px rgba(0,0,0,.7)}
@@ -104,7 +87,6 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.92);backdrop-filt
 .btn-confirmar{flex:1;background:var(--emerald);color:#041A0E;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
 .btn-confirmar:hover{background:#2EDB7A}
 .btn-cancelar{background:none;border:1px solid var(--border2);color:var(--text2);padding:12px 18px;border-radius:10px;font-size:13px;cursor:pointer;font-family:var(--mono)}
-
 @media(max-width:640px){
   nav{padding:0 1.2rem}
   .hero{padding:2rem 1.2rem 1.5rem}
@@ -118,7 +100,7 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.92);backdrop-filt
 <nav>
   <a href="/" class="logo">Mudate<span>Ya</span></a>
   <div class="nav-right">
-    <a href="/" class="btn-back">← Volver</a>
+    <button class="btn-back" onclick="history.back()">← Volver</button>
   </div>
 </nav>
 
@@ -164,7 +146,6 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.92);backdrop-filt
   </div>
 </div>
 
-<!-- Modal confirmación -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h3>Confirmar selección</h3>
@@ -180,23 +161,19 @@ nav{position:sticky;top:0;z-index:200;background:rgba(8,14,12,.92);backdrop-filt
 </div>
 
 <script>
-var TODOS       = [];
-var FILTRADOS   = [];
+var TODOS        = [];
+var FILTRADOS    = [];
 var SELECCIONADOS = new Set();
-var MUDANZA_DATA = null; // datos del wizard pasados por sessionStorage
+var MUDANZA_DATA  = null;
 
-// ── INIT ─────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async function() {
-  // Recuperar datos del wizard desde sessionStorage
   try {
     var raw = sessionStorage.getItem('mudanza_pendiente');
     if (raw) MUDANZA_DATA = JSON.parse(raw);
   } catch(e) {}
-
   await cargarCatalogo();
 });
 
-// ── CARGAR CATÁLOGO ───────────────────────────────────────────────
 async function cargarCatalogo() {
   try {
     var r = await fetch('/api/cotizaciones?action=catalogo');
@@ -209,13 +186,12 @@ async function cargarCatalogo() {
   }
 }
 
-// ── FILTRAR ───────────────────────────────────────────────────────
 function filtrar() {
   var texto    = document.getElementById('filtroTexto').value.toLowerCase();
   var vehiculo = document.getElementById('filtroVehiculo').value;
   var orden    = document.getElementById('filtroOrden').value;
 
-  FILTRADOS = TODOS.filter(m => {
+  FILTRADOS = TODOS.filter(function(m) {
     var matchTexto = !texto ||
       m.nombre.toLowerCase().includes(texto) ||
       (m.empresa||'').toLowerCase().includes(texto) ||
@@ -226,34 +202,30 @@ function filtrar() {
   });
 
   if (orden === 'trabajos') {
-    FILTRADOS.sort((a,b) => b.trabajosCompletados - a.trabajosCompletados);
+    FILTRADOS.sort(function(a,b){ return b.trabajosCompletados - a.trabajosCompletados; });
   } else {
-    FILTRADOS.sort((a,b) => (b.calificacion - a.calificacion) || (b.trabajosCompletados - a.trabajosCompletados));
+    FILTRADOS.sort(function(a,b){ return (b.calificacion - a.calificacion) || (b.trabajosCompletados - a.trabajosCompletados); });
   }
 
   renderGrid();
 }
 
-// ── RENDER ────────────────────────────────────────────────────────
 function renderGrid() {
   var grid = document.getElementById('grid');
-
   if (!FILTRADOS.length) {
     grid.innerHTML = '<div class="empty">No hay mudanceros disponibles con esos filtros.</div>';
     return;
   }
-
-  grid.innerHTML = FILTRADOS.map(m => cardHTML(m)).join('');
+  grid.innerHTML = FILTRADOS.map(function(m){ return cardHTML(m); }).join('');
 }
 
 function cardHTML(m) {
   var sel      = SELECCIONADOS.has(m.email);
-  var initials = (m.nombre || 'MV').split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+  var initials = (m.nombre || 'MV').split(' ').map(function(p){ return p[0]; }).join('').slice(0,2).toUpperCase();
   var stars    = '★'.repeat(Math.floor(m.calificacion||0)) + '☆'.repeat(5 - Math.floor(m.calificacion||0));
   var rating   = m.calificacion ? m.calificacion.toFixed(1) : '—';
   var resenas  = m.nroResenas   ? m.nroResenas + ' reseñas' : 'Sin reseñas aún';
 
-  // Badges de verificación
   var badges = '';
   if (m.verificadoIdentidad) badges += '<span class="badge badge-v">✓ ID verificada</span>';
   if (m.verificadoVehiculo)  badges += '<span class="badge badge-v">✓ Vehículo</span>';
@@ -261,87 +233,63 @@ function cardHTML(m) {
   badges += '<span class="badge badge-zona">' + m.zonaBase + '</span>';
   if (m.vehiculo) badges += '<span class="badge badge-vehiculo">🚛 ' + m.vehiculo.split(' ')[0] + '</span>';
 
-  // Precios orientativos
   var precios = '';
   if (m.precios) {
-    if (m.precios.amb1) precios += '<span class="precio-chip">1amb: $' + parseInt(m.precios.amb1).toLocaleString('es-AR') + '</span>';
+    if (m.precios.amb1)  precios += '<span class="precio-chip">1amb: $' + parseInt(m.precios.amb1).toLocaleString('es-AR') + '</span>';
     if (m.precios.flete) precios += '<span class="precio-chip"> · Flete: $' + parseInt(m.precios.flete).toLocaleString('es-AR') + '</span>';
   }
 
-  // Foto del camión o placeholder
   var fotoContent = m.fotoCamion
     ? '<img class="card-camion" src="' + m.fotoCamion + '" alt="camión" loading="lazy"/>'
     : '<div class="card-camion-placeholder">🚛</div>';
 
-  // Foto de perfil o placeholder
   var fotoPerfilContent = m.foto
     ? '<img class="card-foto" src="' + m.foto + '" alt="' + m.nombre + '" loading="lazy"/>'
-    : '<div class="card-foto-placeholder" style="display:flex;align-items:center;justify-content:center;width:100%;height:140px;background:var(--surface2);font-family:\'Bebas Neue\',sans-serif;font-size:3rem;color:var(--emerald)">' + initials + '</div>';
+    : '<div style="display:flex;align-items:center;justify-content:center;width:100%;height:140px;background:var(--surface2);font-family:\'Bebas Neue\',sans-serif;font-size:3rem;color:var(--emerald)">' + initials + '</div>';
 
-  return `
-    <div class="card${sel ? ' selected' : ''}" onclick="toggleSeleccion('${m.email}')" data-email="${m.email}">
-      <div class="card-check">✓</div>
-      ${fotoPerfilContent}
-      <div class="card-body">
-        <div class="card-nombre">${m.nombre}</div>
-        ${m.empresa ? '<div class="card-empresa">' + m.empresa + '</div>' : ''}
-        <div class="card-stars">
-          <span class="stars">${stars}</span>
-          <span class="card-rating">${rating} · ${resenas}</span>
-        </div>
-        <div class="card-badges">${badges}</div>
-        ${precios ? '<div class="card-precios">' + precios + '</div>' : ''}
-        ${m.trabajosCompletados ? '<div class="card-trabajos">' + m.trabajosCompletados + ' trabajos completados</div>' : ''}
-      </div>
-      ${fotoContent}
-    </div>`;
+  return '<div class="card' + (sel ? ' selected' : '') + '" onclick="toggleSeleccion(\'' + m.email + '\')" data-email="' + m.email + '">'
+    + '<div class="card-check">✓</div>'
+    + fotoPerfilContent
+    + '<div class="card-body">'
+    + '<div class="card-nombre">' + m.nombre + '</div>'
+    + (m.empresa ? '<div class="card-empresa">' + m.empresa + '</div>' : '')
+    + '<div class="card-stars"><span class="stars">' + stars + '</span><span class="card-rating">' + rating + ' · ' + resenas + '</span></div>'
+    + '<div class="card-badges">' + badges + '</div>'
+    + (precios ? '<div class="card-precios">' + precios + '</div>' : '')
+    + (m.trabajosCompletados ? '<div class="card-trabajos">' + m.trabajosCompletados + ' trabajos completados</div>' : '')
+    + '</div>'
+    + fotoContent
+    + '</div>';
 }
 
-// ── SELECCIÓN ─────────────────────────────────────────────────────
 function toggleSeleccion(email) {
   if (SELECCIONADOS.has(email)) {
     SELECCIONADOS.delete(email);
   } else {
-    if (SELECCIONADOS.size >= 3) {
-      // Flash en las cards no seleccionadas para indicar límite
-      mostrarToast('Podés seleccionar hasta 3 mudanceros');
-      return;
-    }
+    if (SELECCIONADOS.size >= 3) { mostrarToast('Podés seleccionar hasta 3 mudanceros'); return; }
     SELECCIONADOS.add(email);
   }
-
-  // Actualizar estado visual de la card
   var card = document.querySelector('[data-email="' + email + '"]');
   if (card) card.classList.toggle('selected', SELECCIONADOS.has(email));
-
   actualizarUI();
 }
 
 function actualizarUI() {
   var n = SELECCIONADOS.size;
-  document.getElementById('selCount').textContent   = n + ' seleccionado' + (n !== 1 ? 's' : '');
+  document.getElementById('selCount').textContent = n + ' seleccionado' + (n !== 1 ? 's' : '');
   document.getElementById('selCount').classList.toggle('show', n > 0);
   document.getElementById('bottomBar').classList.toggle('show', n > 0);
   document.getElementById('bottomCount').textContent = n;
 }
 
-// ── MODAL ─────────────────────────────────────────────────────────
 function abrirModal() {
   if (!SELECCIONADOS.size) return;
-
-  var lista = Array.from(SELECCIONADOS).map(email => {
-    var m = TODOS.find(x => x.email === email);
+  var lista = Array.from(SELECCIONADOS).map(function(email) {
+    var m = TODOS.find(function(x){ return x.email === email; });
     if (!m) return '';
-    var initials = (m.nombre||'MV').split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
-    return `<div class="modal-item">
-      <div class="modal-item-avatar">${initials}</div>
-      <div>
-        <div style="font-weight:600">${m.nombre}</div>
-        <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">${m.zonaBase}</div>
-      </div>
-    </div>`;
+    var initials = (m.nombre||'MV').split(' ').map(function(p){ return p[0]; }).join('').slice(0,2).toUpperCase();
+    return '<div class="modal-item"><div class="modal-item-avatar">' + initials + '</div><div><div style="font-weight:600">' + m.nombre + '</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">' + m.zonaBase + '</div></div></div>';
   }).join('');
-
   document.getElementById('modalLista').innerHTML = lista;
   document.getElementById('modalOverlay').classList.add('show');
 }
@@ -350,12 +298,10 @@ function cerrarModal() {
   document.getElementById('modalOverlay').classList.remove('show');
 }
 
-// ── PUBLICAR ──────────────────────────────────────────────────────
 async function confirmarYPublicar() {
   var btn = document.getElementById('btnConfirmar');
   btn.disabled = true;
   btn.textContent = 'Publicando…';
-
   try {
     var mudanzaId = await publicarMudanza('dirigido', Array.from(SELECCIONADOS));
     sessionStorage.removeItem('mudanza_pendiente');
@@ -379,30 +325,26 @@ async function omitirYPublicar() {
 
 async function publicarMudanza(modo, mudancerosInvitados) {
   if (!MUDANZA_DATA) throw new Error('No hay datos de la mudanza. Volvé al inicio.');
-
-  var payload = {
-    ...MUDANZA_DATA,
-    modoCotizacion:    modo,
+  var payload = Object.assign({}, MUDANZA_DATA, {
+    modoCotizacion: modo,
     mudancerosInvitados: mudancerosInvitados,
-  };
-
+  });
   var r = await fetch('/api/cotizaciones?action=publicar', {
-    method:  'POST',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify(payload),
+    body: JSON.stringify(payload),
   });
   var d = await r.json();
   if (d.error) throw new Error(d.error);
   return d.id;
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────
 function mostrarToast(msg) {
   var t = document.createElement('div');
   t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1D2820;border:1px solid var(--border2);color:var(--text2);padding:10px 20px;border-radius:10px;font-size:13px;font-family:var(--mono);z-index:600;white-space:nowrap';
   t.textContent = msg;
   document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
+  setTimeout(function(){ t.remove(); }, 3000);
 }
 </script>
 </body>
