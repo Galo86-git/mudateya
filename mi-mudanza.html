@@ -21,8 +21,10 @@
 }
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 
-#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
-.login-card{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:2.5rem 2rem;max-width:400px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.5)}
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem;background:var(--bg);position:relative;overflow:hidden}
+#loginScreen::before{content:'';position:absolute;top:-200px;right:-150px;width:600px;height:600px;background:radial-gradient(circle,var(--emerald-glow) 0%,transparent 65%);pointer-events:none}
+#loginScreen::after{content:'';position:absolute;bottom:-200px;left:-150px;width:500px;height:500px;background:radial-gradient(circle,var(--sky-glow) 0%,transparent 65%);pointer-events:none}
+.login-card{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:2.5rem 2rem;max-width:400px;width:100%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.5);position:relative;z-index:1}
 .login-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;margin-bottom:.3rem}
 .login-logo span{color:var(--emerald)}
 .login-sub{font-size:13px;color:var(--text2);margin-bottom:.5rem;line-height:1.6}
@@ -181,22 +183,29 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
   <div class="login-card">
     <!-- Camión mientras carga Google -->
     <div id="loginTruck" style="padding:1rem 0">
-      <div class="truck-scene" style="width:180px;height:70px;margin:0 auto 1rem">
-        <div class="truck-road"></div>
-        <div class="truck-body">
-          <svg width="90" height="44" viewBox="0 0 90 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="0" y="6" width="58" height="28" rx="3" fill="#1D2820" stroke="#2A3C32" stroke-width="1.5"/>
-            <rect x="3" y="9" width="52" height="10" rx="2" fill="#213029" opacity=".6"/>
-            <rect x="58" y="12" width="26" height="22" rx="3" fill="#172018" stroke="#2A3C32" stroke-width="1.5"/>
-            <rect x="67" y="15" width="13" height="10" rx="2" fill="#22C36A" opacity=".25"/>
-            <rect x="81" y="20" width="5" height="4" rx="1" fill="#22C36A" opacity=".8"/>
-            <circle cx="72" cy="36" r="7" fill="#172018" stroke="#2A3C32" stroke-width="2"/>
-            <circle cx="72" cy="36" r="3" fill="#22C36A" opacity=".3"/>
-            <circle cx="16" cy="36" r="7" fill="#172018" stroke="#2A3C32" stroke-width="2"/>
-            <circle cx="16" cy="36" r="3" fill="#22C36A" opacity=".3"/>
-            <text x="6" y="25" font-family="Bebas Neue,sans-serif" font-size="9" fill="#22C36A" opacity=".5" letter-spacing="1">MUDATEYA</text>
-          </svg>
-        </div>
+      <div style="width:280px;margin:0 auto 1rem">
+        <svg width="280" height="136" viewBox="0 0 440 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <style>.ltw{animation:ltw .6s linear infinite}.ltw2{animation:ltw2 .6s linear infinite}.ltw3{animation:ltw3 .6s linear infinite}@keyframes ltw{to{transform:rotate(360deg)}}@keyframes ltw2{to{transform:rotate(360deg)}}@keyframes ltw3{to{transform:rotate(360deg)}}.ltb{animation:ltb 1.3s ease-in-out infinite alternate}@keyframes ltb{0%{transform:translateY(0)}100%{transform:translateY(-7px)}}</style>
+          <g class="ltb">
+            <rect x="10" y="20" width="250" height="90" rx="6" fill="#172018" stroke="#2A3C32" stroke-width="1.5"/>
+            <rect x="16" y="27" width="238" height="22" rx="3" fill="#1D2820"/>
+            <rect x="16" y="52" width="238" height="50" rx="3" fill="#22C36A" opacity=".08"/>
+            <rect x="16" y="52" width="238" height="50" rx="3" fill="none" stroke="#22C36A" stroke-width="1" opacity=".25"/>
+            <line x1="16" y1="51" x2="264" y2="51" stroke="#22C36A" stroke-width="1" opacity=".3"/>
+            <line x1="16" y1="103" x2="264" y2="103" stroke="#22C36A" stroke-width="1" opacity=".3"/>
+            <text x="135" y="86" font-family="'Bebas Neue',sans-serif" font-size="36" fill="#22C36A" opacity=".95" letter-spacing="4" text-anchor="middle">MUDATEYA</text>
+            <rect x="260" y="36" width="150" height="74" rx="6" fill="#1D2820" stroke="#2A3C32" stroke-width="1.5"/>
+            <rect x="281" y="46" width="84" height="44" rx="4" fill="#22C36A" opacity=".15"/>
+            <rect x="281" y="46" width="84" height="44" rx="4" fill="none" stroke="#22C36A" stroke-width="1" opacity=".4"/>
+            <line x1="323" y1="46" x2="323" y2="90" stroke="#22C36A" stroke-width="1" opacity=".3"/>
+            <rect x="366" y="57" width="32" height="18" rx="3" fill="#22C36A" opacity=".8"/>
+            <rect x="263" y="36" width="120" height="8" rx="2" fill="#213029"/>
+            <g class="ltw" style="transform-origin:80px 165px"><circle cx="80" cy="165" r="22" fill="#172018" stroke="#2A3C32" stroke-width="2.5"/><circle cx="80" cy="165" r="11" fill="#1D2820" stroke="#22C36A" stroke-width="1.5" opacity=".7"/><circle cx="80" cy="165" r="4" fill="#22C36A" opacity=".5"/><line x1="80" y1="154" x2="80" y2="176" stroke="#2A3C32" stroke-width="1.5"/><line x1="69" y1="165" x2="91" y2="165" stroke="#2A3C32" stroke-width="1.5"/></g>
+            <g class="ltw2" style="transform-origin:200px 165px"><circle cx="200" cy="165" r="22" fill="#172018" stroke="#2A3C32" stroke-width="2.5"/><circle cx="200" cy="165" r="11" fill="#1D2820" stroke="#22C36A" stroke-width="1.5" opacity=".7"/><circle cx="200" cy="165" r="4" fill="#22C36A" opacity=".5"/><line x1="200" y1="154" x2="200" y2="176" stroke="#2A3C32" stroke-width="1.5"/><line x1="189" y1="165" x2="211" y2="165" stroke="#2A3C32" stroke-width="1.5"/></g>
+            <g class="ltw3" style="transform-origin:340px 165px"><circle cx="340" cy="165" r="22" fill="#172018" stroke="#2A3C32" stroke-width="2.5"/><circle cx="340" cy="165" r="11" fill="#1D2820" stroke="#22C36A" stroke-width="1.5" opacity=".7"/><circle cx="340" cy="165" r="4" fill="#22C36A" opacity=".5"/><line x1="340" y1="154" x2="340" y2="176" stroke="#2A3C32" stroke-width="1.5"/><line x1="329" y1="165" x2="351" y2="165" stroke="#2A3C32" stroke-width="1.5"/></g>
+            <line x1="0" y1="188" x2="440" y2="188" stroke="#213029" stroke-width="1.5"/>
+          </g>
+        </svg>
       </div>
       <div class="truck-msg">Cargando…</div>
     </div>
@@ -394,29 +403,35 @@ function logout(){
 function truckLoader(msg) {
   msg = msg || 'Cargando…';
   return '<div class="truck-loader">'
-    +'<div class="truck-scene" style="width:280px;height:100px">'
-    +'<div class="truck-road"></div>'
-    +'<div class="truck-body">'
-    +'<svg width="140" height="68" viewBox="0 0 140 68" fill="none" xmlns="http://www.w3.org/2000/svg">'
-    +'<rect x="0" y="8" width="88" height="42" rx="4" fill="#172018" stroke="#2A3C32" stroke-width="1.5"/>'
-    +'<rect x="4" y="12" width="80" height="14" rx="2" fill="#1D2820" opacity=".8"/>'
-    +'<rect x="4" y="29" width="80" height="17" rx="2" fill="#22C36A" opacity=".12"/>'
-    +'<text x="44" y="41" font-family="Bebas Neue,sans-serif" font-size="13" fill="#22C36A" opacity=".9" letter-spacing="2" text-anchor="middle">MUDATEYA</text>'
-    +'<rect x="88" y="18" width="40" height="32" rx="4" fill="#1D2820" stroke="#2A3C32" stroke-width="1.5"/>'
-    +'<rect x="100" y="22" width="20" height="14" rx="2" fill="#22C36A" opacity=".2"/>'
-    +'<rect x="124" y="30" width="6" height="6" rx="1" fill="#22C36A" opacity=".9"/>'
-    +'<rect x="90" y="38" width="8" height="8" rx="1" fill="#213029"/>'
-    +'<circle cx="110" cy="54" r="10" fill="#172018" stroke="#2A3C32" stroke-width="2"/>'
-    +'<circle cx="110" cy="54" r="5" fill="#1D2820" stroke="#22C36A" stroke-width="1" opacity=".6"/>'
-    +'<circle cx="110" cy="54" r="2" fill="#22C36A" opacity=".4"/>'
-    +'<circle cx="24" cy="54" r="10" fill="#172018" stroke="#2A3C32" stroke-width="2"/>'
-    +'<circle cx="24" cy="54" r="5" fill="#1D2820" stroke="#22C36A" stroke-width="1" opacity=".6"/>'
-    +'<circle cx="24" cy="54" r="2" fill="#22C36A" opacity=".4"/>'
-    +'<circle cx="42" cy="54" r="10" fill="#172018" stroke="#2A3C32" stroke-width="2"/>'
-    +'<circle cx="42" cy="54" r="5" fill="#1D2820" stroke="#22C36A" stroke-width="1" opacity=".6"/>'
-    +'<circle cx="42" cy="54" r="2" fill="#22C36A" opacity=".4"/>'
+    +'<div style="width:320px;margin:0 auto 1.2rem;position:relative">'
+    +'<svg width="320" height="156" viewBox="0 0 440 220" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    +'<style>.tw{animation:tw .6s linear infinite}.tw2{animation:tw2 .6s linear infinite}.tw3{animation:tw3 .6s linear infinite}'
+    +'@keyframes tw{to{transform:rotate(360deg)}}@keyframes tw2{to{transform:rotate(360deg)}}@keyframes tw3{to{transform:rotate(360deg)}}'
+    +'.tb{animation:tb 1.3s ease-in-out infinite alternate}@keyframes tb{0%{transform:translateY(0)}100%{transform:translateY(-7px)}}'
+    +'</style>'
+    +'<g class="tb">'
+    +'<rect x="10" y="20" width="250" height="90" rx="6" fill="#172018" stroke="#2A3C32" stroke-width="1.5"/>'
+    +'<rect x="16" y="27" width="238" height="22" rx="3" fill="#1D2820"/>'
+    +'<rect x="16" y="52" width="238" height="50" rx="3" fill="#22C36A" opacity=".08"/>'
+    +'<rect x="16" y="52" width="238" height="50" rx="3" fill="none" stroke="#22C36A" stroke-width="1" opacity=".25"/>'
+    +'<line x1="16" y1="51" x2="264" y2="51" stroke="#22C36A" stroke-width="1" opacity=".3"/>'
+    +'<line x1="16" y1="103" x2="264" y2="103" stroke="#22C36A" stroke-width="1" opacity=".3"/>'
+    +'<text x="135" y="86" font-family="\'Bebas Neue\',sans-serif" font-size="36" fill="#22C36A" opacity=".95" letter-spacing="4" text-anchor="middle">MUDATEYA</text>'
+    +'<rect x="260" y="36" width="150" height="74" rx="6" fill="#1D2820" stroke="#2A3C32" stroke-width="1.5"/>'
+    +'<rect x="281" y="46" width="84" height="44" rx="4" fill="#22C36A" opacity=".15"/>'
+    +'<rect x="281" y="46" width="84" height="44" rx="4" fill="none" stroke="#22C36A" stroke-width="1" opacity=".4"/>'
+    +'<line x1="323" y1="46" x2="323" y2="90" stroke="#22C36A" stroke-width="1" opacity=".3"/>'
+    +'<rect x="366" y="57" width="32" height="18" rx="3" fill="#22C36A" opacity=".8"/>'
+    +'<polygon points="398,61 435,48 435,76 398,73" fill="#22C36A" opacity=".08"/>'
+    +'<rect x="263" y="56" width="14" height="40" rx="3" fill="#172018" stroke="#213029" stroke-width="1"/>'
+    +'<rect x="263" y="36" width="120" height="8" rx="2" fill="#213029"/>'
+    +'<g class="tw" style="transform-origin:80px 165px"><circle cx="80" cy="165" r="22" fill="#172018" stroke="#2A3C32" stroke-width="2.5"/><circle cx="80" cy="165" r="11" fill="#1D2820" stroke="#22C36A" stroke-width="1.5" opacity=".7"/><circle cx="80" cy="165" r="4" fill="#22C36A" opacity=".5"/><line x1="80" y1="154" x2="80" y2="176" stroke="#2A3C32" stroke-width="1.5"/><line x1="69" y1="165" x2="91" y2="165" stroke="#2A3C32" stroke-width="1.5"/></g>'
+    +'<g class="tw2" style="transform-origin:200px 165px"><circle cx="200" cy="165" r="22" fill="#172018" stroke="#2A3C32" stroke-width="2.5"/><circle cx="200" cy="165" r="11" fill="#1D2820" stroke="#22C36A" stroke-width="1.5" opacity=".7"/><circle cx="200" cy="165" r="4" fill="#22C36A" opacity=".5"/><line x1="200" y1="154" x2="200" y2="176" stroke="#2A3C32" stroke-width="1.5"/><line x1="189" y1="165" x2="211" y2="165" stroke="#2A3C32" stroke-width="1.5"/></g>'
+    +'<g class="tw3" style="transform-origin:340px 165px"><circle cx="340" cy="165" r="22" fill="#172018" stroke="#2A3C32" stroke-width="2.5"/><circle cx="340" cy="165" r="11" fill="#1D2820" stroke="#22C36A" stroke-width="1.5" opacity=".7"/><circle cx="340" cy="165" r="4" fill="#22C36A" opacity=".5"/><line x1="340" y1="154" x2="340" y2="176" stroke="#2A3C32" stroke-width="1.5"/><line x1="329" y1="165" x2="351" y2="165" stroke="#2A3C32" stroke-width="1.5"/></g>'
+    +'<line x1="0" y1="188" x2="440" y2="188" stroke="#213029" stroke-width="1.5"/>'
+    +'</g>'
     +'</svg>'
-    +'</div></div>'
+    +'</div>'
     +'<div class="truck-msg">'+msg+'</div>'
     +'</div>';
 }
