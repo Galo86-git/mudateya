@@ -7,7 +7,71 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer>
+// ── SELECTOR MODO FSW ─────────────────────────────────────────────
+window._fswModo = 'abierto';
+
+function fswSeleccionarModo(modo) {
+  window._fswModo = modo;
+  var dirigido = document.getElementById('fsw-modo-dirigido');
+  var abierto  = document.getElementById('fsw-modo-abierto');
+  if (modo === 'dirigido') {
+    dirigido.style.background  = 'var(--emerald-subtle)';
+    dirigido.style.borderColor = 'var(--emerald)';
+    dirigido.querySelectorAll('div')[1].style.color = 'var(--emerald)';
+    abierto.style.background   = 'var(--surface)';
+    abierto.style.borderColor  = 'var(--border2)';
+    abierto.querySelectorAll('div')[1].style.color  = 'var(--text)';
+    document.getElementById('fsw-next').textContent = 'Ver mudanceros →';
+  } else {
+    abierto.style.background   = 'var(--emerald-subtle)';
+    abierto.style.borderColor  = 'var(--emerald)';
+    abierto.querySelectorAll('div')[1].style.color  = 'var(--emerald)';
+    dirigido.style.background  = 'var(--surface)';
+    dirigido.style.borderColor = 'var(--border2)';
+    dirigido.querySelectorAll('div')[1].style.color = 'var(--text)';
+    document.getElementById('fsw-next').textContent = 'Solicitar presupuestos →';
+  }
+}
+
+// ── GUARDAR EN SESSIONSTORAGE Y REDIRIGIR AL CATÁLOGO ────────────
+function _guardarYRedirigirCatalogo() {
+  var user = null;
+  try { user = JSON.parse(sessionStorage.getItem('googleUser') || sessionStorage.getItem('clienteUser')); } catch(e) {}
+
+  var esFSW = document.getElementById('fswOverlay').classList.contains('open');
+  var desde    = esFSW ? document.getElementById('fsw-desde').value.trim() : getInputVal('desde');
+  var hasta    = esFSW ? document.getElementById('fsw-hasta').value.trim() : getInputVal('hasta');
+  var fechaLbl = esFSW ? fswGetFechaLabel() : getFechaLabel();
+  var ambTxt   = esFSW ? (fswAmb + ' ambiente' + (fswAmb !== 1 ? 's' : '')) : (amb + ' ambiente' + (amb !== 1 ? 's' : ''));
+  var precio   = esFSW ? (50000 + (fswAmb - 1) * 30000) : estimarPrecio();
+  var objetos  = esFSW
+    ? Array.from(document.querySelectorAll('#fsw-obj-grid .obj-chip.sel .obj-label')).map(function(e){ return e.textContent; }).join(', ')
+    : Array.from(document.querySelectorAll('#step2 .obj-chip.sel .obj-label, #step2 ~ * .obj-chip.sel .obj-label, .wstep .obj-chip.sel .obj-label')).map(function(e){ return e.textContent; }).join(', ');
+  var extras = Array.from(document.querySelectorAll('.extra-chip.sel span:nth-child(2)')).map(function(e){ return e.textContent.trim(); }).join(', ');
+  var clienteWA = window._clienteWA !== undefined ? window._clienteWA
+    : (user ? localStorage.getItem('clienteWA_' + user.email) || '' : '');
+
+  var mudanzaData = {
+    clienteEmail:    user ? user.email : '',
+    clienteNombre:   user ? user.name  : '',
+    clienteWA:       clienteWA,
+    desde:           desde,
+    hasta:           hasta,
+    ambientes:       ambTxt,
+    fecha:           fechaLbl,
+    servicios:       objetos,
+    extras:          extras,
+    zonaBase:        desde,
+    precio_estimado: precio,
+    tipo:            'mudanza',
+  };
+
+  try { sessionStorage.setItem('mudanza_pendiente', JSON.stringify(mudanzaData)); } catch(e) {}
+  window.location.href = '/mudanceros-catalogo';
+}
+
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -612,18 +676,36 @@ li.kb-active{background:rgba(34,195,106,.18)!important;color:#E8F5EE!important}
     </div>
     <div class="fsw-panel" id="fsw-p3">
       <div class="fsw-title">Resumen de tu mudanza</div>
-      <div class="fsw-sub">Revisá todo antes de publicar y recibir cotizaciones</div>
+      <div class="fsw-sub">Revisá todo antes de elegir cómo recibir cotizaciones</div>
       <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:.8rem 1rem;margin-bottom:12px">
         <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--text3);font-family:var(--mono)">Desde</span><span id="fsw-sum-desde" style="color:var(--text);font-weight:500;text-align:right;max-width:60%;font-size:12px">—</span></div>
         <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--text3);font-family:var(--mono)">Hasta</span><span id="fsw-sum-hasta" style="color:var(--text);font-weight:500;text-align:right;max-width:60%;font-size:12px">—</span></div>
         <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--text3);font-family:var(--mono)">Fecha</span><span id="fsw-sum-fecha" style="color:var(--text);font-weight:500">—</span></div>
         <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px"><span style="color:var(--text3);font-family:var(--mono)">Ambientes</span><span id="fsw-sum-amb" style="color:var(--text);font-weight:500">—</span></div>
       </div>
-      <div style="background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:14px;padding:.9rem 1rem;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+      <div style="background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:14px;padding:.9rem 1rem;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
         <div><div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:3px">PRECIO ESTIMADO</div><div id="fsw-sum-precio" style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--emerald);letter-spacing:1px">—</div><div style="font-size:9px;color:var(--text3);font-family:var(--mono)">el precio final lo define el mudancero</div></div>
         <div style="text-align:right"><div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:3px">PAGO VÍA</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--emerald)">Mercado Pago</div><div style="font-size:9px;color:var(--text3);font-family:var(--mono)">100% seguro</div></div>
       </div>
-      <div id="fswMapWrap" style="height:180px;border-radius:12px;overflow:hidden;border:1px solid var(--border2);margin-bottom:10px;background:var(--surface2)"><div id="fswRouteMap" style="width:100%;height:100%"></div></div>
+
+      <!-- ── SELECTOR DE MODO ── -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);margin-bottom:10px">¿Cómo querés recibir cotizaciones?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div id="fsw-modo-dirigido" onclick="fswSeleccionarModo('dirigido')" style="background:var(--surface);border:1.5px solid var(--border2);border-radius:14px;padding:1rem;cursor:pointer;transition:all .2s;text-align:center;user-select:none">
+            <div style="font-size:1.8rem;margin-bottom:8px">👀</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.5px;color:var(--text);margin-bottom:4px">Elegir mudanceros</div>
+            <div style="font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.5">Ves perfiles y reseñas antes de pedir precio</div>
+          </div>
+          <div id="fsw-modo-abierto" onclick="fswSeleccionarModo('abierto')" style="background:var(--emerald-subtle);border:1.5px solid var(--emerald);border-radius:14px;padding:1rem;cursor:pointer;transition:all .2s;text-align:center;user-select:none">
+            <div style="font-size:1.8rem;margin-bottom:8px">⚡</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.5px;color:var(--emerald);margin-bottom:4px">Recibir las primeras 5</div>
+            <div style="font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.5">Los primeros 5 que respondan te cotizan</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="fswMapWrap" style="height:160px;border-radius:12px;overflow:hidden;border:1px solid var(--border2);margin-bottom:10px;background:var(--surface2)"><div id="fswRouteMap" style="width:100%;height:100%"></div></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px"><div style="font-size:9px;color:var(--text3);font-family:var(--mono)">DISTANCIA</div><div id="fsw-sum-dist" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--text)">—</div></div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px"><div style="font-size:9px;color:var(--text3);font-family:var(--mono)">TIEMPO EST.</div><div id="fsw-sum-dur" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--text)">—</div></div>
@@ -1031,7 +1113,7 @@ li.kb-active{background:rgba(34,195,106,.18)!important;color:#E8F5EE!important}
         <p class="aud-desc">Llená tu agenda con clientes que ya quieren contratar.</p>
         <ul class="aud-list">
           <li><span class="aud-arrow">→</span>Recibís pedidos de clientes listos para contratar</li>
-          <li><span class="aud-arrow">→</span>Sin costos fijos — pagás solo si trabajás</li>
+          <li><span class="aud-arrow">→</span>Sin costos fijos, nunca — pagás solo si trabajás</li>
           <li><span class="aud-arrow">→</span>Construís reputación con reseñas verificadas</li>
         </ul>
         <a href="/mudanceros" class="aud-cta">Sumarme como mudancero →</a>
@@ -1391,7 +1473,11 @@ function fswNext() {
     if (!document.querySelectorAll('#fsw-obj-grid .obj-chip.sel').length) { alert('Seleccioná al menos un objeto'); return; }
     fswGoStep(3);
   } else if (fswStep === 3) {
-    fswGoStep(4);
+    if (window._fswModo === 'dirigido') {
+      _guardarYRedirigirCatalogo();
+    } else {
+      fswGoStep(4);
+    }
   }
 }
 function fswBack() { if (fswStep > 1) fswGoStep(fswStep - 1); else closeFSW(); }
@@ -1496,6 +1582,7 @@ function fswRenderGoogleBtn() {
   tryRender();
 }
 async function fswPublicar(user) {
+  // Modo abierto: publicar directo y redirigir a mi-mudanza
   if (fswPublicadaId) { document.getElementById('fsw-published-state').style.display = 'block'; return; }
   document.getElementById('fsw-login-state').style.display = 'none';
   document.getElementById('fsw-publishing-state').style.display = 'block';
@@ -1503,14 +1590,14 @@ async function fswPublicar(user) {
   var hasta = document.getElementById('fsw-hasta').value.trim();
   var objetos = Array.from(document.querySelectorAll('#fsw-obj-grid .obj-chip.sel .obj-label')).map(function(e) { return e.textContent; }).join(', ');
   var precio = 50000 + (fswAmb - 1) * 30000;
+  var clienteWA = window._clienteWA || (user ? localStorage.getItem('clienteWA_' + user.email) || '' : '');
   try {
-    var r = await fetch('/api/cotizaciones?action=publicar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clienteEmail: user.email, clienteNombre: user.name, desde, hasta, ambientes: fswAmb + ' ambiente' + (fswAmb !== 1 ? 's' : ''), fecha: fswGetFechaLabel(), servicios: objetos, zonaBase: desde, precio_estimado: precio }) });
+    var r = await fetch('/api/cotizaciones?action=publicar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clienteEmail: user.email, clienteNombre: user.name, clienteWA: clienteWA, desde, hasta, ambientes: fswAmb + ' ambiente' + (fswAmb !== 1 ? 's' : ''), fecha: fswGetFechaLabel(), servicios: objetos, zonaBase: desde, precio_estimado: precio, modoCotizacion: 'abierto' }) });
     var d = await r.json();
     if (d.id) fswPublicadaId = d.id;
   } catch(e) { console.warn('Error publicando:', e.message); }
   document.getElementById('fsw-publishing-state').style.display = 'none';
   document.getElementById('fsw-published-state').style.display = 'block';
-  // Redirigir automáticamente a mi-mudanza después de 2 segundos
   setTimeout(function(){ window.location.href = '/mi-mudanza'; }, 2000);
 }
 function fswOnLogin(user) {
@@ -1841,49 +1928,13 @@ function onStep3Login(user) {
 
 function confirmarCelularYPublicar(skip) {
   var cel = skip ? '' : (document.getElementById('step3-celular-input').value.trim());
-  // Guardar celular para enviarlo en la publicación
   window._clienteWA = cel;
   document.getElementById('step3-celular').style.display = 'none';
-  publicarMudanzaEnSistema();
+  _guardarYRedirigirCatalogo();
 }
 async function publicarMudanzaEnSistema() {
-  var user = null;
-  try { user = JSON.parse(sessionStorage.getItem('googleUser') || sessionStorage.getItem('clienteUser')); } catch(e) {}
-  document.getElementById('step3-publishing').style.display = 'block';
-  document.getElementById('step3-published').style.display = 'none';
-  document.getElementById('step3-error').style.display = 'none';
-  if (!user) {
-    setTimeout(function() { document.getElementById('step3-publishing').style.display = 'none'; document.getElementById('step3-published').style.display = 'block'; }, 1000);
-    return;
-  }
-  if (_mudanzaPublicadaId) {
-    document.getElementById('step3-publishing').style.display = 'none';
-    document.getElementById('step3-published').style.display = 'block';
-    document.getElementById('btn-ver-mudanza').style.display = 'inline-flex';
-    return;
-  }
-  var desde = getInputVal('desde'), hasta = getInputVal('hasta');
-  var objetos = Array.from(document.querySelectorAll('.obj-chip.sel .obj-label')).map(function(e) { return e.textContent; }).join(', ');
-  var precio = estimarPrecio();
-  var clienteWA = window._clienteWA !== undefined ? window._clienteWA
-    : (localStorage.getItem('clienteWA_'+(user ? user.email : '')) || getInputVal('clienteWA'));
-  try {
-    var r = await fetch('/api/cotizaciones?action=publicar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clienteEmail: user.email, clienteNombre: user.name, desde, hasta, ambientes: amb + ' ambiente' + (amb !== 1 ? 's' : ''), fecha: getFechaLabel(), servicios: objetos, zonaBase: desde, precio_estimado: precio, clienteWA: clienteWA }) });
-    var d = await r.json();
-    document.getElementById('step3-publishing').style.display = 'none';
-    if (d.id) {
-      _mudanzaPublicadaId = d.id;
-      document.getElementById('step3-published').style.display = 'block';
-      setTimeout(function(){ window.location.href = '/mi-mudanza'; }, 2000);
-    } else {
-      document.getElementById('step3-error').style.display = 'block';
-      document.getElementById('step3-published').style.display = 'block';
-    }
-  } catch(e) {
-    document.getElementById('step3-publishing').style.display = 'none';
-    document.getElementById('step3-published').style.display = 'block';
-    setTimeout(function(){ window.location.href = '/mi-mudanza'; }, 2000);
-  }
+  // Redirigir al catálogo de mudanceros para elegir modo
+  _guardarYRedirigirCatalogo();
 }
 function estimarPrecio() {
   // Base por ambientes (mercado AR 2024)
