@@ -684,6 +684,27 @@ document.getElementById('regForm').addEventListener('submit',async function(e){
   if(!dniData.frente){flashUpload('uploadDniFrente');return;}
   if(!dniData.dorso){flashUpload('uploadDniDorso');return;}
 
+  // Validar que el nombre ingresado coincida con el del DNI analizado
+  if(dniData.analisis && (dniData.analisis.apellido || dniData.analisis.nombres)){
+    var norm = function(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z ]/g,'').trim(); };
+    var nombreIngresado = norm(nombre);
+    var apellidoDNI     = norm(dniData.analisis.apellido);
+    var nombresDNI      = norm(dniData.analisis.nombres);
+    // Alcanza con que la primera palabra del apellido o del nombre esté en lo ingresado
+    var primerApellido  = apellidoDNI.split(' ')[0];
+    var primerNombre    = nombresDNI.split(' ')[0];
+    var coincide = (primerApellido && nombreIngresado.includes(primerApellido)) ||
+                   (primerNombre   && nombreIngresado.includes(primerNombre));
+    if(!coincide){
+      var fNombre = document.getElementById('f-nombre');
+      fNombre.classList.add('has-error');
+      var errSpan = fNombre.querySelector('.field-error');
+      if(errSpan) errSpan.textContent = '⚠ El nombre no coincide con el DNI (' + [dniData.analisis.nombres, dniData.analisis.apellido].filter(Boolean).join(' ') + ')';
+      fNombre.scrollIntoView({behavior:'smooth',block:'center'});
+      return;
+    }
+  }
+
   // Validar fotos del vehículo
   var fotoCamionInput=document.getElementById('fotoCamionInput');
   var fotoPatenteInput=document.getElementById('fotoPatenteInput');
