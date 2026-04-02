@@ -1630,7 +1630,7 @@ function fswRenderCatalogo(lista) {
     var foto = m.foto
       ? '<img class="fsw-mud-foto" src="' + m.foto + '" loading="lazy"/>'
       : '<div class="fsw-mud-foto-ph">' + initials + '</div>';
-    return '<div class="fsw-mud-card' + (sel ? ' sel' : '') + '" onclick="fswToggleMudancero('' + m.email + '')" data-email="' + m.email + '">'
+    return '<div class="fsw-mud-card' + (sel ? ' sel' : '') + '" onclick="fswToggleMudancero(\'' + m.email + '\')" data-email="' + m.email + '">'
       + '<div class="fsw-mud-check">✓</div>'
       + foto
       + '<div class="fsw-mud-body">'
