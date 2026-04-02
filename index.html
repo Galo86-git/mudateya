@@ -565,6 +565,64 @@ li.kb-active{background:rgba(34,195,106,.18)!important;color:#E8F5EE!important}
 .fsw-btn-next:disabled{opacity:.5;cursor:not-allowed}
 .fsw-panel{display:none}
 .fsw-panel.active{display:block;animation:fadeUp .25s ease both}
+
+/* ── PASO 3 NUEVO LAYOUT ── */
+.fsw-p3-layout{display:grid;grid-template-columns:260px 1fr 240px;height:calc(100vh - 104px);overflow:hidden;position:relative}
+.fsw-p3-left{padding:1.2rem;overflow-y:auto;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
+.fsw-p3-center{overflow-y:auto;display:flex;flex-direction:column;padding-bottom:60px}
+.fsw-p3-right{border-left:1px solid var(--border);padding:1.2rem;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.fsw-sum-box{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:.75rem .9rem}
+.fsw-sum-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px;gap:8px}
+.fsw-sum-row:last-child{border-bottom:none}
+.fsw-sum-lbl{color:var(--text3);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;padding-top:1px}
+.fsw-sum-val{color:var(--text);font-weight:500;text-align:right;font-size:11px;line-height:1.3}
+.fsw-precio-box{background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:12px;padding:.9rem}
+.fsw-map-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--border2);background:var(--surface2);height:140px;flex-shrink:0}
+.fsw-map-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.fsw-map-stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 9px}
+.fsw-map-stat-lbl{font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.fsw-map-stat-val{font-family:"Bebas Neue",sans-serif;font-size:1.1rem;color:var(--text);letter-spacing:.5px;line-height:1}
+.fsw-cat-header{padding:.9rem 1.2rem .5rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.fsw-cat-title{font-family:"Bebas Neue",sans-serif;font-size:1.2rem;letter-spacing:1px;color:var(--text);margin-bottom:2px}
+.fsw-cat-sub{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.fsw-cat-search{padding:.6rem 1.2rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.fsw-cat-search input{width:100%;padding:7px 11px;border:1px solid var(--border2);border-radius:8px;font-size:12px;font-family:"Outfit",sans-serif;color:var(--text);background:var(--surface2);outline:none;transition:border-color .2s}
+.fsw-cat-search input:focus{border-color:var(--emerald)}
+.fsw-cat-search input::placeholder{color:var(--text3)}
+.fsw-cat-grid{padding:.8rem 1.2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.fsw-mud-card{background:var(--surface);border:1.5px solid var(--border2);border-radius:10px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.fsw-mud-card:hover{border-color:rgba(34,195,106,.35);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.fsw-mud-card.sel{border-color:var(--emerald);box-shadow:0 0 0 2px var(--emerald),0 8px 24px rgba(34,195,106,.15)}
+.fsw-mud-check{position:absolute;top:6px;right:6px;width:19px;height:19px;border-radius:50%;background:var(--emerald);color:#041A0E;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;z-index:2}
+.fsw-mud-card.sel .fsw-mud-check{display:flex}
+.fsw-mud-foto{width:100%;height:80px;object-fit:cover;display:block}
+.fsw-mud-foto-ph{width:100%;height:80px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:"Bebas Neue",sans-serif;font-size:1.8rem;color:var(--emerald)}
+.fsw-mud-body{padding:.6rem .7rem}
+.fsw-mud-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fsw-mud-zona{font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:4px}
+.fsw-mud-stars{font-size:10px;color:#F5A623;letter-spacing:.5px}
+.fsw-mud-rating{font-size:9px;color:var(--text3);font-family:var(--mono);margin-left:3px}
+.fsw-cat-empty{text-align:center;padding:2.5rem 1rem;color:var(--text3);font-family:var(--mono);font-size:12px}
+.fsw-sel-bar{position:absolute;bottom:0;left:260px;right:240px;padding:.8rem 1.2rem;background:rgba(8,14,12,.97);border-top:1px solid var(--border2);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:space-between;gap:12px;z-index:20}
+.fsw-sel-bar.show{display:flex}
+.fsw-sel-info{font-size:12px;color:var(--text2)}
+.fsw-sel-info strong{color:var(--emerald)}
+.fsw-btn-pedir-sel{background:var(--emerald);color:#041A0E;border:none;padding:10px 20px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.fsw-btn-pedir-sel:hover{background:#2EDB7A}
+.fsw-abierto-card{background:var(--emerald-subtle);border:2px solid rgba(34,195,106,.25);border-radius:14px;padding:1.2rem;text-align:center;cursor:pointer;transition:all .2s;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:180px}
+.fsw-abierto-card:hover{border-color:var(--emerald);background:rgba(34,195,106,.14);transform:translateY(-2px)}
+.fsw-abierto-icon{font-size:2.5rem;line-height:1}
+.fsw-abierto-title{font-family:"Bebas Neue",sans-serif;font-size:1.4rem;letter-spacing:1px;color:var(--emerald);line-height:1.1;text-align:center}
+.fsw-abierto-sub{font-size:10px;color:var(--text2);font-family:var(--mono);line-height:1.6;text-align:center}
+.fsw-abierto-btn{background:var(--emerald);color:#041A0E;border:none;padding:10px 16px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;width:100%;transition:all .2s;margin-top:4px}
+.fsw-abierto-btn:hover{background:#2EDB7A}
+.fsw-divisor{display:flex;align-items:center;gap:8px;font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;flex-shrink:0}
+.fsw-divisor::before,.fsw-divisor::after{content:"";flex:1;height:1px;background:var(--border)}
+@media(max-width:900px){
+  .fsw-p3-layout{grid-template-columns:1fr;height:auto;overflow:visible}
+  .fsw-p3-left,.fsw-p3-right{border:none;border-bottom:1px solid var(--border)}
+  .fsw-sel-bar{left:0;right:0;position:fixed}
+}
 </style>
 <script>
 window._fswModo = 'abierto';
@@ -676,41 +734,70 @@ function fswSeleccionarModo(modo) {
         <div class="extra-chip" onclick="toggleExtra(this)"><span class="extra-icon">🛡️</span><span>Seguro de mudanza</span><div class="chk"></div></div>
       </div>
     </div>
-    <div class="fsw-panel" id="fsw-p3">
-      <div class="fsw-title">Resumen de tu mudanza</div>
-      <div class="fsw-sub">Revisá todo antes de elegir cómo recibir cotizaciones</div>
-      <div style="background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:.8rem 1rem;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--text3);font-family:var(--mono)">Desde</span><span id="fsw-sum-desde" style="color:var(--text);font-weight:500;text-align:right;max-width:60%;font-size:12px">—</span></div>
-        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--text3);font-family:var(--mono)">Hasta</span><span id="fsw-sum-hasta" style="color:var(--text);font-weight:500;text-align:right;max-width:60%;font-size:12px">—</span></div>
-        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--text3);font-family:var(--mono)">Fecha</span><span id="fsw-sum-fecha" style="color:var(--text);font-weight:500">—</span></div>
-        <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px"><span style="color:var(--text3);font-family:var(--mono)">Ambientes</span><span id="fsw-sum-amb" style="color:var(--text);font-weight:500">—</span></div>
-      </div>
-      <div style="background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:14px;padding:.9rem 1rem;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
-        <div><div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:3px">PRECIO ESTIMADO</div><div id="fsw-sum-precio" style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--emerald);letter-spacing:1px">—</div><div style="font-size:9px;color:var(--text3);font-family:var(--mono)">el precio final lo define el mudancero</div></div>
-        <div style="text-align:right"><div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:3px">PAGO VÍA</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--emerald)">Mercado Pago</div><div style="font-size:9px;color:var(--text3);font-family:var(--mono)">100% seguro</div></div>
-      </div>
+    <div class="fsw-panel" id="fsw-p3" style="padding:0;overflow:hidden">
+      <div class="fsw-p3-layout">
 
-      <!-- ── SELECTOR DE MODO ── -->
-      <div style="margin-bottom:16px">
-        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);margin-bottom:10px">¿Cómo querés recibir cotizaciones?</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div id="fsw-modo-dirigido" onclick="fswSeleccionarModo('dirigido')" style="background:var(--surface);border:1.5px solid var(--border2);border-radius:14px;padding:1rem;cursor:pointer;transition:all .2s;text-align:center;user-select:none">
-            <div style="font-size:1.8rem;margin-bottom:8px">👀</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.5px;color:var(--text);margin-bottom:4px">Elegir mudanceros</div>
-            <div style="font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.5">Ves perfiles y reseñas antes de pedir precio</div>
+        <!-- IZQUIERDA: resumen + mapa -->
+        <div class="fsw-p3-left">
+          <div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono)">Tu mudanza</div>
+          <div class="fsw-sum-box">
+            <div class="fsw-sum-row"><span class="fsw-sum-lbl">Desde</span><span class="fsw-sum-val" id="fsw-sum-desde">—</span></div>
+            <div class="fsw-sum-row"><span class="fsw-sum-lbl">Hasta</span><span class="fsw-sum-val" id="fsw-sum-hasta">—</span></div>
+            <div class="fsw-sum-row"><span class="fsw-sum-lbl">Fecha</span><span class="fsw-sum-val" id="fsw-sum-fecha">—</span></div>
+            <div class="fsw-sum-row"><span class="fsw-sum-lbl">Ambientes</span><span class="fsw-sum-val" id="fsw-sum-amb">—</span></div>
           </div>
-          <div id="fsw-modo-abierto" onclick="fswSeleccionarModo('abierto')" style="background:var(--emerald-subtle);border:1.5px solid var(--emerald);border-radius:14px;padding:1rem;cursor:pointer;transition:all .2s;text-align:center;user-select:none">
-            <div style="font-size:1.8rem;margin-bottom:8px">⚡</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.5px;color:var(--emerald);margin-bottom:4px">Recibir las primeras 5</div>
-            <div style="font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.5">Los primeros 5 que respondan te cotizan</div>
+          <div class="fsw-precio-box">
+            <div style="font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Precio estimado</div>
+            <div id="fsw-sum-precio" style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--emerald);letter-spacing:1px;line-height:1">—</div>
+            <div style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:3px">el mudancero define el precio final</div>
+          </div>
+          <div class="fsw-map-wrap" id="fswMapWrap"><div id="fswRouteMap" style="width:100%;height:100%"></div></div>
+          <div class="fsw-map-stats">
+            <div class="fsw-map-stat"><div class="fsw-map-stat-lbl">Distancia</div><div class="fsw-map-stat-val" id="fsw-sum-dist">—</div></div>
+            <div class="fsw-map-stat"><div class="fsw-map-stat-lbl">Tiempo est.</div><div class="fsw-map-stat-val" id="fsw-sum-dur">—</div></div>
+          </div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-align:center;padding:.3rem 0">Pago vía <strong style="color:var(--emerald)">Mercado Pago</strong> · 100% seguro</div>
+          <button onclick="fswBack()" style="background:none;border:1px solid var(--border2);color:var(--text2);padding:9px 14px;border-radius:9px;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;width:100%;margin-top:4px">← Volver</button>
+        </div>
+
+        <!-- CENTRO: catálogo -->
+        <div class="fsw-p3-center">
+          <div class="fsw-cat-header">
+            <div class="fsw-cat-title">ELEGÍ MUDANCEROS</div>
+            <div class="fsw-cat-sub">Seleccioná hasta 3 · o usá la opción rápida →</div>
+          </div>
+          <div class="fsw-cat-search">
+            <input id="fsw-cat-filtro" placeholder="Buscar por nombre o zona…" oninput="fswFiltrarCatalogo()"/>
+          </div>
+          <div id="fsw-cat-grid" class="fsw-cat-grid">
+            <div class="fsw-cat-empty"><span class="spinner" style="width:20px;height:20px;border-width:2px;display:block;margin:0 auto 10px"></span>Cargando mudanceros…</div>
           </div>
         </div>
-      </div>
 
-      <div id="fswMapWrap" style="height:160px;border-radius:12px;overflow:hidden;border:1px solid var(--border2);margin-bottom:10px;background:var(--surface2)"><div id="fswRouteMap" style="width:100%;height:100%"></div></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px"><div style="font-size:9px;color:var(--text3);font-family:var(--mono)">DISTANCIA</div><div id="fsw-sum-dist" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--text)">—</div></div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px"><div style="font-size:9px;color:var(--text3);font-family:var(--mono)">TIEMPO EST.</div><div id="fsw-sum-dur" style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--text)">—</div></div>
+        <!-- BARRA SELECCIONADOS (sobre el centro) -->
+        <div class="fsw-sel-bar" id="fswSelBar">
+          <div class="fsw-sel-info">Pedirle cotización a <strong id="fswSelCount">0</strong> mudancero/s</div>
+          <button class="fsw-btn-pedir-sel" onclick="fswPedirCotizacionSeleccionados()">
+            Pedir cotización →
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <!-- DERECHA: opción abierta -->
+        <div class="fsw-p3-right">
+          <div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono)">Opción rápida</div>
+          <div class="fsw-abierto-card" onclick="fswPublicarAbierto()">
+            <div class="fsw-abierto-icon">⚡</div>
+            <div class="fsw-abierto-title">Recibir las primeras 5</div>
+            <div class="fsw-abierto-sub">Los primeros 5 mudanceros disponibles te cotizan automáticamente. Sin elegir.</div>
+            <button class="fsw-abierto-btn">Solicitar presupuestos →</button>
+          </div>
+          <div class="fsw-divisor">o elegí vos</div>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);line-height:1.6;text-align:center;padding:0 .4rem">
+            Seleccioná mudanceros del catálogo y pediles precio directamente a ellos.
+          </div>
+        </div>
+
       </div>
     </div>
     <div class="fsw-panel" id="fsw-p4">
@@ -1455,8 +1542,14 @@ function fswGoStep(n) {
   } else {
     footer.style.display = 'flex';
     back.style.visibility = n === 1 ? 'hidden' : 'visible';
-    if (n === 3) { next.textContent = 'Solicitar presupuestos →'; fswBuildSummary(); }
-    else if (n === 2) { next.textContent = 'Ver resumen →'; }
+    if (n === 3) {
+      footer.style.display = 'none'; // footer oculto en paso 3, la acción está en las cards
+      fswBuildSummary();
+      fswCargarCatalogo();
+      _fswSeleccionados.clear();
+      var bar = document.getElementById('fswSelBar');
+      if (bar) bar.classList.remove('show');
+    } else if (n === 2) { next.textContent = 'Ver resumen →'; }
     else { next.textContent = 'Continuar →'; }
   }
   fswStep = n;
@@ -1482,7 +1575,156 @@ function fswNext() {
     }
   }
 }
-function fswBack() { if (fswStep > 1) fswGoStep(fswStep - 1); else closeFSW(); }
+function fswBack() {
+  if (fswStep > 1) {
+    fswGoStep(fswStep - 1);
+    // Restaurar footer si volvemos del paso 3
+    if (fswStep === 2) {
+      var footer = document.getElementById('fsw-footer');
+      if (footer) footer.style.display = 'flex';
+    }
+  } else {
+    closeFSW();
+  }
+}
+// ── CATÁLOGO INLINE FSW ──────────────────────────────────────────
+var _fswCatTodos = [];
+var _fswSeleccionados = new Set();
+
+async function fswCargarCatalogo() {
+  var grid = document.getElementById('fsw-cat-grid');
+  if (!grid) return;
+  grid.innerHTML = '<div class="fsw-cat-empty"><span class="spinner" style="width:20px;height:20px;border-width:2px;display:block;margin:0 auto 10px"></span>Cargando…</div>';
+  try {
+    var r = await fetch('/api/cotizaciones?action=catalogo');
+    var d = await r.json();
+    _fswCatTodos = d.mudanceros || [];
+    fswRenderCatalogo(_fswCatTodos);
+  } catch(e) {
+    grid.innerHTML = '<div class="fsw-cat-empty">No se pudo cargar el catálogo.</div>';
+  }
+}
+
+function fswFiltrarCatalogo() {
+  var q = (document.getElementById('fsw-cat-filtro').value || '').toLowerCase();
+  var filtrados = !q ? _fswCatTodos : _fswCatTodos.filter(function(m) {
+    return m.nombre.toLowerCase().includes(q) ||
+      (m.empresa||'').toLowerCase().includes(q) ||
+      (m.zonaBase||'').toLowerCase().includes(q);
+  });
+  fswRenderCatalogo(filtrados);
+}
+
+function fswRenderCatalogo(lista) {
+  var grid = document.getElementById('fsw-cat-grid');
+  if (!grid) return;
+  if (!lista.length) {
+    grid.innerHTML = '<div class="fsw-cat-empty">No hay mudanceros con esos filtros.</div>';
+    return;
+  }
+  grid.innerHTML = lista.map(function(m) {
+    var sel = _fswSeleccionados.has(m.email);
+    var initials = (m.nombre||'MV').split(' ').map(function(p){ return p[0]; }).join('').slice(0,2).toUpperCase();
+    var stars = '★'.repeat(Math.floor(m.calificacion||0)) + '☆'.repeat(5 - Math.floor(m.calificacion||0));
+    var rating = m.calificacion ? m.calificacion.toFixed(1) : '—';
+    var foto = m.foto
+      ? '<img class="fsw-mud-foto" src="' + m.foto + '" loading="lazy"/>'
+      : '<div class="fsw-mud-foto-ph">' + initials + '</div>';
+    return '<div class="fsw-mud-card' + (sel ? ' sel' : '') + '" onclick="fswToggleMudancero('' + m.email + '')" data-email="' + m.email + '">'
+      + '<div class="fsw-mud-check">✓</div>'
+      + foto
+      + '<div class="fsw-mud-body">'
+      + '<div class="fsw-mud-name">' + m.nombre + '</div>'
+      + '<div class="fsw-mud-zona">' + (m.zonaBase||'') + '</div>'
+      + '<span class="fsw-mud-stars">' + stars + '</span><span class="fsw-mud-rating">' + rating + '</span>'
+      + '</div></div>';
+  }).join('');
+}
+
+function fswToggleMudancero(email) {
+  if (_fswSeleccionados.has(email)) {
+    _fswSeleccionados.delete(email);
+  } else {
+    if (_fswSeleccionados.size >= 3) {
+      var t = document.createElement('div');
+      t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1D2820;border:1px solid var(--border2);color:var(--text2);padding:10px 20px;border-radius:10px;font-size:12px;font-family:var(--mono);z-index:999;white-space:nowrap';
+      t.textContent = 'Podés seleccionar hasta 3 mudanceros';
+      document.body.appendChild(t);
+      setTimeout(function(){ t.remove(); }, 2500);
+      return;
+    }
+    _fswSeleccionados.add(email);
+  }
+  var card = document.querySelector('[data-email="' + email + '"]');
+  if (card) card.classList.toggle('sel', _fswSeleccionados.has(email));
+  var n = _fswSeleccionados.size;
+  var bar = document.getElementById('fswSelBar');
+  var cnt = document.getElementById('fswSelCount');
+  if (bar) bar.classList.toggle('show', n > 0);
+  if (cnt) cnt.textContent = n;
+}
+
+function fswPedirCotizacionSeleccionados() {
+  if (!_fswSeleccionados.size) return;
+  // Guardar en sessionStorage y publicar en modo dirigido
+  var user = null;
+  try { user = JSON.parse(sessionStorage.getItem('googleUser') || sessionStorage.getItem('clienteUser')); } catch(e) {}
+  var desde = document.getElementById('fsw-desde').value.trim();
+  var hasta  = document.getElementById('fsw-hasta').value.trim();
+  var objetos = Array.from(document.querySelectorAll('#fsw-obj-grid .obj-chip.sel .obj-label')).map(function(e){ return e.textContent; }).join(', ');
+  var precio = 50000 + (fswAmb - 1) * 30000;
+  var clienteWA = window._clienteWA || (user ? localStorage.getItem('clienteWA_' + (user.email||'')) || '' : '');
+  var mudanzaData = {
+    clienteEmail: user ? user.email : '',
+    clienteNombre: user ? user.name : '',
+    clienteWA: clienteWA,
+    desde: desde, hasta: hasta,
+    ambientes: fswAmb + ' ambiente' + (fswAmb !== 1 ? 's' : ''),
+    fecha: fswGetFechaLabel(),
+    servicios: objetos,
+    zonaBase: desde,
+    precio_estimado: precio,
+    tipo: 'mudanza',
+    modoCotizacion: 'dirigido',
+    mudancerosInvitados: Array.from(_fswSeleccionados),
+  };
+  try { sessionStorage.setItem('mudanza_pendiente', JSON.stringify(mudanzaData)); } catch(e) {}
+  if (!user) {
+    _loginRol = 'cliente';
+    openLoginModal();
+    // Cuando el login complete, publicar directo
+    window._pendingDirigido = true;
+  } else {
+    _fswPublicarDirigido(user, mudanzaData);
+  }
+}
+
+async function _fswPublicarDirigido(user, data) {
+  fswGoStep(4);
+  document.getElementById('fsw-login-state').style.display = 'none';
+  document.getElementById('fsw-publishing-state').style.display = 'block';
+  try {
+    var r = await fetch('/api/cotizaciones?action=publicar', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+    var d = await r.json();
+    fswPublicadaId = d.id || null;
+  } catch(e) { console.warn('Error publicando dirigido:', e.message); }
+  document.getElementById('fsw-publishing-state').style.display = 'none';
+  document.getElementById('fsw-published-state').style.display = 'block';
+  sessionStorage.removeItem('mudanza_pendiente');
+  setTimeout(function(){ window.location.href = '/mi-mudanza'; }, 2000);
+}
+
+async function fswPublicarAbierto() {
+  var user = null;
+  try { user = JSON.parse(sessionStorage.getItem('googleUser') || sessionStorage.getItem('clienteUser')); } catch(e) {}
+  if (!user) { _loginRol = 'cliente'; openLoginModal(); return; }
+  fswGoStep(4);
+  fswPublicar(user);
+}
+
 function fswBuildSummary() {
   var desde = document.getElementById('fsw-desde').value.trim();
   var hasta = document.getElementById('fsw-hasta').value.trim();
