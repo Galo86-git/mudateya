@@ -567,61 +567,75 @@ li.kb-active{background:rgba(34,195,106,.18)!important;color:#E8F5EE!important}
 .fsw-panel.active{display:block;animation:fadeUp .25s ease both}
 
 /* ── PASO 3 NUEVO LAYOUT ── */
-.fsw-p3-layout{display:grid;grid-template-columns:260px 1fr 240px;height:calc(100vh - 104px);overflow:hidden;position:relative}
-.fsw-p3-left{padding:1.2rem;overflow-y:auto;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:10px}
-.fsw-p3-center{overflow-y:auto;display:flex;flex-direction:column;padding-bottom:60px}
-.fsw-p3-right{border-left:1px solid var(--border);padding:1.2rem;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
-.fsw-sum-box{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:.75rem .9rem}
-.fsw-sum-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px;gap:8px}
+/* El fsw-body tiene max-width:600px — para p3 lo override con clase especial */
+.fsw-body.p3-mode{max-width:100%;padding:0;overflow:hidden;display:flex;flex-direction:column}
+.fsw-p3-layout{display:grid;grid-template-columns:280px 1fr 260px;flex:1;overflow:hidden;position:relative}
+
+/* columna izquierda */
+.fsw-p3-left{padding:1.2rem 1rem;overflow-y:auto;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:10px;background:var(--bg2)}
+.fsw-sum-box{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:.7rem .9rem}
+.fsw-sum-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--border);gap:8px}
 .fsw-sum-row:last-child{border-bottom:none}
-.fsw-sum-lbl{color:var(--text3);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;padding-top:1px}
+.fsw-sum-lbl{color:var(--text3);font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;padding-top:2px;flex-shrink:0}
 .fsw-sum-val{color:var(--text);font-weight:500;text-align:right;font-size:11px;line-height:1.3}
-.fsw-precio-box{background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:12px;padding:.9rem}
-.fsw-map-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--border2);background:var(--surface2);height:140px;flex-shrink:0}
+.fsw-precio-box{background:var(--emerald-subtle);border:1px solid rgba(34,195,106,.2);border-radius:12px;padding:.8rem .9rem}
+.fsw-map-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--border2);height:130px;flex-shrink:0}
 .fsw-map-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .fsw-map-stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 9px}
 .fsw-map-stat-lbl{font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
 .fsw-map-stat-val{font-family:"Bebas Neue",sans-serif;font-size:1.1rem;color:var(--text);letter-spacing:.5px;line-height:1}
-.fsw-cat-header{padding:.9rem 1.2rem .5rem;border-bottom:1px solid var(--border);flex-shrink:0}
+
+/* columna central */
+.fsw-p3-center{display:flex;flex-direction:column;overflow:hidden;position:relative}
+.fsw-cat-header{padding:.9rem 1.2rem .6rem;border-bottom:1px solid var(--border);flex-shrink:0}
 .fsw-cat-title{font-family:"Bebas Neue",sans-serif;font-size:1.2rem;letter-spacing:1px;color:var(--text);margin-bottom:2px}
 .fsw-cat-sub{font-size:10px;color:var(--text3);font-family:var(--mono)}
 .fsw-cat-search{padding:.6rem 1.2rem;border-bottom:1px solid var(--border);flex-shrink:0}
-.fsw-cat-search input{width:100%;padding:7px 11px;border:1px solid var(--border2);border-radius:8px;font-size:12px;font-family:"Outfit",sans-serif;color:var(--text);background:var(--surface2);outline:none;transition:border-color .2s}
+.fsw-cat-search input{width:100%;padding:8px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;font-family:"Outfit",sans-serif;color:var(--text);background:var(--surface2);outline:none;transition:border-color .2s}
 .fsw-cat-search input:focus{border-color:var(--emerald)}
 .fsw-cat-search input::placeholder{color:var(--text3)}
-.fsw-cat-grid{padding:.8rem 1.2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.fsw-cat-scroll{flex:1;overflow-y:auto;padding-bottom:56px}
+.fsw-cat-grid{padding:.8rem 1.2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
 .fsw-mud-card{background:var(--surface);border:1.5px solid var(--border2);border-radius:10px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.fsw-mud-card:hover{border-color:rgba(34,195,106,.35);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.fsw-mud-card.sel{border-color:var(--emerald);box-shadow:0 0 0 2px var(--emerald),0 8px 24px rgba(34,195,106,.15)}
-.fsw-mud-check{position:absolute;top:6px;right:6px;width:19px;height:19px;border-radius:50%;background:var(--emerald);color:#041A0E;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;z-index:2}
+.fsw-mud-card:hover{border-color:rgba(34,195,106,.4);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.fsw-mud-card.sel{border-color:var(--emerald);box-shadow:0 0 0 2px var(--emerald),0 6px 20px rgba(34,195,106,.2)}
+.fsw-mud-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--emerald);color:#041A0E;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;z-index:2}
 .fsw-mud-card.sel .fsw-mud-check{display:flex}
 .fsw-mud-foto{width:100%;height:80px;object-fit:cover;display:block}
 .fsw-mud-foto-ph{width:100%;height:80px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:"Bebas Neue",sans-serif;font-size:1.8rem;color:var(--emerald)}
-.fsw-mud-body{padding:.6rem .7rem}
-.fsw-mud-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fsw-mud-zona{font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:4px}
-.fsw-mud-stars{font-size:10px;color:#F5A623;letter-spacing:.5px}
+.fsw-mud-body{padding:.55rem .65rem}
+.fsw-mud-name{font-size:11px;font-weight:600;color:var(--text);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fsw-mud-zona{font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:3px}
+.fsw-mud-stars{font-size:10px;color:#F5A623}
 .fsw-mud-rating{font-size:9px;color:var(--text3);font-family:var(--mono);margin-left:3px}
 .fsw-cat-empty{text-align:center;padding:2.5rem 1rem;color:var(--text3);font-family:var(--mono);font-size:12px}
-.fsw-sel-bar{position:absolute;bottom:0;left:260px;right:240px;padding:.8rem 1.2rem;background:rgba(8,14,12,.97);border-top:1px solid var(--border2);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:space-between;gap:12px;z-index:20}
+
+/* barra seleccionados */
+.fsw-sel-bar{position:absolute;bottom:0;left:280px;right:260px;padding:.75rem 1.2rem;background:rgba(8,14,12,.97);border-top:1px solid var(--border2);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:space-between;gap:12px;z-index:20}
 .fsw-sel-bar.show{display:flex}
 .fsw-sel-info{font-size:12px;color:var(--text2)}
 .fsw-sel-info strong{color:var(--emerald)}
-.fsw-btn-pedir-sel{background:var(--emerald);color:#041A0E;border:none;padding:10px 20px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.fsw-btn-pedir-sel{background:var(--emerald);color:#041A0E;border:none;padding:9px 18px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
 .fsw-btn-pedir-sel:hover{background:#2EDB7A}
-.fsw-abierto-card{background:var(--emerald-subtle);border:2px solid rgba(34,195,106,.25);border-radius:14px;padding:1.2rem;text-align:center;cursor:pointer;transition:all .2s;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:180px}
-.fsw-abierto-card:hover{border-color:var(--emerald);background:rgba(34,195,106,.14);transform:translateY(-2px)}
-.fsw-abierto-icon{font-size:2.5rem;line-height:1}
-.fsw-abierto-title{font-family:"Bebas Neue",sans-serif;font-size:1.4rem;letter-spacing:1px;color:var(--emerald);line-height:1.1;text-align:center}
-.fsw-abierto-sub{font-size:10px;color:var(--text2);font-family:var(--mono);line-height:1.6;text-align:center}
-.fsw-abierto-btn{background:var(--emerald);color:#041A0E;border:none;padding:10px 16px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;width:100%;transition:all .2s;margin-top:4px}
+
+/* columna derecha */
+.fsw-p3-right{border-left:1px solid var(--border);padding:1.2rem 1rem;display:flex;flex-direction:column;gap:12px;overflow-y:auto;background:var(--bg2)}
+.fsw-abierto-card{background:var(--emerald-subtle);border:2px solid rgba(34,195,106,.3);border-radius:14px;padding:1.4rem 1rem;text-align:center;cursor:pointer;transition:all .25s;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:160px}
+.fsw-abierto-card:hover{border-color:var(--emerald);background:rgba(34,195,106,.16);transform:translateY(-2px);box-shadow:0 8px 28px rgba(34,195,106,.15)}
+.fsw-abierto-icon{font-size:2.8rem;line-height:1}
+.fsw-abierto-title{font-family:"Bebas Neue",sans-serif;font-size:1.5rem;letter-spacing:1px;color:var(--emerald);line-height:1.1}
+.fsw-abierto-sub{font-size:10px;color:var(--text2);font-family:var(--mono);line-height:1.6}
+.fsw-abierto-btn{background:var(--emerald);color:#041A0E;border:none;padding:11px 16px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:"Outfit",sans-serif;width:100%;transition:all .2s}
 .fsw-abierto-btn:hover{background:#2EDB7A}
 .fsw-divisor{display:flex;align-items:center;gap:8px;font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;flex-shrink:0}
 .fsw-divisor::before,.fsw-divisor::after{content:"";flex:1;height:1px;background:var(--border)}
+
 @media(max-width:900px){
-  .fsw-p3-layout{grid-template-columns:1fr;height:auto;overflow:visible}
+  .fsw-p3-layout{grid-template-columns:1fr;overflow:visible}
+  .fsw-body.p3-mode{overflow-y:auto}
   .fsw-p3-left,.fsw-p3-right{border:none;border-bottom:1px solid var(--border)}
-  .fsw-sel-bar{left:0;right:0;position:fixed}
+  .fsw-p3-center{min-height:400px}
+  .fsw-sel-bar{left:0;right:0;position:fixed;bottom:0}
 }
 </style>
 <script>
@@ -734,12 +748,12 @@ function fswSeleccionarModo(modo) {
         <div class="extra-chip" onclick="toggleExtra(this)"><span class="extra-icon">🛡️</span><span>Seguro de mudanza</span><div class="chk"></div></div>
       </div>
     </div>
-    <div class="fsw-panel" id="fsw-p3" style="padding:0;overflow:hidden">
+    <div class="fsw-panel" id="fsw-p3" style="padding:0;overflow:hidden;height:100%">
       <div class="fsw-p3-layout">
 
         <!-- IZQUIERDA: resumen + mapa -->
         <div class="fsw-p3-left">
-          <div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono)">Tu mudanza</div>
+          <div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);padding-bottom:2px">Resumen</div>
           <div class="fsw-sum-box">
             <div class="fsw-sum-row"><span class="fsw-sum-lbl">Desde</span><span class="fsw-sum-val" id="fsw-sum-desde">—</span></div>
             <div class="fsw-sum-row"><span class="fsw-sum-lbl">Hasta</span><span class="fsw-sum-val" id="fsw-sum-hasta">—</span></div>
@@ -747,54 +761,55 @@ function fswSeleccionarModo(modo) {
             <div class="fsw-sum-row"><span class="fsw-sum-lbl">Ambientes</span><span class="fsw-sum-val" id="fsw-sum-amb">—</span></div>
           </div>
           <div class="fsw-precio-box">
-            <div style="font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Precio estimado</div>
-            <div id="fsw-sum-precio" style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--emerald);letter-spacing:1px;line-height:1">—</div>
-            <div style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:3px">el mudancero define el precio final</div>
+            <div style="font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Precio estimado</div>
+            <div id="fsw-sum-precio" style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--emerald);letter-spacing:1px;line-height:1">—</div>
+            <div style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:4px">el mudancero define el precio final</div>
           </div>
           <div class="fsw-map-wrap" id="fswMapWrap"><div id="fswRouteMap" style="width:100%;height:100%"></div></div>
           <div class="fsw-map-stats">
             <div class="fsw-map-stat"><div class="fsw-map-stat-lbl">Distancia</div><div class="fsw-map-stat-val" id="fsw-sum-dist">—</div></div>
             <div class="fsw-map-stat"><div class="fsw-map-stat-lbl">Tiempo est.</div><div class="fsw-map-stat-val" id="fsw-sum-dur">—</div></div>
           </div>
-          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-align:center;padding:.3rem 0">Pago vía <strong style="color:var(--emerald)">Mercado Pago</strong> · 100% seguro</div>
-          <button onclick="fswBack()" style="background:none;border:1px solid var(--border2);color:var(--text2);padding:9px 14px;border-radius:9px;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;width:100%;margin-top:4px">← Volver</button>
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-align:center;line-height:1.5">Pago vía <strong style="color:var(--emerald)">Mercado Pago</strong><br>100% seguro</div>
+          <button onclick="fswBack()" style="background:none;border:1px solid var(--border2);color:var(--text2);padding:8px 14px;border-radius:9px;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;width:100%">← Volver</button>
         </div>
 
         <!-- CENTRO: catálogo -->
         <div class="fsw-p3-center">
           <div class="fsw-cat-header">
-            <div class="fsw-cat-title">ELEGÍ MUDANCEROS</div>
-            <div class="fsw-cat-sub">Seleccioná hasta 3 · o usá la opción rápida →</div>
+            <div class="fsw-cat-title">ELEGÍ TU MUDANCERO</div>
+            <div class="fsw-cat-sub">Seleccioná hasta 3 y pediles cotización · o usá la opción rápida →</div>
           </div>
           <div class="fsw-cat-search">
             <input id="fsw-cat-filtro" placeholder="Buscar por nombre o zona…" oninput="fswFiltrarCatalogo()"/>
           </div>
-          <div id="fsw-cat-grid" class="fsw-cat-grid">
-            <div class="fsw-cat-empty"><span class="spinner" style="width:20px;height:20px;border-width:2px;display:block;margin:0 auto 10px"></span>Cargando mudanceros…</div>
+          <div class="fsw-cat-scroll">
+            <div id="fsw-cat-grid" class="fsw-cat-grid">
+              <div class="fsw-cat-empty"><span class="spinner" style="width:18px;height:18px;border-width:2px;display:block;margin:0 auto 10px"></span>Cargando mudanceros…</div>
+            </div>
           </div>
         </div>
 
-        <!-- BARRA SELECCIONADOS (sobre el centro) -->
+        <!-- BARRA SELECCIONADOS (flotante sobre el centro) -->
         <div class="fsw-sel-bar" id="fswSelBar">
-          <div class="fsw-sel-info">Pedirle cotización a <strong id="fswSelCount">0</strong> mudancero/s</div>
+          <div class="fsw-sel-info">Cotización a <strong id="fswSelCount">0</strong> mudancero/s seleccionado/s</div>
           <button class="fsw-btn-pedir-sel" onclick="fswPedirCotizacionSeleccionados()">
             Pedir cotización →
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </div>
 
         <!-- DERECHA: opción abierta -->
         <div class="fsw-p3-right">
-          <div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono)">Opción rápida</div>
+          <div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);padding-bottom:2px">Opción rápida</div>
           <div class="fsw-abierto-card" onclick="fswPublicarAbierto()">
             <div class="fsw-abierto-icon">⚡</div>
-            <div class="fsw-abierto-title">Recibir las primeras 5</div>
-            <div class="fsw-abierto-sub">Los primeros 5 mudanceros disponibles te cotizan automáticamente. Sin elegir.</div>
-            <button class="fsw-abierto-btn">Solicitar presupuestos →</button>
+            <div class="fsw-abierto-title">RECIBIR LAS PRIMERAS 5</div>
+            <div class="fsw-abierto-sub">Los primeros 5 mudanceros disponibles te cotizan automáticamente.</div>
+            <button class="fsw-abierto-btn" onclick="event.stopPropagation();fswPublicarAbierto()">Solicitar presupuestos →</button>
           </div>
           <div class="fsw-divisor">o elegí vos</div>
-          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);line-height:1.6;text-align:center;padding:0 .4rem">
-            Seleccioná mudanceros del catálogo y pediles precio directamente a ellos.
+          <div style="font-size:10px;color:var(--text3);font-family:var(--mono);line-height:1.6;text-align:center">
+            Seleccioná mudanceros del catálogo y pediles cotización directa.
           </div>
         </div>
 
@@ -1542,15 +1557,20 @@ function fswGoStep(n) {
   } else {
     footer.style.display = 'flex';
     back.style.visibility = n === 1 ? 'hidden' : 'visible';
+    var fswBody = document.querySelector('#fswOverlay .fsw-body');
     if (n === 3) {
-      footer.style.display = 'none'; // footer oculto en paso 3, la acción está en las cards
+      footer.style.display = 'none';
+      if (fswBody) fswBody.classList.add('p3-mode');
       fswBuildSummary();
       fswCargarCatalogo();
       _fswSeleccionados.clear();
       var bar = document.getElementById('fswSelBar');
       if (bar) bar.classList.remove('show');
-    } else if (n === 2) { next.textContent = 'Ver resumen →'; }
-    else { next.textContent = 'Continuar →'; }
+    } else {
+      if (fswBody) fswBody.classList.remove('p3-mode');
+      if (n === 2) { next.textContent = 'Ver resumen →'; }
+      else { next.textContent = 'Continuar →'; }
+    }
   }
   fswStep = n;
   var body = document.querySelector('#fswOverlay .fsw-body');
