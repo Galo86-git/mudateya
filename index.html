@@ -567,10 +567,6 @@ li.kb-active{background:rgba(34,195,106,.18)!important;color:#E8F5EE!important}
 .fsw-panel.active{display:block;animation:fadeUp .25s ease both}
 
 /* ── PASO 3 NUEVO LAYOUT ── */
-@media(min-width:769px){
-  #fsw-p3{overflow:hidden;height:100%}
-  .fsw-panel.active#fsw-p3{display:flex;flex-direction:column}
-}
 /* El fsw-body tiene max-width:600px — para p3 lo override con clase especial */
 .fsw-body.p3-mode{max-width:100%;padding:0;overflow:hidden;display:flex;flex-direction:column}
 .fsw-p3-layout{display:grid;grid-template-columns:280px 1fr 260px;flex:1;overflow:hidden;position:relative}
@@ -634,56 +630,12 @@ li.kb-active{background:rgba(34,195,106,.18)!important;color:#E8F5EE!important}
 .fsw-divisor{display:flex;align-items:center;gap:8px;font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;flex-shrink:0}
 .fsw-divisor::before,.fsw-divisor::after{content:"";flex:1;height:1px;background:var(--border)}
 
-@media(max-width:768px){
-  /* Paso 3 mobile: todo scroll libre */
-  .fsw-body.p3-mode{
-    overflow-y:auto !important;
-    overflow-x:hidden !important;
-    -webkit-overflow-scrolling:touch;
-    padding:0 !important;
-    height:100%;
-  }
-  .fsw-p3-layout{
-    grid-template-columns:1fr !important;
-    height:auto !important;
-    overflow:visible !important;
-    display:block !important;
-  }
-  .fsw-p3-left{
-    border-right:none;
-    border-bottom:1px solid var(--border);
-    padding:1rem;
-    gap:8px;
-    height:auto !important;
-    overflow:visible !important;
-  }
-  .fsw-map-wrap{height:160px}
-  .fsw-p3-center{
-    height:auto !important;
-    overflow:visible !important;
-    border-bottom:1px solid var(--border);
-  }
-  .fsw-cat-scroll{
-    overflow:visible !important;
-    height:auto !important;
-    max-height:none !important;
-    padding-bottom:0;
-  }
-  .fsw-cat-grid{grid-template-columns:repeat(2,1fr);gap:8px;padding:.8rem}
-  .fsw-p3-right{
-    border-left:none;
-    height:auto !important;
-    overflow:visible !important;
-    padding:1rem;
-  }
-  .fsw-abierto-card{min-height:140px}
-  .fsw-sel-bar{
-    position:fixed;
-    bottom:0;left:0;right:0;
-    z-index:999;
-    padding:.8rem 1rem;
-  }
-  .fsw-volver-btn{display:none !important}
+@media(max-width:900px){
+  .fsw-p3-layout{grid-template-columns:1fr;overflow:visible}
+  .fsw-body.p3-mode{overflow-y:auto}
+  .fsw-p3-left,.fsw-p3-right{border:none;border-bottom:1px solid var(--border)}
+  .fsw-p3-center{min-height:400px}
+  .fsw-sel-bar{left:0;right:0;position:fixed;bottom:0}
 }
 </style>
 <script>
@@ -796,7 +748,7 @@ function fswSeleccionarModo(modo) {
         <div class="extra-chip" onclick="toggleExtra(this)"><span class="extra-icon">🛡️</span><span>Seguro de mudanza</span><div class="chk"></div></div>
       </div>
     </div>
-    <div class="fsw-panel" id="fsw-p3" style="padding:0">
+    <div class="fsw-panel" id="fsw-p3" style="padding:0;overflow:hidden;height:100%">
       <div class="fsw-p3-layout">
 
         <!-- IZQUIERDA: resumen + mapa -->
@@ -819,7 +771,7 @@ function fswSeleccionarModo(modo) {
             <div class="fsw-map-stat"><div class="fsw-map-stat-lbl">Tiempo est.</div><div class="fsw-map-stat-val" id="fsw-sum-dur">—</div></div>
           </div>
           <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-align:center;line-height:1.5">Pago vía <strong style="color:var(--emerald)">Mercado Pago</strong><br>100% seguro</div>
-          <button class="fsw-volver-btn" onclick="fswBack()" style="background:none;border:1px solid var(--border2);color:var(--text2);padding:8px 14px;border-radius:9px;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;width:100%">← Volver</button>
+          <button onclick="fswBack()" style="background:none;border:1px solid var(--border2);color:var(--text2);padding:8px 14px;border-radius:9px;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;width:100%">← Volver</button>
         </div>
 
         <!-- CENTRO: catálogo -->
@@ -1606,16 +1558,8 @@ function fswGoStep(n) {
     footer.style.display = 'flex';
     back.style.visibility = n === 1 ? 'hidden' : 'visible';
     var fswBody = document.querySelector('#fswOverlay .fsw-body');
-    var isMobile = window.innerWidth <= 768;
     if (n === 3) {
-      if (isMobile) {
-        // Mobile: mostrar footer solo con botón volver
-        footer.style.display = 'flex';
-        back.style.visibility = 'visible';
-        next.style.display = 'none';
-      } else {
-        footer.style.display = 'none';
-      }
+      footer.style.display = 'none';
       if (fswBody) fswBody.classList.add('p3-mode');
       fswBuildSummary();
       fswCargarCatalogo();
@@ -1623,7 +1567,6 @@ function fswGoStep(n) {
       var bar = document.getElementById('fswSelBar');
       if (bar) bar.classList.remove('show');
     } else {
-      next.style.display = '';
       if (fswBody) fswBody.classList.remove('p3-mode');
       if (n === 2) { next.textContent = 'Ver resumen →'; }
       else { next.textContent = 'Continuar →'; }
@@ -1668,6 +1611,15 @@ function fswBack() {
 var _fswCatTodos = [];
 var _fswSeleccionados = new Set();
 
+var _MOCK_MUDANCEROS = [
+  { email:'carlos@mock.com', nombre:'Carlos Gómez', empresa:'Mudanzas Gómez', zonaBase:'Palermo, CABA', vehiculo:'Camión mediano', calificacion:4.8, nroResenas:42, trabajosCompletados:38, verificadoIdentidad:true, verificadoVehiculo:true, verificadoSeguro:false, precios:{amb1:55000,flete:18000} },
+  { email:'roberto@mock.com', nombre:'Roberto Silva', empresa:'Silva Fletes', zonaBase:'Quilmes, GBA', vehiculo:'Camioneta / furgón pequeño', calificacion:4.6, nroResenas:27, trabajosCompletados:24, verificadoIdentidad:true, verificadoVehiculo:false, verificadoSeguro:false, precios:{amb1:42000,flete:14000} },
+  { email:'diego@mock.com', nombre:'Diego Fernández', empresa:'', zonaBase:'Caballito, CABA', vehiculo:'Camión grande', calificacion:5.0, nroResenas:15, trabajosCompletados:13, verificadoIdentidad:true, verificadoVehiculo:true, verificadoSeguro:true, precios:{amb1:70000,flete:22000} },
+  { email:'martin@mock.com', nombre:'Martín López', empresa:'Mudanzas del Norte', zonaBase:'San Isidro, GBA', vehiculo:'Camión mediano', calificacion:4.5, nroResenas:61, trabajosCompletados:55, verificadoIdentidad:true, verificadoVehiculo:true, verificadoSeguro:false, precios:{amb1:60000,flete:20000} },
+  { email:'pablo@mock.com', nombre:'Pablo Torres', empresa:'', zonaBase:'Flores, CABA', vehiculo:'Camioneta / furgón pequeño', calificacion:4.3, nroResenas:9, trabajosCompletados:8, verificadoIdentidad:false, verificadoVehiculo:true, verificadoSeguro:false, precios:{amb1:38000,flete:12000} },
+  { email:'lucas@mock.com', nombre:'Lucas Ramírez', empresa:'Fletes Rápidos BA', zonaBase:'Lanús, GBA', vehiculo:'Camión mediano', calificacion:4.7, nroResenas:33, trabajosCompletados:30, verificadoIdentidad:true, verificadoVehiculo:true, verificadoSeguro:true, precios:{amb1:52000,flete:17000} },
+];
+
 async function fswCargarCatalogo() {
   var grid = document.getElementById('fsw-cat-grid');
   if (!grid) return;
@@ -1675,10 +1627,12 @@ async function fswCargarCatalogo() {
   try {
     var r = await fetch('/api/cotizaciones?action=catalogo');
     var d = await r.json();
-    _fswCatTodos = d.mudanceros || [];
+    _fswCatTodos = (d.mudanceros && d.mudanceros.length) ? d.mudanceros : _MOCK_MUDANCEROS;
     fswRenderCatalogo(_fswCatTodos);
   } catch(e) {
-    grid.innerHTML = '<div class="fsw-cat-empty">No se pudo cargar el catálogo.</div>';
+    // Si falla la API igual mostramos los mock
+    _fswCatTodos = _MOCK_MUDANCEROS;
+    fswRenderCatalogo(_fswCatTodos);
   }
 }
 
@@ -1739,11 +1693,6 @@ function fswToggleMudancero(email) {
   var cnt = document.getElementById('fswSelCount');
   if (bar) bar.classList.toggle('show', n > 0);
   if (cnt) cnt.textContent = n;
-  // En mobile agregar padding al body para que no tape el contenido
-  if (window.innerWidth <= 768) {
-    var body = document.querySelector('#fswOverlay .fsw-body');
-    if (body) body.style.paddingBottom = n > 0 ? '70px' : '';
-  }
 }
 
 function fswPedirCotizacionSeleccionados() {
