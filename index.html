@@ -630,12 +630,43 @@ li.kb-active{background:rgba(34,195,106,.18)!important;color:#E8F5EE!important}
 .fsw-divisor{display:flex;align-items:center;gap:8px;font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;flex-shrink:0}
 .fsw-divisor::before,.fsw-divisor::after{content:"";flex:1;height:1px;background:var(--border)}
 
-@media(max-width:900px){
-  .fsw-p3-layout{grid-template-columns:1fr;overflow:visible}
-  .fsw-body.p3-mode{overflow-y:auto}
-  .fsw-p3-left,.fsw-p3-right{border:none;border-bottom:1px solid var(--border)}
-  .fsw-p3-center{min-height:400px}
-  .fsw-sel-bar{left:0;right:0;position:fixed;bottom:0}
+@media(max-width:768px){
+  /* Paso 3 mobile: layout vertical con secciones colapsables */
+  .fsw-body.p3-mode{overflow-y:auto;overflow-x:hidden}
+  .fsw-p3-layout{
+    grid-template-columns:1fr;
+    height:auto;
+    overflow:visible;
+    display:flex;
+    flex-direction:column;
+  }
+  .fsw-p3-left{
+    border-right:none;
+    border-bottom:1px solid var(--border);
+    padding:1rem;
+    gap:8px;
+  }
+  .fsw-map-wrap{height:160px}
+  .fsw-p3-center{
+    min-height:auto;
+    overflow:visible;
+    border-bottom:1px solid var(--border);
+  }
+  .fsw-cat-scroll{overflow:visible;max-height:none;padding-bottom:0}
+  .fsw-cat-grid{grid-template-columns:repeat(2,1fr);gap:8px;padding:.8rem}
+  .fsw-p3-right{
+    border-left:none;
+    padding:1rem;
+  }
+  .fsw-abierto-card{min-height:140px}
+  .fsw-sel-bar{
+    position:fixed;
+    bottom:0;left:0;right:0;
+    z-index:999;
+    padding:.8rem 1rem;
+  }
+  /* Ocultar el botón volver de la columna izq en mobile — está el del footer */
+  .fsw-p3-left .fsw-volver-btn{display:none}
 }
 </style>
 <script>
@@ -771,7 +802,7 @@ function fswSeleccionarModo(modo) {
             <div class="fsw-map-stat"><div class="fsw-map-stat-lbl">Tiempo est.</div><div class="fsw-map-stat-val" id="fsw-sum-dur">—</div></div>
           </div>
           <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-align:center;line-height:1.5">Pago vía <strong style="color:var(--emerald)">Mercado Pago</strong><br>100% seguro</div>
-          <button onclick="fswBack()" style="background:none;border:1px solid var(--border2);color:var(--text2);padding:8px 14px;border-radius:9px;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;width:100%">← Volver</button>
+          <button class="fsw-volver-btn" onclick="fswBack()" style="background:none;border:1px solid var(--border2);color:var(--text2);padding:8px 14px;border-radius:9px;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s;width:100%">← Volver</button>
         </div>
 
         <!-- CENTRO: catálogo -->
@@ -1558,8 +1589,16 @@ function fswGoStep(n) {
     footer.style.display = 'flex';
     back.style.visibility = n === 1 ? 'hidden' : 'visible';
     var fswBody = document.querySelector('#fswOverlay .fsw-body');
+    var isMobile = window.innerWidth <= 768;
     if (n === 3) {
-      footer.style.display = 'none';
+      if (isMobile) {
+        // Mobile: mostrar footer solo con botón volver
+        footer.style.display = 'flex';
+        back.style.visibility = 'visible';
+        next.style.display = 'none';
+      } else {
+        footer.style.display = 'none';
+      }
       if (fswBody) fswBody.classList.add('p3-mode');
       fswBuildSummary();
       fswCargarCatalogo();
@@ -1567,6 +1606,7 @@ function fswGoStep(n) {
       var bar = document.getElementById('fswSelBar');
       if (bar) bar.classList.remove('show');
     } else {
+      next.style.display = '';
       if (fswBody) fswBody.classList.remove('p3-mode');
       if (n === 2) { next.textContent = 'Ver resumen →'; }
       else { next.textContent = 'Continuar →'; }
@@ -1682,6 +1722,11 @@ function fswToggleMudancero(email) {
   var cnt = document.getElementById('fswSelCount');
   if (bar) bar.classList.toggle('show', n > 0);
   if (cnt) cnt.textContent = n;
+  // En mobile agregar padding al body para que no tape el contenido
+  if (window.innerWidth <= 768) {
+    var body = document.querySelector('#fswOverlay .fsw-body');
+    if (body) body.style.paddingBottom = n > 0 ? '70px' : '';
+  }
 }
 
 function fswPedirCotizacionSeleccionados() {
