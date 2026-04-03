@@ -568,8 +568,8 @@ li.kb-active{background:rgba(34,195,106,.18)!important;color:#E8F5EE!important}
 
 /* ── PASO 3 NUEVO LAYOUT ── */
 /* El fsw-body tiene max-width:600px — para p3 lo override con clase especial */
-.fsw-body.p3-mode{max-width:100%;padding:0;overflow:hidden;display:flex;flex-direction:column}
-.fsw-p3-layout{display:grid;grid-template-columns:280px 1fr 260px;flex:1;overflow:hidden;position:relative}
+.fsw-body.p3-mode{max-width:100%;padding:0;overflow:hidden;display:flex;flex-direction:column;height:100%}
+.fsw-p3-layout{display:grid;grid-template-columns:280px 1fr 260px;flex:1;overflow:hidden;position:relative;height:100%}
 
 /* columna izquierda */
 .fsw-p3-left{padding:1.2rem 1rem;overflow-y:auto;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:10px;background:var(--bg2)}
@@ -586,7 +586,7 @@ li.kb-active{background:rgba(34,195,106,.18)!important;color:#E8F5EE!important}
 .fsw-map-stat-val{font-family:"Bebas Neue",sans-serif;font-size:1.1rem;color:var(--text);letter-spacing:.5px;line-height:1}
 
 /* columna central */
-.fsw-p3-center{display:flex;flex-direction:column;overflow:hidden;position:relative}
+.fsw-p3-center{display:flex;flex-direction:column;overflow:hidden;position:relative;height:100%}
 .fsw-cat-header{padding:.9rem 1.2rem .6rem;border-bottom:1px solid var(--border);flex-shrink:0}
 .fsw-cat-title{font-family:"Bebas Neue",sans-serif;font-size:1.2rem;letter-spacing:1px;color:var(--text);margin-bottom:2px}
 .fsw-cat-sub{font-size:10px;color:var(--text3);font-family:var(--mono)}
@@ -594,7 +594,7 @@ li.kb-active{background:rgba(34,195,106,.18)!important;color:#E8F5EE!important}
 .fsw-cat-search input{width:100%;padding:8px 12px;border:1px solid var(--border2);border-radius:8px;font-size:12px;font-family:"Outfit",sans-serif;color:var(--text);background:var(--surface2);outline:none;transition:border-color .2s}
 .fsw-cat-search input:focus{border-color:var(--emerald)}
 .fsw-cat-search input::placeholder{color:var(--text3)}
-.fsw-cat-scroll{flex:1;overflow-y:auto;padding-bottom:56px}
+.fsw-cat-scroll{flex:1;overflow-y:auto;padding-bottom:56px;min-height:0}
 .fsw-cat-grid{padding:.8rem 1.2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
 .fsw-mud-card{background:var(--surface);border:1.5px solid var(--border2);border-radius:10px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
 .fsw-mud-card:hover{border-color:rgba(34,195,106,.4);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.5)}
