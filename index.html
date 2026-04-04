@@ -315,9 +315,11 @@ nav{
   display:flex;
   background:#fff;border-bottom:1px solid var(--border);
   padding:.55rem 1rem;gap:6px;overflow-x:auto;
-  scrollbar-width:none;position:sticky;top:58px;z-index:90;
+  scrollbar-width:none;position:sticky;top:108px;z-index:89;
 }
 .filtros-mobile-bar::-webkit-scrollbar{display:none}
+/* Asegurar que resultados no queden ocultos */
+#resBody{position:relative;z-index:1}
 
 /* Pill base */
 .filtro-pill{
@@ -341,6 +343,22 @@ nav{
   box-shadow:0 8px 30px rgba(0,0,0,.12);padding:14px;min-width:200px;z-index:200;
 }
 .filtro-pill.open .pill-dropdown{display:block}
+/* Overlay mobile */
+#pillOverlay{display:none;position:fixed;inset:0;z-index:198;background:rgba(0,0,0,.4);touch-action:none}
+body.pill-open #pillOverlay{display:block}
+@media(max-width:768px){
+  .pill-dropdown{
+    position:fixed!important;top:auto!important;left:0!important;right:0!important;bottom:0!important;
+    border-radius:20px 20px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.2);
+    max-height:75vh;overflow-y:auto;min-width:unset;padding:20px 16px 32px;
+    z-index:200;
+  }
+  /* Handle visual arriba del sheet */
+  .pill-dropdown::before{
+    content:'';display:block;width:40px;height:4px;background:#CBD5E1;
+    border-radius:4px;margin:0 auto 16px;
+  }
+}
 .pd-title{font-size:10px;font-weight:700;color:var(--text3,#94A3B8);text-transform:uppercase;
   letter-spacing:.6px;margin-bottom:10px;font-family:var(--mono)}
 .pd-opt{display:flex;align-items:center;gap:9px;padding:7px 4px;border-radius:8px;
@@ -602,6 +620,8 @@ footer{background:#003580;padding:1.5rem}
 </style>
 </head>
 <body>
+
+<div id="pillOverlay" onclick="cerrarTodosPills()"></div>
 
 <!-- NAV -->
 <nav>
@@ -1134,7 +1154,7 @@ var _fechaFlete = 'Hoy';
 var _busqueda = {};
 var _todos = [];
 var _sel = new Set();
-var _filtros = { orden:'cal', vehiculos:new Set(), zonas:new Set(), verifs:new Set(), precioMin:0, precioMax:600000 };
+var _filtros = { orden:'cal', vehiculos:new Set(), zonas:new Set(), verifs:new Set(), precioMin:0, precioMax:2000000 };
 var _googleInited = false;
 var _currentUser = null;
 var _pendingPub = null;
@@ -1577,7 +1597,24 @@ async function cargarResultados() {
   try {
     var r = await fetch('/api/cotizaciones?action=catalogo');
     var d = await r.json();
-    _todos = (d.mudanceros && d.mudanceros.length) ? d.mudanceros : _MOCK;
+    var mudanceros = (d.mudanceros && d.mudanceros.length) ? d.mudanceros : _MOCK;
+    // Normalizar: asegurar que cada mudancero tenga todos los campos necesarios
+    _todos = mudanceros.map(function(m) {
+      if (!m.precios || typeof m.precios !== 'object') {
+        m.precios = { amb1: 450000, flete: 160000 };
+      }
+      if (!m.precios.amb1 || m.precios.amb1 < 50000) {
+        // Precio viejo (pre-actualización) — escalar
+        m.precios.amb1  = Math.max(380000, (m.precios.amb1 || 450000) * 7);
+        m.precios.flete = Math.max(130000, (m.precios.flete || 150000) * 7);
+      }
+      if (!m.calificacion) m.calificacion = 4.5;
+      if (!m.nroResenas) m.nroResenas = 0;
+      if (!m.trabajosCompletados) m.trabajosCompletados = 0;
+      if (!m.zonaBase) m.zonaBase = '';
+      if (!m.vehiculo) m.vehiculo = 'Camión mediano';
+      return m;
+    });
   } catch(e) { _todos = _MOCK; }
   renderResultados();
 }
@@ -1589,11 +1626,15 @@ function renderResultados() {
   if (_filtros.verifs.has('id'))  lista = lista.filter(function(m){ return m.verificadoIdentidad; });
   if (_filtros.verifs.has('veh')) lista = lista.filter(function(m){ return m.verificadoVehiculo; });
   if (_filtros.verifs.has('seg')) lista = lista.filter(function(m){ return m.verificadoSeguro; });
-  // Filtro precio
+  // Filtro precio — defensivo, nunca excluye si hay datos faltantes
   if (_filtros.precioMin > 0 || _filtros.precioMax < PRECIO_MAX_TOTAL) {
     var _amb = Math.max(1, parseInt(_busqueda.ambientes) || 1);
     lista = lista.filter(function(m) {
-      var p = _busqueda.tipo==='flete' ? (m.precios.flete||0) : (m.precios.amb1||0) * _amb;
+      if (!m.precios) return true;
+      var p = _busqueda.tipo==='flete'
+        ? (parseInt(m.precios.flete) || 0)
+        : (parseInt(m.precios.amb1)  || 0) * _amb;
+      if (p <= 0) return true;
       return p >= _filtros.precioMin && (_filtros.precioMax >= PRECIO_MAX_TOTAL || p <= _filtros.precioMax);
     });
   }
@@ -1724,21 +1765,34 @@ function limpiarFiltros() {
 // ══════════════════════════════════════════
 // PILL DROPDOWNS
 // ══════════════════════════════════════════
+function cerrarTodosPills() {
+  document.querySelectorAll('.filtro-pill.open').forEach(function(p){ p.classList.remove('open'); });
+  document.body.classList.remove('pill-open');
+}
 function togglePillDropdown(e, pillId) {
   e.stopPropagation();
   var pill = document.getElementById(pillId);
   var isOpen = pill.classList.contains('open');
-  // Cerrar todos
-  document.querySelectorAll('.filtro-pill.open').forEach(function(p){ p.classList.remove('open'); });
-  if (!isOpen) pill.classList.add('open');
+  cerrarTodosPills();
+  if (!isOpen) {
+    pill.classList.add('open');
+    document.body.classList.add('pill-open');
+  }
 }
-// Cerrar al click fuera
-document.addEventListener('click', function() {
-  document.querySelectorAll('.filtro-pill.open').forEach(function(p){ p.classList.remove('open'); });
+// Cerrar al click fuera — con polyfill para closest
+document.addEventListener('click', function(e) {
+  var target = e.target;
+  var dentroDeUnPill = false;
+  while (target && target !== document.body) {
+    if (target.classList && target.classList.contains('filtro-pill')) { dentroDeUnPill = true; break; }
+    target = target.parentElement;
+  }
+  if (!dentroDeUnPill) cerrarTodosPills();
 });
 
 function _actualizarClearAll() {
-  var hayFiltros = _filtros.vehiculos.size || _filtros.zonas.size || _filtros.verifs.size || _filtros.orden !== 'cal';
+  var hayFiltros = _filtros.vehiculos.size || _filtros.zonas.size || _filtros.verifs.size 
+    || _filtros.orden !== 'cal' || _filtros.precioMin > 0 || _filtros.precioMax < PRECIO_MAX_TOTAL;
   document.getElementById('pill-clear').style.display = hayFiltros ? 'flex' : 'none';
 }
 
