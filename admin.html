@@ -20,7 +20,7 @@
   --mono:'DM Mono',monospace;
 }
 html{scroll-behavior:smooth}
-body{font-family:'Inter',sans-serif;background:#fff;color:#0F1923;min-height:100vh;-webkit-font-smoothing:antialiased}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#0F1923;min-height:100vh;-webkit-font-smoothing:antialiased}
 
 #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem;flex-direction:column;gap:2rem;background:#F5F7FA}
 .login-card{background:#fff;border:1px solid #E2E8F0;border-radius:24px;padding:2.5rem 2rem;max-width:380px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.1)}
@@ -297,9 +297,14 @@ window.onload = async function(){
   var saved = sessionStorage.getItem('adminUser');
   if(saved){
     try{
-      currentUser = JSON.parse(saved);
-      if(isAuthorized(currentUser.email)){ showAdmin(); return; }
-    }catch(e){}
+      var parsed = JSON.parse(saved);
+      if(parsed._expires && Date.now() > parsed._expires){
+        sessionStorage.removeItem('adminUser');
+      } else if(isAuthorized(parsed.email)){
+        currentUser = parsed;
+        showAdmin(); return;
+      }
+    }catch(e){ sessionStorage.removeItem('adminUser'); }
   }
 
   if(GOOGLE_CLIENT_ID){
@@ -312,13 +317,15 @@ function handleCredential(response){
   var payload = JSON.parse(atob(response.credential.split('.')[1]));
   if(!isAuthorized(payload.email)){ alert('⚠ Tu email (' + payload.email + ') no tiene acceso.'); return; }
   currentUser = { name: payload.name, email: payload.email, picture: payload.picture };
-  sessionStorage.setItem('adminUser', JSON.stringify(currentUser));
+  const adminSession = { ...currentUser, _expires: Date.now() + 24*60*60*1000 };
+  sessionStorage.setItem('adminUser', JSON.stringify(adminSession));
   showAdmin();
 }
 
 function isAuthorized(email){
-  if(ADMIN_EMAILS.length === 0) return true;
-  return ADMIN_EMAILS.includes(email);
+  // Nunca dar acceso si la lista no cargó — fail closed
+  if(!ADMIN_EMAILS || ADMIN_EMAILS.length === 0) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase().trim());
 }
 
 function showAdmin(){
