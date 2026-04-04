@@ -311,18 +311,8 @@ nav{
 
 /* Filtros mobile top bar */
 /* ── FILTROS BAR (siempre visible) ─────────────── */
-.filtros-mobile-bar{
-  display:none;
-  background:#fff;border-bottom:1px solid var(--border);
-  padding:.55rem 1rem;gap:6px;overflow-x:auto;
-  scrollbar-width:none;position:sticky;top:108px;z-index:89;
-}
-@media(max-width:900px){
-  .filtros-mobile-bar{display:flex}
-}
-@media(max-width:600px){
-  .filtros-mobile-bar{top:146px}
-}
+/* filtros-mobile-bar — reemplazado por mob-results-bar */
+.filtros-mobile-bar{display:none!important}
 .filtros-mobile-bar::-webkit-scrollbar{display:none}
 /* Asegurar que resultados no queden ocultos */
 #resBody{position:relative;z-index:1}
@@ -598,7 +588,9 @@ footer{background:#003580;padding:1.5rem}
   flex-shrink:0;display:flex;align-items:center;gap:6px;
   background:#fff;color:#003580;border:none;padding:.55rem 1rem;border-radius:10px;
   font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;
+  transition:all .2s;
 }
+.mob-btn-filtros.has-active{background:#22C36A;color:#fff}
 .mob-filtros-count{
   background:var(--blue);color:#fff;border-radius:50%;
   width:18px;height:18px;font-size:10px;font-weight:700;
@@ -2076,16 +2068,29 @@ function _mfActualizarPrecioUI() {
 }
 
 function _mfActualizarContador() {
-  var n = 0;
-  if (_mfTemp.orden !== 'cal') n++;
-  n += _mfTemp.verifs.size + _mfTemp.vehiculos.size + _mfTemp.zonas.size;
-  if (_mfTemp.precioMin > 0 || _mfTemp.precioMax < PRECIO_MAX_TOTAL) n++;
+  // Contar resultados reales con los filtros temporales aplicados
+  var lista = _todos.slice();
+  if (_mfTemp.vehiculos.size) lista = lista.filter(function(m){ return _mfTemp.vehiculos.has(m.vehiculo); });
+  if (_mfTemp.zonas.size) lista = lista.filter(function(m){ return Array.from(_mfTemp.zonas).some(function(z){ return (m.zonaBase||'').includes(z); }); });
+  if (_mfTemp.verifs.has('id'))  lista = lista.filter(function(m){ return m.verificadoIdentidad; });
+  if (_mfTemp.verifs.has('veh')) lista = lista.filter(function(m){ return m.verificadoVehiculo; });
+  if (_mfTemp.verifs.has('seg')) lista = lista.filter(function(m){ return m.verificadoSeguro; });
+  if (_mfTemp.precioMin > 0 || _mfTemp.precioMax < PRECIO_MAX_TOTAL) {
+    var _amb = Math.max(1, parseInt(_busqueda.ambientes) || 1);
+    lista = lista.filter(function(m) {
+      var p = _busqueda.tipo==='flete' ? (m.precios.flete||0) : (m.precios.amb1||0) * _amb;
+      if (p <= 0) return true;
+      return p >= _mfTemp.precioMin && (_mfTemp.precioMax >= PRECIO_MAX_TOTAL || p <= _mfTemp.precioMax);
+    });
+  }
+  var n = lista.length;
+  var hayFiltros = _mfTemp.vehiculos.size || _mfTemp.zonas.size || _mfTemp.verifs.size
+    || _mfTemp.orden !== 'cal' || _mfTemp.precioMin > 0 || _mfTemp.precioMax < PRECIO_MAX_TOTAL;
   var countEl = document.getElementById('mobFiltrosCount');
+  if (countEl) { countEl.style.display = hayFiltros ? 'inline-flex' : 'none'; countEl.textContent = hayFiltros ? '!' : ''; }
   var btnCount = document.getElementById('mobAplicarCount');
-  if (countEl) { countEl.style.display = n>0?'inline-flex':'none'; countEl.textContent=n; }
-  if (btnCount) { btnCount.textContent = n>0?'('+n+')':''; }
-  // Badge en botón filtros
-  document.getElementById('mobBtnFiltros').classList.toggle('has-active', n>0);
+  if (btnCount) btnCount.textContent = '(' + n + ')';
+  document.getElementById('mobBtnFiltros').classList.toggle('has-active', hayFiltros);
 }
 
 function mfLimpiarTodo() {
@@ -2101,10 +2106,19 @@ function mfAplicar() {
   _filtros.zonas = new Set(_mfTemp.zonas);
   _filtros.precioMin = _mfTemp.precioMin;
   _filtros.precioMax = _mfTemp.precioMax;
-  // Sincronizar también el panel desktop (por consistencia)
+  // Sincronizar panel desktop
   _syncUI(_filtros.precioMin, _filtros.precioMax);
-  renderResultados();
   cerrarFiltrosMobile();
+  // Si hay datos, renderizar. Si no, mostrar todos los mock
+  if (!_todos.length) {
+    _todos = _MOCK;
+    document.getElementById('resultados').classList.add('show');
+  }
+  renderResultados();
+  // Scroll a resultados
+  setTimeout(function(){
+    document.getElementById('listaRes').scrollIntoView({behavior:'smooth', block:'start'});
+  }, 200);
 }
 
 // Actualizar la mob-results-bar cuando hay búsqueda
