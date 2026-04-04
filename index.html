@@ -1969,16 +1969,15 @@ function togglePill(el, key) {}
 var _mfTemp = { orden:'cal', verifs:new Set(), vehiculos:new Set(), zonas:new Set(), precioMin:0, precioMax:2000000 };
 
 function abrirFiltrosMobile() {
-  // Sincronizar estado temporal con filtros actuales
+  // Si no hay datos todavía, cargar mocks para que el contador funcione
+  if (!_todos.length) _todos = _MOCK;
   _mfTemp.orden = _filtros.orden;
   _mfTemp.verifs = new Set(_filtros.verifs);
   _mfTemp.vehiculos = new Set(_filtros.vehiculos);
   _mfTemp.zonas = new Set(_filtros.zonas);
   _mfTemp.precioMin = _filtros.precioMin;
   _mfTemp.precioMax = _filtros.precioMax;
-  // Reflejar en UI del sheet
   _mfRefrescarUI();
-  // Abrir
   document.getElementById('filtrosMobileSheet').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -2099,26 +2098,21 @@ function mfLimpiarTodo() {
 }
 
 function mfAplicar() {
-  // Copiar estado temporal a filtros reales
   _filtros.orden = _mfTemp.orden;
   _filtros.verifs = new Set(_mfTemp.verifs);
   _filtros.vehiculos = new Set(_mfTemp.vehiculos);
   _filtros.zonas = new Set(_mfTemp.zonas);
   _filtros.precioMin = _mfTemp.precioMin;
   _filtros.precioMax = _mfTemp.precioMax;
-  // Sincronizar panel desktop
   _syncUI(_filtros.precioMin, _filtros.precioMax);
   cerrarFiltrosMobile();
-  // Si hay datos, renderizar. Si no, mostrar todos los mock
-  if (!_todos.length) {
-    _todos = _MOCK;
-    document.getElementById('resultados').classList.add('show');
-  }
+  // Asegurar datos y mostrar sección SIEMPRE
+  if (!_todos.length) _todos = _MOCK;
+  document.getElementById('resultados').classList.add('show');
   renderResultados();
-  // Scroll a resultados
   setTimeout(function(){
     document.getElementById('listaRes').scrollIntoView({behavior:'smooth', block:'start'});
-  }, 200);
+  }, 300);
 }
 
 // Actualizar la mob-results-bar cuando hay búsqueda
