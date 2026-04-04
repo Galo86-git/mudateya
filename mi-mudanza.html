@@ -305,6 +305,10 @@ body{font-family:'Inter',sans-serif;background:#fff;color:var(--text);min-height
 
 <script>
 var GOOGLE_CLIENT_ID = '';
+
+// ── SEGURIDAD: escapar HTML antes de insertar en innerHTML ──────────
+function esc(s){ if(!s) return ''; var d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }
+
 var currentUser = null;
 var mudanzasData = [];
 
@@ -318,9 +322,9 @@ window.onload = async function(){
   var saved = sessionStorage.getItem('clienteUser');
   if(saved){
     try{
-      currentUser = JSON.parse(saved);
-      showApp();
-      return;
+      var _p = JSON.parse(saved);
+      if(_p._expires && Date.now() > _p._expires){ sessionStorage.removeItem('clienteUser'); sessionStorage.removeItem('googleUser'); }
+      else { currentUser = _p; showApp(); return; }
     }catch(e){}
   }
 
@@ -340,8 +344,9 @@ window.onload = async function(){
 function handleCredential(response){
   var payload = JSON.parse(atob(response.credential.split('.')[1]));
   currentUser = {name:payload.name, email:payload.email, picture:payload.picture};
-  sessionStorage.setItem('clienteUser', JSON.stringify(currentUser));
-  sessionStorage.setItem('googleUser', JSON.stringify(currentUser));
+  var _cs = {...currentUser, _expires: Date.now()+604800000};
+  sessionStorage.setItem('clienteUser', JSON.stringify(_cs));
+  sessionStorage.setItem('googleUser', JSON.stringify(_cs));
   showApp();
   // Pedir celular si no lo tiene guardado
   var wa = localStorage.getItem('clienteWA_' + currentUser.email);
@@ -541,7 +546,7 @@ function renderMudanzaCard(m, idx){
             // Fila superior: nombre + precio
             + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:'+(isAceptada||m.estado==='cotizacion_aceptada'?'0':'8px')+'">'
             +   '<div style="flex:1">'
-            +     '<div style="font-size:13px;font-weight:500;color:var(--text)">'+c.mudanceroNombre+'</div>'
+            +     '<div style="font-size:13px;font-weight:500;color:var(--text)">'+esc(c.mudanceroNombre)+'</div>'
             +     (c.tiempoEstimado?'<div style="font-size:11px;color:var(--text3);font-family:var(--mono)">⏱ '+c.tiempoEstimado+'</div>':'')
             +   '</div>'
             +   '<div style="text-align:right;flex-shrink:0">'
@@ -571,8 +576,8 @@ function renderMudanzaCard(m, idx){
 
   return '<div class="mudanza-card">'
     + '<div class="mudanza-header">'
-    +   '<div><div class="mudanza-ruta">'+m.desde+' → '+m.hasta+'</div>'
-    +   '<div class="mudanza-fecha">📅 '+(m.fecha||'A confirmar')+' · '+(m.ambientes||'—')+'</div></div>'
+    +   '<div><div class="mudanza-ruta">'+esc(m.desde)+' → '+esc(m.hasta)+'</div>'
+    +   '<div class="mudanza-fecha">📅 '+esc(m.fecha||'A confirmar')+' · '+esc(m.ambientes||'—')+'</div></div>'
     +   '<span class="badge '+badgeClass+'">'+badgeText+'</span>'
     + '</div>'
     + '<div class="stepper">'+stepperHtml+'</div>'
@@ -580,7 +585,7 @@ function renderMudanzaCard(m, idx){
     + cotzHtml
     + (m.cotizacionAceptada ? '<div class="mudanza-mudancero">'
         + '<div class="mud-avatar">'+m.cotizacionAceptada.mudanceroNombre.split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)+'</div>'
-        + '<div style="flex:1"><div class="mud-name">'+m.cotizacionAceptada.mudanceroNombre+'</div>'
+        + '<div style="flex:1"><div class="mud-name">'+esc(m.cotizacionAceptada.mudanceroNombre)+'</div>'
         + '<div class="mud-tel">📱 '+(m.cotizacionAceptada.mudanceroTel||'Sin teléfono registrado')+'</div></div>'
         + (m.cotizacionAceptada.mudanceroTel
             ? '<a href="https://wa.me/54'+String(m.cotizacionAceptada.mudanceroTel).replace(/\D/g,'')+'?text=Hola+'+encodeURIComponent((m.cotizacionAceptada.mudanceroNombre||'').split(' ')[0])+'%2C+te+contacto+por+mi+mudanza+aceptada+en+MudateYa+%28'+encodeURIComponent(m.desde)+'+a+'+encodeURIComponent(m.hasta)+'%29+%F0%9F%9A%9B" target="_blank" rel="noopener" class="btn btn-green" style="margin-left:auto;font-size:12px;padding:8px 16px;flex-shrink:0;white-space:nowrap">💬 WhatsApp</a>'
@@ -822,8 +827,8 @@ function renderPagos(){
       var mud = m.cotizacionAceptada || {};
       var precio = mud.precio || parseInt(m.precio||0);
       return '<div class="pago-card">'
-        + '<div class="pago-row"><span class="pago-label">Mudanza</span><span class="pago-val">'+m.desde+' → '+m.hasta+'</span></div>'
-        + '<div class="pago-row"><span class="pago-label">Mudancero</span><span class="pago-val">'+(mud.mudanceroNombre||'—')+'</span></div>'
+        + '<div class="pago-row"><span class="pago-label">Mudanza</span><span class="pago-val">'+esc(m.desde)+' → '+esc(m.hasta)+'</span></div>'
+        + '<div class="pago-row"><span class="pago-label">Mudancero</span><span class="pago-val">'+esc(mud.mudanceroNombre||'—')+'</span></div>'
         + '<div class="pago-row"><span class="pago-label">Método</span><span class="pago-val">💳 Mercado Pago</span></div>'
         + '<div class="pago-row"><span class="pago-label">Total</span><span class="pago-val green">$'+precio.toLocaleString('es-AR')+'</span></div>'
         + '<div class="pago-row"><span class="pago-label">Fecha</span><span class="pago-val">'+(m.fecha||'—')+'</span></div>'
@@ -847,7 +852,7 @@ function renderCalificaciones(){
   document.getElementById('calificacionesList').innerHTML = completadas.map(function(m){
     return '<div style="background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:1.2rem;margin-bottom:10px">'
       + '<div style="font-size:14px;font-weight:500;margin-bottom:4px">'+(m.mudancero&&m.mudancero.nombre?m.mudancero.nombre:'Mudancero')+'</div>'
-      + '<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:10px">'+m.desde+' → '+m.hasta+'</div>'
+      + '<div style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:10px">'+esc(m.desde)+' → '+esc(m.hasta)+'</div>'
       + (m.calificado
           ? '<div style="color:var(--amber);font-size:1.2rem">'+'★'.repeat(m.estrellas||5)+'</div><div style="font-size:12px;color:var(--text2);margin-top:6px">'+(m.comentario||'')+'</div>'
           : '<button class="btn btn-sky" onclick="abrirCalificacion('+mudanzasData.indexOf(m)+')" style="font-size:12px">⭐ Calificar</button>')
@@ -863,7 +868,7 @@ function abrirCalificacion(idx){
   modal.style.cssText = 'position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem';
   modal.innerHTML = '<div style="background:#fff;border:1px solid #E2E8F0;border-radius:20px;padding:1.8rem;max-width:420px;width:100%">'
     + '<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:.4rem">Calificar mudancero</div>'
-    + '<div style="font-size:13px;color:var(--text2);margin-bottom:1.2rem">'+(m.mudancero&&m.mudancero.nombre?m.mudancero.nombre:'Mudancero')+' · '+m.desde+' → '+m.hasta+'</div>'
+    + '<div style="font-size:13px;color:var(--text2);margin-bottom:1.2rem">'+(m.mudancero&&m.mudancero.nombre?m.mudancero.nombre:'Mudancero')+' · '+esc(m.desde)+' → '+esc(m.hasta)+'</div>'
     + '<div class="stars-row" id="starsRow">'+[1,2,3,4,5].map(function(n){ return '<span class="star" onclick="setStar('+n+')" onmouseover="hoverStar('+n+')" onmouseout="renderStarsUI()">★</span>'; }).join('')+'</div>'
     + '<div style="margin:1rem 0"><textarea id="calComentario" rows="3" placeholder="Contá tu experiencia (opcional)…" style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:\'Outfit\',sans-serif;color:var(--text);background:var(--surface2);outline:none;resize:vertical"></textarea></div>'
     + '<div style="display:flex;gap:8px;justify-content:flex-end">'
