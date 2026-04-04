@@ -167,7 +167,10 @@ async function generarPDFBase64(datos) {
       {
         columns: [
           { stack: [
-            { text: 'MudateYa', bold: true, fontSize: 22, color: WHITE },
+            { columns: [
+              { text: 'Mudate', bold: true, fontSize: 22, color: WHITE, width: 'auto' },
+              { text: 'Ya',     bold: true, fontSize: 22, color: '#4ADE80', width: 'auto' },
+            ], columnGap: 0 },
             { text: 'El marketplace de mudanzas de Argentina', fontSize: 8, color: '#aac4e0', margin: [0,2,0,0] },
           ]},
           { stack: [
@@ -176,7 +179,7 @@ async function generarPDFBase64(datos) {
             { text: fechaEmision, fontSize: 8, color: '#aac4e0', alignment: 'right' },
           ]},
         ],
-        margin: [0, 0, 0, 20],
+        margin: [0, 6, 0, 20],
       },
 
       // ── BADGE "válido 24hs" ──────────────────────
@@ -270,20 +273,20 @@ async function generarPDFBase64(datos) {
           { text: 'PROXIMOS PASOS', bold: true, fontSize: 7, color: TEXT3, characterSpacing: 0.8, margin: [0,0,0,12] },
           { columns: [
             { width: '25%', stack: [
-              numBadge('1'),
-              { text: 'Aceptar cotizacion\nen MudateYa', fontSize: 7.5, color: TEXT2, alignment: 'center' },
+              { columns: [{ width: '*', text: '' }, numBadge('1'), { width: '*', text: '' }] },
+              { text: 'Aceptar cotizacion en MudateYa', fontSize: 7.5, color: TEXT2, alignment: 'center' },
             ]},
             { width: '25%', stack: [
-              numBadge('2'),
-              { text: 'Pagar con\nMercado Pago', fontSize: 7.5, color: TEXT2, alignment: 'center' },
+              { columns: [{ width: '*', text: '' }, numBadge('2'), { width: '*', text: '' }] },
+              { text: 'Pagar con Mercado Pago', fontSize: 7.5, color: TEXT2, alignment: 'center' },
             ]},
             { width: '25%', stack: [
-              numBadge('3'),
-              { text: 'Coordinar fecha\ny horario', fontSize: 7.5, color: TEXT2, alignment: 'center' },
+              { columns: [{ width: '*', text: '' }, numBadge('3'), { width: '*', text: '' }] },
+              { text: 'Coordinar fecha y horario', fontSize: 7.5, color: TEXT2, alignment: 'center' },
             ]},
             { width: '25%', stack: [
-              numBadge('4'),
-              { text: 'Mudanza\nrealizada', fontSize: 7.5, color: TEXT2, alignment: 'center' },
+              { columns: [{ width: '*', text: '' }, numBadge('4'), { width: '*', text: '' }] },
+              { text: 'Mudanza realizada', fontSize: 7.5, color: TEXT2, alignment: 'center' },
             ]},
           ], columnGap: 8 },
         ]}]]},
