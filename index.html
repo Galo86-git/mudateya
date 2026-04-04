@@ -1456,7 +1456,7 @@ function verPerfil(email) {
   var m = _todos.find(function(x){ return x.email===email; });
   if (m) sessionStorage.setItem('perfilMudancero', JSON.stringify(m));
   sessionStorage.setItem('busquedaActual', JSON.stringify(_busqueda));
-  window.location.href = '/mudancero?id=' + encodeURIComponent(email);
+  window.open('/mudancero?id=' + encodeURIComponent(email), '_blank');
 }
 
 // ══════════════════════════════════════════
