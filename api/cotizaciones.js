@@ -319,12 +319,77 @@ async function generarPDFBase64(datos) {
 // HANDLER PRINCIPAL
 // ════════════════════════════════════════════════════
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // ── CORS: solo aceptar requests desde mudateya.ar ──────────────
+  const allowedOrigins = [
+    'https://mudateya.ar',
+    'https://www.mudateya.ar',
+    process.env.ALLOWED_ORIGIN || '', // para staging/dev
+  ].filter(Boolean);
+  const origin = req.headers.origin || '';
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else if (!origin) {
+    // Request sin Origin (ej: curl desde el servidor mismo, Vercel cron)
+    res.setHeader('Access-Control-Allow-Origin', 'https://mudateya.ar');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Session-Token');
+  res.setHeader('Vary', 'Origin');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const { action } = req.query;
+
+  // ── RATE LIMITING por IP ─────────────────────────────────────────
+  const RATE_LIMITED_ACTIONS = ['publicar', 'cotizar', 'analizar-foto', 'crear-sesion'];
+  if (RATE_LIMITED_ACTIONS.includes(action)) {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+    const rlKey = `ratelimit:${action}:${ip}`;
+    const MAX_PER_MINUTE = action === 'analizar-foto' ? 5 : 15;
+    try {
+      const current = await redisCall('INCR', rlKey);
+      if (parseInt(current) === 1) await redisCall('EXPIRE', rlKey, '60');
+      if (parseInt(current) > MAX_PER_MINUTE) {
+        return res.status(429).json({ error: 'Demasiados requests. Esperá un momento.' });
+      }
+    } catch(rlErr) {
+      console.warn('Rate limit check failed:', rlErr.message);
+      // Si Redis falla el rate limit, continuar igual (no bloquear)
+    }
+  }
+
+  // ── AUTH HELPERS ────────────────────────────────────────────────
+  // Acciones que requieren que el email del body/query coincida con
+  // el token de sesión guardado en Redis (clienteToken o mudanceroToken)
+  async function verificarSesionCliente(email) {
+    const token = req.headers['x-session-token'] || req.query.sessionToken;
+    if (!token) return false;
+    const tokenGuardado = await getJSON(`session:cliente:${email}`);
+    return tokenGuardado && tokenGuardado === token;
+  }
+  async function verificarSesionMudancero(email) {
+    const token = req.headers['x-session-token'] || req.query.sessionToken;
+    if (!token) return false;
+    const tokenGuardado = await getJSON(`session:mudancero:${email}`);
+    return tokenGuardado && tokenGuardado === token;
+  }
+  // Acción pública: crear sesión al hacer login con Google (llamada desde el frontend)
+  // El frontend ya validó el token con el SDK de Google — acá solo guardamos la sesión
+  if (action === 'crear-sesion' && req.method === 'POST') {
+    const { email, googleIdToken, rol } = req.body;
+    if (!email || !googleIdToken) return res.status(400).json({ error: 'Faltan datos' });
+    // Verificar el token de Google en el backend
+    const verifyUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${googleIdToken}`;
+    const verifyRes = await fetch(verifyUrl);
+    const verifyData = await verifyRes.json();
+    if (verifyData.email !== email) return res.status(401).json({ error: 'Token inválido' });
+    if (verifyData.aud !== process.env.GOOGLE_CLIENT_ID) return res.status(401).json({ error: 'Token inválido' });
+    // Generar token de sesión
+    const sessionToken = require('crypto').randomBytes(32).toString('hex');
+    const ttl = 60 * 60 * 24 * 7; // 7 días
+    const prefix = rol === 'mudancero' ? 'mudancero' : 'cliente';
+    await setJSON(`session:${prefix}:${email}`, sessionToken, ttl);
+    return res.status(200).json({ ok: true, sessionToken, ttl });
+  }
 
   try {
 
@@ -438,6 +503,9 @@ module.exports = async function handler(req, res) {
     if (action === 'mis-mudanzas' && req.method === 'GET') {
       const { email } = req.query;
       if (!email) return res.status(400).json({ error: 'Falta email' });
+      // ── Verificar que quien pide es el dueño de las mudanzas ──
+      const autenticado = await verificarSesionCliente(email);
+      if (!autenticado) return res.status(401).json({ error: 'Sesión inválida' });
       try {
         const ids = await getJSON(`cliente:${email}`) || [];
         const mudanzas = [];
@@ -450,12 +518,38 @@ module.exports = async function handler(req, res) {
 
     // Registrar pago realizado (anticipo o saldo) — llamado desde pago-exitoso
     if (action === 'registrar-pago' && req.method === 'POST') {
-      const { mudanzaId, tipoPago } = req.body;
+      const { mudanzaId, tipoPago, mpPaymentId } = req.body;
       if (!mudanzaId || !tipoPago) return res.status(400).json({ error: 'Faltan datos' });
+      // ── Solo se acepta desde la API interna de Mercado Pago (webhook) ──
+      // O con un secret interno para el flujo de pago-exitoso
+      const internalSecret = req.headers['x-internal-secret'];
+      const validSecret = process.env.INTERNAL_API_SECRET;
+      if (!validSecret || internalSecret !== validSecret) {
+        return res.status(403).json({ error: 'Sin autorización para registrar pagos' });
+      }
       const m = await getJSON(`mudanza:${mudanzaId}`);
       if (!m) return res.status(404).json({ error: 'No encontrada' });
+      // Verificar que el pago de MP existe y es válido (si viene mpPaymentId)
+      if (mpPaymentId && process.env.MP_ACCESS_TOKEN) {
+        try {
+          const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${mpPaymentId}`, {
+            headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` }
+          });
+          const mpData = await mpRes.json();
+          if (mpData.status !== 'approved') {
+            return res.status(400).json({ error: 'Pago de MP no aprobado' });
+          }
+          // Guardar el ID de pago de MP para auditoría
+          if (tipoPago === 'anticipo') m.mpAnticipoPagoId = mpPaymentId;
+          if (tipoPago === 'saldo')    m.mpSaldoPagoId = mpPaymentId;
+        } catch(mpErr) {
+          console.warn('No se pudo verificar pago MP:', mpErr.message);
+          // Continuar igual — el webhook es la fuente de verdad
+        }
+      }
       if (tipoPago === 'anticipo') m.anticipoPagado = true;
       if (tipoPago === 'saldo')    m.saldoPagado = true;
+      m.ultimoUpdatePago = new Date().toISOString();
       await setJSON(`mudanza:${mudanzaId}`, m, 604800);
       return res.status(200).json({ ok: true });
     }
@@ -606,6 +700,11 @@ module.exports = async function handler(req, res) {
 
     if (action === 'mis-cotizaciones' && req.method === 'GET') {
       const { email } = req.query;
+      // ── Verificar sesión del mudancero ──
+      if (email) {
+        const autMud = await verificarSesionMudancero(email);
+        if (!autMud) return res.status(401).json({ error: 'Sesión inválida' });
+      }
       if (!email) return res.status(400).json({ error: 'Falta email' });
       const ids = await getJSON(`mudancero:${email}`) || [];
       const mudanzas = [];
