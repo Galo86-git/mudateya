@@ -1336,6 +1336,11 @@ function setFechaChip(el, val) {
 function onFechaExacta() {
   var v = document.getElementById('input-fecha').value;
   if (!v) return;
+  // iOS Safari ignora min — validar manualmente
+  if (v < _fechaMinHoy()) {
+    document.getElementById('input-fecha').value = _fechaMinHoy();
+    v = _fechaMinHoy();
+  }
   document.querySelectorAll('#fechaPopup .fecha-chip').forEach(function(c){ c.classList.remove('sel'); });
   var d = new Date(v + 'T12:00:00');
   _fechaLabel = d.toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'});
@@ -1346,6 +1351,11 @@ function onFechaExacta() {
 function onFechaFlete() {
   var v = document.getElementById('input-flete-fecha').value;
   if (!v) return;
+  // iOS Safari ignora min — validar manualmente
+  if (v < _fechaMinHoy()) {
+    document.getElementById('input-flete-fecha').value = _fechaMinHoy();
+    v = _fechaMinHoy();
+  }
   document.querySelectorAll('#fechaFletePopup .fecha-chip').forEach(function(c){ c.classList.remove('sel'); });
   var d = new Date(v + 'T12:00:00');
   var label = d.toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'});
@@ -1362,13 +1372,21 @@ function setFechaFlete(el, val) {
   document.getElementById('flete-fecha-display').classList.remove('ph');
   document.getElementById('fechaFletePopup').classList.remove('open');
 }
-// Fecha mínima hoy
+// Fecha mínima hoy — iOS Safari ignora el atributo min, hay que validar en JS
 (function(){
   var h = new Date();
   var min = h.getFullYear()+'-'+String(h.getMonth()+1).padStart(2,'0')+'-'+String(h.getDate()).padStart(2,'0');
-  document.getElementById('input-fecha').min = min;
-  var iff = document.getElementById('input-flete-fecha'); if (iff) iff.min = min;
+  var el = document.getElementById('input-fecha');
+  el.min = min;
+  el.setAttribute('min', min);
+  var iff = document.getElementById('input-flete-fecha');
+  if (iff) { iff.min = min; iff.setAttribute('min', min); }
 })();
+
+function _fechaMinHoy() {
+  var h = new Date();
+  return h.getFullYear()+'-'+String(h.getMonth()+1).padStart(2,'0')+'-'+String(h.getDate()).padStart(2,'0');
+}
 
 // ══════════════════════════════════════════
 // OBJETOS
