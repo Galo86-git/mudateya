@@ -656,10 +656,9 @@ footer{background:#003580;padding:1.5rem}
           <span class="seg-label">📅 ¿Cuándo?</span>
           <div class="seg-val ph" id="flete-fecha-display">Hoy / Mañana</div>
           <div class="fecha-popup" id="fechaFletePopup" onclick="event.stopPropagation()">
+            <input type="date" id="input-flete-fecha" onchange="onFechaFlete()" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:'Outfit',sans-serif;color:var(--text);background:#fff;outline:none;margin-bottom:8px"/>
             <div class="chip-grid">
               <div class="fecha-chip sel" onclick="setFechaFlete(this,'Hoy')">⚡ Hoy</div>
-              <div class="fecha-chip" onclick="setFechaFlete(this,'Mañana')">📅 Mañana</div>
-              <div class="fecha-chip" onclick="setFechaFlete(this,'Esta semana')">Esta semana</div>
             </div>
           </div>
         </div>
@@ -991,6 +990,17 @@ function onFechaExacta() {
   document.getElementById('fecha-display').classList.remove('ph');
   document.getElementById('fechaPopup').classList.remove('open');
 }
+function onFechaFlete() {
+  var v = document.getElementById('input-flete-fecha').value;
+  if (!v) return;
+  document.querySelectorAll('#fechaFletePopup .fecha-chip').forEach(function(c){ c.classList.remove('sel'); });
+  var d = new Date(v + 'T12:00:00');
+  var label = d.toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'});
+  _fechaFlete = label;
+  document.getElementById('flete-fecha-display').textContent = label;
+  document.getElementById('flete-fecha-display').classList.remove('ph');
+  document.getElementById('fechaFletePopup').classList.remove('open');
+}
 function setFechaFlete(el, val) {
   document.querySelectorAll('#fechaFletePopup .fecha-chip').forEach(function(c){ c.classList.remove('sel'); });
   el.classList.add('sel');
@@ -1004,6 +1014,7 @@ function setFechaFlete(el, val) {
   var h = new Date();
   var min = h.getFullYear()+'-'+String(h.getMonth()+1).padStart(2,'0')+'-'+String(h.getDate()).padStart(2,'0');
   document.getElementById('input-fecha').min = min;
+  var iff = document.getElementById('input-flete-fecha'); if (iff) iff.min = min;
 })();
 
 // ══════════════════════════════════════════
