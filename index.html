@@ -1574,6 +1574,16 @@ function initMapaMini() {
       document.getElementById('ruta-tiempo').textContent = leg.duration.text;
       document.getElementById('ruta-dist').textContent  = leg.distance.text;
       document.getElementById('ruta-info').style.display = 'block';
+      // Guardar km reales en _busqueda para el estimador
+      _busqueda.distanciaKm = Math.round(leg.distance.value / 1000);
+      // Actualizar precio estimado en el resumen si está visible
+      var resEstimado = document.getElementById('res-estimado');
+      if (resEstimado) {
+        var est = _busqueda.tipo === 'flete'
+          ? _estimarPrecioFlete(_busqueda.distanciaKm)
+          : _estimarPrecioMudanza(_busqueda.ambientes, _busqueda.distanciaKm);
+        resEstimado.textContent = '$' + est.toLocaleString('es-AR');
+      }
     }
   });
 }
@@ -1844,7 +1854,6 @@ function toggleSel(email, e) {
 // VER PERFIL
 // ══════════════════════════════════════════
 function verPerfil(email) {
-  // Guardar contexto en sessionStorage para que mudancero.html lo use
   var m = _todos.find(function(x){ return x.email===email; });
   if (m) sessionStorage.setItem('perfilMudancero', JSON.stringify(m));
   sessionStorage.setItem('busquedaActual', JSON.stringify(_busqueda));
@@ -2301,21 +2310,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // ══════════════════════════════════════════
-// ESTIMADOR DE PRECIO
+// ESTIMADOR DE PRECIO — calibrado abril 2026
+// Fuentes: Infobae, iProfesional, MudanzasTodoCórdoba, Retroflet
 // ══════════════════════════════════════════
-// Precios calibrados abril 2026 — traslado sin embalaje, CABA/GBA
-// Referencia: servicio completo (con embalaje) multiplicado x 0.65
-var _TABLA_PRECIOS_MUD = {
-  1: 450000,   // monoambiente
-  2: 550000,   // 2 ambientes
-  3: 680000,   // 3 ambientes
-  4: 860000,   // 4 ambientes
-  5: 1050000,  // 5 ambientes
-  6: 1180000,  // 6+ ambientes
+
+// Base por ambientes — CABA/GBA zona corta (0-30km), traslado sin embalaje
+var _BASE_POR_AMB = {
+  1: 700000,    // monoambiente
+  2: 860000,    // 2 ambientes
+  3: 1100000,   // 3 ambientes
+  4: 1400000,   // 4 ambientes
+  5: 1700000,   // 5 ambientes
+  6: 2100000,   // 6+ ambientes
 };
-function _estimarPrecioMudanza(ambientes) {
+
+// Costo por km adicional según distancia (solo ida, promedio camión mediano)
+// Fuente: $1.800-$2.200/km para mudanzas residenciales (2026)
+function _costoKm(distKm) {
+  if (distKm <= 30)  return 0;       // incluido en la base
+  if (distKm <= 100) return 1800;    // zona GBA extendida
+  if (distKm <= 300) return 2000;    // larga distancia cercana
+  if (distKm <= 600) return 2200;    // interprovincial
+  return 2400;                        // larga distancia (>600km, ej CABA→Mendoza)
+}
+
+// Multiplicador por distancia (refleja más horas de trabajo)
+function _multDistancia(distKm) {
+  if (distKm <= 30)  return 1.0;
+  if (distKm <= 100) return 1.25;
+  if (distKm <= 300) return 1.45;
+  if (distKm <= 600) return 1.65;
+  return 1.85;
+}
+
+function _estimarPrecioMudanza(ambientes, distKm) {
   var amb = Math.max(1, Math.min(parseInt(ambientes)||1, 6));
-  return _TABLA_PRECIOS_MUD[amb] || _TABLA_PRECIOS_MUD[6];
+  var base = _BASE_POR_AMB[amb];
+  var km = Math.max(0, distKm || 0);
+  var mult = _multDistancia(km);
+  var kmExtra = Math.max(0, km - 30);
+  var adicionalKm = kmExtra * _costoKm(km);
+  return Math.round((base * mult + adicionalKm) / 1000) * 1000; // redondear a miles
+}
+
+function _estimarPrecioFlete(distKm) {
+  var km = Math.max(0, distKm || 0);
+  // Flete base: furgoneta, 2hs mínimo ~$180k zona corta
+  var base = 180000;
+  var mult = _multDistancia(km);
+  var kmExtra = Math.max(0, km - 30);
+  var adicionalKm = kmExtra * 1200; // furgoneta: ~$1.200/km
+  return Math.round((base * mult + adicionalKm) / 1000) * 1000;
 }
 
 // ══════════════════════════════════════════
@@ -2344,7 +2389,10 @@ async function _publicar(modo) {
         desde:_busqueda.desde, hasta:_busqueda.hasta,
         ambientes:_busqueda.tipo==='mudanza' ? (_busqueda.ambientes+' ambientes') : 'Flete',
         fecha:_busqueda.fecha, servicios:objetos, zonaBase:_busqueda.desde,
-        precio_estimado:_busqueda.tipo==='mudanza' ? _estimarPrecioMudanza(_busqueda.ambientes) : 180000,
+        precio_estimado:_busqueda.tipo==='mudanza'
+          ? _estimarPrecioMudanza(_busqueda.ambientes, _busqueda.distanciaKm || 15)
+          : _estimarPrecioFlete(_busqueda.distanciaKm || 15),
+        distanciaKm: _busqueda.distanciaKm || null,
         tipo:_busqueda.tipo, modoCotizacion:modo,
         mudancerosInvitados:modo==='dirigido' ? Array.from(_sel) : [],
       })
