@@ -581,6 +581,64 @@ footer{background:#003580;padding:1.5rem}
 .footer-links a:hover{color:#fff}
 .footer-copy{font-size:10px;color:rgba(255,255,255,.65);font-family:var(--mono)}
 
+/* ══ MOBILE RESULTS BAR + BOTTOM SHEET ══ */
+.mob-results-bar{
+  display:none;background:#003580;
+  position:sticky;top:56px;z-index:100;
+  border-bottom:3px solid #22C36A;padding:.6rem 1rem;
+}
+.mob-bar-inner{display:flex;align-items:center;gap:10px}
+.mob-bar-search{
+  flex:1;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);
+  border-radius:10px;padding:.5rem .8rem;cursor:pointer;min-width:0;
+}
+.mob-bar-ruta{display:block;font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mob-bar-det{display:block;font-size:11px;color:rgba(255,255,255,.7);margin-top:1px}
+.mob-btn-filtros{
+  flex-shrink:0;display:flex;align-items:center;gap:6px;
+  background:#fff;color:#003580;border:none;padding:.55rem 1rem;border-radius:10px;
+  font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;
+}
+.mob-filtros-count{
+  background:var(--blue);color:#fff;border-radius:50%;
+  width:18px;height:18px;font-size:10px;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.mob-sheet-ov{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.5)}
+.mob-sheet-ov.open{display:block}
+.mob-sheet{
+  position:absolute;bottom:0;left:0;right:0;background:#fff;
+  border-radius:20px 20px 0 0;max-height:88vh;display:flex;flex-direction:column;
+  box-shadow:0 -4px 30px rgba(0,0,0,.15);
+}
+.mob-sheet-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 1.2rem .8rem;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.mob-sheet-title{font-size:16px;font-weight:700;color:var(--text)}
+.mob-sheet-close{background:var(--bg2);border:1px solid var(--border);color:var(--text2);width:30px;height:30px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.mob-sheet-body{flex:1;overflow-y:auto;padding:.4rem 0;-webkit-overflow-scrolling:touch}
+.mob-sheet-footer{
+  display:flex;gap:10px;padding:1rem 1.2rem;border-top:1px solid var(--border);flex-shrink:0;
+  padding-bottom:max(1rem, env(safe-area-inset-bottom));
+}
+.mob-btn-limpiar{background:none;border:1.5px solid var(--border2);color:var(--text2);padding:.7rem 1.2rem;border-radius:10px;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer}
+.mob-btn-aplicar{flex:1;background:var(--blue);color:#fff;border:none;padding:.8rem 1.2rem;border-radius:10px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer}
+.mob-fs-section{padding:.9rem 1.2rem;border-bottom:1px solid var(--border)}
+.mob-fs-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:.7rem}
+.mob-fs-opts{display:flex;flex-direction:column;gap:2px}
+.mob-fs-opts-wrap{flex-direction:row;flex-wrap:wrap;gap:8px}
+.mob-fs-opt{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;border:1.5px solid var(--border);font-size:14px;color:var(--text);cursor:pointer;transition:all .15s;background:#fff}
+.mob-fs-opt.selected{border-color:var(--blue);background:var(--blue-light);color:var(--blue);font-weight:600}
+.mob-fs-opt.selected::after{content:'✓';margin-left:auto;font-weight:700}
+.mob-fs-chip{padding:8px 14px;border-radius:20px;border:1.5px solid var(--border2);font-size:13px;color:var(--text2);cursor:pointer;transition:all .15s;background:#fff}
+.mob-fs-chip.active{border-color:var(--blue);background:var(--blue);color:#fff;font-weight:600}
+@media(max-width:900px){
+  .mob-results-bar{display:block}
+  .res-search-bar{display:none}
+  .filtros-mobile-bar{display:none!important}
+}
+
 /* Modales */
 .modal-ov{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem}
 .modal-ov.open{display:flex}
@@ -853,108 +911,104 @@ footer{background:#003580;padding:1.5rem}
     </div>
   </div>
 
-  <!-- Filtros bar con dropdowns -->
-  <div class="filtros-mobile-bar" id="filtrosMobileBar">
-
-    <!-- Ordenar -->
-    <div class="filtro-pill" id="pill-orden" onclick="togglePillDropdown(event,'pill-orden')">
-      <span id="pill-orden-lbl">Ordenar</span>
-      <span class="pill-chevron">▼</span>
-      <div class="pill-dropdown" onclick="event.stopPropagation()">
-        <div class="pd-title">Ordenar por</div>
-        <div class="pd-opt selected" id="pdo-cal" onclick="setPillOrden('cal',this)">⭐ Mejor calificación</div>
-        <div class="pd-opt" id="pdo-precio" onclick="setPillOrden('precio',this)">💰 Menor precio</div>
-        <div class="pd-opt" id="pdo-trab" onclick="setPillOrden('trab',this)">📦 Más trabajos</div>
+  <!-- Barra mobile: búsqueda compacta + botón filtros -->
+  <div class="mob-results-bar" id="filtrosMobileBar">
+    <div class="mob-bar-inner">
+      <div class="mob-bar-search" onclick="scrollToHero()">
+        <span class="mob-bar-ruta" id="mob-ruta">—</span>
+        <span class="mob-bar-det" id="mob-det">—</span>
       </div>
+      <button class="mob-btn-filtros" id="mobBtnFiltros" onclick="abrirFiltrosMobile()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/></svg>
+        Filtros
+        <span class="mob-filtros-count" id="mobFiltrosCount" style="display:none">0</span>
+      </button>
     </div>
+  </div>
 
-    <!-- Vehículo -->
-    <div class="filtro-pill" id="pill-veh" onclick="togglePillDropdown(event,'pill-veh')">
-      <span id="pill-veh-lbl">Vehículo</span>
-      <span class="pill-chevron">▼</span>
-      <div class="pill-dropdown" onclick="event.stopPropagation()">
-        <div class="pd-title">Tipo de vehículo</div>
-        <div class="pd-opt" id="pdv-cam-g" onclick="togglePillFV('Camión grande','pdv-cam-g','pill-veh','pill-veh-lbl','Vehículo')">🚛 Camión grande</div>
-        <div class="pd-opt" id="pdv-cam-m" onclick="togglePillFV('Camión mediano','pdv-cam-m','pill-veh','pill-veh-lbl','Vehículo')">🚚 Camión mediano</div>
-        <div class="pd-opt" id="pdv-fur" onclick="togglePillFV('Camioneta / furgón pequeño','pdv-fur','pill-veh','pill-veh-lbl','Vehículo')">🚐 Camioneta / furgón</div>
-        <div class="pd-opt" id="pdv-gru" onclick="togglePillFV('Camión con hidrogrúa','pdv-gru','pill-veh','pill-veh-lbl','Vehículo')">🏗 Con hidrogrúa</div>
-        <div class="pd-sep"></div>
-        <div class="pd-clear" onclick="limpiarPillFV('pill-veh','pill-veh-lbl','Vehículo')">Limpiar</div>
+  <!-- Bottom sheet filtros mobile -->
+  <div id="filtrosMobileSheet" class="mob-sheet-ov" onclick="cerrarFiltrosMobile(event)">
+    <div class="mob-sheet" onclick="event.stopPropagation()">
+      <div class="mob-sheet-header">
+        <span class="mob-sheet-title">Filtros</span>
+        <button class="mob-sheet-close" onclick="cerrarFiltrosMobile()">✕</button>
       </div>
-    </div>
+      <div class="mob-sheet-body">
 
-    <!-- Verificaciones -->
-    <div class="filtro-pill" id="pill-ver" onclick="togglePillDropdown(event,'pill-ver')">
-      <span id="pill-ver-lbl">Verificación</span>
-      <span class="pill-chevron">▼</span>
-      <div class="pill-dropdown" onclick="event.stopPropagation()">
-        <div class="pd-title">Verificaciones</div>
-        <div class="pd-opt" id="pdver-id" onclick="togglePillFVer('id','pdver-id','pill-ver','pill-ver-lbl','Verificación')">✅ Identidad verificada</div>
-        <div class="pd-opt" id="pdver-veh" onclick="togglePillFVer('veh','pdver-veh','pill-ver','pill-ver-lbl','Verificación')">🚛 Vehículo verificado</div>
-        <div class="pd-opt" id="pdver-seg" onclick="togglePillFVer('seg','pdver-seg','pill-ver','pill-ver-lbl','Verificación')">🛡 Con seguro</div>
-        <div class="pd-sep"></div>
-        <div class="pd-clear" onclick="limpiarPillFVer('pill-ver','pill-ver-lbl','Verificación')">Limpiar</div>
-      </div>
-    </div>
-
-    <!-- Zona -->
-    <div class="filtro-pill" id="pill-zona" onclick="togglePillDropdown(event,'pill-zona')">
-      <span id="pill-zona-lbl">Zona</span>
-      <span class="pill-chevron">▼</span>
-      <div class="pill-dropdown" onclick="event.stopPropagation()">
-        <div class="pd-title">Zona de operación</div>
-        <div class="pd-opt" id="pdz-caba" onclick="togglePillFZ('CABA','pdz-caba','pill-zona','pill-zona-lbl','Zona')">📍 CABA</div>
-        <div class="pd-opt" id="pdz-gban" onclick="togglePillFZ('GBA Norte','pdz-gban','pill-zona','pill-zona-lbl','Zona')">📍 GBA Norte</div>
-        <div class="pd-opt" id="pdz-gbas" onclick="togglePillFZ('GBA Sur','pdz-gbas','pill-zona','pill-zona-lbl','Zona')">📍 GBA Sur</div>
-        <div class="pd-opt" id="pdz-gbao" onclick="togglePillFZ('GBA Oeste','pdz-gbao','pill-zona','pill-zona-lbl','Zona')">📍 GBA Oeste</div>
-        <div class="pd-opt" id="pdz-ros" onclick="togglePillFZ('Rosario','pdz-ros','pill-zona','pill-zona-lbl','Zona')">📍 Rosario</div>
-        <div class="pd-opt" id="pdz-cor" onclick="togglePillFZ('Córdoba','pdz-cor','pill-zona','pill-zona-lbl','Zona')">📍 Córdoba</div>
-        <div class="pd-sep"></div>
-        <div class="pd-clear" onclick="limpiarPillFZ('pill-zona','pill-zona-lbl','Zona')">Limpiar</div>
-      </div>
-    </div>
-
-    <!-- Filtro precio -->
-    <div class="filtro-pill" id="pill-precio" onclick="togglePillDropdown(event,'pill-precio')">
-      <span id="pill-precio-lbl">Precio</span>
-      <span class="pill-chevron">▼</span>
-      <div class="pill-dropdown" style="min-width:280px" onclick="event.stopPropagation()">
-        <div class="pd-title">Precio estimado</div>
-        <div class="precio-slider-wrap">
-          <div class="precio-range-header">
-            <span id="pill-precio-min-lbl">$ 0</span>
-            <span style="color:var(--text3)">—</span>
-            <span id="pill-precio-max-lbl">Sin límite</span>
-          </div>
-          <div class="precio-histogram" id="pill-histogram"></div>
-          <div class="precio-slider-track-wrap" id="pill-track">
-            <div class="precio-slider-fill" id="pill-precio-fill"></div>
-            <div class="precio-thumb" id="pill-thumb-min" style="z-index:4"></div>
-            <div class="precio-thumb" id="pill-thumb-max" style="z-index:4"></div>
-            <input class="precio-slider-input" type="range" id="pill-rmin" min="0" max="2000000" step="50000" value="0" style="z-index:5" oninput="onPrecioSlider('pill')">
-            <input class="precio-slider-input" type="range" id="pill-rmax" min="0" max="2000000" step="50000" value="2000000" style="z-index:5" oninput="onPrecioSlider('pill')">
-          </div>
-          <div class="precio-inputs-row">
-            <div class="precio-input-box">
-              <div class="precio-input-box-lbl">Mínimo</div>
-              <input class="precio-input-box-field" id="pill-txt-min" type="text" value="$ 0" onchange="onPrecioTextChange('pill','min',this.value)" onblur="onPrecioTextChange('pill','min',this.value)">
+        <!-- Ordenar -->
+        <div class="mob-fs-section">
+          <div class="mob-fs-title">Ordenar por</div>
+          <div class="mob-fs-opts">
+            <div class="mob-fs-opt selected" id="mfso-cal" onclick="mfSetOrden('cal',this)">
+              <span class="mob-fs-opt-icon">⭐</span> Mejor calificación
             </div>
-            <div class="precio-input-box">
-              <div class="precio-input-box-lbl">Máximo</div>
-              <input class="precio-input-box-field" id="pill-txt-max" type="text" value="Sin límite" onchange="onPrecioTextChange('pill','max',this.value)" onblur="onPrecioTextChange('pill','max',this.value)">
+            <div class="mob-fs-opt" id="mfso-precio" onclick="mfSetOrden('precio',this)">
+              <span class="mob-fs-opt-icon">💰</span> Menor precio
+            </div>
+            <div class="mob-fs-opt" id="mfso-trab" onclick="mfSetOrden('trab',this)">
+              <span class="mob-fs-opt-icon">📦</span> Más trabajos
             </div>
           </div>
         </div>
-        <div class="pd-sep"></div>
-        <div class="pd-clear" onclick="limpiarPillPrecio()">Limpiar</div>
+
+        <!-- Verificación -->
+        <div class="mob-fs-section">
+          <div class="mob-fs-title">Verificación</div>
+          <div class="mob-fs-opts mob-fs-opts-wrap">
+            <div class="mob-fs-chip" id="mfsc-id" onclick="mfToggleChip(this,'verif-id')">✅ Identidad</div>
+            <div class="mob-fs-chip" id="mfsc-veh" onclick="mfToggleChip(this,'verif-veh')">🚛 Vehículo</div>
+            <div class="mob-fs-chip" id="mfsc-seg" onclick="mfToggleChip(this,'verif-seg')">🛡 Seguro</div>
+          </div>
+        </div>
+
+        <!-- Vehículo -->
+        <div class="mob-fs-section">
+          <div class="mob-fs-title">Tipo de vehículo</div>
+          <div class="mob-fs-opts mob-fs-opts-wrap">
+            <div class="mob-fs-chip" id="mfsv-cam-g" onclick="mfToggleChip(this,'veh-cam-g')">🚛 Camión grande</div>
+            <div class="mob-fs-chip" id="mfsv-cam-m" onclick="mfToggleChip(this,'veh-cam-m')">🚚 Camión mediano</div>
+            <div class="mob-fs-chip" id="mfsv-fur" onclick="mfToggleChip(this,'veh-fur')">🚐 Furgón</div>
+            <div class="mob-fs-chip" id="mfsv-gru" onclick="mfToggleChip(this,'veh-gru')">🏗 Con hidrogrúa</div>
+          </div>
+        </div>
+
+        <!-- Zona -->
+        <div class="mob-fs-section">
+          <div class="mob-fs-title">Zona</div>
+          <div class="mob-fs-opts mob-fs-opts-wrap">
+            <div class="mob-fs-chip" id="mfsz-caba" onclick="mfToggleChip(this,'zona-caba')">📍 CABA</div>
+            <div class="mob-fs-chip" id="mfsz-gban" onclick="mfToggleChip(this,'zona-gban')">📍 GBA Norte</div>
+            <div class="mob-fs-chip" id="mfsz-gbas" onclick="mfToggleChip(this,'zona-gbas')">📍 GBA Sur</div>
+            <div class="mob-fs-chip" id="mfsz-gbao" onclick="mfToggleChip(this,'zona-gbao')">📍 GBA Oeste</div>
+            <div class="mob-fs-chip" id="mfsz-ros" onclick="mfToggleChip(this,'zona-ros')">📍 Rosario</div>
+            <div class="mob-fs-chip" id="mfsz-cor" onclick="mfToggleChip(this,'zona-cor')">📍 Córdoba</div>
+          </div>
+        </div>
+
+        <!-- Precio -->
+        <div class="mob-fs-section" style="border-bottom:none">
+          <div class="mob-fs-title">Precio estimado</div>
+          <div class="precio-range-header" style="margin-bottom:14px">
+            <span id="mf-precio-min-lbl">$ 0</span>
+            <span style="color:var(--text3)">—</span>
+            <span id="mf-precio-max-lbl">Sin límite</span>
+          </div>
+          <div class="precio-histogram" id="mf-histogram"></div>
+          <div class="precio-slider-track-wrap">
+            <div class="precio-slider-fill" id="mf-precio-fill"></div>
+            <div class="precio-thumb" id="mf-thumb-min" style="z-index:4"></div>
+            <div class="precio-thumb" id="mf-thumb-max" style="z-index:4"></div>
+            <input class="precio-slider-input" type="range" id="mf-rmin" min="0" max="2000000" step="50000" value="0" style="z-index:5" oninput="onMfPrecioSlider()">
+            <input class="precio-slider-input" type="range" id="mf-rmax" min="0" max="2000000" step="50000" value="2000000" style="z-index:5" oninput="onMfPrecioSlider()">
+          </div>
+        </div>
+
+      </div>
+      <div class="mob-sheet-footer">
+        <button class="mob-btn-limpiar" onclick="mfLimpiarTodo()">Limpiar todo</button>
+        <button class="mob-btn-aplicar" onclick="mfAplicar()">Ver resultados <span id="mobAplicarCount"></span></button>
       </div>
     </div>
-
-    <!-- Limpiar todo -->
-    <div class="filtro-pill" id="pill-clear" style="display:none;border-color:#EF4444;color:#EF4444" onclick="limpiarTodosFiltros()">
-      ✕ Limpiar todo
-    </div>
-
   </div>
 
   <div class="res-body" id="resBody">
@@ -1593,7 +1647,7 @@ function buscar() {
 
   var fecha = _tipo==='mudanza' ? (_fechaLabel||'A definir') : _fechaFlete;
   _busqueda = { tipo:_tipo, desde, hasta, fecha, ambientes:_amb };
-  // Actualizar sticky bar
+  // Actualizar sticky bar desktop
   document.getElementById('res-desde').textContent = desde.split(',')[0];
   document.getElementById('res-hasta').textContent  = hasta.split(',')[0];
   document.getElementById('res-fecha').textContent  = fecha;
@@ -1601,6 +1655,8 @@ function buscar() {
   document.getElementById('res-seg-amb').style.display = _tipo==='mudanza' ? '' : 'none';
   document.getElementById('resTitulo').textContent = _tipo==='mudanza' ? 'Mudanceros disponibles' : 'Fleteros disponibles';
   document.getElementById('resRuta').textContent = desde + ' → ' + hasta;
+  // Actualizar barra mobile
+  _actualizarMobBar(desde, hasta, fecha, _amb, _tipo);
   // Mostrar resultados
   var sec = document.getElementById('resultados');
   sec.classList.add('show');
@@ -1912,6 +1968,164 @@ function limpiarTodosFiltros() {
 
 // legacy togglePill (por si algo lo llama)
 function togglePill(el, key) {}
+
+// ══════════════════════════════════════════
+// BOTTOM SHEET FILTROS MOBILE
+// ══════════════════════════════════════════
+
+// Estado temporal del sheet (se aplica al tocar "Ver resultados")
+var _mfTemp = { orden:'cal', verifs:new Set(), vehiculos:new Set(), zonas:new Set(), precioMin:0, precioMax:2000000 };
+
+function abrirFiltrosMobile() {
+  // Sincronizar estado temporal con filtros actuales
+  _mfTemp.orden = _filtros.orden;
+  _mfTemp.verifs = new Set(_filtros.verifs);
+  _mfTemp.vehiculos = new Set(_filtros.vehiculos);
+  _mfTemp.zonas = new Set(_filtros.zonas);
+  _mfTemp.precioMin = _filtros.precioMin;
+  _mfTemp.precioMax = _filtros.precioMax;
+  // Reflejar en UI del sheet
+  _mfRefrescarUI();
+  // Abrir
+  document.getElementById('filtrosMobileSheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarFiltrosMobile(e) {
+  if (e && e.target !== document.getElementById('filtrosMobileSheet')) return;
+  document.getElementById('filtrosMobileSheet').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function _mfRefrescarUI() {
+  // Orden
+  ['cal','precio','trab'].forEach(function(k) {
+    var el = document.getElementById('mfso-'+k);
+    if (el) el.classList.toggle('selected', _mfTemp.orden === k);
+  });
+  // Verificaciones
+  var verifMap = {'mfsc-id':'id','mfsc-veh':'veh','mfsc-seg':'seg'};
+  Object.keys(verifMap).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('active', _mfTemp.verifs.has(verifMap[id]));
+  });
+  // Vehículos
+  var vehMap = {'mfsv-cam-g':'Camión grande','mfsv-cam-m':'Camión mediano','mfsv-fur':'Camioneta / furgón pequeño','mfsv-gru':'Camión con hidrogrúa'};
+  Object.keys(vehMap).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('active', _mfTemp.vehiculos.has(vehMap[id]));
+  });
+  // Zonas
+  var zonaMap = {'mfsz-caba':'CABA','mfsz-gban':'GBA Norte','mfsz-gbas':'GBA Sur','mfsz-gbao':'GBA Oeste','mfsz-ros':'Rosario','mfsz-cor':'Córdoba'};
+  Object.keys(zonaMap).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('active', _mfTemp.zonas.has(zonaMap[id]));
+  });
+  // Precio slider
+  document.getElementById('mf-rmin').value = _mfTemp.precioMin;
+  document.getElementById('mf-rmax').value = _mfTemp.precioMax;
+  _mfActualizarPrecioUI();
+  // Contador en botón aplicar
+  _mfActualizarContador();
+}
+
+function mfSetOrden(v, el) {
+  _mfTemp.orden = v;
+  document.querySelectorAll('#filtrosMobileSheet .mob-fs-opt').forEach(function(o){ o.classList.remove('selected'); });
+  el.classList.add('selected');
+  _mfActualizarContador();
+}
+
+function mfToggleChip(el, key) {
+  el.classList.toggle('active');
+  var activo = el.classList.contains('active');
+  // Mapear key a filtro temporal
+  var verifMap = {'verif-id':'id','verif-veh':'veh','verif-seg':'seg'};
+  var vehMap = {'veh-cam-g':'Camión grande','veh-cam-m':'Camión mediano','veh-fur':'Camioneta / furgón pequeño','veh-gru':'Camión con hidrogrúa'};
+  var zonaMap = {'zona-caba':'CABA','zona-gban':'GBA Norte','zona-gbas':'GBA Sur','zona-gbao':'GBA Oeste','zona-ros':'Rosario','zona-cor':'Córdoba'};
+  if (verifMap[key]) { if(activo) _mfTemp.verifs.add(verifMap[key]); else _mfTemp.verifs.delete(verifMap[key]); }
+  else if (vehMap[key]) { if(activo) _mfTemp.vehiculos.add(vehMap[key]); else _mfTemp.vehiculos.delete(vehMap[key]); }
+  else if (zonaMap[key]) { if(activo) _mfTemp.zonas.add(zonaMap[key]); else _mfTemp.zonas.delete(zonaMap[key]); }
+  _mfActualizarContador();
+}
+
+function onMfPrecioSlider() {
+  var mn = parseInt(document.getElementById('mf-rmin').value);
+  var mx = parseInt(document.getElementById('mf-rmax').value);
+  if (mn >= mx) {
+    if (document.activeElement === document.getElementById('mf-rmin')) { mn = Math.max(0, mx-50000); document.getElementById('mf-rmin').value=mn; }
+    else { mx = Math.min(PRECIO_MAX_TOTAL, mn+50000); document.getElementById('mf-rmax').value=mx; }
+  }
+  _mfTemp.precioMin = mn;
+  _mfTemp.precioMax = mx;
+  _mfActualizarPrecioUI();
+  _mfActualizarContador();
+}
+
+function _mfActualizarPrecioUI() {
+  var mn = _mfTemp.precioMin, mx = _mfTemp.precioMax;
+  document.getElementById('mf-precio-min-lbl').textContent = fmtPrecioSlider(mn);
+  document.getElementById('mf-precio-max-lbl').textContent = fmtPrecioSlider(mx);
+  var pct1 = mn/PRECIO_MAX_TOTAL*100, pct2 = mx/PRECIO_MAX_TOTAL*100;
+  var fill = document.getElementById('mf-precio-fill');
+  if (fill) { fill.style.left=pct1+'%'; fill.style.width=(pct2-pct1)+'%'; }
+  var tm = document.getElementById('mf-thumb-min'), tM = document.getElementById('mf-thumb-max');
+  if (tm) tm.style.left=pct1+'%';
+  if (tM) tM.style.left=pct2+'%';
+  _buildHistogram('mf-histogram', mn, mx);
+}
+
+function _mfActualizarContador() {
+  var n = 0;
+  if (_mfTemp.orden !== 'cal') n++;
+  n += _mfTemp.verifs.size + _mfTemp.vehiculos.size + _mfTemp.zonas.size;
+  if (_mfTemp.precioMin > 0 || _mfTemp.precioMax < PRECIO_MAX_TOTAL) n++;
+  var countEl = document.getElementById('mobFiltrosCount');
+  var btnCount = document.getElementById('mobAplicarCount');
+  if (countEl) { countEl.style.display = n>0?'inline-flex':'none'; countEl.textContent=n; }
+  if (btnCount) { btnCount.textContent = n>0?'('+n+')':''; }
+  // Badge en botón filtros
+  document.getElementById('mobBtnFiltros').classList.toggle('has-active', n>0);
+}
+
+function mfLimpiarTodo() {
+  _mfTemp = { orden:'cal', verifs:new Set(), vehiculos:new Set(), zonas:new Set(), precioMin:0, precioMax:PRECIO_MAX_TOTAL };
+  _mfRefrescarUI();
+}
+
+function mfAplicar() {
+  // Copiar estado temporal a filtros reales
+  _filtros.orden = _mfTemp.orden;
+  _filtros.verifs = new Set(_mfTemp.verifs);
+  _filtros.vehiculos = new Set(_mfTemp.vehiculos);
+  _filtros.zonas = new Set(_mfTemp.zonas);
+  _filtros.precioMin = _mfTemp.precioMin;
+  _filtros.precioMax = _mfTemp.precioMax;
+  // Sincronizar también el panel desktop (por consistencia)
+  _syncUI(_filtros.precioMin, _filtros.precioMax);
+  renderResultados();
+  cerrarFiltrosMobile();
+}
+
+// Actualizar la mob-results-bar cuando hay búsqueda
+function _actualizarMobBar(desde, hasta, fecha, ambientes, tipo) {
+  var rutaEl = document.getElementById('mob-ruta');
+  var detEl = document.getElementById('mob-det');
+  if (!rutaEl) return;
+  var desdeShort = (desde||'').split(',')[0];
+  var hastaShort = (hasta||'').split(',')[0];
+  rutaEl.textContent = desdeShort + ' → ' + hastaShort;
+  var det = [];
+  if (fecha) det.push(fecha);
+  if (tipo === 'mudanza' && ambientes) det.push(ambientes + ' amb.');
+  else if (tipo === 'flete') det.push('Flete');
+  detEl.textContent = det.join(' · ') || '—';
+}
+
+// Init histogram del sheet
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() { _buildHistogram('mf-histogram', 0, PRECIO_MAX_TOTAL); }, 100);
+});
 
 // ══════════════════════════════════════════
 // FILTRO PRECIO
