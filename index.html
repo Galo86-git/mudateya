@@ -1323,6 +1323,41 @@ function buscar() {
     }
     return;
   }
+  // Validar objeto/foto en flete
+  if (_tipo === 'flete') {
+    var tieneObj = !!_fleteObj;
+    var tieneFoto = !!_fleteFotoB64;
+    var tieneOtros = (document.getElementById('flete-otros-input') || {}).value && (document.getElementById('flete-otros-input').value.trim().length > 2);
+    if (!tieneObj && !tieneFoto && !tieneOtros) {
+      // Mostrar error en el área de chips
+      var chipsArea = document.querySelector('#sb-flete .obj-chip[onclick*="selFleteObj"]');
+      var errObj = document.getElementById('flete-obj-err');
+      if (!errObj) {
+        errObj = document.createElement('div');
+        errObj.id = 'flete-obj-err';
+        errObj.style.cssText = 'font-size:11px;color:#FF5252;font-family:Inter,sans-serif;margin-top:4px;display:flex;align-items:center;gap:4px';
+        errObj.innerHTML = '⚠ Seleccioná un tipo de objeto o subí una foto para continuar';
+        var objRow = document.querySelector('#sb-flete [style*="¿Qué objeto?"]');
+        if (!objRow) objRow = document.querySelector('#sb-flete .obj-chip[onclick*="selFleteObj"]').closest('div').parentElement;
+        objRow.parentElement.insertBefore(errObj, objRow.nextSibling);
+      }
+      // Highlight chips con borde rojo
+      document.querySelectorAll('#sb-flete .obj-chip').forEach(function(ch){
+        ch.style.borderColor = '#FF5252';
+        ch.style.color = '#FF5252';
+      });
+      // Highlight botón foto
+      var fotoLabel = document.getElementById('flete-foto-label');
+      if (fotoLabel) fotoLabel.style.borderColor = '#FF5252';
+      setTimeout(function(){
+        if (errObj && errObj.parentElement) errObj.remove();
+        document.querySelectorAll('#sb-flete .obj-chip').forEach(function(ch){ ch.style.borderColor=''; ch.style.color=''; });
+        if (fotoLabel) fotoLabel.style.borderColor = '';
+      }, 3000);
+      return;
+    }
+  }
+
   var fecha = _tipo==='mudanza' ? (_fechaLabel||'A definir') : _fechaFlete;
   _busqueda = { tipo:_tipo, desde, hasta, fecha, ambientes:_amb };
   // Actualizar sticky bar
