@@ -2490,59 +2490,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Detectar cuando el usuario vuelve desde el perfil (history.back)
 window.addEventListener('pageshow', function(e) {
-  // Restaurar búsqueda activa siempre que venimos de vuelta
-  var busqueda = null;
-  try { busqueda = JSON.parse(sessionStorage.getItem('busquedaActual')); } catch(err){}
-
-  if (busqueda && busqueda.desde && busqueda.hasta) {
-    // Restaurar estado de búsqueda
-    _busqueda = busqueda;
-    _tipo = busqueda.tipo || 'mudanza';
-    _amb  = parseInt(busqueda.ambientes) || 2;
-
-    // Restaurar seleccionados
-    try {
-      var sel = JSON.parse(sessionStorage.getItem('seleccionados')||'[]');
-      sel.forEach(function(em){ _sel.add(em); });
-    } catch(err){}
-
-    // Restaurar ultimoSeleccionado si existe
-    var emailSel = null;
-    try { emailSel = sessionStorage.getItem('ultimoSeleccionado'); } catch(err){}
-    if (emailSel) {
-      sessionStorage.removeItem('ultimoSeleccionado');
-      _sel.add(emailSel);
-    }
-
-    // Mostrar resultados con los datos actuales
-    if (_todos.length > 0) {
-      document.getElementById('resultados').classList.add('show');
-      // Actualizar sticky bar
-      var resDesde = document.getElementById('res-desde');
-      var resHasta = document.getElementById('res-hasta');
-      var resFecha = document.getElementById('res-fecha');
-      var resAmb   = document.getElementById('res-amb');
-      if (resDesde) resDesde.textContent = busqueda.desde.split(',')[0];
-      if (resHasta) resHasta.textContent = busqueda.hasta.split(',')[0];
-      if (resFecha) resFecha.textContent = busqueda.fecha || '';
-      if (resAmb)   resAmb.textContent   = (_amb) + ' amb.';
-      renderResultados();
-      // Barra de selección
-      var n = _sel.size;
-      var selBar = document.getElementById('selBar');
-      if (selBar) selBar.classList.toggle('show', n > 0);
-      var selCount = document.getElementById('selCount');
-      if (selCount) selCount.textContent = n;
-      // Scroll a resultados
-      setTimeout(function(){
-        var secRes = document.getElementById('resultados');
-        if (secRes) secRes.scrollIntoView({behavior:'smooth', block:'start'});
-      }, 100);
-    } else {
-      // No hay datos todavía — cargar
-      cargarResultados();
-      document.getElementById('resultados').classList.add('show');
-    }
+  var email = null;
+  try { email = sessionStorage.getItem('ultimoSeleccionado'); } catch(e){}
+  if (!email) return;
+  sessionStorage.removeItem('ultimoSeleccionado');
+  // Marcar como seleccionado
+  _sel.add(email);
+  // Actualizar barra de selección
+  var n = _sel.size;
+  var selBar = document.getElementById('selBar');
+  if (selBar) selBar.classList.toggle('show', n > 0);
+  var selCount = document.getElementById('selCount');
+  if (selCount) selCount.textContent = n;
+  // Re-renderizar resultados para mostrar el check
+  if (document.getElementById('resultados').classList.contains('show')) {
+    renderResultados();
+    // Scroll suave de vuelta a los resultados
+    setTimeout(function(){
+      var listaEl = document.getElementById('listaRes');
+      if (listaEl) listaEl.scrollIntoView({behavior:'smooth', block:'start'});
+    }, 100);
   }
 });
 // Recibir mensajes del perfil (legacy — ya no se usa nueva pestaña pero se mantiene por si acaso)
