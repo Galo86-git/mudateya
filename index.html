@@ -2489,27 +2489,61 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Detectar cuando el usuario vuelve desde el perfil (history.back)
+// En mobile el browser usa bfcache — e.persisted = true
 window.addEventListener('pageshow', function(e) {
-  var email = null;
-  try { email = sessionStorage.getItem('ultimoSeleccionado'); } catch(e){}
-  if (!email) return;
-  sessionStorage.removeItem('ultimoSeleccionado');
-  // Marcar como seleccionado
-  _sel.add(email);
-  // Actualizar barra de selección
-  var n = _sel.size;
-  var selBar = document.getElementById('selBar');
-  if (selBar) selBar.classList.toggle('show', n > 0);
-  var selCount = document.getElementById('selCount');
-  if (selCount) selCount.textContent = n;
-  // Re-renderizar resultados para mostrar el check
-  if (document.getElementById('resultados').classList.contains('show')) {
-    renderResultados();
-    // Scroll suave de vuelta a los resultados
+  // Solo actuar si viene del bfcache (mobile) O si hay búsqueda guardada
+  var busqueda = null;
+  try { busqueda = JSON.parse(sessionStorage.getItem('busquedaActual')); } catch(err){}
+  if (!busqueda || !busqueda.desde || !busqueda.hasta) return;
+
+  // Restaurar estado
+  _busqueda = busqueda;
+  _tipo = busqueda.tipo || 'mudanza';
+  _amb  = parseInt(busqueda.ambientes) || 2;
+
+  // Restaurar seleccionados
+  try {
+    var sel = JSON.parse(sessionStorage.getItem('seleccionados')||'[]');
+    sel.forEach(function(em){ _sel.add(em); });
+  } catch(err){}
+  var emailSel = null;
+  try { emailSel = sessionStorage.getItem('ultimoSeleccionado'); } catch(err){}
+  if (emailSel) { sessionStorage.removeItem('ultimoSeleccionado'); _sel.add(emailSel); }
+
+  // Si viene del bfcache (mobile), forzar re-render completo
+  if (e.persisted) {
+    document.getElementById('resultados').classList.add('show');
+    // Actualizar sticky bar
+    var rd = document.getElementById('res-desde'); if(rd) rd.textContent = busqueda.desde.split(',')[0];
+    var rh = document.getElementById('res-hasta'); if(rh) rh.textContent = busqueda.hasta.split(',')[0];
+    var rf = document.getElementById('res-fecha'); if(rf) rf.textContent = busqueda.fecha || '';
+    var ra = document.getElementById('res-amb');   if(ra) ra.textContent = _amb + ' amb.';
+    // Cargar datos frescos y renderizar
+    if (_todos.length > 0) {
+      renderResultados();
+    } else {
+      cargarResultados();
+    }
+    var n = _sel.size;
+    var sb = document.getElementById('selBar'); if(sb) sb.classList.toggle('show', n>0);
+    var sc = document.getElementById('selCount'); if(sc) sc.textContent = n;
     setTimeout(function(){
-      var listaEl = document.getElementById('listaRes');
-      if (listaEl) listaEl.scrollIntoView({behavior:'smooth', block:'start'});
-    }, 100);
+      var sec = document.getElementById('resultados');
+      if (sec) sec.scrollIntoView({behavior:'instant', block:'start'});
+    }, 50);
+  } else {
+    // Navegación normal (desktop o sin bfcache)
+    if (_todos.length > 0) {
+      document.getElementById('resultados').classList.add('show');
+      renderResultados();
+      var n2 = _sel.size;
+      var sb2 = document.getElementById('selBar'); if(sb2) sb2.classList.toggle('show', n2>0);
+      var sc2 = document.getElementById('selCount'); if(sc2) sc2.textContent = n2;
+      setTimeout(function(){
+        var sec2 = document.getElementById('resultados');
+        if (sec2) sec2.scrollIntoView({behavior:'smooth', block:'start'});
+      }, 100);
+    }
   }
 });
 // Recibir mensajes del perfil (legacy — ya no se usa nueva pestaña pero se mantiene por si acaso)
