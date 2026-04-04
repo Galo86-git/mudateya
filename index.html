@@ -64,8 +64,8 @@ nav{
 /* ══ HERO ══ */
 .hero{background:#003580;padding:2rem 1.5rem 3rem}
 .hero-inner{max-width:900px;margin:0 auto}
-.hero h1{font-family:'Inter',sans-serif;font-size:clamp(1.4rem,2.5vw,2rem);font-weight:800;color:#fff;margin-bottom:.25rem;line-height:1.25;letter-spacing:-.3px}
-.hero-sub{font-size:14px;color:rgba(255,255,255,.8);margin-bottom:1.4rem;font-weight:400;letter-spacing:-.1px}
+.hero h1{font-family:'Inter',sans-serif;font-size:clamp(1.6rem,3.5vw,2.2rem);font-weight:800;color:#fff;margin-bottom:.25rem;line-height:1.25;letter-spacing:-.3px}
+.hero-sub{font-size:15px;color:rgba(255,255,255,.8);margin-bottom:1.4rem;font-weight:400;letter-spacing:-.1px}
 
 /* ══ SEARCH BAR ══ */
 .search-bar{
@@ -89,9 +89,9 @@ nav{
 .search-segment:last-of-type{border-right:none}
 .search-segment:hover{background:var(--bg2)}
 .search-segment.active{background:#f0f7ff}
-.seg-label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px}
+.seg-label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px}
 .seg-label svg{opacity:.6}
-.seg-val{font-size:15px;font-weight:400;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.1px}
+.seg-val{font-size:16px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.1px}
 .seg-val.ph{color:#64748B;font-weight:400}
 .seg-input{
   background:none;border:none;outline:none;
@@ -103,10 +103,10 @@ nav{
   background:var(--blue);color:#fff;
   border:none;padding:0 1.8rem;
   border-radius:0 var(--r) var(--r) 0;
-  font-size:16px;font-weight:700;
+  font-size:17px;font-weight:700;
   cursor:pointer;font-family:'Inter',sans-serif;
   transition:background .2s;white-space:nowrap;
-  display:flex;align-items:center;gap:6px;flex-shrink:0;
+  display:flex;align-items:center;gap:8px;flex-shrink:0;
   letter-spacing:-.2px;
 }
 .btn-search-bar:hover{background:var(--blue-dark)}
@@ -229,11 +229,11 @@ nav{
 /* ══ TRUST BAR ══ */
 .trust-bar{
   background:var(--bg2);border-bottom:1px solid var(--border);
-  padding:.7rem 1.5rem;
-  display:flex;align-items:center;justify-content:center;gap:2rem;flex-wrap:wrap;
+  padding:.8rem 1.5rem;
+  display:flex;align-items:center;justify-content:center;gap:1.5rem;flex-wrap:wrap;
 }
-.trust-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
-.trust-icon{font-size:14px}
+.trust-item{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2);font-weight:500}
+.trust-icon{font-size:16px}
 
 /* ══ RESULTADOS ══ */
 #resultados{display:none}
@@ -531,8 +531,8 @@ body.pill-open #pillOverlay{display:block}
 }
 .stat-item{padding:1.4rem 1rem;text-align:center;border-right:1px solid rgba(255,255,255,.15)}
 .stat-item:last-child{border-right:none}
-.stat-n{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#22C36A;letter-spacing:1px;line-height:1}
-.stat-l{font-size:11px;color:rgba(255,255,255,.8);margin-top:4px;font-family:var(--mono);letter-spacing:.2px}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:#22C36A;letter-spacing:1px;line-height:1}
+.stat-l{font-size:12px;color:rgba(255,255,255,.85);margin-top:5px;font-family:var(--mono);letter-spacing:.2px}
 
 .section{padding:4rem 1.5rem;background:#fff}
 .section.alt{background:var(--bg2)}
@@ -673,22 +673,54 @@ footer{background:#003580;padding:1.5rem}
   nav{padding:0 1rem}
   .nav-links,.nav-right{display:none}
   .nav-burger{display:flex}
-  .hero{padding:1.5rem 1rem 2.5rem}
+
+  /* Hero */
+  .hero{padding:1.8rem 1.2rem 2.5rem}
+  .hero h1{font-size:1.75rem;letter-spacing:-.4px;line-height:1.2}
+  .hero-sub{font-size:14px;line-height:1.6;margin-bottom:1.2rem}
+
+  /* Trust bar: 2x2 grid en mobile */
+  .trust-bar{
+    display:grid;grid-template-columns:1fr 1fr;
+    gap:0;padding:0;
+  }
+  .trust-item{
+    padding:.85rem 1rem;font-size:13px;font-weight:500;
+    border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+    justify-content:flex-start;
+  }
+  .trust-item:nth-child(even){border-right:none}
+  .trust-item:nth-child(3),.trust-item:nth-child(4){border-bottom:none}
+
+  /* Stats bar: 2x2 */
   .res-search-inner{flex-wrap:wrap;gap:6px}
   .res-seg{font-size:11px;padding:.4rem .7rem}
   .stats-bar{grid-template-columns:repeat(2,1fr)}
   .stat-item{border-bottom:1px solid rgba(255,255,255,.15)}
   .stat-item:nth-child(odd){border-right:1px solid rgba(255,255,255,.15)}
   .stat-item:nth-child(even){border-right:none}
+  .stat-n{font-size:1.7rem}
+  .stat-l{font-size:10px}
+
+  /* Secciones */
   .steps-grid,.aud-grid{grid-template-columns:1fr}
-  .section{padding:2.5rem 1rem}
-  .footer-inner{flex-direction:column;align-items:flex-start}
-  .card-rapida{flex-direction:column;text-align:center}
-  .btn-cr{width:100%}
-  /* res-search-bar mobile: compactar en 2 filas */
-  .res-search-bar{padding:.5rem 1rem}
-  .res-search-inner{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-  .btn-res-search{grid-column:1/-1;margin-left:0;justify-content:center}
+  .section{padding:2.5rem 1.2rem}
+  .sec-title{font-size:1.4rem}
+  .sec-sub{font-size:13px}
+  .step-block{padding:1.4rem 1.2rem}
+  .step-block h3{font-size:15px}
+  .step-block p{font-size:13px}
+  .aud-card{padding:1.4rem 1.2rem}
+
+  /* Card rápida */
+  .card-rapida{flex-direction:column;text-align:center;padding:.9rem 1rem}
+  .cr-title{font-size:14px}
+  .cr-sub{font-size:12px}
+  .btn-cr{width:100%;margin-top:.5rem}
+
+  /* Footer */
+  .footer-inner{flex-direction:column;align-items:flex-start;gap:.8rem}
+  .footer-links{gap:1rem}
 }
 </style>
 </head>
@@ -728,7 +760,7 @@ footer{background:#003580;padding:1.5rem}
 <!-- HERO -->
 <section class="hero" id="heroSection" style="position:relative"><div class="hero-inner">
     <h1>Cotizá tu mudanza con los mejores de Argentina</h1>
-    <p class="hero-sub">Comparás precios reales de mudanceros verificados y elegís sin compromiso. Es gratis.</p>
+    <p class="hero-sub">Comparás precios reales de mudanceros verificados y elegís sin compromiso. Publicá gratis.</p>
 
     <!-- Service tabs -->
     <div class="service-tabs">
@@ -873,7 +905,7 @@ footer{background:#003580;padding:1.5rem}
   <div class="trust-item"><span class="trust-icon">✅</span> +1.200 mudanceros verificados</div>
   <div class="trust-item"><span class="trust-icon">⭐</span> 4.8 calificación promedio</div>
   <div class="trust-item"><span class="trust-icon">💳</span> Pago seguro con Mercado Pago</div>
-  <div class="trust-item"><span class="trust-icon">🆓</span> Gratis para clientes</div>
+  <div class="trust-item"><span class="trust-icon">🆓</span> Publicá tu mudanza gratis</div>
 </div>
 
 <!-- RESULTADOS -->
@@ -1133,7 +1165,7 @@ footer{background:#003580;padding:1.5rem}
       <div class="aud-card cl">
         <span class="aud-icon">🏠</span>
         <div class="aud-title">Si te mudás</div>
-        <p class="aud-desc">Comparás precios reales antes de comprometerte con nadie. Es gratis.</p>
+        <p class="aud-desc">Comparás precios reales antes de comprometerte con nadie. Publicá gratis.</p>
         <ul class="aud-list">
           <li><span class="aud-arr">→</span>Solo mudanceros con identidad y vehículo verificado</li>
           <li><span class="aud-arr">→</span>Precios acordados de antemano, sin sorpresas</li>
@@ -1184,7 +1216,7 @@ footer{background:#003580;padding:1.5rem}
     <div style="text-align:center">
       <div style="font-size:2.5rem;margin-bottom:10px">🔐</div>
       <div style="font-size:1.2rem;font-weight:700;margin-bottom:.3rem">Iniciá sesión</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:1.4rem">Para publicar y recibir cotizaciones. Es gratis.</p>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:1.4rem">Para publicar y recibir cotizaciones. Publicá gratis.</p>
       <div id="googleBtn" style="display:flex;justify-content:center;margin-bottom:1rem"></div>
       <p style="font-size:10px;color:var(--text2);font-family:var(--mono)">🔒 Solo usamos tu email · No publicamos nada en tu cuenta</p>
     </div>
