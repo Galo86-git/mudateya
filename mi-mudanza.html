@@ -558,7 +558,7 @@ function renderMudanzaCard(m, idx){
           var cData = JSON.stringify(c).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
           return '<div style="background:var(--surface2);border:1px solid '+(isAceptada?'var(--emerald)':'#E2E8F0')+';border-radius:10px;padding:10px 12px;margin-bottom:6px">'
             // Fila superior: nombre + precio
-            + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:'+(isAceptada||m.estado==='cotizacion_aceptada'?'0':'8px')+'">'
+            + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
             +   '<div style="flex:1">'
             +     '<div style="font-size:13px;font-weight:500;color:var(--text)">'+esc(c.mudanceroNombre)+'</div>'
             +     (c.tiempoEstimado?'<div style="font-size:11px;color:var(--text3);font-family:var(--mono)">⏱ '+c.tiempoEstimado+'</div>':'')
@@ -568,6 +568,15 @@ function renderMudanzaCard(m, idx){
             +     (isAceptada ? '<div style="font-size:10px;color:var(--blue);font-family:var(--mono)">✓ Aceptada</div>' : '')
             +   '</div>'
             + '</div>'
+            // Desglose km si aplica
+            + (c.precioKm > 0 && c.distanciaKm > 0
+              ? '<div style="background:#EEF4FF;border-radius:6px;padding:6px 10px;margin-bottom:6px;font-size:11px;font-family:var(--mono);color:var(--text3)">'
+                + '<span style="color:var(--text2)">Base: $'+c.precioBase.toLocaleString('es-AR')+'</span>'
+                + ' &nbsp;+&nbsp; '
+                + '<span style="color:var(--text2)">'+c.distanciaKm+'km × $'+c.precioKm.toLocaleString('es-AR')+'/km</span>'
+                + '</div>'
+              : ''
+            )
             // Botones — solo si no está aceptada ni hay otra aceptada
             + ((!isAceptada && m.estado !== 'cotizacion_aceptada') ? (
                 '<div style="display:flex;gap:6px;margin-top:8px;align-items:center">'
