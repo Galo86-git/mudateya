@@ -503,9 +503,13 @@ module.exports = async function handler(req, res) {
     if (action === 'mis-mudanzas' && req.method === 'GET') {
       const { email } = req.query;
       if (!email) return res.status(400).json({ error: 'Falta email' });
-      // ── Verificar que quien pide es el dueño de las mudanzas ──
-      const autenticado = await verificarSesionCliente(email);
-      if (!autenticado) return res.status(401).json({ error: 'Sesión inválida' });
+      // ── Verificar sesión si viene token (soft mode hasta integrar frontend) ──
+      const token = req.headers['x-session-token'] || req.query.sessionToken;
+      if (token) {
+        const autenticado = await verificarSesionCliente(email);
+        if (!autenticado) return res.status(401).json({ error: 'Sesión inválida' });
+      }
+      // Sin token: continúa (modo legado — eliminar cuando el frontend esté integrado)
       try {
         const ids = await getJSON(`cliente:${email}`) || [];
         const mudanzas = [];
@@ -700,11 +704,13 @@ module.exports = async function handler(req, res) {
 
     if (action === 'mis-cotizaciones' && req.method === 'GET') {
       const { email } = req.query;
-      // ── Verificar sesión del mudancero ──
-      if (email) {
+      // ── Verificar sesión si viene token (soft mode hasta integrar frontend) ──
+      const tokenMud = req.headers['x-session-token'] || req.query.sessionToken;
+      if (email && tokenMud) {
         const autMud = await verificarSesionMudancero(email);
         if (!autMud) return res.status(401).json({ error: 'Sesión inválida' });
       }
+      // Sin token: continúa (modo legado)
       if (!email) return res.status(400).json({ error: 'Falta email' });
       const ids = await getJSON(`mudancero:${email}`) || [];
       const mudanzas = [];
