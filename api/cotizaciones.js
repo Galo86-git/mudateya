@@ -152,11 +152,11 @@ async function generarPDFBase64(datos) {
 
   const dd = {
     pageSize: 'A4',
-    pageMargins: [40, 40, 40, 40],
+    pageMargins: [40, 56, 40, 40],
 
     // Franja azul navy arriba
     background: () => [
-      { canvas: [{ type: 'rect', x: 0, y: 0, w: 595, h: 72, color: NAVY }] },
+      { canvas: [{ type: 'rect', x: 0, y: 0, w: 595, h: 88, color: NAVY }] },
     ],
 
     defaultStyle: { font: 'Helvetica', fontSize: 9.5, color: TEXT, lineHeight: 1.3 },
@@ -179,7 +179,7 @@ async function generarPDFBase64(datos) {
             { text: fechaEmision, fontSize: 8, color: '#aac4e0', alignment: 'right' },
           ]},
         ],
-        margin: [0, 6, 0, 20],
+        margin: [0, 0, 0, 20],
       },
 
       // ── BADGE "válido 24hs" ──────────────────────
