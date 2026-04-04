@@ -312,10 +312,13 @@ nav{
 /* Filtros mobile top bar */
 /* ── FILTROS BAR (siempre visible) ─────────────── */
 .filtros-mobile-bar{
-  display:flex;
+  display:none;
   background:#fff;border-bottom:1px solid var(--border);
   padding:.55rem 1rem;gap:6px;overflow-x:auto;
   scrollbar-width:none;position:sticky;top:108px;z-index:89;
+}
+@media(max-width:900px){
+  .filtros-mobile-bar{display:flex}
 }
 .filtros-mobile-bar::-webkit-scrollbar{display:none}
 /* Asegurar que resultados no queden ocultos */
