@@ -356,21 +356,20 @@ nav{
 /* Slider de precio — estilo Booking */
 .precio-slider-wrap{padding:2px 0 4px}
 .precio-range-header{display:flex;align-items:center;gap:6px;margin-bottom:14px;font-size:13px;color:var(--text)}
-.precio-range-header strong{font-weight:700}
 .precio-histogram{display:flex;align-items:flex-end;gap:1px;height:48px;margin-bottom:0}
 .precio-histogram-bar{flex:1;background:var(--border2);border-radius:2px 2px 0 0;min-height:2px;transition:background .2s}
 .precio-histogram-bar.in-range{background:var(--blue)}
-.precio-slider-track-wrap{position:relative;height:6px;background:var(--border2);border-radius:3px;margin:12px 0 16px}
+.precio-slider-track-wrap{position:relative;height:6px;background:var(--border2);border-radius:3px;margin:18px 0 20px}
 .precio-slider-fill{position:absolute;top:0;height:6px;background:var(--blue);border-radius:3px;pointer-events:none}
-.precio-slider-input{position:absolute;width:100%;left:0;top:50%;transform:translateY(-50%);height:20px;opacity:0;cursor:pointer;margin:0;z-index:3;pointer-events:all;-webkit-appearance:none;appearance:none}
-.precio-slider-input::-webkit-slider-thumb{width:20px;height:20px;border-radius:50%;cursor:grab;-webkit-appearance:none;appearance:none}
-.precio-slider-input::-moz-range-thumb{width:20px;height:20px;border-radius:50%;cursor:grab;border:none;background:transparent}
-.precio-thumb{position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:var(--blue);border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.25);pointer-events:none;z-index:2}
-.precio-slider-inputs-wrap{position:absolute;inset:0;z-index:3}
+.precio-slider-input{position:absolute;width:100%;left:0;top:50%;transform:translateY(-50%);height:20px;opacity:0;cursor:pointer;margin:0;pointer-events:all;-webkit-appearance:none;appearance:none}
+.precio-slider-input::-webkit-slider-thumb{width:22px;height:22px;border-radius:50%;cursor:grab;-webkit-appearance:none;appearance:none}
+.precio-slider-input::-moz-range-thumb{width:22px;height:22px;border-radius:50%;cursor:grab;border:none;background:transparent}
+.precio-thumb{position:absolute;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:var(--blue);border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.25);pointer-events:none;z-index:2;transition:box-shadow .15s}
 .precio-inputs-row{display:flex;gap:8px;margin-top:4px}
-.precio-input-box{flex:1;border:1px solid var(--border2);border-radius:8px;padding:8px 10px}
+.precio-input-box{flex:1;border:1px solid var(--border2);border-radius:8px;padding:8px 10px;cursor:text;transition:border-color .2s}
+.precio-input-box:focus-within{border-color:var(--blue);box-shadow:0 0 0 2px rgba(26,111,255,.1)}
 .precio-input-box-lbl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;font-family:var(--mono)}
-.precio-input-box-val{font-size:14px;font-weight:700;color:var(--text)}
+.precio-input-box-field{font-size:14px;font-weight:700;color:var(--text);border:none;outline:none;background:transparent;width:100%;font-family:'Inter',sans-serif}
 
 /* Header resultados */
 .res-header{
@@ -887,21 +886,19 @@ footer{background:#003580;padding:1.5rem}
           <div class="precio-histogram" id="pill-histogram"></div>
           <div class="precio-slider-track-wrap" id="pill-track">
             <div class="precio-slider-fill" id="pill-precio-fill"></div>
-            <div class="precio-thumb" id="pill-thumb-min"></div>
-            <div class="precio-thumb" id="pill-thumb-max"></div>
-            <div class="precio-slider-inputs-wrap">
-              <input class="precio-slider-input" type="range" id="pill-rmin" min="0" max="600000" step="10000" value="0" oninput="onPrecioSlider()">
-              <input class="precio-slider-input" type="range" id="pill-rmax" min="0" max="600000" step="10000" value="600000" oninput="onPrecioSlider()">
-            </div>
+            <div class="precio-thumb" id="pill-thumb-min" style="z-index:4"></div>
+            <div class="precio-thumb" id="pill-thumb-max" style="z-index:4"></div>
+            <input class="precio-slider-input" type="range" id="pill-rmin" min="0" max="600000" step="10000" value="0" style="z-index:5" oninput="onPrecioSlider('pill')">
+            <input class="precio-slider-input" type="range" id="pill-rmax" min="0" max="600000" step="10000" value="600000" style="z-index:5" oninput="onPrecioSlider('pill')">
           </div>
           <div class="precio-inputs-row">
             <div class="precio-input-box">
               <div class="precio-input-box-lbl">Mínimo</div>
-              <div class="precio-input-box-val" id="pill-min-box">$ 0</div>
+              <input class="precio-input-box-field" id="pill-txt-min" type="text" value="$ 0" onchange="onPrecioTextChange('pill','min',this.value)" onblur="onPrecioTextChange('pill','min',this.value)">
             </div>
             <div class="precio-input-box">
               <div class="precio-input-box-lbl">Máximo</div>
-              <div class="precio-input-box-val" id="pill-max-box">Sin límite</div>
+              <input class="precio-input-box-field" id="pill-txt-max" type="text" value="Sin límite" onchange="onPrecioTextChange('pill','max',this.value)" onblur="onPrecioTextChange('pill','max',this.value)">
             </div>
           </div>
         </div>
@@ -935,21 +932,19 @@ footer{background:#003580;padding:1.5rem}
           <div class="precio-histogram" id="panel-histogram"></div>
           <div class="precio-slider-track-wrap">
             <div class="precio-slider-fill" id="panel-precio-fill"></div>
-            <div class="precio-thumb" id="panel-thumb-min"></div>
-            <div class="precio-thumb" id="panel-thumb-max"></div>
-            <div class="precio-slider-inputs-wrap">
-              <input class="precio-slider-input" type="range" id="panel-rmin" min="0" max="600000" step="10000" value="0" oninput="onPrecioPanelSlider()">
-              <input class="precio-slider-input" type="range" id="panel-rmax" min="0" max="600000" step="10000" value="600000" oninput="onPrecioPanelSlider()">
-            </div>
+            <div class="precio-thumb" id="panel-thumb-min" style="z-index:4"></div>
+            <div class="precio-thumb" id="panel-thumb-max" style="z-index:4"></div>
+            <input class="precio-slider-input" type="range" id="panel-rmin" min="0" max="600000" step="10000" value="0" style="z-index:5" oninput="onPrecioSlider('panel')">
+            <input class="precio-slider-input" type="range" id="panel-rmax" min="0" max="600000" step="10000" value="600000" style="z-index:5" oninput="onPrecioSlider('panel')">
           </div>
           <div class="precio-inputs-row">
             <div class="precio-input-box">
               <div class="precio-input-box-lbl">Mínimo</div>
-              <div class="precio-input-box-val" id="panel-min-box">$ 0</div>
+              <input class="precio-input-box-field" id="panel-txt-min" type="text" value="$ 0" onchange="onPrecioTextChange('panel','min',this.value)" onblur="onPrecioTextChange('panel','min',this.value)">
             </div>
             <div class="precio-input-box">
               <div class="precio-input-box-lbl">Máximo</div>
-              <div class="precio-input-box-val" id="panel-max-box">Sin límite</div>
+              <input class="precio-input-box-field" id="panel-txt-max" type="text" value="Sin límite" onchange="onPrecioTextChange('panel','max',this.value)" onblur="onPrecioTextChange('panel','max',this.value)">
             </div>
           </div>
         </div>
@@ -1805,18 +1800,22 @@ function togglePill(el, key) {}
 // FILTRO PRECIO
 // ══════════════════════════════════════════
 var PRECIO_MAX_TOTAL = 600000;
-var PRECIO_BINS = 20; // barras del histograma
+var PRECIO_BINS = 20;
 
 function fmtPrecioSlider(n) {
   if (n <= 0) return '$ 0';
   if (n >= PRECIO_MAX_TOTAL) return 'Sin límite';
-  return '$ ' + Math.round(n/1000) + '.000';
+  return '$ ' + n.toLocaleString('es-AR');
+}
+
+function parsePrecioText(s) {
+  var n = parseInt(String(s).replace(/\D/g,''));
+  return isNaN(n) ? null : n;
 }
 
 function _buildHistogram(containerId, mn, mx) {
   var el = document.getElementById(containerId);
   if (!el) return;
-  // Distribución de precios mock (campana con cola derecha)
   var dist = [3,6,10,16,22,28,32,35,38,36,30,25,20,15,11,8,6,4,3,2];
   var maxH = Math.max.apply(null, dist);
   var step = PRECIO_MAX_TOTAL / PRECIO_BINS;
@@ -1831,81 +1830,83 @@ function _buildHistogram(containerId, mn, mx) {
   el.innerHTML = html;
 }
 
-function _actualizarFill(fillId, minId, maxId, thumbMinId, thumbMaxId) {
-  var mn = parseInt(document.getElementById(minId).value);
-  var mx = parseInt(document.getElementById(maxId).value);
+function _actualizarFill(prefix, mn, mx) {
   var pct1 = mn / PRECIO_MAX_TOTAL * 100;
   var pct2 = mx / PRECIO_MAX_TOTAL * 100;
-  var fill = document.getElementById(fillId);
+  var fill = document.getElementById(prefix+'-precio-fill');
   if (fill) { fill.style.left = pct1+'%'; fill.style.width = (pct2-pct1)+'%'; }
-  var tMin = document.getElementById(thumbMinId);
-  var tMax = document.getElementById(thumbMaxId);
+  var tMin = document.getElementById(prefix+'-thumb-min');
+  var tMax = document.getElementById(prefix+'-thumb-max');
   if (tMin) tMin.style.left = pct1+'%';
   if (tMax) tMax.style.left = pct2+'%';
 }
 
-function _syncPrecioUI(mn, mx) {
-  // Pill
-  document.getElementById('pill-rmin').value = mn;
-  document.getElementById('pill-rmax').value = mx;
+function _syncUI(mn, mx) {
   var minLbl = fmtPrecioSlider(mn);
   var maxLbl = fmtPrecioSlider(mx);
-  document.getElementById('pill-precio-min-lbl').textContent = minLbl;
-  document.getElementById('pill-precio-max-lbl').textContent = maxLbl;
-  document.getElementById('pill-min-box').textContent = minLbl;
-  document.getElementById('pill-max-box').textContent = maxLbl;
-  _actualizarFill('pill-precio-fill','pill-rmin','pill-rmax','pill-thumb-min','pill-thumb-max');
-  _buildHistogram('pill-histogram', mn, mx);
-  // Panel
-  document.getElementById('panel-rmin').value = mn;
-  document.getElementById('panel-rmax').value = mx;
-  document.getElementById('panel-precio-min-lbl').textContent = minLbl;
-  document.getElementById('panel-precio-max-lbl').textContent = maxLbl;
-  document.getElementById('panel-min-box').textContent = minLbl;
-  document.getElementById('panel-max-box').textContent = maxLbl;
-  _actualizarFill('panel-precio-fill','panel-rmin','panel-rmax','panel-thumb-min','panel-thumb-max');
-  _buildHistogram('panel-histogram', mn, mx);
-  // Label del pill
+  ['pill','panel'].forEach(function(p) {
+    document.getElementById(p+'-rmin').value = mn;
+    document.getElementById(p+'-rmax').value = mx;
+    _actualizarFill(p, mn, mx);
+    _buildHistogram(p+'-histogram', mn, mx);
+    document.getElementById(p+'-txt-min').value = minLbl;
+    document.getElementById(p+'-txt-max').value = maxLbl;
+    document.getElementById(p+'-precio-min-lbl').textContent = minLbl;
+    document.getElementById(p+'-precio-max-lbl').textContent = maxLbl;
+  });
   var activo = mn > 0 || mx < PRECIO_MAX_TOTAL;
   document.getElementById('pill-precio').classList.toggle('has-value', activo);
   document.getElementById('pill-precio-lbl').textContent = activo
-    ? (fmtPrecioSlider(mn) + ' — ' + fmtPrecioSlider(mx))
-    : 'Precio';
+    ? (minLbl + ' — ' + maxLbl) : 'Precio';
   _actualizarClearAll();
 }
 
-function onPrecioSlider() {
-  var mn = parseInt(document.getElementById('pill-rmin').value);
-  var mx = parseInt(document.getElementById('pill-rmax').value);
-  if (mn > mx) { var t=mn; mn=mx; mx=t; document.getElementById('pill-rmin').value=mn; document.getElementById('pill-rmax').value=mx; }
+function onPrecioSlider(prefix) {
+  var mnEl = document.getElementById(prefix+'-rmin');
+  var mxEl = document.getElementById(prefix+'-rmax');
+  var mn = parseInt(mnEl.value);
+  var mx = parseInt(mxEl.value);
+  if (mn >= mx) {
+    if (document.activeElement === mnEl) { mn = Math.max(0, mx - 10000); mnEl.value = mn; }
+    else { mx = Math.min(PRECIO_MAX_TOTAL, mn + 10000); mxEl.value = mx; }
+  }
   _filtros.precioMin = mn;
   _filtros.precioMax = mx;
-  _syncPrecioUI(mn, mx);
+  _syncUI(mn, mx);
   renderResultados();
 }
 
-function onPrecioPanelSlider() {
-  var mn = parseInt(document.getElementById('panel-rmin').value);
-  var mx = parseInt(document.getElementById('panel-rmax').value);
-  if (mn > mx) { var t=mn; mn=mx; mx=t; document.getElementById('panel-rmin').value=mn; document.getElementById('panel-rmax').value=mx; }
+function onPrecioTextChange(prefix, side, val) {
+  var n = parsePrecioText(val);
+  if (n === null) {
+    document.getElementById(prefix+'-txt-'+side).value =
+      fmtPrecioSlider(side==='min' ? _filtros.precioMin : _filtros.precioMax);
+    return;
+  }
+  n = Math.round(n/10000)*10000;
+  n = Math.max(0, Math.min(n, PRECIO_MAX_TOTAL));
+  var mn = _filtros.precioMin, mx = _filtros.precioMax;
+  if (side === 'min') { mn = Math.min(n, mx - 10000); if(mn<0) mn=0; }
+  else               { mx = Math.max(n, mn + 10000); if(mx>PRECIO_MAX_TOTAL) mx=PRECIO_MAX_TOTAL; }
   _filtros.precioMin = mn;
   _filtros.precioMax = mx;
-  _syncPrecioUI(mn, mx);
+  _syncUI(mn, mx);
   renderResultados();
 }
 
 function limpiarPillPrecio() {
   _filtros.precioMin = 0;
   _filtros.precioMax = PRECIO_MAX_TOTAL;
-  _syncPrecioUI(0, PRECIO_MAX_TOTAL);
+  _syncUI(0, PRECIO_MAX_TOTAL);
   document.getElementById('pill-precio').classList.remove('has-value','open');
   renderResultados();
 }
 
-// Init histogramas cuando carga la página
 document.addEventListener('DOMContentLoaded', function() {
   _buildHistogram('pill-histogram', 0, PRECIO_MAX_TOTAL);
   _buildHistogram('panel-histogram', 0, PRECIO_MAX_TOTAL);
+  _actualizarFill('pill', 0, PRECIO_MAX_TOTAL);
+  _actualizarFill('panel', 0, PRECIO_MAX_TOTAL);
 });
 
 
