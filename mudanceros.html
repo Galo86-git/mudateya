@@ -379,40 +379,18 @@ nav{position:sticky;top:0;z-index:200;background:#003580;backdrop-filter:blur(20
     <!-- ── SECCIÓN 8: FOTOS DEL VEHÍCULO ── -->
     <div class="form-section">
       <div class="section-title">Fotos del vehículo</div>
-      <div class="section-sub">Requerido · Se muestran en tu perfil para generar confianza · Agregá todas las que quieras</div>
-      <div class="foto-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-        <!-- Camión — requerido -->
-        <div>
-          <div class="field-label" style="margin-bottom:8px">Foto del camión <span style="color:var(--emerald)">*</span></div>
-          <div class="upload-area" id="uploadAreaCamion" onclick="document.getElementById('fotoCamionInput').click()">
-            <img id="fotoCamionPreview" class="upload-preview" alt="preview camión"/>
-            <div class="upload-icon" id="uploadIconCamion">🚛</div>
-            <div class="upload-text" id="uploadTextCamion">Sacá foto o subí imagen</div>
-            <div class="upload-sub">Cámara o galería · Máx. 5MB</div>
-          </div>
-          <input type="file" id="fotoCamionInput" accept="image/*" onchange="previewFotoCamion(this)" style="display:none"/>
-        </div>
-        <!-- Patente — opcional -->
-        <div>
-          <div class="field-label" style="margin-bottom:8px">Foto de la patente <span style="color:var(--text3);font-weight:400">(opcional)</span></div>
-          <div class="upload-area" id="uploadAreaPatente" onclick="document.getElementById('fotoPatenteInput').click()">
-            <img id="fotoPatentePreview" class="upload-preview" alt="preview patente"/>
-            <div class="upload-icon" id="uploadIconPatente">🔢</div>
-            <div class="upload-text" id="uploadTextPatente">Sacá foto o subí imagen</div>
-            <div class="upload-sub">Cámara o galería · Máx. 5MB</div>
-          </div>
-          <input type="file" id="fotoPatenteInput" accept="image/*" onchange="previewFotoPatente(this)" style="display:none"/>
-        </div>
-      </div>
+      <div class="section-sub">Requerido · Se muestran en tu perfil · Podés seleccionar varias a la vez</div>
 
-      <!-- Fotos adicionales -->
-      <div style="margin-top:1.2rem">
-        <div class="field-label" style="margin-bottom:8px">Fotos adicionales <span style="color:var(--text3);font-weight:400">(opcional)</span></div>
-        <div id="fotosExtrasGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px"></div>
-        <button type="button" onclick="agregarFotoExtra()" style="display:flex;align-items:center;gap:6px;background:none;border:1.5px dashed var(--border2);border-radius:10px;padding:10px 16px;font-size:13px;color:var(--text2);cursor:pointer;font-family:Inter,sans-serif;transition:all .2s;width:100%;justify-content:center">
-          <span style="font-size:18px">+</span> Agregar otra foto
-        </button>
+      <div class="upload-area" id="uploadAreaCamion" onclick="document.getElementById('fotoCamionInput').click()">
+        <img id="fotoCamionPreview" class="upload-preview" alt="preview camión" style="display:none"/>
+        <div class="upload-icon" id="uploadIconCamion">🚛</div>
+        <div class="upload-text" id="uploadTextCamion">Sacá fotos o subí imágenes</div>
+        <div class="upload-sub">Seleccioná una o varias · Cámara o galería · Máx. 5MB c/u</div>
       </div>
+      <input type="file" id="fotoCamionInput" accept="image/*" multiple onchange="previewFotosCamion(this)" style="display:none"/>
+
+      <!-- Grid de previews -->
+      <div id="fotosVehiculoGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"></div>
     </div>
 
     <!-- ── SECCIÓN 9: FOTO PERFIL ── -->
@@ -663,10 +641,60 @@ function previewFotoPatente(input){
   }
 }
 
-var _fotosExtras = [];
-var _fotoExtraIdx = 0;
+var _fotosVehiculo = []; // array de base64
 
-function agregarFotoExtra() {
+function previewFotosCamion(input) {
+  if (!input.files || !input.files.length) return;
+  var grid = document.getElementById('fotosVehiculoGrid');
+  Array.from(input.files).forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var b64 = e.target.result;
+      _fotosVehiculo.push(b64);
+      // Preview thumbnail con botón eliminar
+      var wrap = document.createElement('div');
+      wrap.style.cssText = 'position:relative;width:80px;height:80px';
+      var img = document.createElement('img');
+      img.src = b64;
+      img.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border2)';
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.innerHTML = '✕';
+      btn.style.cssText = 'position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;line-height:1;padding:0';
+      var idx = _fotosVehiculo.length - 1;
+      btn.onclick = function() {
+        _fotosVehiculo.splice(_fotosVehiculo.indexOf(b64), 1);
+        wrap.remove();
+        if (_fotosVehiculo.length === 0) {
+          document.getElementById('uploadIconCamion').style.display = '';
+          document.getElementById('uploadTextCamion').textContent = 'Sacá fotos o subí imágenes';
+          document.getElementById('uploadAreaCamion').classList.remove('has-file');
+        }
+      };
+      wrap.appendChild(img);
+      wrap.appendChild(btn);
+      grid.appendChild(wrap);
+      // Actualizar área principal
+      document.getElementById('uploadIconCamion').style.display = 'none';
+      document.getElementById('uploadTextCamion').textContent = _fotosVehiculo.length + ' foto' + (_fotosVehiculo.length > 1 ? 's' : '') + ' cargada' + (_fotosVehiculo.length > 1 ? 's' : '') + ' ✓  (tocá para agregar más)';
+      document.getElementById('uploadAreaCamion').classList.add('has-file');
+    };
+    reader.readAsDataURL(file);
+  });
+  // Resetear input para permitir seleccionar las mismas fotos de nuevo
+  input.value = '';
+}
+
+function previewFotoPatente(input){
+  if(input.files&&input.files[0]){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var preview=document.getElementById('fotoPatentePreview');
+      if (preview) { preview.src=e.target.result; preview.style.display='block'; }
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
   var idx = _fotoExtraIdx++;
   var inputId = 'fotoExtra-' + idx;
   var grid = document.getElementById('fotosExtrasGrid');
@@ -883,7 +911,7 @@ document.getElementById('regForm').addEventListener('submit',async function(e){
   // Validar fotos del vehículo
   var fotoCamionInput=document.getElementById('fotoCamionInput');
   var fotoPatenteInput=document.getElementById('fotoPatenteInput');
-  if(!fotoCamionInput.files||!fotoCamionInput.files[0]){flashUpload('uploadAreaCamion');return;}
+  if(_fotosVehiculo.length === 0){flashUpload('uploadAreaCamion');return;}
 
   var btn=document.getElementById('btnSubmit');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Enviando…';
@@ -892,8 +920,6 @@ document.getElementById('regForm').addEventListener('submit',async function(e){
   var fotoBase64='';
   var fotoInput=document.getElementById('fotoInput');
   if(fotoInput.files&&fotoInput.files[0]) fotoBase64=await readFile(fotoInput.files[0]);
-  var fotoCamionBase64=await readFile(fotoCamionInput.files[0]);
-  var fotoPatenteBase64=await readFile(fotoPatenteInput.files[0]);
 
   var data={
     nombre,telefono,email,
@@ -916,9 +942,10 @@ document.getElementById('regForm').addEventListener('submit',async function(e){
     precioFlete:document.getElementById('pflete').value.replace(/\./g,'')||'',
     extra:document.getElementById('extra').value.trim(),
     foto:fotoBase64,
-    fotoCamion:fotoCamionBase64,
-    fotoPatente:fotoPatenteBase64,
-    fotosExtras: _fotosExtras.map(function(f){ return f.b64; }),
+    fotosVehiculo: _fotosVehiculo,
+    fotoCamion: _fotosVehiculo[0] || '',
+    fotoPatente: '',
+    fotosExtras: _fotosVehiculo.slice(1),
     // DNI
     dniFrente: dniData.frente ? 'data:' + dniData.frente.mediaType + ';base64,' + dniData.frente.b64 : '',
     dniDorso:  dniData.dorso  ? 'data:' + dniData.dorso.mediaType  + ';base64,' + dniData.dorso.b64  : '',
