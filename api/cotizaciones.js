@@ -541,6 +541,10 @@ module.exports = async function handler(req, res) {
       if (tipoPago === 'saldo')    m.saldoPagado = true;
       m.ultimoUpdatePago = new Date().toISOString();
       await setJSON(`mudanza:${mudanzaId}`, m, 604800);
+      // Email al mudancero cuando se confirma el anticipo
+      if (tipoPago === 'anticipo' && m.cotizacionAceptada) {
+        try { await notificarPagoConfirmado(m); } catch(e) { console.error('Email pago:', e.message); }
+      }
       return res.status(200).json({ ok: true });
     }
     if (action === 'cambiar-estado' && req.method === 'POST') {
@@ -557,8 +561,8 @@ module.exports = async function handler(req, res) {
       m.estado = estado;
       if (estado === 'completada') {
         m.fechaCompletada = new Date().toISOString();
-        // Loguear en Google Sheets cuando se completa
         try { await logPedidoSheets(m); } catch(e) { console.warn('Sheets log error:', e.message); }
+        try { await notificarMudanzaCompletada(m); } catch(e) { console.error('Email completada:', e.message); }
       }
       if (estado === 'en_curso') m.fechaInicio = new Date().toISOString();
       await setJSON(`mudanza:${mudanzaId}`, m, 604800);
@@ -653,6 +657,8 @@ module.exports = async function handler(req, res) {
         const nuevoPendientes = pendientes.filter(e => e !== email);
         await setJSON('mudanceros:pendientes', nuevoPendientes);
       }
+      // Notificar al mudancero
+      try { await notificarEstadoMudancero(perfil, nuevoEstado); } catch(e) { console.error('Email estado mudancero:', e.message); }
       return res.status(200).json({ ok: true, estado: nuevoEstado });
     }
 
@@ -1236,3 +1242,165 @@ async function logPedidoSheets(mudanza) {
   });
 }
 
+
+// ── EMAIL: PAGO ANTICIPO CONFIRMADO → MUDANCERO ─────────────────
+async function notificarPagoConfirmado(mudanza) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  if (!process.env.RESEND_API_KEY) return;
+  const cot = mudanza.cotizacionAceptada;
+  if (!cot || !cot.mudanceroEmail) return;
+  const siteUrl = process.env.SITE_URL || 'https://mudateya.ar';
+  const precioFmt = '$' + parseInt(cot.precio).toLocaleString('es-AR');
+  const nombre = (cot.mudanceroNombre || '').split(' ')[0];
+  await resend.emails.send({
+    from: 'MudateYa <noreply@mudateya.ar>',
+    to: cot.mudanceroEmail,
+    subject: `💰 ¡El cliente pagó! — ${mudanza.desde} → ${mudanza.hasta}`,
+    html: `
+<div style="font-family:Inter,Arial,sans-serif;max-width:580px;margin:0 auto;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+  <div style="background:#003580;padding:20px 28px">
+    <span style="font-size:20px;font-weight:900;color:#ffffff;letter-spacing:1px">Mudate</span><span style="font-size:20px;font-weight:900;color:#22C36A;letter-spacing:1px">Ya</span>
+  </div>
+  <div style="padding:28px">
+    <h2 style="margin:0 0 8px;font-size:20px;color:#0F1923">💰 ¡El anticipo fue acreditado!</h2>
+    <p style="font-size:14px;color:#475569;margin:0 0 20px">Hola ${nombre}, <strong>${mudanza.clienteNombre}</strong> confirmó el pago del anticipo. Ya podés coordinar la mudanza.</p>
+    <div style="background:#F0FFF4;border:1px solid #BBF7D0;border-radius:12px;padding:18px;margin-bottom:20px">
+      <table style="width:100%;border-collapse:collapse">
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0;width:35%;border-bottom:1px solid #E2E8F0">Cliente</td><td style="font-size:13px;font-weight:600;color:#0F1923;padding:5px 0;border-bottom:1px solid #E2E8F0">${mudanza.clienteNombre}</td></tr>
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0;border-bottom:1px solid #E2E8F0">Ruta</td><td style="font-size:13px;color:#0F1923;padding:5px 0;border-bottom:1px solid #E2E8F0">${mudanza.desde} → ${mudanza.hasta}</td></tr>
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0;border-bottom:1px solid #E2E8F0">Fecha</td><td style="font-size:13px;color:#0F1923;padding:5px 0;border-bottom:1px solid #E2E8F0">${mudanza.fecha || 'A confirmar'}</td></tr>
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0">Precio acordado</td><td style="font-size:16px;font-weight:700;color:#22C36A;padding:5px 0">${precioFmt}</td></tr>
+      </table>
+    </div>
+    <div style="background:#EEF4FF;border:1px solid #C7D9FF;border-radius:10px;padding:14px 16px;margin-bottom:20px">
+      <p style="font-size:13px;color:#003580;margin:0">📞 <strong>Contactá al cliente</strong> para coordinar los detalles de la mudanza. Su teléfono está en tu panel.</p>
+    </div>
+    <a href="${siteUrl}/mi-cuenta" style="display:block;text-align:center;background:#1A6FFF;color:#ffffff;padding:13px 24px;border-radius:10px;text-decoration:none;font-size:15px;font-weight:700">Ver en mi panel →</a>
+  </div>
+  <div style="background:#F4F6F9;border-top:1px solid #E2E8F0;padding:14px 28px;text-align:center">
+    <p style="font-size:11px;color:#94A3B8;margin:0;font-family:monospace">MudateYa · mudateya.ar</p>
+  </div>
+</div>`,
+  });
+}
+
+// ── EMAIL: MUDANZA COMPLETADA → CLIENTE Y MUDANCERO ─────────────
+async function notificarMudanzaCompletada(mudanza) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  if (!process.env.RESEND_API_KEY) return;
+  const cot = mudanza.cotizacionAceptada;
+  const siteUrl = process.env.SITE_URL || 'https://mudateya.ar';
+  const precioFmt = '$' + parseInt(cot ? cot.precio : 0).toLocaleString('es-AR');
+
+  // Email al cliente
+  if (mudanza.clienteEmail) {
+    await resend.emails.send({
+      from: 'MudateYa <noreply@mudateya.ar>',
+      to: mudanza.clienteEmail,
+      subject: `✅ ¡Mudanza completada! — ${mudanza.desde} → ${mudanza.hasta}`,
+      html: `
+<div style="font-family:Inter,Arial,sans-serif;max-width:580px;margin:0 auto;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+  <div style="background:#003580;padding:20px 28px">
+    <span style="font-size:20px;font-weight:900;color:#ffffff;letter-spacing:1px">Mudate</span><span style="font-size:20px;font-weight:900;color:#22C36A;letter-spacing:1px">Ya</span>
+  </div>
+  <div style="padding:28px">
+    <h2 style="margin:0 0 8px;font-size:20px;color:#0F1923">✅ ¡Tu mudanza fue completada!</h2>
+    <p style="font-size:14px;color:#475569;margin:0 0 20px">Hola ${mudanza.clienteNombre}, <strong>${cot ? cot.mudanceroNombre : 'el mudancero'}</strong> marcó tu mudanza como completada.</p>
+    <div style="background:#F4F6F9;border:1px solid #E2E8F0;border-radius:12px;padding:18px;margin-bottom:20px">
+      <table style="width:100%;border-collapse:collapse">
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0;width:35%;border-bottom:1px solid #E2E8F0">Ruta</td><td style="font-size:13px;font-weight:600;color:#0F1923;padding:5px 0;border-bottom:1px solid #E2E8F0">${mudanza.desde} → ${mudanza.hasta}</td></tr>
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0;border-bottom:1px solid #E2E8F0">Mudancero</td><td style="font-size:13px;color:#0F1923;padding:5px 0;border-bottom:1px solid #E2E8F0">${cot ? cot.mudanceroNombre : '—'}</td></tr>
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0">Total</td><td style="font-size:16px;font-weight:700;color:#22C36A;padding:5px 0">${precioFmt}</td></tr>
+      </table>
+    </div>
+    <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:14px 16px;margin-bottom:20px">
+      <p style="font-size:13px;color:#92400E;margin:0">⭐ <strong>¿Cómo te fue?</strong> Tu opinión ayuda a otros clientes a elegir mejor. Podés calificar al mudancero desde tu panel.</p>
+    </div>
+    <a href="${siteUrl}/mi-mudanza" style="display:block;text-align:center;background:#1A6FFF;color:#ffffff;padding:13px 24px;border-radius:10px;text-decoration:none;font-size:15px;font-weight:700">Ver mi mudanza →</a>
+  </div>
+  <div style="background:#F4F6F9;border-top:1px solid #E2E8F0;padding:14px 28px;text-align:center">
+    <p style="font-size:11px;color:#94A3B8;margin:0;font-family:monospace">MudateYa · mudateya.ar</p>
+  </div>
+</div>`,
+    });
+  }
+
+  // Email al mudancero
+  if (cot && cot.mudanceroEmail) {
+    const nombre = (cot.mudanceroNombre || '').split(' ')[0];
+    await resend.emails.send({
+      from: 'MudateYa <noreply@mudateya.ar>',
+      to: cot.mudanceroEmail,
+      subject: `🎉 ¡Trabajo completado! — ${mudanza.desde} → ${mudanza.hasta}`,
+      html: `
+<div style="font-family:Inter,Arial,sans-serif;max-width:580px;margin:0 auto;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+  <div style="background:#003580;padding:20px 28px">
+    <span style="font-size:20px;font-weight:900;color:#ffffff;letter-spacing:1px">Mudate</span><span style="font-size:20px;font-weight:900;color:#22C36A;letter-spacing:1px">Ya</span>
+  </div>
+  <div style="padding:28px">
+    <h2 style="margin:0 0 8px;font-size:20px;color:#0F1923">🎉 ¡Trabajo completado, ${nombre}!</h2>
+    <p style="font-size:14px;color:#475569;margin:0 0 20px">Registramos que completaste la mudanza. MudateYa procesará la liquidación en los próximos <strong>15 días hábiles</strong>.</p>
+    <div style="background:#F0FFF4;border:1px solid #BBF7D0;border-radius:12px;padding:18px;margin-bottom:20px">
+      <table style="width:100%;border-collapse:collapse">
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0;width:35%;border-bottom:1px solid #E2E8F0">Ruta</td><td style="font-size:13px;font-weight:600;color:#0F1923;padding:5px 0;border-bottom:1px solid #E2E8F0">${mudanza.desde} → ${mudanza.hasta}</td></tr>
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0;border-bottom:1px solid #E2E8F0">Cliente</td><td style="font-size:13px;color:#0F1923;padding:5px 0;border-bottom:1px solid #E2E8F0">${mudanza.clienteNombre}</td></tr>
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0">A liquidar</td><td style="font-size:16px;font-weight:700;color:#22C36A;padding:5px 0">${precioFmt}</td></tr>
+      </table>
+    </div>
+    <a href="${siteUrl}/mi-cuenta" style="display:block;text-align:center;background:#1A6FFF;color:#ffffff;padding:13px 24px;border-radius:10px;text-decoration:none;font-size:15px;font-weight:700">Ver mis trabajos →</a>
+  </div>
+  <div style="background:#F4F6F9;border-top:1px solid #E2E8F0;padding:14px 28px;text-align:center">
+    <p style="font-size:11px;color:#94A3B8;margin:0;font-family:monospace">MudateYa · mudateya.ar</p>
+  </div>
+</div>`,
+    });
+  }
+}
+
+// ── EMAIL: PERFIL APROBADO O RECHAZADO → MUDANCERO ──────────────
+async function notificarEstadoMudancero(perfil, estado) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  if (!process.env.RESEND_API_KEY || !perfil.email) return;
+  const siteUrl = process.env.SITE_URL || 'https://mudateya.ar';
+  const nombre = (perfil.nombre || '').split(' ')[0];
+  const aprobado = estado === 'aprobado';
+
+  await resend.emails.send({
+    from: 'MudateYa <noreply@mudateya.ar>',
+    to: perfil.email,
+    subject: aprobado
+      ? `✅ ¡Tu perfil fue aprobado! Ya podés recibir pedidos`
+      : `⚠️ Tu perfil necesita correcciones — MudateYa`,
+    html: `
+<div style="font-family:Inter,Arial,sans-serif;max-width:580px;margin:0 auto;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+  <div style="background:#003580;padding:20px 28px">
+    <span style="font-size:20px;font-weight:900;color:#ffffff;letter-spacing:1px">Mudate</span><span style="font-size:20px;font-weight:900;color:#22C36A;letter-spacing:1px">Ya</span>
+    <span style="margin-left:10px;background:${aprobado ? '#22C36A' : '#F59E0B'};color:${aprobado ? '#003580' : '#fff'};font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px">${aprobado ? '✅ APROBADO' : '⚠️ PENDIENTE'}</span>
+  </div>
+  <div style="padding:28px">
+    <h2 style="margin:0 0 8px;font-size:20px;color:#0F1923">${aprobado ? `¡Bienvenido al equipo, ${nombre}!` : `Hola ${nombre}, necesitamos que corrijas algo`}</h2>
+    <p style="font-size:14px;color:#475569;margin:0 0 20px;line-height:1.6">
+      ${aprobado
+        ? 'Tu perfil fue verificado y aprobado. A partir de ahora vas a empezar a recibir pedidos de mudanzas y fletes en tu zona.'
+        : 'Revisamos tu perfil y necesitamos que corrijas algunos datos para poder activar tu cuenta. Escribinos a hola@mudateya.ar y te decimos qué falta.'}
+    </p>
+    ${aprobado ? `
+    <div style="background:#F0FFF4;border:1px solid #BBF7D0;border-radius:12px;padding:18px;margin-bottom:20px">
+      <div style="font-size:13px;color:#16A34A;font-weight:600;margin-bottom:8px">¿Qué pasa ahora?</div>
+      <ul style="font-size:13px;color:#475569;margin:0;padding-left:16px;line-height:2">
+        <li>Cuando un cliente publique una mudanza en tu zona te llega un email</li>
+        <li>Entrás a tu panel, ves los detalles y cotizás</li>
+        <li>Si el cliente acepta tu cotización, recibís el pago por Mercado Pago</li>
+      </ul>
+    </div>` : `
+    <div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:12px;padding:18px;margin-bottom:20px">
+      <p style="font-size:13px;color:#92400E;margin:0">📧 Escribinos a <strong>hola@mudateya.ar</strong> con el asunto "Corrección de perfil" y te ayudamos a completar el registro.</p>
+    </div>`}
+    <a href="${siteUrl}/mi-cuenta" style="display:block;text-align:center;background:#1A6FFF;color:#ffffff;padding:13px 24px;border-radius:10px;text-decoration:none;font-size:15px;font-weight:700">${aprobado ? 'Ver mi panel →' : 'Contactar soporte →'}</a>
+  </div>
+  <div style="background:#F4F6F9;border-top:1px solid #E2E8F0;padding:14px 28px;text-align:center">
+    <p style="font-size:11px;color:#94A3B8;margin:0;font-family:monospace">MudateYa · mudateya.ar · hola@mudateya.ar</p>
+  </div>
+</div>`,
+  });
+}
