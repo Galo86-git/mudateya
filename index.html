@@ -726,6 +726,13 @@ footer{background:#003580;padding:1.5rem}
 </head>
 <body>
 
+<!-- BETA BAR -->
+<div id="betaBar" style="background:#1A6FFF;color:#fff;font-size:12px;font-family:'DM Mono',monospace;text-align:center;padding:8px 1rem;display:flex;align-items:center;justify-content:center;gap:8px;position:relative">
+  <span>🚀 MudateYa está en beta · Somos nuevos y queremos mejorar ·</span>
+  <a href="mailto:hola@mudateya.ar" style="color:#fff;font-weight:700;text-decoration:underline;white-space:nowrap">¿Tuviste algún problema? Escribinos</a>
+  <button onclick="document.getElementById('betaBar').style.display='none'" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.7);font-size:16px;cursor:pointer;line-height:1;padding:0">✕</button>
+</div>
+
 <div id="pillOverlay" onclick="cerrarTodosPills()"></div>
 
 <!-- NAV -->
