@@ -369,10 +369,10 @@ body.pill-open #pillOverlay{display:block}
 
 /* Slider de precio — estilo Booking */
 .precio-slider-wrap{padding:2px 0 4px}
-.precio-range-header{display:flex;align-items:center;gap:6px;margin-bottom:14px;font-size:13px;color:var(--text)}
-.precio-histogram{display:flex;align-items:flex-end;gap:1px;height:48px;margin-bottom:0}
-.precio-histogram-bar{flex:1;background:var(--border2);border-radius:2px 2px 0 0;min-height:2px;transition:background .2s}
-.precio-histogram-bar.in-range{background:var(--blue)}
+.precio-range-header{display:flex;align-items:center;gap:4px;margin-bottom:10px;font-size:13px;color:var(--text)}
+.precio-histogram{display:flex;align-items:flex-end;gap:1px;height:52px;margin-bottom:-2px;padding:0 2px}
+.precio-histogram-bar{flex:1;background:var(--border2);border-radius:2px 2px 0 0;min-height:2px;transition:background .15s}
+.precio-histogram-bar.in-range{background:var(--blue);opacity:.7}
 .precio-slider-track-wrap{position:relative;height:6px;background:var(--border2);border-radius:3px;margin:18px 4px 20px}
 .precio-slider-fill{position:absolute;top:0;height:6px;background:var(--blue);border-radius:3px;pointer-events:none}
 .precio-slider-input{position:absolute;width:100%;left:0;top:50%;transform:translateY(-50%);height:20px;opacity:0;cursor:pointer;margin:0;pointer-events:all;-webkit-appearance:none;appearance:none;background:transparent}
@@ -1059,10 +1059,10 @@ footer{background:#003580;padding:1.5rem}
       <div class="filtro-section">
         <div class="filtro-h">Precio estimado</div>
         <div class="precio-slider-wrap">
-          <div class="precio-range-header">
-            <span id="panel-precio-min-lbl">$ 0</span>
-            <span style="color:var(--text3)">—</span>
-            <span id="panel-precio-max-lbl">Sin límite</span>
+          <div class="precio-range-header" style="margin-bottom:6px">
+            <span id="panel-precio-min-lbl" style="font-size:13px;font-weight:600;color:var(--text)">$ 0</span>
+            <span style="color:var(--text3)"> — </span>
+            <span id="panel-precio-max-lbl" style="font-size:13px;font-weight:600;color:var(--text)">Sin límite</span>
           </div>
           <div class="precio-histogram" id="panel-histogram"></div>
           <div class="precio-slider-track-wrap" id="panel-track">
@@ -1071,16 +1071,6 @@ footer{background:#003580;padding:1.5rem}
             <div class="precio-thumb" id="panel-thumb-max"></div>
             <input class="precio-slider-input" type="range" id="panel-rmin" min="0" max="2000000" step="50000" value="0" oninput="onPrecioSlider('min')">
             <input class="precio-slider-input" type="range" id="panel-rmax" min="0" max="2000000" step="50000" value="2000000" oninput="onPrecioSlider('max')">
-          </div>
-          <div class="precio-inputs-row">
-            <div class="precio-input-box">
-              <div class="precio-input-box-lbl">Mínimo</div>
-              <input class="precio-input-box-field" id="panel-txt-min" type="text" value="$ 0" onchange="onPrecioTextChange('panel','min',this.value)" onblur="onPrecioTextChange('panel','min',this.value)">
-            </div>
-            <div class="precio-input-box">
-              <div class="precio-input-box-lbl">Máximo</div>
-              <input class="precio-input-box-field" id="panel-txt-max" type="text" value="Sin límite" onchange="onPrecioTextChange('panel','max',this.value)" onblur="onPrecioTextChange('panel','max',this.value)">
-            </div>
           </div>
         </div>
       </div>
