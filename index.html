@@ -2637,12 +2637,17 @@ function _restaurarBusqueda() {
   }, 80);
 }
 
-// pageshow — cubre desktop y algunos mobile
+// Scroll al top siempre al cargar la página
+if (history.scrollRestoration) history.scrollRestoration = 'manual';
+window.scrollTo(0, 0);
+
+// pageshow — solo para bfcache (volver del perfil en mobile)
 window.addEventListener('pageshow', function(e) {
   if (e.persisted) _restaurarBusqueda();
 });
 // visibilitychange — cubre iOS Safari bfcache
 document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible' && document.referrer === '') return; // ignorar primer load
   if (document.visibilityState === 'visible') _restaurarBusqueda();
 });
 // Recibir mensajes del perfil (legacy — ya no se usa nueva pestaña pero se mantiene por si acaso)
