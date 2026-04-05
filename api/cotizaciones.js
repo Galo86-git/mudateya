@@ -725,7 +725,7 @@ async function notificarMudanceros(mudanza) {
   const expira = new Date(mudanza.expira).toLocaleString('es-AR', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
   const esDirigido = mudanza.modoCotizacion === 'dirigido';
   await resend.emails.send({
-    from: 'MudateYa <onboarding@resend.dev>',
+    from: 'MudateYa <noreply@mudateya.ar>',
     to: adminEmail,
     subject: `Nueva mudanza disponible — ${mudanza.desde} → ${mudanza.hasta}`,
     html: `
@@ -786,7 +786,7 @@ async function notificarCliente(mudanza, cotizacion) {
   }
 
   await resend.emails.send({
-    from: 'MudateYa <onboarding@resend.dev>',
+    from: 'MudateYa <noreply@mudateya.ar>',
     to: mudanza.clienteEmail,
     subject: `💰 Cotización de ${cotizacion.mudanceroNombre} — $${cotizacion.precio.toLocaleString('es-AR')}`,
     html: `<div style="font-family:Inter,Arial,sans-serif;max-width:580px;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
@@ -874,7 +874,7 @@ async function enviarEmailAceptacion(mudanza, cot) {
   // ── 3. Email al CLIENTE con botón de pago ────────
   if (mudanza.clienteEmail) {
     await resend.emails.send({
-      from: 'MudateYa <onboarding@resend.dev>',
+      from: 'MudateYa <noreply@mudateya.ar>',
       to: mudanza.clienteEmail,
       subject: `✅ Aceptaste la cotización — Pagá ahora con Mercado Pago`,
       html: `<div style="font-family:Inter,Arial,sans-serif;max-width:580px;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
@@ -937,7 +937,7 @@ async function enviarEmailAceptacion(mudanza, cot) {
   // ── 4. Email al MUDANCERO ────────────────────────
   if (cot.mudanceroEmail) {
     await resend.emails.send({
-      from: 'MudateYa <onboarding@resend.dev>',
+      from: 'MudateYa <noreply@mudateya.ar>',
       to: cot.mudanceroEmail,
       subject: `🎉 ¡Aceptaron tu cotización! — ${mudanza.desde} → ${mudanza.hasta}`,
       html: `<div style="font-family:Inter,Arial,sans-serif;max-width:580px;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
@@ -985,7 +985,7 @@ async function notificarMudanceroInvitado(mudanza, perfil) {
   if (!process.env.RESEND_API_KEY || !perfil.email) return;
   const siteUrl = process.env.SITE_URL || 'https://mudateya.vercel.app';
   await resend.emails.send({
-    from: 'MudateYa <onboarding@resend.dev>',
+    from: 'MudateYa <noreply@mudateya.ar>',
     to:   perfil.email,
     subject: `⭐ Te eligieron — ${mudanza.desde} → ${mudanza.hasta}`,
     html: `<div style="font-family:Inter,Arial,sans-serif;max-width:580px;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
