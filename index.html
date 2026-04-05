@@ -767,8 +767,8 @@ footer{background:#003580;padding:1.5rem}
 
 <!-- HERO -->
 <section class="hero" id="heroSection" style="position:relative"><div class="hero-inner">
-    <h1>Cotizá tu mudanza con los mejores de Argentina</h1>
-    <p class="hero-sub">Comparás precios reales de mudanceros verificados y elegís sin compromiso. Publicá gratis.</p>
+    <h1 id="heroTitle">Cotizá tu mudanza con los mejores de Argentina</h1>
+    <p class="hero-sub" id="heroSub">Comparás precios reales de mudanceros verificados y elegís sin compromiso. Publicá gratis.</p>
 
     <!-- Service tabs -->
     <div class="service-tabs">
@@ -1317,6 +1317,16 @@ function setTipo(t) {
   document.getElementById('tab-flete').classList.toggle('active', t==='flete');
   document.getElementById('sb-mudanza').style.display = t==='mudanza' ? '' : 'none';
   document.getElementById('sb-flete').style.display   = t==='flete'   ? '' : 'none';
+  // Actualizar hero
+  var title = document.getElementById('heroTitle');
+  var sub   = document.getElementById('heroSub');
+  if (t === 'flete') {
+    if (title) title.textContent = 'Cotizá tu flete con los mejores de Argentina';
+    if (sub)   sub.textContent   = 'Encontrá fleteros verificados cerca tuyo. Comparás precios y elegís. Publicá gratis.';
+  } else {
+    if (title) title.textContent = 'Cotizá tu mudanza con los mejores de Argentina';
+    if (sub)   sub.textContent   = 'Comparás precios reales de mudanceros verificados y elegís sin compromiso. Publicá gratis.';
+  }
 }
 
 // ══════════════════════════════════════════
