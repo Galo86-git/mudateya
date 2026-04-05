@@ -381,6 +381,7 @@ module.exports = async function handler(req, res) {
       if (!globalIdx.includes(id)) globalIdx.push(id);
       await setJSON('mudanzas:activas', globalIdx, 604800);
       try { await notificarMudanceros(mudanza); } catch(e) { console.error(e.message); }
+      try { await confirmarPublicacionCliente(mudanza); } catch(e) { console.error(e.message); }
       return res.status(200).json({ ok: true, id, mudanza });
     }
 
@@ -717,26 +718,132 @@ module.exports = async function handler(req, res) {
 // ════════════════════════════════════════════════════
 // EMAILS
 // ════════════════════════════════════════════════════
-async function notificarMudanceros(mudanza) {
+async function confirmarPublicacionCliente(mudanza) {
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const adminEmail = process.env.ADMIN_EMAIL;
-  if (!process.env.RESEND_API_KEY || !adminEmail) return;
-  const siteUrl = process.env.SITE_URL || 'https://mudateya.vercel.app';
-  const expira = new Date(mudanza.expira).toLocaleString('es-AR', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
+  if (!process.env.RESEND_API_KEY || !mudanza.clienteEmail) return;
+  const siteUrl = process.env.SITE_URL || 'https://mudateya.ar';
   const esDirigido = mudanza.modoCotizacion === 'dirigido';
   await resend.emails.send({
     from: 'MudateYa <noreply@mudateya.ar>',
-    to: adminEmail,
-    subject: `Nueva mudanza disponible — ${mudanza.desde} → ${mudanza.hasta}`,
+    to: mudanza.clienteEmail,
+    subject: `✅ Tu mudanza está publicada — ${mudanza.desde} → ${mudanza.hasta}`,
     html: `
 <div style="font-family:Inter,Arial,sans-serif;max-width:580px;margin:0 auto;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
   <div style="background:#003580;padding:20px 28px">
     <span style="font-size:20px;font-weight:900;color:#ffffff;letter-spacing:1px">Mudate</span><span style="font-size:20px;font-weight:900;color:#22C36A;letter-spacing:1px">Ya</span>
-    ${esDirigido ? '<span style="margin-left:10px;background:#22C36A;color:#003580;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px">TE ELIGIERON</span>' : ''}
   </div>
   <div style="padding:28px">
-    <h2 style="margin:0 0 6px;font-size:18px;color:#0F1923">${esDirigido ? 'Un cliente te eligió directamente' : 'Nueva mudanza disponible'}</h2>
-    <p style="font-size:13px;color:#475569;margin:0 0 20px">${esDirigido ? 'Este cliente revisó tu perfil y te invitó a cotizar.' : 'Cotizá antes que los otros mudanceros.'}</p>
+    <h2 style="margin:0 0 8px;font-size:20px;color:#0F1923">¡Tu mudanza está publicada!</h2>
+    <p style="font-size:14px;color:#475569;margin:0 0 20px">Hola ${mudanza.clienteNombre || ''}${esDirigido ? ', le enviamos tu pedido directamente al mudancero.' : ', los mudanceros ya pueden verte y cotizarte.'}</p>
+    <div style="background:#F4F6F9;border:1px solid #E2E8F0;border-radius:12px;padding:18px;margin-bottom:20px">
+      <table style="width:100%;border-collapse:collapse">
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:6px 0;width:35%;border-bottom:1px solid #E2E8F0">Desde</td><td style="font-size:14px;font-weight:600;color:#0F1923;padding:6px 0;border-bottom:1px solid #E2E8F0">${mudanza.desde}</td></tr>
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:6px 0;border-bottom:1px solid #E2E8F0">Hasta</td><td style="font-size:14px;font-weight:600;color:#0F1923;padding:6px 0;border-bottom:1px solid #E2E8F0">${mudanza.hasta}</td></tr>
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:6px 0;border-bottom:1px solid #E2E8F0">Tamaño</td><td style="font-size:14px;color:#0F1923;padding:6px 0;border-bottom:1px solid #E2E8F0">${mudanza.ambientes}</td></tr>
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:6px 0">Fecha</td><td style="font-size:14px;color:#0F1923;padding:6px 0">${mudanza.fecha || 'A confirmar'}</td></tr>
+      </table>
+    </div>
+    <p style="font-size:13px;color:#475569;margin:0 0 20px">⏱ Tu pedido expira en <strong>24 horas</strong>. Te avisamos por email cuando recibas cotizaciones.</p>
+    <a href="${siteUrl}/mi-mudanza" style="display:block;text-align:center;background:#1A6FFF;color:#ffffff;padding:14px 24px;border-radius:10px;text-decoration:none;font-size:15px;font-weight:700">Ver mis mudanzas →</a>
+  </div>
+  <div style="background:#F4F6F9;border-top:1px solid #E2E8F0;padding:14px 28px;text-align:center">
+    <p style="font-size:11px;color:#94A3B8;margin:0;font-family:monospace">MudateYa · El marketplace de mudanzas de Argentina</p>
+  </div>
+</div>`,
+  });
+}
+
+async function notificarMudanceros(mudanza) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  if (!process.env.RESEND_API_KEY) return;
+  const siteUrl = process.env.SITE_URL || 'https://mudateya.ar';
+  const expira = new Date(mudanza.expira).toLocaleString('es-AR', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
+  const esDirigido = mudanza.modoCotizacion === 'dirigido';
+  const adminEmail = process.env.ADMIN_EMAIL;
+
+  // Construir lista de destinatarios
+  let destinatarios = [];
+
+  if (esDirigido) {
+    // Modo dirigido: solo los mudanceros invitados
+    const invitados = mudanza.mudancerosInvitados || [];
+    for (const email of invitados) {
+      const perfil = await getJSON(`mudancero:perfil:${email}`);
+      if (perfil && perfil.email) destinatarios.push({ email: perfil.email, nombre: perfil.nombre || '' });
+    }
+  } else {
+    // Modo abierto: todos los mudanceros activos, filtrados por zona
+    const todos = await getJSON('mudanceros:todos') || [];
+    const zonaOrigen = (mudanza.zonaBase || mudanza.desde || '').toLowerCase();
+
+    // Palabras clave de zona para matching
+    const zonaKeywords = {
+      'caba': ['caba','palermo','belgrano','caballito','flores','almagro','devoto','liniers','san telmo','recoleta','tribunales','microcentro','once'],
+      'gba norte': ['san isidro','vicente lopez','tigre','san martin','tres de febrero','norte'],
+      'gba sur': ['quilmes','lanus','avellaneda','lomas','sur','florencio varela'],
+      'gba oeste': ['moron','merlo','moreno','la matanza','oeste','castelar','haedo'],
+      'rosario': ['rosario','santa fe'],
+      'cordoba': ['cordoba','córdoba'],
+    };
+
+    for (const emailMud of todos) {
+      try {
+        const perfil = await getJSON(`mudancero:perfil:${emailMud}`);
+        if (!perfil || !perfil.email) continue;
+        const zonaBase = (perfil.zonaBase || '').toLowerCase();
+        const zonasExtra = (perfil.zonasExtra || '').toLowerCase();
+        const zonasMud = zonaBase + ' ' + zonasExtra;
+
+        // Verificar si la zona del mudancero matchea con la zona de la mudanza
+        let match = false;
+
+        // Match directo
+        if (zonaOrigen.includes(zonaBase.split(',')[0]) || zonaBase.includes(zonaOrigen.split(',')[0])) {
+          match = true;
+        }
+
+        // Match por keywords
+        if (!match) {
+          for (const [zona, keywords] of Object.entries(zonaKeywords)) {
+            const origenEnZona = keywords.some(k => zonaOrigen.includes(k));
+            const mudEnZona = keywords.some(k => zonasMud.includes(k)) || zonasMud.includes(zona);
+            if (origenEnZona && mudEnZona) { match = true; break; }
+          }
+        }
+
+        // Si no hay zona definida o no matchea, igual notificar (red pequeña al inicio)
+        if (!match && todos.length <= 20) match = true;
+
+        if (match) destinatarios.push({ email: perfil.email, nombre: perfil.nombre || '' });
+      } catch(e) { continue; }
+    }
+  }
+
+  // Siempre notificar al admin como fallback
+  if (adminEmail && !destinatarios.find(d => d.email === adminEmail)) {
+    destinatarios.push({ email: adminEmail, nombre: 'Admin' });
+  }
+
+  if (!destinatarios.length) return;
+
+  // Enviar email a cada destinatario
+  for (const dest of destinatarios) {
+    try {
+      await resend.emails.send({
+        from: 'MudateYa <noreply@mudateya.ar>',
+        to: dest.email,
+        subject: esDirigido
+          ? `⭐ Un cliente te eligió — ${mudanza.desde} → ${mudanza.hasta}`
+          : `🔥 Nueva mudanza en tu zona — ${mudanza.desde} → ${mudanza.hasta}`,
+        html: `
+<div style="font-family:Inter,Arial,sans-serif;max-width:580px;margin:0 auto;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+  <div style="background:#003580;padding:20px 28px;display:flex;align-items:center">
+    <span style="font-size:20px;font-weight:900;color:#ffffff;letter-spacing:1px">Mudate</span><span style="font-size:20px;font-weight:900;color:#22C36A;letter-spacing:1px">Ya</span>
+    ${esDirigido ? '<span style="margin-left:10px;background:#22C36A;color:#003580;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px">TE ELIGIERON</span>' : '<span style="margin-left:10px;background:#EF4444;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px">SOLO 5 LUGARES</span>'}
+  </div>
+  <div style="padding:28px">
+    <h2 style="margin:0 0 6px;font-size:18px;color:#0F1923">${esDirigido ? 'Un cliente te eligió directamente' : '🔥 Nueva mudanza en tu zona'}</h2>
+    <p style="font-size:13px;color:#475569;margin:0 0 20px">${esDirigido ? 'Este cliente revisó tu perfil y te invitó a cotizar.' : 'Solo los <strong>primeros 5 mudanceros</strong> en cotizar acceden a este pedido. ¡Apurate!'}</p>
     <div style="background:#F4F6F9;border:1px solid #E2E8F0;border-radius:12px;padding:18px;margin-bottom:20px">
       <table style="width:100%;border-collapse:collapse">
         <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:6px 0;width:35%;border-bottom:1px solid #E2E8F0">Desde</td><td style="font-size:14px;font-weight:600;color:#0F1923;padding:6px 0;border-bottom:1px solid #E2E8F0">${mudanza.desde}</td></tr>
@@ -747,14 +854,16 @@ async function notificarMudanceros(mudanza) {
         <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:6px 0">Expira</td><td style="font-size:13px;color:#F59E0B;font-weight:600;padding:6px 0">${expira}</td></tr>
       </table>
     </div>
-    <a href="${siteUrl}/mi-cuenta" style="display:block;text-align:center;background:#1A6FFF;color:#ffffff;padding:14px 24px;border-radius:10px;text-decoration:none;font-size:15px;font-weight:700;letter-spacing:-.2px">Cotizar ahora →</a>
-    <p style="font-size:11px;color:#94A3B8;text-align:center;margin-top:12px;font-family:monospace">${mudanza.id}</p>
+    <a href="${siteUrl}/mi-cuenta" style="display:block;text-align:center;background:#1A6FFF;color:#ffffff;padding:14px 24px;border-radius:10px;text-decoration:none;font-size:15px;font-weight:700;letter-spacing:-.2px">${esDirigido ? 'Ver el pedido →' : '⚡ Cotizar ahora →'}</a>
+    ${!esDirigido ? '<p style="font-size:12px;color:#EF4444;text-align:center;margin-top:10px;font-weight:600">Solo quedan 5 lugares · Primero en cotizar, primero en ganar</p>' : ''}
   </div>
   <div style="background:#F4F6F9;border-top:1px solid #E2E8F0;padding:14px 28px;text-align:center">
-    <p style="font-size:11px;color:#94A3B8;margin:0;font-family:monospace">MudateYa · El marketplace de mudanzas de Argentina</p>
+    <p style="font-size:11px;color:#94A3B8;margin:0;font-family:monospace">MudateYa · mudateya.ar</p>
   </div>
 </div>`,
-  });
+      });
+    } catch(e) { console.error('Error notificando a ' + dest.email + ':', e.message); }
+  }
 }
 
 async function notificarCliente(mudanza, cotizacion) {
