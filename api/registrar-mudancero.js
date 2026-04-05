@@ -213,6 +213,9 @@ module.exports = async function handler(req, res) {
     // ── NOTIFICAR AL ADMIN ──────────────────────────────────────
     try { await notificarAdmin(perfil); } catch(e) { console.warn('Email admin:', e.message); }
 
+    // ── BIENVENIDA AL MUDANCERO ─────────────────────────────────
+    try { await bienvenidaMudancero(perfil); } catch(e) { console.warn('Email mudancero:', e.message); }
+
     // ── LOG EN SHEETS ───────────────────────────────────────────
     try { await logMudanceroSheets(perfil); } catch(e) { console.warn('Sheets:', e.message); }
 
@@ -286,7 +289,47 @@ async function notificarAdmin(perfil) {
   });
 }
 
-// ── LOG EN GOOGLE SHEETS ─────────────────────────────────────────
+// ── EMAIL DE BIENVENIDA AL MUDANCERO ────────────────────────────
+async function bienvenidaMudancero(perfil) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  if (!process.env.RESEND_API_KEY || !perfil.email) return;
+  const siteUrl = process.env.SITE_URL || 'https://mudateya.ar';
+  const nombre = perfil.nombre.split(' ')[0]; // Solo el primer nombre
+
+  await resend.emails.send({
+    from:    'MudateYa <noreply@mudateya.ar>',
+    to:      perfil.email,
+    subject: `¡Bienvenido a MudateYa, ${nombre}! 🚛`,
+    html: `
+<div style="font-family:Inter,Arial,sans-serif;max-width:580px;margin:0 auto;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+  <div style="background:#003580;padding:20px 28px">
+    <span style="font-size:20px;font-weight:900;color:#ffffff;letter-spacing:1px">Mudate</span><span style="font-size:20px;font-weight:900;color:#22C36A;letter-spacing:1px">Ya</span>
+  </div>
+  <div style="padding:28px">
+    <h2 style="margin:0 0 8px;font-size:20px;color:#0F1923">¡Hola ${nombre}, bienvenido! 👋</h2>
+    <p style="font-size:14px;color:#475569;margin:0 0 20px;line-height:1.6">Recibimos tu solicitud de registro en MudateYa. Estamos revisando tu perfil y en menos de <strong>24 horas</strong> te confirmamos la activación.</p>
+
+    <div style="background:#F4F6F9;border:1px solid #E2E8F0;border-radius:12px;padding:18px;margin-bottom:20px">
+      <div style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Tu perfil</div>
+      <table style="width:100%;border-collapse:collapse">
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0;width:35%;border-bottom:1px solid #E2E8F0">Nombre</td><td style="font-size:13px;font-weight:600;color:#0F1923;padding:5px 0;border-bottom:1px solid #E2E8F0">${perfil.nombre}${perfil.empresa ? ' · ' + perfil.empresa : ''}</td></tr>
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0;border-bottom:1px solid #E2E8F0">Zona</td><td style="font-size:13px;color:#0F1923;padding:5px 0;border-bottom:1px solid #E2E8F0">${perfil.zonaBase}</td></tr>
+        <tr><td style="font-size:11px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px;padding:5px 0">Vehículo</td><td style="font-size:13px;color:#0F1923;padding:5px 0">${perfil.vehiculo}</td></tr>
+      </table>
+    </div>
+
+    <div style="background:#EEF4FF;border:1px solid #C7D9FF;border-radius:10px;padding:14px 16px;margin-bottom:20px">
+      <p style="font-size:13px;color:#003580;margin:0;line-height:1.6">⏱ <strong>¿Qué pasa ahora?</strong><br>Revisamos tu DNI y datos. Una vez aprobado empezás a recibir pedidos de mudanzas directo en tu panel.</p>
+    </div>
+
+    <a href="${siteUrl}/mi-cuenta" style="display:block;text-align:center;background:#1A6FFF;color:#ffffff;padding:13px 24px;border-radius:10px;text-decoration:none;font-size:15px;font-weight:700">Ver mi cuenta →</a>
+  </div>
+  <div style="background:#F4F6F9;border-top:1px solid #E2E8F0;padding:14px 28px;text-align:center">
+    <p style="font-size:11px;color:#94A3B8;margin:0;font-family:monospace">MudateYa · mudateya.ar · Cualquier consulta escribinos a hola@mudateya.ar</p>
+  </div>
+</div>`,
+  });
+}
 async function logMudanceroSheets(perfil) {
   const webhookUrl = process.env.GOOGLE_SHEETS_MUDANCEROS_URL;
   if (!webhookUrl) return;
