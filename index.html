@@ -1920,7 +1920,8 @@ document.addEventListener('click', function(e) {
 function _actualizarClearAll() {
   var hayFiltros = _filtros.vehiculos.size || _filtros.zonas.size || _filtros.verifs.size 
     || _filtros.orden !== 'cal' || _filtros.precioMin > 0 || _filtros.precioMax < PRECIO_MAX_TOTAL;
-  document.getElementById('pill-clear').style.display = hayFiltros ? 'flex' : 'none';
+  var el = document.getElementById('pill-clear');
+  if (el) el.style.display = hayFiltros ? 'flex' : 'none';
 }
 
 // Ordenar
