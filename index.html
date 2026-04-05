@@ -600,7 +600,8 @@ footer{background:#003580;padding:1.5rem}
   flex-shrink:0;display:flex;align-items:center;gap:6px;
   background:#fff;color:#003580;border:none;padding:.55rem 1rem;border-radius:10px;
   font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;
-  transition:all .2s;
+  transition:all .2s;position:relative;z-index:101;
+  -webkit-tap-highlight-color:transparent;
 }
 .mob-btn-filtros.has-active{background:#22C36A;color:#fff}
 .mob-filtros-count{
@@ -608,7 +609,7 @@ footer{background:#003580;padding:1.5rem}
   width:18px;height:18px;font-size:10px;font-weight:700;
   display:inline-flex;align-items:center;justify-content:center;
 }
-.mob-sheet-ov{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.5)}
+.mob-sheet-ov{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5)}
 .mob-sheet-ov.open{display:block}
 .mob-sheet{
   position:absolute;bottom:0;left:0;right:0;background:#fff;
@@ -960,7 +961,7 @@ footer{background:#003580;padding:1.5rem}
         <span class="mob-bar-ruta" id="mob-ruta">—</span>
         <span class="mob-bar-det" id="mob-det">—</span>
       </div>
-      <button class="mob-btn-filtros" id="mobBtnFiltros" onclick="abrirFiltrosMobile()">
+      <button class="mob-btn-filtros" id="mobBtnFiltros" onclick="abrirFiltrosMobile()" ontouchend="event.preventDefault();abrirFiltrosMobile()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/></svg>
         Filtros
         <span class="mob-filtros-count" id="mobFiltrosCount" style="display:none">0</span>
