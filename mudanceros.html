@@ -614,32 +614,8 @@ function previewFoto(input){
     reader.readAsDataURL(input.files[0]);
   }
 }
-function previewFotoCamion(input){
-  if(input.files&&input.files[0]){
-    var reader=new FileReader();
-    reader.onload=function(e){
-      var preview=document.getElementById('fotoCamionPreview');
-      preview.src=e.target.result;preview.style.display='block';
-      document.getElementById('uploadIconCamion').style.display='none';
-      document.getElementById('uploadTextCamion').textContent='Foto del camión cargada ✓';
-      document.getElementById('uploadAreaCamion').classList.add('has-file');
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-function previewFotoPatente(input){
-  if(input.files&&input.files[0]){
-    var reader=new FileReader();
-    reader.onload=function(e){
-      var preview=document.getElementById('fotoPatentePreview');
-      preview.src=e.target.result;preview.style.display='block';
-      document.getElementById('uploadIconPatente').style.display='none';
-      document.getElementById('uploadTextPatente').textContent='Foto de la patente cargada ✓';
-      document.getElementById('uploadAreaPatente').classList.add('has-file');
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
-}
+
+
 
 var _fotosVehiculo = []; // array de base64
 
@@ -695,67 +671,7 @@ function previewFotoPatente(input){
     reader.readAsDataURL(input.files[0]);
   }
 }
-  var idx = _fotoExtraIdx++;
-  var inputId = 'fotoExtra-' + idx;
-  var grid = document.getElementById('fotosExtrasGrid');
 
-  var wrapper = document.createElement('div');
-  wrapper.id = 'fotoExtraWrap-' + idx;
-  wrapper.style.cssText = 'position:relative';
-
-  var area = document.createElement('div');
-  area.className = 'upload-area';
-  area.style.cssText = 'min-height:100px;cursor:pointer;position:relative';
-  area.innerHTML = '<div style="font-size:24px;margin-bottom:4px">📷</div>'
-    + '<div style="font-size:12px;color:var(--text3)">Subir foto</div>'
-    + '<img id="prev-' + idx + '" style="max-width:80px;max-height:80px;border-radius:8px;display:none;object-fit:cover;margin:0 auto" alt=""/>';
-  area.onclick = function(){ document.getElementById(inputId).click(); };
-
-  // Botón eliminar
-  var btnElim = document.createElement('button');
-  btnElim.type = 'button';
-  btnElim.innerHTML = '✕';
-  btnElim.style.cssText = 'position:absolute;top:4px;right:4px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;line-height:1;padding:0;display:none';
-  btnElim.onclick = function(e){
-    e.stopPropagation();
-    _fotosExtras = _fotosExtras.filter(function(f){ return f.idx !== idx; });
-    wrapper.remove();
-  };
-
-  var input = document.createElement('input');
-  input.type = 'file';
-  input.id = inputId;
-  input.accept = 'image/*';
-  input.style.display = 'none';
-  input.onchange = function(){
-    if (!this.files || !this.files[0]) return;
-    var reader = new FileReader();
-    var file = this.files[0];
-    reader.onload = function(e){
-      var b64 = e.target.result;
-      // Actualizar o agregar
-      var existing = _fotosExtras.find(function(f){ return f.idx === idx; });
-      if (existing) existing.b64 = b64;
-      else _fotosExtras.push({ idx: idx, b64: b64 });
-      // Preview
-      var prev = document.getElementById('prev-' + idx);
-      prev.src = b64; prev.style.display = 'block';
-      area.querySelector('div').style.display = 'none';
-      area.querySelectorAll('div')[1].style.display = 'none';
-      area.classList.add('has-file');
-      btnElim.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  };
-
-  wrapper.appendChild(area);
-  wrapper.appendChild(btnElim);
-  wrapper.appendChild(input);
-  grid.appendChild(wrapper);
-
-  // Trigger click automáticamente
-  setTimeout(function(){ input.click(); }, 100);
-}
 
 // ── CUIL: FORMATO Y VALIDACIÓN AFIP ─────────────────────────────
 function formatCUIL(input) {
