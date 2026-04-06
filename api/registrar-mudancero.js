@@ -180,7 +180,10 @@ module.exports = async function handler(req, res) {
       extra: extra || '',
       sinEstres: sinEstres === true || sinEstres === 'true' || false,
       sitioWeb: req.body.sitioWeb || '',
-      foto: foto || '', fotoCamion: fotoCamion || '', fotoPatente: fotoPatente || '',
+      foto: foto || '', 
+      fotoCamion: fotoCamion || req.body.fotosVehiculo?.[0] || '',
+      fotoPatente: fotoPatente || '',
+      fotosVehiculo: req.body.fotosVehiculo || [],
       dniFrente: dniFrente || '', dniDorso: dniDorso || '',
       dniAnalisis: dniAnalisis || null,
 
