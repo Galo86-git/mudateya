@@ -60,7 +60,7 @@ function fmt(n) {
 }
 
 function generarHTML(barrio, datos, esFlete, mudanceros) {
-  const tipoStr = esFlete ? 'flete' : 'mudanza';
+  const tipoStr = esSinEstres ? 'mudanza sin estrés' : esFlete ? 'flete' : 'mudanza';
   const tiposStr = esFlete ? 'fletes' : 'mudanzas';
   const proveedorStr = esFlete ? 'fletero' : 'mudancero';
   const proveedoresStr = esFlete ? 'fleteros' : 'mudanceros';
@@ -235,14 +235,17 @@ module.exports = async function handler(req, res) {
 
   // Detectar tipo y barrio desde la URL
   // mudanzas-en-palermo, fletes-en-san-isidro
-  const matchMudanza = path.match(/^mudanzas-en-(.+)$/);
-  const matchFlete   = path.match(/^fletes-en-(.+)$/);
+  const matchMudanza   = path.match(/^mudanzas-en-(.+)$/);
+  const matchFlete     = path.match(/^fletes-en-(.+)$/);
+  const matchSinEstres = path.match(/^mudanza-sin-estres-(.+)$/);
+  const matchCompleta  = path.match(/^mudanza-completa-(.+)$/);
 
-  const match = matchMudanza || matchFlete;
+  const match = matchMudanza || matchFlete || matchSinEstres || matchCompleta;
   if (!match) return res.status(404).send('Not found');
 
   const barrio = match[1].toLowerCase();
   const esFlete = !!matchFlete;
+  const esSinEstres = !!(matchSinEstres || matchCompleta);
   const datos = ZONAS[barrio];
 
   if (!datos) {
@@ -260,7 +263,7 @@ module.exports = async function handler(req, res) {
         const zonaMatch = (p.zonaBase||'').toLowerCase().includes(datos.nombre.toLowerCase()) ||
                           (p.zonasExtra||'').toLowerCase().includes(datos.nombre.toLowerCase()) ||
                           (p.zonaBase||'').toLowerCase().includes(datos.zona.toLowerCase());
-        if (zonaMatch) mudanceros.push(p);
+        if (zonaMatch && (!esSinEstres || p.sinEstres)) mudanceros.push(p);
       } catch(e) { continue; }
     }
   } catch(e) { mudanceros = []; }
