@@ -822,7 +822,7 @@ async function notificarMudanceros(mudanza) {
   const siteUrl = process.env.SITE_URL || 'https://mudateya.ar';
   const expira = new Date(mudanza.expira).toLocaleString('es-AR', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
   const esDirigido = mudanza.modoCotizacion === 'dirigido';
-  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.ADMIN_EMAILS?.split(',')[0] || 'jgalozaldivar@gmail.com';
 
   // Construir lista de destinatarios
   let destinatarios = [];
