@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
     }
 
     var result = await put(pathname, buffer, {
-      access: 'private',
+      access: 'public',
       contentType: mediaType,
     });
 
