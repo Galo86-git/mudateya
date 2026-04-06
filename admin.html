@@ -99,13 +99,18 @@ tr:hover td{background:rgba(34,195,106,.03)}
 
 .modal-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:1rem}
 .modal-overlay.open{display:flex}
-.modal{background:#fff;border:1px solid #CBD5E1;border-radius:20px;padding:1.8rem;max-width:500px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.6)}
+.modal{background:#fff;border:1px solid #CBD5E1;border-radius:20px;padding:1.8rem;max-width:680px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.6)}
 .modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:1rem}
-.modal-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:2px solid #22C36A;font-size:12px}
+.modal-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #E2E8F0;font-size:12px}
 .modal-row:last-child{border-bottom:none}
 .modal-label{color:#64748B;font-family:var(--mono)}
-.modal-val{color:#475569;text-align:right;max-width:280px}
+.modal-val{color:#475569;text-align:right;max-width:340px;word-break:break-all}
 .modal-footer{display:flex;gap:8px;margin-top:1.2rem;justify-content:flex-end}
+.modal-fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:12px 0}
+.modal-foto-item{border-radius:10px;overflow:hidden;border:1px solid #E2E8F0;aspect-ratio:4/3;background:#F4F6F9;cursor:pointer}
+.modal-foto-item img{width:100%;height:100%;object-fit:cover;transition:opacity .2s}
+.modal-foto-item img:hover{opacity:.85}
+.modal-section{font-size:10px;font-weight:700;color:#94A3B8;font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 6px}
 
 .search-bar{display:flex;gap:8px;margin-bottom:1rem}
 .search-input{flex:1;padding:9px 14px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;color:#0F1923;background:#F5F7FA;outline:none;transition:border-color .2s}
@@ -632,14 +637,77 @@ var CAMPOS = ['Fecha','Nombre','Empresa','Teléfono','Email','Zona base','Zonas 
 
 function getEstado(m){ return m[21] || 'Pendiente'; }
 
-function openModal(idx){
+async function openModal(idx){
   currentMudanceroIdx = idx;
   var m = mudancerosData[idx];
+  var email = m[4];
   document.getElementById('modalNombre').textContent = m[1] || 'Mudancero';
-  document.getElementById('modalContent').innerHTML = CAMPOS.map(function(label, i){
-    if(!m[i] && i > 0) return '';
-    return '<div class="modal-row"><span class="modal-label">'+label+'</span><span class="modal-val">'+(m[i]||'—')+'</span></div>';
+  document.getElementById('modalContent').innerHTML = '<div style="text-align:center;padding:20px;color:#94A3B8;font-size:13px">Cargando datos…</div>';
+  document.getElementById('mudanceroModal').classList.add('open');
+
+  // Cargar perfil completo desde Redis
+  var perfil = null;
+  try {
+    var r = await fetch('/api/mudancero-data?email=' + encodeURIComponent(email));
+    var d = await r.json();
+    if (d.perfil) perfil = d.perfil;
+  } catch(e) {}
+
+  // Datos básicos
+  var filas = [
+    ['Email', email],
+    ['Teléfono', m[3] || (perfil && perfil.telefono) || '—'],
+    ['CUIL/CUIT', m[7] || (perfil && perfil.cuil) || '—'],
+    ['Zona', m[5] || '—'],
+    ['Zonas extra', m[6] || '—'],
+    ['Vehículo', m[8] || '—'],
+    ['Servicios', m[11] || '—'],
+    ['Método cobro', perfil ? (perfil.metodoCobro || '—') : '—'],
+    ['CBU/Alias', perfil ? (perfil.cbu || perfil.emailMP || '—') : '—'],
+    ['Titular', perfil ? (perfil.titularCuenta || '—') : '—'],
+    ['Sitio web', perfil ? (perfil.sitioWeb || '—') : '—'],
+    ['Fecha registro', m[18] || '—'],
+    ['Estado', getEstado(m)],
+  ];
+
+  var html = filas.map(function(f) {
+    return '<div class="modal-row"><span class="modal-label">'+f[0]+'</span><span class="modal-val">'+f[1]+'</span></div>';
   }).join('');
+
+  // Fotos del vehículo
+  if (perfil) {
+    var fotosVeh = perfil.fotosVehiculo || (perfil.fotoCamion ? [perfil.fotoCamion] : []);
+    if (fotosVeh.length) {
+      html += '<div class="modal-section">📸 Fotos del vehículo</div><div class="modal-fotos">';
+      fotosVeh.forEach(function(url) {
+        if (url) html += '<div class="modal-foto-item"><img src="'+url+'" onclick="window.open(\''+url+'\',\'_blank\')" title="Ver foto completa"/></div>';
+      });
+      html += '</div>';
+    }
+
+    // Fotos del DNI
+    if (perfil.dniFrente || perfil.dniDorso) {
+      html += '<div class="modal-section">🪪 Fotos del DNI</div><div class="modal-fotos">';
+      if (perfil.dniFrente) html += '<div class="modal-foto-item"><img src="'+perfil.dniFrente+'" onclick="window.open(\''+perfil.dniFrente+'\',\'_blank\')" title="DNI Frente"/></div>';
+      if (perfil.dniDorso)  html += '<div class="modal-foto-item"><img src="'+perfil.dniDorso+'" onclick="window.open(\''+perfil.dniDorso+'\',\'_blank\')" title="DNI Dorso"/></div>';
+      html += '</div>';
+    } else {
+      html += '<div class="modal-section">🪪 DNI</div><div style="font-size:12px;color:#F59E0B;padding:8px 0">⚠ Sin fotos de DNI — verificar manualmente</div>';
+    }
+
+    // Foto de perfil
+    if (perfil.foto) {
+      html += '<div class="modal-section">👤 Foto de perfil</div><div class="modal-fotos"><div class="modal-foto-item"><img src="'+perfil.foto+'" onclick="window.open(\''+perfil.foto+'\',\'_blank\')"/></div></div>';
+    }
+
+    // Descripción
+    if (perfil.extra) {
+      html += '<div class="modal-section">📝 Descripción</div><div style="font-size:12px;color:#475569;padding:8px;background:#F8FAFC;border-radius:8px;line-height:1.5">'+perfil.extra+'</div>';
+    }
+  }
+
+  document.getElementById('modalContent').innerHTML = html;
+
   var estado = getEstado(m);
   var btnA = document.getElementById('btnAprobar');
   var btnR = document.getElementById('btnRechazar');
@@ -647,7 +715,6 @@ function openModal(idx){
   btnA.textContent = '✓ Aprobar'; btnR.textContent = '✗ Rechazar';
   btnA.style.display = estado === 'Aprobado'  ? 'none' : '';
   btnR.style.display = estado === 'Rechazado' ? 'none' : '';
-  document.getElementById('mudanceroModal').classList.add('open');
 }
 
 function closeModal(){
