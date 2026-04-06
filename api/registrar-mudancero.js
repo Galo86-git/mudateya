@@ -235,6 +235,9 @@ module.exports = async function handler(req, res) {
     // ── NOTIFICAR AL ADMIN ──────────────────────────────────────
     try { await notificarAdmin(perfil); } catch(e) { console.warn('Email admin:', e.message); }
 
+    // ── EMAIL DE BIENVENIDA AL MUDANCERO ───────────────────────
+    try { await bienvenidaMudancero(perfil); } catch(e) { console.warn('Email bienvenida:', e.message); }
+
     // ── LOG EN SHEETS ───────────────────────────────────────────
     try { await logMudanceroSheets(perfil); } catch(e) { console.warn('Sheets:', e.message); }
 
@@ -384,4 +387,50 @@ async function logMudanceroSheets(perfil) {
       Estado:            'PENDIENTE_REVISION',
     }),
   });
+}
+
+// ── EMAIL DE BIENVENIDA AL MUDANCERO ────────────────────────────
+async function bienvenidaMudancero(perfil) {
+  var resend = new Resend(process.env.RESEND_API_KEY);
+  if (!process.env.RESEND_API_KEY) return;
+
+  await resend.emails.send({
+    from:    'MudateYa <noreply@mudateya.ar>',
+    to:      perfil.email,
+    subject: '¡Tu solicitud fue recibida, ' + perfil.nombre.split(' ')[0] + '! 🚛',
+    html: '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #E2E8F0">' +
+      '<div style="background:#003580;padding:24px 28px;text-align:center">' +
+        '<div style="font-family:Georgia,serif;font-size:28px;font-weight:900;letter-spacing:2px;color:#fff">MUDATEYA</div>' +
+      '</div>' +
+      '<div style="padding:28px">' +
+        '<h2 style="margin:0 0 8px;color:#0F1923;font-size:20px">¡Hola, ' + perfil.nombre.split(' ')[0] + '! Tu solicitud fue recibida 🎉</h2>' +
+        '<p style="color:#475569;font-size:14px;line-height:1.7;margin:0 0 20px">Recibimos tu formulario de registro como mudancero en MudateYa. Nuestro equipo va a revisar tu información y te vamos a contactar por WhatsApp en las próximas <strong>24 horas</strong> para activar tu perfil.</p>' +
+
+        '<div style="background:#F5F7FA;border-radius:12px;padding:16px 20px;margin-bottom:20px">' +
+          '<div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">¿Qué pasa ahora?</div>' +
+          '<div style="display:flex;flex-direction:column;gap:10px">' +
+            paso('1', 'Revisamos tu solicitud y verificamos tus datos (DNI, vehículo, CUIL)') +
+            paso('2', 'Te contactamos por WhatsApp para confirmar los datos y activar tu perfil') +
+            paso('3', 'Empezás a recibir pedidos de clientes en tu zona') +
+          '</div>' +
+        '</div>' +
+
+        '<div style="background:#EEF4FF;border-radius:12px;padding:16px 20px;margin-bottom:24px;border-left:4px solid #1A6FFF">' +
+          '<div style="font-size:13px;color:#1A6FFF;font-weight:600;margin-bottom:4px">📋 Tu registro</div>' +
+          '<div style="font-size:13px;color:#475569">ID: <strong style="font-family:monospace">' + perfil.id + '</strong></div>' +
+          '<div style="font-size:13px;color:#475569">Zona: <strong>' + perfil.zonaBase + '</strong></div>' +
+          '<div style="font-size:13px;color:#475569">Vehículo: <strong>' + perfil.vehiculo + '</strong></div>' +
+        '</div>' +
+
+        '<p style="color:#94A3B8;font-size:11px;text-align:center;margin:0">¿Preguntas? Respondé este mail o escribinos a <a href="mailto:hola@mudateya.ar" style="color:#1A6FFF">hola@mudateya.ar</a></p>' +
+      '</div>' +
+    '</div>',
+  });
+}
+
+function paso(num, texto) {
+  return '<div style="display:flex;align-items:flex-start;gap:10px">' +
+    '<div style="width:22px;height:22px;border-radius:50%;background:#22C36A;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + num + '</div>' +
+    '<div style="font-size:13px;color:#475569;line-height:1.5">' + texto + '</div>' +
+  '</div>';
 }
