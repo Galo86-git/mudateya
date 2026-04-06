@@ -1,8 +1,27 @@
 // api/registrar-mudancero.js
 // Recibe el formulario completo de onboarding de mudanceros
-// Guarda en Redis + valida CUIL contra AFIP + notifica al admin
+// Guarda en Redis + valida CUIL + sube fotos a Vercel Blob + notifica al admin
 
 const { Resend } = require('resend');
+const { put } = require('@vercel/blob');
+
+// ── SUBIR FOTO A VERCEL BLOB ──────────────────────────────────────
+async function subirFotoBlob(base64, nombre) {
+  if (!base64 || !process.env.BLOB_READ_WRITE_TOKEN) return '';
+  try {
+    const base64Data = base64.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    const mimeMatch = base64.match(/^data:(image\/\w+);base64,/);
+    const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const ext = mimeType.split('/')[1] || 'jpg';
+    const filename = `mudateya/mudanceros/${nombre}-${Date.now()}.${ext}`;
+    const blob = await put(filename, buffer, { access: 'public', contentType: mimeType });
+    return blob.url;
+  } catch(e) {
+    console.warn('Error subiendo foto a Blob:', e.message);
+    return '';
+  }
+}
 
 // ── REDIS ────────────────────────────────────────────────────────
 async function redisCall(method, ...args) {
@@ -157,6 +176,17 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    // ── SUBIR FOTOS A VERCEL BLOB ───────────────────────────────
+    const emailSlug = email.replace(/[@.]/g, '-');
+    const fotoUrl        = foto        ? await subirFotoBlob(foto, emailSlug + '-perfil') : '';
+    const fotoCamionUrl  = (fotoCamion || (req.body.fotosVehiculo || [])[0])
+                           ? await subirFotoBlob(fotoCamion || (req.body.fotosVehiculo || [])[0], emailSlug + '-camion') : '';
+    const fotosVehUrls   = [];
+    for (var i = 0; i < (req.body.fotosVehiculo || []).length; i++) {
+      var url = await subirFotoBlob(req.body.fotosVehiculo[i], emailSlug + '-veh-' + i);
+      if (url) fotosVehUrls.push(url);
+    }
+
     // ── ARMAR PERFIL ────────────────────────────────────────────
     const id = 'MUD-' + Date.now();
 
@@ -164,7 +194,7 @@ module.exports = async function handler(req, res) {
       id, email, nombre, telefono,
       empresa:      empresa      || '',
       cuil:         cuil         ? cuil.replace(/[-\s]/g, '') : '',
-      cuilAfip:     cuilResultado,   // resultado completo de AFIP
+      cuilAfip:     cuilResultado,
 
       zonaBase, zonasExtra: zonasExtra || '', distancia: distancia || '',
       vehiculo, cantVehiculos: cantVehiculos || '1', equipo: equipo || 'Solo yo',
@@ -180,11 +210,11 @@ module.exports = async function handler(req, res) {
       extra: extra || '',
       sinEstres: sinEstres === true || sinEstres === 'true' || false,
       sitioWeb: req.body.sitioWeb || '',
-      foto: foto || '', 
-      fotoCamion: fotoCamion || req.body.fotosVehiculo?.[0] || '',
-      fotoPatente: fotoPatente || '',
-      fotosVehiculo: req.body.fotosVehiculo || [],
-      dniFrente: dniFrente || '', dniDorso: dniDorso || '',
+      foto: fotoUrl || '',
+      fotoCamion: fotoCamionUrl || '',
+      fotoPatente: '',
+      fotosVehiculo: fotosVehUrls,
+      // DNI — guardar solo el análisis, no las imágenes completas (muy pesadas)
       dniAnalisis: dniAnalisis || null,
 
       // Verificaciones
