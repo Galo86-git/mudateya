@@ -372,25 +372,7 @@ nav{position:sticky;top:0;z-index:200;background:#003580;backdrop-filter:blur(20
         </div>
       </div>
 
-      <!-- LOADING -->
-      <div class="dni-loading" id="dni-loading">
-        <span class="spinner-dark" style="width:14px;height:14px;flex-shrink:0"></span>
-        Analizando DNI con IA…
-      </div>
-
-      <!-- ERROR -->
-      <div class="dni-error" id="dni-error"></div>
-
-      <!-- RESULTADO DEL ANÁLISIS -->
-      <div class="dni-result" id="dni-result">
-        <div class="dni-result-title">
-          <span id="dni-result-icon">✦</span> Análisis del DNI
-        </div>
-        <div id="dni-result-rows"></div>
-        <div style="margin-top:10px;font-size:10px;color:#64748B;font-family:var(--mono)">
-          🔒 Datos usados solo para verificación interna · No se comparten con clientes
-        </div>
-      </div>
+      <!-- Análisis DNI desactivado — verificación manual por el admin -->
 
     </div>
 
@@ -516,14 +498,7 @@ function onDNIUpload(input, lado) {
 
     // Guardar base64
     dniData[lado] = { b64: b64, mediaType: file.type || 'image/jpeg', dataUrl: dataUrl };
-
-    // Resetear input para permitir subir la misma foto de nuevo
-    input.value = '';
-
-    // Re-analizar siempre que haya al menos el frente
-    if (dniData.frente) {
-      analizarDNI();
-    }
+    // Sin análisis de IA — el admin verifica manualmente
   };
   reader.readAsDataURL(file);
 }
