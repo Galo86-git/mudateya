@@ -517,8 +517,11 @@ function onDNIUpload(input, lado) {
     // Guardar base64
     dniData[lado] = { b64: b64, mediaType: file.type || 'image/jpeg', dataUrl: dataUrl };
 
-    // Si tenemos los dos lados, analizamos
-    if (dniData.frente && dniData.dorso) {
+    // Resetear input para permitir subir la misma foto de nuevo
+    input.value = '';
+
+    // Re-analizar siempre que haya al menos el frente
+    if (dniData.frente) {
       analizarDNI();
     }
   };
@@ -875,7 +878,7 @@ document.getElementById('regForm').addEventListener('submit',async function(e){
   ok=validateField('vehiculo',vehiculo!=='')&&ok;
   if(!ok){document.querySelector('.has-error input,.has-error select')?.scrollIntoView({behavior:'smooth',block:'center'});return;}
 
-  // Validar DNI obligatorio
+  // Validar DNI — solo requerir que se hayan subido las fotos, no que sea legible
   if(!dniData.frente){flashUpload('uploadDniFrente');return;}
   if(!dniData.dorso){flashUpload('uploadDniDorso');return;}
 
@@ -894,9 +897,8 @@ document.getElementById('regForm').addEventListener('submit',async function(e){
       var fNombre = document.getElementById('f-nombre');
       fNombre.classList.add('has-error');
       var errSpan = fNombre.querySelector('.field-error');
-      if(errSpan) errSpan.textContent = '⚠ El nombre no coincide con el DNI (' + [dniData.analisis.nombres, dniData.analisis.apellido].filter(Boolean).join(' ') + ')';
-      fNombre.scrollIntoView({behavior:'smooth',block:'center'});
-      return;
+      if(errSpan) errSpan.textContent = '⚠ El nombre no coincide con el DNI (' + [dniData.analisis.nombres, dniData.analisis.apellido].filter(Boolean).join(' ') + ') — lo revisamos manualmente';
+      // No bloqueamos — seguimos igual, el admin lo verifica
     }
   }
 
