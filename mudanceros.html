@@ -864,7 +864,7 @@ function readFile(file) {
 document.getElementById('regForm').addEventListener('submit',async function(e){
   e.preventDefault();
 
-  // Validar campos básicos
+  // Validar campos mínimos
   var nombre=document.getElementById('nombre').value.trim();
   var telefono=document.getElementById('telefono').value.trim();
   var email=document.getElementById('email').value.trim();
@@ -874,37 +874,12 @@ document.getElementById('regForm').addEventListener('submit',async function(e){
   ok=validateField('nombre',nombre.length>1)&&ok;
   ok=validateField('telefono',telefono.length>6)&&ok;
   ok=validateField('email',/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))&&ok;
-  ok=validateField('zona-base',zonaBase!=='')&&ok;
-  ok=validateField('vehiculo',vehiculo!=='')&&ok;
   if(!ok){document.querySelector('.has-error input,.has-error select')?.scrollIntoView({behavior:'smooth',block:'center'});return;}
 
-  // Validar DNI — solo requerir que se hayan subido las fotos, no que sea legible
+  // DNI — requerir al menos el frente, dorso y vehículo son opcionales
   if(!dniData.frente){flashUpload('uploadDniFrente');return;}
-  if(!dniData.dorso){flashUpload('uploadDniDorso');return;}
 
-  // Validar que el nombre ingresado coincida con el del DNI analizado
-  if(dniData.analisis && (dniData.analisis.apellido || dniData.analisis.nombres)){
-    var norm = function(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z ]/g,'').trim(); };
-    var nombreIngresado = norm(nombre);
-    var apellidoDNI     = norm(dniData.analisis.apellido);
-    var nombresDNI      = norm(dniData.analisis.nombres);
-    // Alcanza con que la primera palabra del apellido o del nombre esté en lo ingresado
-    var primerApellido  = apellidoDNI.split(' ')[0];
-    var primerNombre    = nombresDNI.split(' ')[0];
-    var coincide = (primerApellido && nombreIngresado.includes(primerApellido)) ||
-                   (primerNombre   && nombreIngresado.includes(primerNombre));
-    if(!coincide){
-      var fNombre = document.getElementById('f-nombre');
-      fNombre.classList.add('has-error');
-      var errSpan = fNombre.querySelector('.field-error');
-      if(errSpan) errSpan.textContent = '⚠ El nombre no coincide con el DNI (' + [dniData.analisis.nombres, dniData.analisis.apellido].filter(Boolean).join(' ') + ') — lo revisamos manualmente';
-      // No bloqueamos — seguimos igual, el admin lo verifica
-    }
-  }
-
-  // Validar fotos del vehículo
-  var fotoCamionInput=document.getElementById('fotoCamionInput');
-  var fotoPatenteInput=document.getElementById('fotoPatenteInput');
+  // Fotos del vehículo — requerido
   if(_fotosVehiculo.length === 0){flashUpload('uploadAreaCamion');return;}
 
   var btn=document.getElementById('btnSubmit');
