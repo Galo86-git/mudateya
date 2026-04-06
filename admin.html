@@ -392,11 +392,12 @@ async function loadMudanceros(){
 async function loadPagos(){
   try{
     var r = await fetch('/api/admin?type=pagos');
+    if (!r.ok) { pagosData = []; return; }
     var d = await r.json();
     pagosData = d.rows || [];
   }catch(e){
     pagosData = [];
-    console.error('Error cargando pagos:', e);
+    console.warn('Pagos no disponibles:', e.message);
   }
 }
 
