@@ -1,7 +1,4 @@
 // api/upload-foto.js
-// Recibe una imagen como body binario, la sube a Vercel Blob y devuelve la URL.
-// El browser llama a este endpoint al seleccionar cada foto (antes del submit).
-
 const { put } = require('@vercel/blob');
 
 module.exports = async function handler(req, res) {
@@ -11,6 +8,9 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')   return res.status(405).json({ error: 'Método no permitido' });
 
+  var token = process.env.BLOB_FOTOS_READ_WRITE_TOKEN;
+  console.log('TOKEN FOTOS presente:', !!token, '— primeros 10 chars:', token ? token.slice(0,10) : 'UNDEFINED');
+
   try {
     var carpeta   = req.headers['x-carpeta'] || 'mudanceros/tmp';
     var nombre    = req.headers['x-nombre']  || ('foto-' + Date.now());
@@ -18,7 +18,6 @@ module.exports = async function handler(req, res) {
     var ext       = mediaType.split('/')[1].replace('jpeg', 'jpg');
     var pathname  = carpeta + '/' + nombre + '-' + Date.now() + '.' + ext;
 
-    // Leer body como buffer
     var chunks = [];
     await new Promise(function(resolve, reject) {
       req.on('data', function(chunk) { chunks.push(chunk); });
@@ -34,7 +33,7 @@ module.exports = async function handler(req, res) {
     var result = await put(pathname, buffer, {
       access: 'public',
       contentType: mediaType,
-      token: process.env.BLOB_FOTOS_READ_WRITE_TOKEN,
+      token: token,
     });
 
     return res.status(200).json({ ok: true, url: result.url });
