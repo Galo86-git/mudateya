@@ -115,7 +115,10 @@ module.exports = async function handler(req, res) {
     var extra           = body.extra;
     var foto            = body.foto;
     var fotoCamion      = body.fotoCamion;
-    var fotoPatente     = body.fotoPatente;
+    var fotoPatente     = body.fotoPatente || "";
+    var fotosVehiculo   = body.fotosVehiculo || [];
+    var sinEstres       = body.sinEstres || false;
+    var sitioWeb        = body.sitioWeb || "";
     var dniFrente       = body.dniFrente;
     var dniDorso        = body.dniDorso;
     var dniAnalisis     = body.dniAnalisis;
@@ -132,11 +135,8 @@ module.exports = async function handler(req, res) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ error: 'Email inválido' });
     }
-    if (!dniFrente || !dniDorso) {
-      return res.status(400).json({ error: 'Faltan fotos del DNI' });
-    }
-    if (!fotoCamion || !fotoPatente) {
-      return res.status(400).json({ error: 'Faltan fotos del vehículo' });
+    if (!dniFrente) {
+      return res.status(400).json({ error: "Falta la foto del DNI" });
     }
 
     // ── VALIDAR CUIL CONTRA AFIP ────────────────────────────────
@@ -185,21 +185,11 @@ module.exports = async function handler(req, res) {
     // ── GENERAR ID ──────────────────────────────────────────────
     var id = 'MUD-' + Date.now();
 
-    // ── SUBIR FOTOS A VERCEL BLOB ───────────────────────────────
-    // Se suben en paralelo para no perder tiempo
-    var carpeta = 'mudanceros/' + id;
-    var resultadoFotos = await Promise.all([
-      subirImagen(foto,        carpeta, 'perfil'),
-      subirImagen(fotoCamion,  carpeta, 'camion'),
-      subirImagen(fotoPatente, carpeta, 'patente'),
-      subirImagen(dniFrente,   carpeta, 'dni-frente'),
-      subirImagen(dniDorso,    carpeta, 'dni-dorso'),
-    ]);
-    var urlFoto        = resultadoFotos[0];
-    var urlFotoCamion  = resultadoFotos[1];
-    var urlFotoPatente = resultadoFotos[2];
-    var urlDniFrente   = resultadoFotos[3];
-    var urlDniDorso    = resultadoFotos[4];
+    // ── FOTOS — ya subidas a Blob por el frontend, solo usamos las URLs ──
+    var urlFoto        = foto       || '';
+    var urlFotoCamion  = fotoCamion || '';
+    var urlDniFrente   = dniFrente  || '';
+    var urlDniDorso    = dniDorso   || '';
 
     // ── ARMAR PERFIL (sin base64 — solo URLs) ───────────────────
     var perfil = {
@@ -231,11 +221,14 @@ module.exports = async function handler(req, res) {
       },
 
       extra:      extra      || '',
+      sinEstres:  sinEstres,
+      sitioWeb:   sitioWeb,
+      fotosVehiculo: fotosVehiculo,
 
       // URLs de Blob (no base64)
       foto:        urlFoto,
       fotoCamion:  urlFotoCamion,
-      fotoPatente: urlFotoPatente,
+      fotoPatente: '',
       dniFrente:   urlDniFrente,
       dniDorso:    urlDniDorso,
       dniAnalisis: dniAnalisis || null,
