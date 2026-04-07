@@ -534,21 +534,13 @@ module.exports = async function handler(req, res) {
         }
       }
 
-      // Modo abierto: máximo 5 cotizaciones, después se cierra
-      const maxCot = mudanza.maxCotizaciones || 5;
-      if (mudanza.modoCotizacion !== 'dirigido' && mudanza.cotizaciones.length >= maxCot) {
-        mudanza.estado = 'cotizaciones_completas';
-        await setJSON(`mudanza:${mudanzaId}`, mudanza, 172800);
-        return res.status(400).json({ error: 'Esta mudanza ya recibió las 5 cotizaciones. Llegaste tarde.' });
-      }
+      // Límite de cotizaciones deshabilitado temporalmente para testing
+      // const maxCot = mudanza.maxCotizaciones || 5;
 
       const cotizacion = { id: 'COT-' + Date.now(), mudanzaId, mudanceroEmail, mudanceroNombre, mudanceroTel, precio: parseInt(precio), nota: nota||'', tiempoEstimado: tiempoEstimado||'', fecha: new Date().toISOString(), estado: 'pendiente' };
       mudanza.cotizaciones.push(cotizacion);
 
-      // Si con esta cotización llegamos al límite, cerramos automáticamente
-      if (mudanza.modoCotizacion !== 'dirigido' && mudanza.cotizaciones.length >= maxCot) {
-        mudanza.estado = 'cotizaciones_completas';
-      }
+      // Cierre automático deshabilitado temporalmente para testing
       await setJSON(`mudanza:${mudanzaId}`, mudanza, 172800);
       const mudIdx = await getJSON(`mudancero:${mudanceroEmail}`) || [];
       if (!mudIdx.includes(mudanzaId)) mudIdx.push(mudanzaId);
