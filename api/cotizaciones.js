@@ -70,13 +70,13 @@ async function generarPDFBase64(datos) {
   const objetos       = datos.objetos || datos.servicios || '—';
   const extras        = datos.extras || '';
   const nota          = datos.nota || '';
-  const precio        = parseInt(datos.precio || datos.precio_total || 0);
+  const precio        = parseInt(String(datos.precio || datos.precio_total || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0;
   const esFlete       = datos.ambientes === 'Flete' || datos.tipo === 'flete';
   const feePct        = esFlete ? 0.20 : 0.15;
   const fee           = Math.round(precio * feePct / 500) * 500;
   const resto         = precio - fee;
   const fmt           = (n) => '$' + n.toLocaleString('es-AR');
-  const starStr       = '★'.repeat(Math.floor(estrellas)) + '☆'.repeat(5 - Math.floor(estrellas));
+  const starStr       = '*'.repeat(Math.floor(estrellas)) + '-'.repeat(5 - Math.floor(estrellas));
 
   function rowBorder() {
     return { canvas: [{ type: 'line', x1: 0, y1: 4, x2: 467, y2: 4, lineWidth: 0.3, lineColor: BORDER_C }] };
@@ -167,7 +167,7 @@ async function generarPDFBase64(datos) {
               { text: 'Ya',     bold: true, fontSize: 24, color: VERDE,  width: 'auto' },
             ], columnGap: 0 },
             { text: 'El marketplace de mudanzas de Argentina', fontSize: 8, color: MUTED, margin: [0, 3, 0, 6] },
-            { table: { body: [[{ text: '● PRESUPUESTO OFICIAL  ·  válido 24hs', bold: true, fontSize: 7, color: VERDE }]] },
+            { table: { body: [[{ text: 'PRESUPUESTO OFICIAL - valido 24hs', bold: true, fontSize: 7, color: VERDE }]] },
               layout: badgeLayout(VERDE_BG, VERDE_DIM), margin: [0,0,0,0] },
           ]},
           { stack: [
@@ -205,7 +205,7 @@ async function generarPDFBase64(datos) {
                   { text: `  ${estrellas}${nroResenas ? '  ·  ' + nroResenas + ' reseñas' : ''}`, fontSize: 7, color: MUTED, width: '*', margin: [0,1,0,0] },
                 ], margin: [0,3,0,4] },
                 { columns: [
-                  { table: { body: [[{ text: '✓ VERIFICADO', bold: true, fontSize: 6.5, color: VERDE }]] },
+                  { table: { body: [[{ text: 'VERIFICADO', bold: true, fontSize: 6.5, color: VERDE }]] },
                     layout: badgeLayout(VERDE_BG, VERDE_DIM), width: 'auto' },
                   vehiculo ? { width: 4, text: '' } : null,
                   vehiculo ? { table: { body: [[{ text: vehiculo, fontSize: 6.5, color: MUTED }]] },
@@ -270,10 +270,10 @@ async function generarPDFBase64(datos) {
       // ── GARANTÍAS ────────────────────────────────
       {
         columns: [
-          ['🔒', 'Pago seguro',    'Mercado Pago'],
-          ['✓',  'Verificado',     'ID confirmada'],
-          ['★',  '4.8★ promedio',  'Miles de reseñas'],
-          ['↩',  'Sin sorpresas',  'Precio acordado'],
+          ['MP',  'Pago seguro',   'Mercado Pago'],
+          ['ID',  'Verificado',    'DNI confirmado'],
+          ['4.8', 'Promedio',      'Miles de resenas'],
+          ['$OK', 'Sin sorpresas', 'Precio acordado'],
         ].map(([icon, title, sub]) => ({
           width: '25%',
           table: { widths: ['*'], body: [[{ stack: [
@@ -296,7 +296,7 @@ async function generarPDFBase64(datos) {
       { columns: [
         { columns: [
           { text: 'MudateYa', bold: true, fontSize: 9, color: VERDE, width: 'auto' },
-          { text: ' · El marketplace de mudanzas de Argentina · mudateya.ar', fontSize: 8, color: MUTED, width: '*', margin: [0,1,0,0] },
+          { text: '  -  El marketplace de mudanzas de Argentina  -  mudateya.ar', fontSize: 8, color: MUTED, width: '*', margin: [0,1,0,0] },
         ]},
         { text: `Válida 24hs · ${nro}`, fontSize: 7, color: DIM, alignment: 'right', margin: [0,1,0,0] },
       ]},
