@@ -396,10 +396,9 @@ module.exports = async function handler(req, res) {
     if (action === 'publicar' && req.method === 'POST') {
       const { clienteEmail, clienteNombre, desde, hasta, ambientes, fecha, servicios, extras, zonaBase, precio_estimado, clienteWA, tipo, pisoOrigen, pisoDestino, ascOrigen, ascDestino, fotos } = req.body;
       if (!clienteEmail || !desde || !hasta) return res.status(400).json({ error: 'Faltan datos' });
-
       // ── LÍMITES ANTI-SPAM ──────────────────────────────────────────────
-      // Límite 1: máximo 3 pedidos activos simultáneos por cliente
-      const MAX_ACTIVOS_POR_CLIENTE = 3;
+      // Límite 1: máximo 2 pedidos activos simultáneos por cliente
+      const MAX_ACTIVOS_POR_CLIENTE = 2;
       const idxCliente = await getJSON(`cliente:${clienteEmail}`) || [];
       const ahora = new Date();
       let activosCliente = 0;
@@ -416,23 +415,22 @@ module.exports = async function handler(req, res) {
         });
       }
 
-      // Límite 2: cooldown de 10 minutos entre publicaciones del mismo cliente
+      // Límite 2: cooldown de 10 minutos entre publicaciones
       const ultimaPublicacion = await getJSON(`cliente:ultima-pub:${clienteEmail}`);
       if (ultimaPublicacion) {
         const diffMs = ahora - new Date(ultimaPublicacion);
-        const COOLDOWN_MS = 10 * 60 * 1000; // 10 minutos
+        const COOLDOWN_MS = 10 * 60 * 1000;
         if (diffMs < COOLDOWN_MS) {
-          const restaSeg = Math.ceil((COOLDOWN_MS - diffMs) / 1000);
-          const restaMin = Math.ceil(restaSeg / 60);
+          const restaMin = Math.ceil((COOLDOWN_MS - diffMs) / 60000);
           return res.status(429).json({
             error: `Publicaste hace menos de 10 minutos. Esperá ${restaMin} minuto${restaMin > 1 ? 's' : ''} antes de publicar otro pedido.`,
             codigo: 'COOLDOWN'
           });
         }
       }
-      await setJSON(`cliente:ultima-pub:${clienteEmail}`, ahora.toISOString(), 600); // expira en 10 min
+      await setJSON(`cliente:ultima-pub:${clienteEmail}`, ahora.toISOString(), 600);
 
-      // Límite 3: máximo 10 pedidos publicados en las últimas 24hs
+      // Límite 3: máximo 10 pedidos en 24hs
       const MAX_POR_DIA = 10;
       const hace24hs = new Date(ahora - 24 * 60 * 60 * 1000);
       let publicadosHoy = 0;
@@ -790,7 +788,7 @@ async function notificarMudanceros(mudanza) {
   if (!process.env.RESEND_API_KEY || !adminEmail) return;
   const expira = new Date(mudanza.expira).toLocaleString('es-AR', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
   await resend.emails.send({
-    from: 'MudateYa <onboarding@resend.dev>',
+    from: 'MudateYa <noreply@mudateya.ar>',
     to: adminEmail,
     subject: `🚛 Nueva mudanza — ${mudanza.desde} → ${mudanza.hasta} · ${mudanza.id}`,
     html: `<div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
@@ -839,7 +837,7 @@ async function notificarCliente(mudanza, cotizacion) {
   }
 
   await resend.emails.send({
-    from: 'MudateYa <onboarding@resend.dev>',
+    from: 'MudateYa <noreply@mudateya.ar>',
     to: mudanza.clienteEmail,
     subject: `💰 Cotización de ${cotizacion.mudanceroNombre} — $${cotizacion.precio.toLocaleString('es-AR')}`,
     html: `<div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
@@ -924,7 +922,7 @@ async function enviarEmailAceptacion(mudanza, cot) {
   // ── 3. Email al CLIENTE con botón de pago ────────
   if (mudanza.clienteEmail) {
     await resend.emails.send({
-      from: 'MudateYa <onboarding@resend.dev>',
+      from: 'MudateYa <noreply@mudateya.ar>',
       to: mudanza.clienteEmail,
       subject: `✅ Aceptaste la cotización — Pagá ahora con Mercado Pago`,
       html: `<div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
@@ -979,7 +977,7 @@ async function enviarEmailAceptacion(mudanza, cot) {
   // ── 4. Email al MUDANCERO ────────────────────────
   if (cot.mudanceroEmail) {
     await resend.emails.send({
-      from: 'MudateYa <onboarding@resend.dev>',
+      from: 'MudateYa <noreply@mudateya.ar>',
       to: cot.mudanceroEmail,
       subject: `🎉 ¡Aceptaron tu cotización! — ${mudanza.desde} → ${mudanza.hasta}`,
       html: `<div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
@@ -1024,7 +1022,7 @@ async function notificarMudanceroInvitado(mudanza, perfil) {
   if (!process.env.RESEND_API_KEY || !perfil.email) return;
   const siteUrl = process.env.SITE_URL || 'https://mudateya.vercel.app';
   await resend.emails.send({
-    from: 'MudateYa <onboarding@resend.dev>',
+    from: 'MudateYa <noreply@mudateya.ar>',
     to:   perfil.email,
     subject: `⭐ Te eligieron — ${mudanza.desde} → ${mudanza.hasta}`,
     html: `<div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
