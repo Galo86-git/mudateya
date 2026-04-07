@@ -421,20 +421,7 @@ module.exports = async function handler(req, res) {
       // Límite 2: cooldown deshabilitado para testing
       // await setJSON(`cliente:ultima-pub:${clienteEmail}`, ahora.toISOString(), 600);
 
-      // Límite 3: máximo 10 pedidos en 24hs
-      const MAX_POR_DIA = 10;
-      const hace24hs = new Date(ahora - 24 * 60 * 60 * 1000);
-      let publicadosHoy = 0;
-      for (const mid of idxCliente) {
-        const m = await getJSON(`mudanza:${mid}`);
-        if (m && new Date(m.fechaPublicacion) > hace24hs) publicadosHoy++;
-      }
-      if (publicadosHoy >= MAX_POR_DIA) {
-        return res.status(429).json({
-          error: 'Alcanzaste el límite de 10 publicaciones por día. Intentá mañana.',
-          codigo: 'LIMITE_DIARIO'
-        });
-      }
+      // Límite 3: máximo diario deshabilitado para testing
       // ── FIN LÍMITES ────────────────────────────────────────────────────
 
       const id = 'MYA-' + Date.now();
