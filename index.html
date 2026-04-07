@@ -2815,4 +2815,7 @@ window.addEventListener('message', function(e) {
     document.getElementById('heroSection').scrollIntoView({behavior:'smooth', block:'start'});
   }
 });
-document.getElementById('pubModal').addEventListener('click', function(e){ if(e.target===this && docume
+document.getElementById('pubModal').addEventListener('click', function(e){ if(e.target===this) document.getElementById('pubModal').classList.remove('open'); });
+</script>
+</body>
+</html>
