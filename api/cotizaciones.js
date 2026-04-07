@@ -27,293 +27,296 @@ async function setJSON(key, value, exSeconds) {
 }
 
 // ════════════════════════════════════════════════════
-// GENERADOR PDF con pdfmake
+// GENERADOR PDF con PDFKit
 // ════════════════════════════════════════════════════
 async function generarPDFBase64(datos) {
-  const PdfPrinter = require('pdfmake');
+  const PDFDocument = require('pdfkit');
 
-  const fonts = {
-    Helvetica: {
-      normal:      'Helvetica',
-      bold:        'Helvetica-Bold',
-      italics:     'Helvetica-Oblique',
-      bolditalics: 'Helvetica-BoldOblique',
-    },
-  };
-  const printer = new PdfPrinter(fonts);
-
-  const VERDE     = '#22C36A';
-  const VERDE_BG  = '#0D2018';
-  const VERDE_DIM = '#1A9A52';
-  const BG        = '#0A1410';
-  const CARD      = '#101C16';
-  const CARD2     = '#152018';
-  const WHITE     = '#E8F5EE';
-  const MUTED     = '#5A8A78';
-  const DIM       = '#2E4A3A';
-  const GOLD      = '#F5A623';
-  const BORDER_C  = '#1E3028';
-
-  const nro          = datos.id || 'MYA-0001';
-  const fechaEmision = datos.fechaEmision || new Date().toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' });
+  // ── DATOS ────────────────────────────────────────────────────────
+  const nro           = datos.id || 'MYA-0001';
+  const fechaDoc      = datos.fechaEmision || new Date().toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' });
   const clienteNombre = datos.clienteNombre || '—';
   const clienteEmail  = datos.clienteEmail  || '—';
   const mudNombre     = datos.mudanceroNombre || '—';
-  const mudInits      = (datos.mudancero_initials || datos.mudanceroNombre || 'MV').slice(0,2).toUpperCase();
-  const estrellas     = parseFloat(datos.estrellas || 4.8);
-  const nroResenas    = datos.nro_resenas || '';
-  const vehiculo      = datos.vehiculo || '';
+  const mudInits      = (datos.mudanceroNombre || 'MV').slice(0,2).toUpperCase();
   const desde         = datos.desde || '—';
   const hasta         = datos.hasta || '—';
-  const fechaMud      = datos.fecha || datos.fecha_mudanza || '—';
+  const fechaMud      = datos.fecha || '—';
   const ambientes     = datos.ambientes || '—';
   const objetos       = datos.objetos || datos.servicios || '—';
   const extras        = datos.extras || '';
   const nota          = datos.nota || '';
-  const precio        = parseInt(String(datos.precio || datos.precio_total || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0;
-  const esFlete       = datos.ambientes === 'Flete' || datos.tipo === 'flete';
-  const feePct        = esFlete ? 0.20 : 0.15;
-  const fee           = Math.round(precio * feePct / 500) * 500;
-  const resto         = precio - fee;
-  const fmt           = (n) => '$' + n.toLocaleString('es-AR');
-  const starStr       = '*'.repeat(Math.floor(estrellas)) + '-'.repeat(5 - Math.floor(estrellas));
+  const tiempo        = datos.tiempoEstimado || '';
+  const precio        = parseInt(String(datos.precio || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0;
+  const precioFmt     = '$' + precio.toLocaleString('es-AR');
 
-  function rowBorder() {
-    return { canvas: [{ type: 'line', x1: 0, y1: 4, x2: 467, y2: 4, lineWidth: 0.3, lineColor: BORDER_C }] };
+  // ── COLORES ───────────────────────────────────────────────────────
+  // Paleta MudateYa — legible sobre blanco
+  const C_NAVY    = '#003580';   // azul oscuro — textos principales, logo
+  const C_GREEN   = '#22C36A';   // verde — acentos, precio
+  const C_GRND    = '#17A356';   // verde oscuro — textos sobre fondo verde
+  const C_BLUE    = '#1A6FFF';   // azul medio — títulos sección
+  const C_TEXT1   = '#0F1923';   // negro suave — texto principal
+  const C_TEXT2   = '#475569';   // gris medio — texto secundario
+  const C_TEXT3   = '#64748B';   // gris claro — labels, hints
+  const C_BG1     = '#FFFFFF';   // blanco puro
+  const C_BG2     = '#F5F7FA';   // gris muy claro — fondo alternante
+  const C_BG3     = '#E8F5EE';   // verde muy claro — fondo precio, verificado
+  const C_BG4     = '#F0FFF6';   // verde palido — fondo badge
+  const C_BORDER  = '#E2E8F0';   // borde gris claro
+  const C_BGRN    = '#BBF7D0';   // borde verde
+
+  // ── DOCUMENTO ────────────────────────────────────────────────────
+  const doc = new PDFDocument({
+    size: 'A4',
+    margins: { top: 0, bottom: 0, left: 0, right: 0 },
+    info: { Title: 'Presupuesto MudateYa ' + nro },
+    bufferPages: true,
+  });
+
+  const chunks = [];
+  doc.on('data', c => chunks.push(c));
+
+  const PW = 595.28;  // page width
+  const PH = 841.89;  // page height
+  const ML = 40;      // margen izquierdo
+  const MR = 40;      // margen derecho
+  const CW = PW - ML - MR;  // content width = 515.28
+
+  // ── HELPERS ───────────────────────────────────────────────────────
+  function fillRect(x, y, w, h, color, r) {
+    r = r || 0;
+    if (r > 0) doc.roundedRect(x, y, w, h, r).fill(color);
+    else doc.rect(x, y, w, h).fill(color);
+  }
+  function strokeRect(x, y, w, h, color, lw, r) {
+    doc.save();
+    doc.lineWidth(lw || 0.5).strokeColor(color);
+    if (r) doc.roundedRect(x, y, w, h, r).stroke();
+    else doc.rect(x, y, w, h).stroke();
+    doc.restore();
+  }
+  function hLine(x1, x2, y, color, lw) {
+    doc.save().moveTo(x1, y).lineTo(x2, y).strokeColor(color).lineWidth(lw || 0.5).stroke().restore();
+  }
+  function t(str, x, y, font, size, color, opts) {
+    doc.font(font).fontSize(size).fillColor(color);
+    doc.text(String(str || ''), x, y, opts || {});
+  }
+  function label(str, x, y, w) {
+    t(str.toUpperCase(), x, y, 'Helvetica-Bold', 7, C_TEXT3, { width: w || CW, lineBreak: false });
+  }
+  function value(str, x, y, w) {
+    t(str, x, y, 'Helvetica', 9, C_TEXT1, { width: w || CW - 110, lineBreak: false });
   }
 
-  function detalleRow(lbl, val, isLast) {
-    return {
-      stack: [
-        {
-          columns: [
-            { text: lbl.toUpperCase(), font: 'Helvetica', bold: true, fontSize: 7.5, color: MUTED, width: 90 },
-            { text: String(val || '—'), font: 'Helvetica', fontSize: 8.5, color: WHITE, width: '*' },
-          ],
-        },
-        isLast ? { text: '' } : rowBorder(),
-      ],
-      margin: [0, 5, 0, isLast ? 0 : 5],
-    };
-  }
+  // ══════════════════════════════════════════════════════════════════
+  // ESTRUCTURA DE LA PÁGINA
+  // ══════════════════════════════════════════════════════════════════
 
-  const filasDet = [
-    ['Desde',     desde],
-    ['Hasta',     hasta],
-    ['Fecha',     fechaMud],
-    ['Ambientes', ambientes],
-    ['Objetos',   objetos],
+  let Y = 0;
+
+  // ── 1. HEADER ─────────────────────────────────────────────────────
+  // Fondo blanco con franja verde abajo
+  fillRect(0, 0, PW, 72, C_BG1);
+  // Franja verde inferior del header
+  fillRect(0, 68, PW, 4, C_GREEN);
+
+  // Logo MudateYa
+  doc.font('Helvetica-Bold').fontSize(28).fillColor(C_NAVY);
+  doc.text('Mudate', ML, 20, { lineBreak: false, continued: false });
+  const wMudate = doc.widthOfString('Mudate');
+  doc.font('Helvetica-Bold').fontSize(28).fillColor(C_GREEN);
+  doc.text('Ya', ML + wMudate, 20, { lineBreak: false });
+
+  // Subtítulo
+  doc.font('Helvetica').fontSize(8).fillColor(C_TEXT3);
+  doc.text('El marketplace de mudanzas de Argentina', ML, 52, { lineBreak: false });
+
+  // Número de cotización (derecha)
+  doc.font('Helvetica-Bold').fontSize(14).fillColor(C_NAVY);
+  doc.text(nro, 0, 18, { width: PW - MR, align: 'right' });
+  doc.font('Helvetica').fontSize(7).fillColor(C_TEXT3);
+  doc.text('COTIZACION', 0, 38, { width: PW - MR, align: 'right' });
+  doc.font('Helvetica').fontSize(8).fillColor(C_TEXT2);
+  doc.text(fechaDoc, 0, 50, { width: PW - MR, align: 'right' });
+
+  Y = 82;
+
+  // ── 2. BADGE ──────────────────────────────────────────────────────
+  fillRect(0, Y, PW, 24, C_BG4);
+  hLine(0, PW, Y, C_BGRN, 0.5);
+  hLine(0, PW, Y + 24, C_BGRN, 0.5);
+  doc.font('Helvetica-Bold').fontSize(8).fillColor(C_GRND);
+  doc.text('PRESUPUESTO OFICIAL  -  Valido 24hs', ML, Y + 8);
+
+  Y = 116;
+
+  // ── 3. CLIENTE + MUDANCERO ────────────────────────────────────────
+  const CARD_H = 76;
+  const COL_W  = (CW - 12) / 2;
+
+  // Card cliente
+  fillRect(ML, Y, COL_W, CARD_H, C_BG2, 6);
+  strokeRect(ML, Y, COL_W, CARD_H, C_BORDER, 0.5, 6);
+  label('Cliente', ML + 12, Y + 10, COL_W - 20);
+  doc.font('Helvetica-Bold').fontSize(12).fillColor(C_NAVY);
+  doc.text(clienteNombre, ML + 12, Y + 24, { width: COL_W - 20, lineBreak: false });
+  doc.font('Helvetica').fontSize(8).fillColor(C_TEXT3);
+  doc.text(clienteEmail, ML + 12, Y + 42, { width: COL_W - 20, lineBreak: false });
+
+  // Card mudancero
+  const MX = ML + COL_W + 12;
+  fillRect(MX, Y, COL_W, CARD_H, C_BG2, 6);
+  strokeRect(MX, Y, COL_W, CARD_H, C_BORDER, 0.5, 6);
+  label('Mudancero', MX + 12, Y + 10, COL_W - 20);
+
+  // Avatar
+  fillRect(MX + 12, Y + 24, 32, 32, C_BG3, 5);
+  strokeRect(MX + 12, Y + 24, 32, 32, C_BGRN, 0.5, 5);
+  doc.font('Helvetica-Bold').fontSize(11).fillColor(C_GRND);
+  doc.text(mudInits, MX + 12, Y + 31, { width: 32, align: 'center' });
+
+  // Nombre mudancero
+  doc.font('Helvetica-Bold').fontSize(12).fillColor(C_NAVY);
+  doc.text(mudNombre, MX + 52, Y + 24, { width: COL_W - 64, lineBreak: false });
+
+  // Badge verificado
+  fillRect(MX + 52, Y + 44, 60, 14, C_BG3, 3);
+  strokeRect(MX + 52, Y + 44, 60, 14, C_BGRN, 0.5, 3);
+  doc.font('Helvetica-Bold').fontSize(6.5).fillColor(C_GRND);
+  doc.text('VERIFICADO', MX + 52, Y + 48, { width: 60, align: 'center' });
+
+  Y += CARD_H + 16;
+
+  // ── 4. DETALLE MUDANZA ────────────────────────────────────────────
+  // Título sección
+  doc.font('Helvetica-Bold').fontSize(8).fillColor(C_BLUE);
+  doc.text('DETALLE DE LA MUDANZA', ML, Y);
+  Y += 12;
+  hLine(ML, PW - MR, Y, C_BORDER, 0.5);
+  Y += 6;
+
+  const filas = [
+    ['DESDE',      desde    ],
+    ['HASTA',      hasta    ],
+    ['FECHA',      fechaMud ],
+    ['AMBIENTES',  ambientes],
+    ['OBJETOS',    objetos  ],
   ];
-  if (extras) filasDet.push(['Servicios', extras]);
-  if (nota)   filasDet.push(['Nota del mudancero', nota]);
+  if (extras) filas.push(['SERVICIOS', extras]);
+  if (nota)   filas.push(['NOTA', nota]);
+  if (tiempo) filas.push(['TIEMPO EST.', tiempo]);
 
-  function cardLayout(fillC, borderC) {
-    return {
-      fillColor:    () => fillC,
-      hLineColor:   () => borderC,
-      vLineColor:   () => borderC,
-      hLineWidth:   () => 0.5,
-      vLineWidth:   () => 0.5,
-      paddingLeft:  () => 14,
-      paddingRight: () => 14,
-      paddingTop:   () => 12,
-      paddingBottom:() => 12,
-    };
-  }
+  filas.forEach(([lbl, val], i) => {
+    const rowH = 20;
+    if (i % 2 === 0) fillRect(ML, Y, CW, rowH, C_BG2, 2);
+    doc.font('Helvetica-Bold').fontSize(7.5).fillColor(C_TEXT3);
+    doc.text(lbl, ML + 10, Y + 6, { width: 90, lineBreak: false });
+    doc.font('Helvetica').fontSize(9).fillColor(C_TEXT1);
+    doc.text(String(val || '—'), ML + 108, Y + 6, { width: CW - 118, lineBreak: false });
+    Y += rowH;
+  });
 
-  function badgeLayout(fillC, borderC) {
-    return {
-      fillColor:    () => fillC,
-      hLineColor:   () => borderC,
-      vLineColor:   () => borderC,
-      hLineWidth:   () => 0.5,
-      vLineWidth:   () => 0.5,
-      paddingLeft:  () => 6,
-      paddingRight: () => 6,
-      paddingTop:   () => 2,
-      paddingBottom:() => 2,
-    };
-  }
+  Y += 14;
 
-  function numBadge(num) {
-    return {
-      table: { body: [[{ text: num, bold: true, fontSize: 10, color: VERDE, alignment: 'center' }]] },
-      layout: {
-        fillColor: () => VERDE_BG, hLineColor: () => VERDE_DIM, vLineColor: () => VERDE_DIM,
-        hLineWidth: () => 0.6, vLineWidth: () => 0.6,
-        paddingLeft: () => 8, paddingRight: () => 8, paddingTop: () => 4, paddingBottom: () => 4,
-      },
-      margin: [0, 0, 0, 5],
-    };
-  }
+  // ── 5. PRECIO ─────────────────────────────────────────────────────
+  fillRect(ML, Y, CW, 68, C_BG3, 8);
+  strokeRect(ML, Y, CW, 68, C_BGRN, 0.5, 8);
+  // Barra izquierda verde
+  fillRect(ML, Y, 5, 68, C_GREEN, 0);
 
-  const dd = {
-    pageSize: 'A4',
-    pageMargins: [36, 36, 36, 36],
-    background: () => [
-      { canvas: [{ type: 'rect', x: 0, y: 0, w: 595, h: 842, color: BG }] },
-      { canvas: [{ type: 'rect', x: 0, y: 0, w: 4,   h: 842, color: VERDE }] },
-    ],
-    defaultStyle: { font: 'Helvetica', fontSize: 9, color: WHITE },
+  doc.font('Helvetica-Bold').fontSize(36).fillColor(C_NAVY);
+  doc.text(precioFmt, ML + 20, Y + 10, { lineBreak: false });
+  doc.font('Helvetica-Bold').fontSize(7).fillColor(C_TEXT3);
+  doc.text('PRECIO TOTAL', ML + 20, Y + 52);
+  doc.font('Helvetica').fontSize(8).fillColor(C_TEXT2);
+  doc.text('Pago 100% por Mercado Pago.  Seguro y protegido.', ML + 180, Y + 28, { width: CW - 190 });
 
-    content: [
+  Y += 82;
 
-      // ── HEADER ──────────────────────────────────
-      {
-        table: { widths: ['*', 'auto'], body: [[
-          { stack: [
-            { columns: [
-              { text: 'Mudate', bold: true, fontSize: 24, color: WHITE, width: 'auto' },
-              { text: 'Ya',     bold: true, fontSize: 24, color: VERDE,  width: 'auto' },
-            ], columnGap: 0 },
-            { text: 'El marketplace de mudanzas de Argentina', fontSize: 8, color: MUTED, margin: [0, 3, 0, 6] },
-            { table: { body: [[{ text: 'PRESUPUESTO OFICIAL - valido 24hs', bold: true, fontSize: 7, color: VERDE }]] },
-              layout: badgeLayout(VERDE_BG, VERDE_DIM), margin: [0,0,0,0] },
-          ]},
-          { stack: [
-            { text: nro, bold: true, fontSize: 14, color: VERDE, alignment: 'right' },
-            { text: 'COTIZACIÓN', bold: true, fontSize: 7, color: MUTED, alignment: 'right', characterSpacing: 0.8, margin: [0, 3, 0, 2] },
-            { text: fechaEmision, fontSize: 8, color: MUTED, alignment: 'right' },
-          ], alignment: 'right' },
-        ]]},
-        layout: cardLayout(CARD, BORDER_C),
-        margin: [0, 0, 0, 8],
-      },
+  // ── 6. PROXIMOS PASOS ─────────────────────────────────────────────
+  doc.font('Helvetica-Bold').fontSize(8).fillColor(C_BLUE);
+  doc.text('PROXIMOS PASOS', ML, Y);
+  Y += 12;
 
-      // ── CLIENTE + MUDANCERO ──────────────────────
-      {
-        columns: [
-          { width: '48%', table: { widths: ['*'], body: [[{ stack: [
-            { text: 'CLIENTE', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.8, margin: [0,0,0,8] },
-            { text: clienteNombre, bold: true, fontSize: 11, color: WHITE },
-            { text: clienteEmail, fontSize: 8, color: MUTED, margin: [0,3,0,0] },
-          ]}]]}, layout: cardLayout(CARD2, BORDER_C) },
-          { width: '4%', text: '' },
-          { width: '48%', table: { widths: ['*'], body: [[{ stack: [
-            { text: 'MUDANCERO', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.8, margin: [0,0,0,8] },
-            { columns: [
-              { width: 34, stack: [
-                { table: { body: [[{ text: mudInits, bold: true, fontSize: 10, color: VERDE, alignment: 'center' }]] },
-                  layout: { fillColor: () => VERDE_BG, hLineColor: () => VERDE_DIM, vLineColor: () => VERDE_DIM,
-                    hLineWidth: () => 0.8, vLineWidth: () => 0.8,
-                    paddingLeft: () => 5, paddingRight: () => 5, paddingTop: () => 6, paddingBottom: () => 6 } },
-              ], margin: [0, 0, 8, 0] },
-              { stack: [
-                { text: mudNombre, bold: true, fontSize: 11, color: WHITE },
-                { columns: [
-                  { text: starStr, fontSize: 9, color: GOLD, width: 'auto' },
-                  { text: `  ${estrellas}${nroResenas ? '  ·  ' + nroResenas + ' reseñas' : ''}`, fontSize: 7, color: MUTED, width: '*', margin: [0,1,0,0] },
-                ], margin: [0,3,0,4] },
-                { columns: [
-                  { table: { body: [[{ text: 'VERIFICADO', bold: true, fontSize: 6.5, color: VERDE }]] },
-                    layout: badgeLayout(VERDE_BG, VERDE_DIM), width: 'auto' },
-                  vehiculo ? { width: 4, text: '' } : null,
-                  vehiculo ? { table: { body: [[{ text: vehiculo, fontSize: 6.5, color: MUTED }]] },
-                    layout: badgeLayout(CARD, BORDER_C), width: 'auto' } : null,
-                ].filter(Boolean) },
-              ]},
-            ], columnGap: 0 },
-          ]}]]}, layout: cardLayout(CARD2, BORDER_C) },
-        ],
-        columnGap: 0,
-        margin: [0, 0, 0, 8],
-      },
+  fillRect(ML, Y, CW, 64, C_BG2, 6);
+  strokeRect(ML, Y, CW, 64, C_BORDER, 0.5, 6);
 
-      // ── DETALLE MUDANZA ──────────────────────────
-      {
-        table: { widths: ['*'], body: [[{ stack: [
-          { text: 'DETALLE DE LA MUDANZA', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.8, margin: [0,0,0,6] },
-          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 467, y2: 0, lineWidth: 0.4, lineColor: BORDER_C }] },
-          { text: '', margin: [0, 4, 0, 0] },
-          ...filasDet.map(([lbl, val], i) => detalleRow(lbl, val, i === filasDet.length - 1)),
-        ]}]]},
-        layout: cardLayout(CARD, BORDER_C),
-        margin: [0, 0, 0, 8],
-      },
+  const pasos = [
+    ['1', 'Aceptar\ncotizacion'],
+    ['2', 'Pagar con\nMercado Pago'],
+    ['3', 'Coordinar\nfecha y hora'],
+    ['4', 'Mudanza\nlista!'],
+  ];
+  const stepW = CW / 4;
+  pasos.forEach(([num, txt], i) => {
+    const sx = ML + i * stepW + stepW / 2;
+    // Círculo
+    doc.circle(sx, Y + 26, 12).fill(C_GREEN);
+    doc.font('Helvetica-Bold').fontSize(11).fillColor(C_BG1);
+    doc.text(num, sx - 12, Y + 19, { width: 24, align: 'center' });
+    doc.font('Helvetica').fontSize(6.5).fillColor(C_TEXT2);
+    doc.text(txt, sx - 28, Y + 42, { width: 56, align: 'center' });
+    // Línea conectora
+    if (i < 3) hLine(sx + 12, sx + stepW - 12, Y + 26, C_BORDER, 1);
+  });
 
-      // ── PRECIO ───────────────────────────────────
-      {
-        table: { widths: ['*'], body: [[
-          { stack: [
-            { text: fmt(precio), bold: true, fontSize: 30, color: VERDE },
-            { text: 'PRECIO TOTAL', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.5, margin: [0,4,0,2] },
-            { text: 'Pago 100% por Mercado Pago. Seguro y protegido.', fontSize: 7.5, color: DIM },
-          ]},
-        ]]},
-        layout: {
-          fillColor:    () => VERDE_BG,
-          hLineColor:   () => VERDE_DIM,
-          vLineColor:   () => VERDE_DIM,
-          hLineWidth:   () => 0.7,
-          vLineWidth:   () => 0.7,
-          paddingLeft:  () => 14, paddingRight:  () => 14,
-          paddingTop:   () => 14, paddingBottom: () => 14,
-        },
-        margin: [0, 0, 0, 8],
-      },
+  Y += 78;
 
-      // ── PRÓXIMOS PASOS ───────────────────────────
-      {
-        table: { widths: ['*'], body: [[{ stack: [
-          { text: 'PRÓXIMOS PASOS', bold: true, fontSize: 7, color: MUTED, characterSpacing: 0.8, margin: [0,0,0,10] },
-          { columns: [
-            { width: '25%', stack: [ numBadge('1'), { text: 'Aceptar cotización\nen MudateYa', fontSize: 7, color: MUTED, alignment: 'center' } ] },
-            { width: '25%', stack: [ numBadge('2'), { text: 'Pagar el total\ncon Mercado Pago', fontSize: 7, color: MUTED, alignment: 'center' } ] },
-            { width: '25%', stack: [ numBadge('3'), { text: 'Coordinar fecha\ny hora', fontSize: 7, color: MUTED, alignment: 'center' } ] },
-            { width: '25%', stack: [ numBadge('4'), { text: '¡Mudanza lista!', fontSize: 7, color: MUTED, alignment: 'center' } ] },
-          ], columnGap: 8 },
-        ]}]]},
-        layout: cardLayout(CARD2, BORDER_C),
-        margin: [0, 0, 0, 8],
-      },
+  // ── 7. GARANTIAS ──────────────────────────────────────────────────
+  doc.font('Helvetica-Bold').fontSize(8).fillColor(C_BLUE);
+  doc.text('POR QUE ELEGIRNOS', ML, Y);
+  Y += 12;
 
-      // ── GARANTÍAS ────────────────────────────────
-      {
-        columns: [
-          ['MP',  'Pago seguro',   'Mercado Pago'],
-          ['ID',  'Verificado',    'DNI confirmado'],
-          ['4.8', 'Promedio',      'Miles de resenas'],
-          ['$OK', 'Sin sorpresas', 'Precio acordado'],
-        ].map(([icon, title, sub]) => ({
-          width: '25%',
-          table: { widths: ['*'], body: [[{ stack: [
-            { text: icon,  fontSize: 16, color: VERDE, alignment: 'center', margin: [0,0,0,4] },
-            { text: title, bold: true, fontSize: 7.5, color: WHITE, alignment: 'center', margin: [0,0,0,2] },
-            { text: sub,   fontSize: 6.5, color: MUTED, alignment: 'center' },
-          ]}]]},
-          layout: {
-            fillColor: () => CARD, hLineColor: () => BORDER_C, vLineColor: () => BORDER_C,
-            hLineWidth: () => 0.4, vLineWidth: () => 0.4,
-            paddingLeft: () => 6, paddingRight: () => 6, paddingTop: () => 10, paddingBottom: () => 10,
-          },
-        })),
-        columnGap: 4,
-        margin: [0, 0, 0, 10],
-      },
+  const garantias = [
+    { icon: 'MP',   titulo: 'Pago seguro',    sub: 'Mercado Pago' },
+    { icon: 'DNI',  titulo: 'Verificado',      sub: 'Identidad confirmada' },
+    { icon: '*****', titulo: 'Resenas',          sub: 'Verificadas' },
+    { icon: '$=',   titulo: 'Sin sorpresas',   sub: 'Precio acordado' },
+  ];
+  const GW = (CW - 9) / 4;
+  garantias.forEach((g, i) => {
+    const gx = ML + i * (GW + 3);
+    fillRect(gx, Y, GW, 54, C_BG2, 5);
+    strokeRect(gx, Y, GW, 54, C_BORDER, 0.5, 5);
+    doc.font('Helvetica-Bold').fontSize(12).fillColor(C_NAVY);
+    doc.text(g.icon, gx, Y + 8, { width: GW, align: 'center' });
+    doc.font('Helvetica-Bold').fontSize(7).fillColor(C_TEXT1);
+    doc.text(g.titulo, gx, Y + 28, { width: GW, align: 'center' });
+    doc.font('Helvetica').fontSize(6).fillColor(C_TEXT3);
+    doc.text(g.sub, gx, Y + 40, { width: GW, align: 'center' });
+  });
 
-      // ── FOOTER ───────────────────────────────────
-      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 523, y2: 0, lineWidth: 0.4, lineColor: BORDER_C }], margin: [0,0,0,6] },
-      { columns: [
-        { columns: [
-          { text: 'MudateYa', bold: true, fontSize: 9, color: VERDE, width: 'auto' },
-          { text: '  -  El marketplace de mudanzas de Argentina  -  mudateya.ar', fontSize: 8, color: MUTED, width: '*', margin: [0,1,0,0] },
-        ]},
-        { text: `Válida 24hs · ${nro}`, fontSize: 7, color: DIM, alignment: 'right', margin: [0,1,0,0] },
-      ]},
-    ],
-  };
+  Y += 68;
+
+  // ── 8. AVISO PAGO SEGURO ──────────────────────────────────────────
+  const avisoY = Y;
+  fillRect(ML, avisoY, CW, 26, '#FFFBEB', 5);
+  strokeRect(ML, avisoY, CW, 26, '#FCD34D', 0.5, 5);
+  fillRect(ML, avisoY, 4, 26, '#F59E0B', 0);
+  doc.font('Helvetica').fontSize(7.5).fillColor('#92400E').text('MudateYa solo garantiza pagos a traves de su plataforma. Pagos fuera de la plataforma no estan protegidos.', ML + 14, avisoY + 8, { width: CW - 28 });
+
+  Y += 44;
+
+  // ── 9. FOOTER ─────────────────────────────────────────────────────
+  hLine(ML, PW - MR, Y, C_BORDER, 0.5);
+  Y += 8;
+  doc.font('Helvetica-Bold').fontSize(9).fillColor(C_NAVY);
+  doc.text('MudateYa', ML, Y, { lineBreak: false });
+  doc.font('Helvetica').fontSize(8).fillColor(C_TEXT3);
+  doc.text('  mudateya.ar  -  hola@mudateya.ar', ML + 56, Y, { lineBreak: false });
+  doc.font('Helvetica').fontSize(7).fillColor(C_TEXT3);
+  doc.text('Valida 24hs  |  ' + nro, 0, Y, { width: PW - MR, align: 'right' });
+
+  doc.end();
 
   return new Promise((resolve, reject) => {
-    try {
-      const pdfDoc = printer.createPdfKitDocument(dd);
-      const chunks = [];
-      pdfDoc.on('data', chunk => chunks.push(chunk));
-      pdfDoc.on('end', () => resolve(Buffer.concat(chunks).toString('base64')));
-      pdfDoc.on('error', reject);
-      pdfDoc.end();
-    } catch(e) { reject(e); }
+    doc.on('end', () => resolve(Buffer.concat(chunks).toString('base64')));
+    doc.on('error', reject);
   });
 }
+
 
 // ════════════════════════════════════════════════════
 // HANDLER PRINCIPAL
@@ -479,12 +482,12 @@ module.exports = async function handler(req, res) {
         }
       }
 
-      // Límite de cotizaciones deshabilitado temporalmente para testing
+      // Limite deshabilitado para testing
 
       const cotizacion = { id: 'COT-' + Date.now(), mudanzaId, mudanceroEmail, mudanceroNombre, mudanceroTel, precio: parseInt(precio), nota: nota||'', tiempoEstimado: tiempoEstimado||'', fecha: new Date().toISOString(), estado: 'pendiente' };
       mudanza.cotizaciones.push(cotizacion);
 
-      // Cierre automático deshabilitado temporalmente para testing
+      // Cierre automatico deshabilitado para testing
       await setJSON(`mudanza:${mudanzaId}`, mudanza, 172800);
       const mudIdx = await getJSON(`mudancero:${mudanceroEmail}`) || [];
       if (!mudIdx.includes(mudanzaId)) mudIdx.push(mudanzaId);
