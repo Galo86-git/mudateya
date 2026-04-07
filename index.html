@@ -1836,14 +1836,21 @@ async function cargarResultados() {
         m.precios = { amb1: 450000, amb2: 550000, amb3: 680000, amb4: 860000, flete: 160000 };
       }
       // Mapear campos del formulario (precio1amb → amb1, etc.)
-      if (m.precio1amb && !m.precios.amb1) m.precios.amb1 = parseInt(m.precio1amb);
-      if (m.precio2amb && !m.precios.amb2) m.precios.amb2 = parseInt(m.precio2amb);
-      if (m.precio3amb && !m.precios.amb3) m.precios.amb3 = parseInt(m.precio3amb);
-      if (m.precio4amb && !m.precios.amb4) m.precios.amb4 = parseInt(m.precio4amb);
-      if (m.precioFlete && !m.precios.flete) m.precios.flete = parseInt(m.precioFlete);
-      if (!m.precios.amb1 || m.precios.amb1 < 50000) {
-        m.precios.amb1  = Math.max(380000, (m.precios.amb1 || 450000) * 7);
-        m.precios.flete = Math.max(130000, (m.precios.flete || 150000) * 7);
+      // Limpiar puntos de miles antes de parseInt (ej: "300.000" → 300000)
+      function _parsePrecio(v) { return parseInt(String(v||0).replace(/\./g,'').replace(/[^0-9]/g,''))||0; }
+      if (m.precio1amb && !m.precios.amb1) m.precios.amb1 = _parsePrecio(m.precio1amb);
+      if (m.precio2amb && !m.precios.amb2) m.precios.amb2 = _parsePrecio(m.precio2amb);
+      if (m.precio3amb && !m.precios.amb3) m.precios.amb3 = _parsePrecio(m.precio3amb);
+      if (m.precio4amb && !m.precios.amb4) m.precios.amb4 = _parsePrecio(m.precio4amb);
+      if (m.precioFlete && !m.precios.flete) m.precios.flete = _parsePrecio(m.precioFlete);
+      // También limpiar precios.amb* si ya venían con puntos
+      ['amb1','amb2','amb3','amb4','flete'].forEach(function(k){
+        if (m.precios[k]) m.precios[k] = _parsePrecio(m.precios[k]);
+      });
+      // Solo usar fallback si realmente no tiene precio cargado
+      if (!m.precios.amb1 || m.precios.amb1 < 1000) {
+        m.precios.amb1  = 450000;
+        m.precios.flete = 150000;
       }
       if (!m.calificacion) m.calificacion = 4.5;
       if (!m.nroResenas) m.nroResenas = 0;
