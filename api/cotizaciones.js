@@ -296,7 +296,7 @@ async function generarPDFBase64(datos) {
       { columns: [
         { columns: [
           { text: 'MudateYa', bold: true, fontSize: 9, color: VERDE, width: 'auto' },
-          { text: ' · El marketplace de mudanzas de Argentina · mudateya.com.ar', fontSize: 8, color: MUTED, width: '*', margin: [0,1,0,0] },
+          { text: ' · El marketplace de mudanzas de Argentina · mudateya.ar', fontSize: 8, color: MUTED, width: '*', margin: [0,1,0,0] },
         ]},
         { text: `Válida 24hs · ${nro}`, fontSize: 7, color: DIM, alignment: 'right', margin: [0,1,0,0] },
       ]},
@@ -791,19 +791,23 @@ async function notificarMudanceros(mudanza) {
     from: 'MudateYa <noreply@mudateya.ar>',
     to: adminEmail,
     subject: `🚛 Nueva mudanza — ${mudanza.desde} → ${mudanza.hasta} · ${mudanza.id}`,
-    html: `<div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
-      <div style="background:#22C36A;padding:18px 22px"><h2 style="margin:0;color:#041A0E">🚛 Nueva mudanza · ${mudanza.id}</h2></div>
-      <div style="padding:22px">
-        <table style="width:100%">
-          <tr><td style="color:#7AADA0;padding:6px 0;width:35%">De</td><td><strong>${mudanza.desde}</strong></td></tr>
-          <tr><td style="color:#7AADA0;padding:6px 0">A</td><td><strong>${mudanza.hasta}</strong></td></tr>
-          <tr><td style="color:#7AADA0;padding:6px 0">Tamaño</td><td>${mudanza.ambientes}</td></tr>
-          <tr><td style="color:#7AADA0;padding:6px 0">Fecha</td><td>${mudanza.fecha}</td></tr>
-          <tr><td style="color:#7AADA0;padding:6px 0">Estimado</td><td style="color:#22C36A;font-weight:700">$${parseInt(mudanza.precio_estimado||0).toLocaleString('es-AR')}</td></tr>
-          <tr><td style="color:#7AADA0;padding:6px 0">Expira</td><td style="color:#FFB300">${expira}</td></tr>
+    html: `<div style="font-family:Arial,sans-serif;max-width:580px;margin:0 auto;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+      <div style="background:#003580;padding:20px 28px"><span style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:#fff">Mudate</span><span style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:#22C36A">Ya</span><span style="font-size:13px;color:rgba(255,255,255,.7);margin-left:12px">Admin · Nuevo pedido</span></div>
+      <div style="background:#EEF4FF;border-bottom:1px solid #C7D9FF;padding:12px 28px;font-size:13px;color:#1A6FFF;font-weight:600">🚛 Nueva mudanza · ${mudanza.id}</div>
+      <div style="padding:28px">
+        <table style="width:100%;border-collapse:collapse">
+          <tr><td style="color:#64748B;padding:7px 0;width:35%;font-size:13px">De</td><td style="font-weight:600;color:#0F1923;font-size:13px">${mudanza.desde}</td></tr>
+          <tr style="background:#F5F7FA"><td style="color:#64748B;padding:7px 6px;font-size:13px">A</td><td style="font-weight:600;color:#0F1923;font-size:13px;padding:7px 0">${mudanza.hasta}</td></tr>
+          <tr><td style="color:#64748B;padding:7px 0;font-size:13px">Tamaño</td><td style="font-size:13px;color:#0F1923">${mudanza.ambientes}</td></tr>
+          <tr style="background:#F5F7FA"><td style="color:#64748B;padding:7px 6px;font-size:13px">Fecha</td><td style="font-size:13px;color:#0F1923;padding:7px 0">${mudanza.fecha}</td></tr>
+          <tr><td style="color:#64748B;padding:7px 0;font-size:13px">Estimado</td><td style="color:#17A356;font-weight:700;font-size:14px">$${parseInt(mudanza.precio_estimado||0).toLocaleString('es-AR')}</td></tr>
+          <tr style="background:#F5F7FA"><td style="color:#64748B;padding:7px 6px;font-size:13px">Expira</td><td style="color:#F59E0B;font-weight:600;font-size:13px;padding:7px 0">${expira}</td></tr>
         </table>
-        <a href="https://mudateya.ar/mi-cuenta" style="display:inline-block;margin-top:16px;background:#22C36A;color:#041A0E;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700">Cotizar →</a>
+        <div style="margin-top:20px">
+          <a href="https://mudateya.ar/mi-cuenta" style="display:inline-block;background:#22C36A;color:#003580;padding:13px 26px;border-radius:9px;text-decoration:none;font-weight:700;font-size:14px">Cotizar →</a>
+        </div>
       </div>
+      <div style="background:#F5F7FA;border-top:1px solid #E2E8F0;padding:14px 28px;font-size:11px;color:#94A3B8;font-family:monospace">MudateYa · mudateya.ar</div>
     </div>`,
   });
 }
@@ -840,17 +844,34 @@ async function notificarCliente(mudanza, cotizacion) {
     from: 'MudateYa <noreply@mudateya.ar>',
     to: mudanza.clienteEmail,
     subject: `💰 Cotización de ${cotizacion.mudanceroNombre} — $${cotizacion.precio.toLocaleString('es-AR')}`,
-    html: `<div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
-      <div style="background:#22C36A;padding:18px 22px"><h2 style="margin:0;color:#041A0E">💰 Nueva cotización recibida</h2></div>
-      <div style="padding:22px">
-        <p style="color:#7AADA0"><strong style="color:#E8F5EE">${cotizacion.mudanceroNombre}</strong> cotizó tu mudanza <strong>${mudanza.desde} → ${mudanza.hasta}</strong></p>
-        <div style="background:#172018;border-radius:10px;padding:14px 18px;margin:14px 0">
-          <div style="font-size:1.8rem;color:#22C36A;font-weight:700">$${cotizacion.precio.toLocaleString('es-AR')}</div>
-          ${cotizacion.tiempoEstimado ? `<div style="color:#7AADA0;font-size:12px;margin-top:4px">⏱ ${cotizacion.tiempoEstimado}</div>` : ''}
-          ${cotizacion.nota ? `<div style="color:#7AADA0;font-size:12px;margin-top:8px;font-style:italic">"${cotizacion.nota}"</div>` : ''}
+    html: `<div style="font-family:Arial,sans-serif;max-width:580px;margin:0 auto;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+      <!-- Header -->
+      <div style="background:#003580;padding:20px 28px;display:flex;align-items:center">
+        <span style="font-family:Georgia,serif;font-size:22px;font-weight:900;color:#ffffff;letter-spacing:1px">Mudate</span><span style="font-family:Georgia,serif;font-size:22px;font-weight:900;color:#22C36A;letter-spacing:1px">Ya</span>
+      </div>
+      <!-- Badge -->
+      <div style="background:#F0FFF6;border-bottom:1px solid #BBF7D0;padding:12px 28px;font-size:13px;color:#16A34A;font-weight:600">
+        💰 Nueva cotización recibida
+      </div>
+      <!-- Body -->
+      <div style="padding:28px">
+        <p style="color:#475569;font-size:15px;margin-bottom:20px;line-height:1.6">
+          <strong style="color:#0F1923">${cotizacion.mudanceroNombre}</strong> cotizó tu mudanza<br>
+          <span style="color:#1A6FFF;font-weight:600">${mudanza.desde} → ${mudanza.hasta}</span>
+        </p>
+        <!-- Precio destacado -->
+        <div style="background:#F5F7FA;border:1px solid #E2E8F0;border-left:4px solid #22C36A;border-radius:10px;padding:18px 22px;margin:0 0 20px">
+          <div style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:monospace">Precio cotizado</div>
+          <div style="font-size:2rem;font-weight:700;color:#003580">$${cotizacion.precio.toLocaleString('es-AR')}</div>
+          ${cotizacion.tiempoEstimado ? `<div style="color:#64748B;font-size:13px;margin-top:6px">⏱ ${cotizacion.tiempoEstimado}</div>` : ''}
+          ${cotizacion.nota ? `<div style="color:#475569;font-size:13px;margin-top:8px;font-style:italic;border-top:1px solid #E2E8F0;padding-top:8px">"${cotizacion.nota}"</div>` : ''}
         </div>
-        <p style="color:#7AADA0;font-size:13px">Adjuntamos el detalle completo en PDF.</p>
-        <a href="https://mudateya.ar/mi-mudanza" style="display:inline-block;background:#22C36A;color:#041A0E;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700">Ver todas las cotizaciones →</a>
+        <p style="color:#64748B;font-size:13px;margin-bottom:20px">El detalle completo está adjunto en PDF.</p>
+        <a href="https://mudateya.ar/mi-mudanza" style="display:inline-block;background:#1A6FFF;color:#ffffff;padding:13px 26px;border-radius:9px;text-decoration:none;font-weight:700;font-size:14px">Ver mis cotizaciones →</a>
+      </div>
+      <!-- Footer -->
+      <div style="background:#F5F7FA;border-top:1px solid #E2E8F0;padding:14px 28px;font-size:11px;color:#94A3B8;font-family:monospace">
+        MudateYa · mudateya.ar · hola@mudateya.ar
       </div>
     </div>`,
     attachments,
@@ -925,49 +946,44 @@ async function enviarEmailAceptacion(mudanza, cot) {
       from: 'MudateYa <noreply@mudateya.ar>',
       to: mudanza.clienteEmail,
       subject: `✅ Aceptaste la cotización — Pagá ahora con Mercado Pago`,
-      html: `<div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
-        <div style="background:#22C36A;padding:18px 22px">
-          <h2 style="margin:0;color:#041A0E">✅ ¡Cotización aceptada!</h2>
+      html: `<div style="font-family:Arial,sans-serif;max-width:580px;margin:0 auto;background:#ffffff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+        <!-- Header -->
+        <div style="background:#003580;padding:20px 28px">
+          <span style="font-family:Georgia,serif;font-size:22px;font-weight:900;color:#fff">Mudate</span><span style="font-family:Georgia,serif;font-size:22px;font-weight:900;color:#22C36A">Ya</span>
         </div>
-        <div style="padding:22px">
-          <p style="color:#7AADA0;line-height:1.7">Hola <strong style="color:#E8F5EE">${mudanza.clienteNombre}</strong>,</p>
-          <p style="color:#7AADA0;line-height:1.7">
-            Aceptaste la cotización de <strong style="color:#E8F5EE">${cot.mudanceroNombre}</strong>.
-            Para confirmar la mudanza, completá el pago.
+        <!-- Badge -->
+        <div style="background:#F0FFF6;border-bottom:1px solid #BBF7D0;padding:12px 28px;font-size:13px;color:#16A34A;font-weight:600">
+          ✅ ¡Cotización aceptada!
+        </div>
+        <!-- Body -->
+        <div style="padding:28px">
+          <p style="color:#475569;font-size:15px;margin-bottom:18px;line-height:1.6">
+            Hola <strong style="color:#0F1923">${mudanza.clienteNombre}</strong>, aceptaste la cotización de <strong style="color:#003580">${cot.mudanceroNombre}</strong>. Para confirmar la mudanza, completá el pago.
           </p>
-
           <!-- Resumen -->
-          <div style="background:#172018;border-radius:10px;padding:14px 18px;margin:14px 0">
-            <table style="width:100%">
-              <tr><td style="color:#7AADA0;padding:5px 0;width:35%">Mudancero</td><td><strong>${cot.mudanceroNombre}</strong></td></tr>
-              <tr><td style="color:#7AADA0;padding:5px 0">Teléfono</td><td>${cot.mudanceroTel || '—'}</td></tr>
-              <tr><td style="color:#7AADA0;padding:5px 0">Ruta</td><td>${mudanza.desde} → ${mudanza.hasta}</td></tr>
-              <tr><td style="color:#7AADA0;padding:5px 0">Fecha</td><td>${mudanza.fecha}</td></tr>
-              <tr><td style="color:#7AADA0;padding:5px 0">Ambientes</td><td>${mudanza.ambientes}</td></tr>
-              ${cot.nota ? `<tr><td style="color:#7AADA0;padding:5px 0">Nota</td><td style="font-style:italic">${cot.nota}</td></tr>` : ''}
+          <div style="background:#F5F7FA;border:1px solid #E2E8F0;border-radius:10px;padding:16px 20px;margin:0 0 20px">
+            <table style="width:100%;border-collapse:collapse">
+              <tr><td style="color:#64748B;padding:6px 0;width:35%;font-size:13px">Mudancero</td><td style="font-weight:600;color:#0F1923;font-size:13px">${cot.mudanceroNombre}</td></tr>
+              <tr><td style="color:#64748B;padding:6px 0;font-size:13px">Teléfono</td><td style="font-size:13px;color:#0F1923">${cot.mudanceroTel || '—'}</td></tr>
+              <tr><td style="color:#64748B;padding:6px 0;font-size:13px">Ruta</td><td style="font-size:13px;color:#0F1923">${mudanza.desde} → ${mudanza.hasta}</td></tr>
+              <tr><td style="color:#64748B;padding:6px 0;font-size:13px">Fecha</td><td style="font-size:13px;color:#0F1923">${mudanza.fecha}</td></tr>
+              <tr><td style="color:#64748B;padding:6px 0;font-size:13px">Ambientes</td><td style="font-size:13px;color:#0F1923">${mudanza.ambientes}</td></tr>
+              ${cot.nota ? `<tr><td style="color:#64748B;padding:6px 0;font-size:13px">Nota</td><td style="font-size:13px;color:#475569;font-style:italic">${cot.nota}</td></tr>` : ''}
             </table>
           </div>
-
-          <!-- Precio + botón de pago -->
-          <div style="background:#0D2018;border:2px solid #22C36A;border-radius:12px;padding:20px;margin:20px 0;text-align:center">
-            <div style="font-size:13px;color:#5A8A78;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Total a pagar</div>
-            <div style="font-size:2.5rem;font-weight:700;color:#22C36A;margin-bottom:16px">${precioFmt}</div>
-            <a href="${linkPago}"
-               style="display:inline-block;background:#009EE3;color:white;padding:14px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;letter-spacing:.3px">
-              💳 Pagar con Mercado Pago
-            </a>
-            <p style="color:#3D6458;font-size:11px;margin-top:12px;margin-bottom:0">
-              🔒 Pago 100% seguro · MudateYa retiene el monto hasta confirmar el servicio
-            </p>
+          <!-- Precio + pago -->
+          <div style="background:#EEF4FF;border:2px solid #1A6FFF;border-radius:12px;padding:22px;margin:0 0 20px;text-align:center">
+            <div style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-family:monospace">Total a pagar</div>
+            <div style="font-size:2.2rem;font-weight:700;color:#003580;margin-bottom:18px">${precioFmt}</div>
+            <a href="${linkPago}" style="display:inline-block;background:#009EE3;color:#ffffff;padding:14px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px">💳 Pagar con Mercado Pago</a>
+            <p style="color:#64748B;font-size:11px;margin-top:12px;margin-bottom:0">🔒 Pago 100% seguro · MudateYa protege tu dinero hasta confirmar el servicio</p>
           </div>
-
-          <p style="color:#7AADA0;font-size:13px">
-            También podés acceder desde
-            <a href="${siteUrl}/mi-mudanza" style="color:#22C36A">tu panel de mudanzas</a>.
-          </p>
-          <p style="color:#3D6458;font-size:11px">
-            Adjuntamos el comprobante de cotización en PDF para tus registros.
-          </p>
+          <p style="color:#64748B;font-size:13px;margin-bottom:8px">También podés acceder desde <a href="${siteUrl}/mi-mudanza" style="color:#1A6FFF;font-weight:600">tu panel de mudanzas</a>.</p>
+          <p style="color:#94A3B8;font-size:12px">Adjuntamos el comprobante en PDF para tus registros.</p>
+        </div>
+        <!-- Footer -->
+        <div style="background:#F5F7FA;border-top:1px solid #E2E8F0;padding:14px 28px;font-size:11px;color:#94A3B8;font-family:monospace">
+          MudateYa · mudateya.ar · hola@mudateya.ar
         </div>
       </div>`,
       attachments,
