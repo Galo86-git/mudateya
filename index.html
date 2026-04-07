@@ -2628,9 +2628,47 @@ async function _publicar(modo) {
         desde:_busqueda.desde, hasta:_busqueda.hasta,
         ambientes:_busqueda.tipo==='mudanza' ? (_busqueda.ambientes+' ambientes') : 'Flete',
         fecha:_busqueda.fecha, servicios:objetos, zonaBase:_busqueda.desde,
-        precio_estimado:_busqueda.tipo==='mudanza'
-          ? _estimarPrecioMudanza(_busqueda.ambientes, _busqueda.distanciaKm || 15)
-          : _estimarPrecioFlete(_busqueda.distanciaKm || 15),
+        precio_estimado:(function(){
+          var nAmb = Math.max(1, Math.min(parseInt(_busqueda.ambientes)||1, 4));
+          var campo = nAmb===1?'amb1':nAmb===2?'amb2':nAmb===3?'amb3':'amb4';
+          // Modo dirigido: usar precio real del/los mudancero/s seleccionado/s
+          if (modo === 'dirigido' && _sel.size > 0) {
+            var precios = [];
+            _sel.forEach(function(email) {
+              var m = _todos.find(function(x){ return x.email===email; });
+              if (!m || !m.precios) return;
+              var p = _busqueda.tipo==='flete'
+                ? parseInt(String(m.precios.flete||0).replace(/\./g,''))
+                : parseInt(String(m.precios[campo]||m.precios.amb1||0).replace(/\./g,''));
+              if (p > 10000) precios.push(p);
+            });
+            if (precios.length === 1) return precios[0];
+            if (precios.length > 1) {
+              var sum = precios.reduce(function(a,b){return a+b;},0);
+              return Math.round(sum/precios.length/1000)*1000;
+            }
+          }
+          // Modo abierto: mediana del catálogo real
+          var catPrecios = [];
+          (_todos.length ? _todos : _MOCK).forEach(function(m) {
+            if (!m.precios) return;
+            var p = _busqueda.tipo==='flete'
+              ? parseInt(String(m.precios.flete||0).replace(/\./g,''))
+              : parseInt(String(m.precios[campo]||m.precios.amb1||0).replace(/\./g,''));
+            if (p > 10000) catPrecios.push(p);
+          });
+          if (catPrecios.length) {
+            catPrecios.sort(function(a,b){return a-b;});
+            var mid = Math.floor(catPrecios.length/2);
+            return catPrecios.length % 2 !== 0
+              ? catPrecios[mid]
+              : Math.round((catPrecios[mid-1]+catPrecios[mid])/2/1000)*1000;
+          }
+          // Fallback
+          return _busqueda.tipo==='mudanza'
+            ? _estimarPrecioMudanza(_busqueda.ambientes, _busqueda.distanciaKm || 15)
+            : _estimarPrecioFlete(_busqueda.distanciaKm || 15);
+        })(),
         distanciaKm: _busqueda.distanciaKm || null,
         tipo:_busqueda.tipo, modoCotizacion:modo,
         mudancerosInvitados:modo==='dirigido' ? Array.from(_sel) : [],
