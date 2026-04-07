@@ -596,14 +596,16 @@ function renderMudanzaCard(m, idx){
     +   (function(){
           var cotz = m.cotizaciones || [];
           if (cotz.length > 0) {
-            var precios = cotz.map(function(c){ return c.precio || 0; }).filter(Boolean).sort(function(a,b){return a-b;});
+            var precios = cotz.map(function(c){ return parseInt(String(c.precio||0).replace(/\./g,'').replace(/[^0-9]/g,''))||0; }).filter(Boolean).sort(function(a,b){return a-b;});
             if (precios.length === 1) {
               return '<span class="meta-tag" style="color:var(--blue);border-color:rgba(26,111,255,.25)">💰 Cotización: $'+precios[0].toLocaleString('es-AR')+'</span>';
             } else {
               return '<span class="meta-tag" style="color:var(--blue);border-color:rgba(26,111,255,.25)">💰 Rango: $'+precios[0].toLocaleString('es-AR')+' — $'+precios[precios.length-1].toLocaleString('es-AR')+'</span>';
             }
           } else if (m.precio_estimado) {
-            return '<span class="meta-tag">Estimado: $'+parseInt(m.precio_estimado).toLocaleString('es-AR')+'</span>';
+            var pe = parseInt(String(m.precio_estimado||0).replace(/\./g,'').replace(/[^0-9]/g,''))||0;
+            var peFmt = '$'+pe.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+            return '<span class="meta-tag">Estimado: '+peFmt+'</span>';
           }
           return '';
         })()
