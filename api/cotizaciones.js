@@ -321,6 +321,48 @@ async function generarPDFBase64(datos) {
 // ════════════════════════════════════════════════════
 // HANDLER PRINCIPAL
 // ════════════════════════════════════════════════════
+
+// ── Email de alta exitosa al mudancero aprobado ───────────────────
+async function enviarEmailAltaMudancero(perfil) {
+  const { Resend } = require('resend');
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const token = Buffer.from(perfil.email + ':' + Date.now()).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 32);
+  await setJSON('terminos:token:' + token, { email: perfil.email, creado: new Date().toISOString() }, 7 * 24 * 60 * 60);
+  const nombre = perfil.nombre || 'Mudancero';
+  const empresa = perfil.empresa ? ' · ' + perfil.empresa : '';
+  const linkTerminos = 'https://mudateya.ar/aceptar-terminos?token=' + token;
+  await resend.emails.send({
+    from:    'MudateYa <noreply@mudateya.ar>',
+    to:      perfil.email,
+    subject: '🎉 ¡Fuiste aprobado en MudateYa! Activá tu cuenta',
+    html: '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #E2E8F0">' +
+      '<div style="background:#003580;padding:28px 32px"><div style="font-size:26px;font-weight:900;color:#fff">Mudate<span style="color:#22C36A">Ya</span></div></div>' +
+      '<div style="background:#22C36A;padding:4px"></div>' +
+      '<div style="padding:32px">' +
+        '<div style="font-size:40px;text-align:center;margin-bottom:16px">🎉</div>' +
+        '<h2 style="font-size:22px;color:#003580;margin:0 0 8px;text-align:center">¡Estás aprobado, ' + nombre + '!</h2>' +
+        '<p style="font-size:14px;color:#475569;text-align:center;margin:0 0 28px">Revisamos tu perfil' + empresa + ' y todo está en orden.<br/>Ya podés empezar a recibir pedidos en tu zona.</p>' +
+        '<div style="background:#F0FFF4;border:1px solid #BBF7D0;border-radius:12px;padding:20px 24px;margin-bottom:28px">' +
+          '<div style="font-size:15px;font-weight:700;color:#166534;margin-bottom:8px">Un último paso — Aceptá los Términos y Condiciones</div>' +
+          '<p style="font-size:13px;color:#475569;margin:0 0 16px;line-height:1.6">Para activar tu cuenta y aparecer en el catálogo, aceptá los Términos y Condiciones de MudateYa. Incluyen las comisiones y las reglas de la plataforma.</p>' +
+          '<a href="' + linkTerminos + '" style="display:block;background:#22C36A;color:#fff;text-align:center;padding:14px 24px;border-radius:10px;text-decoration:none;font-size:15px;font-weight:700">✓ Aceptar Términos y Condiciones →</a>' +
+          '<p style="font-size:11px;color:#94A3B8;text-align:center;margin:10px 0 0;font-family:monospace">Link válido por 7 días</p>' +
+        '</div>' +
+        '<div style="background:#F8FAFC;border-radius:10px;padding:16px 20px;margin-bottom:24px">' +
+          '<div style="font-size:13px;font-weight:700;color:#0F1923;margin-bottom:10px">Comisiones:</div>' +
+          '<table style="width:100%;font-size:13px;color:#475569">' +
+            '<tr><td style="padding:4px 0">🏠 Mudanzas</td><td style="text-align:right;font-weight:700;color:#003580">15% por trabajo completado</td></tr>' +
+            '<tr><td style="padding:4px 0">📦 Fletes</td><td style="text-align:right;font-weight:700;color:#003580">20% por trabajo completado</td></tr>' +
+            '<tr><td colspan="2" style="padding:4px 0;color:#94A3B8;font-size:11px">Solo pagás comisión cuando completás un trabajo. Sin costos fijos.</td></tr>' +
+          '</table>' +
+        '</div>' +
+        '<div style="text-align:center"><a href="https://mudateya.ar/mi-cuenta" style="color:#1A6FFF;font-size:13px;text-decoration:none">Ver mi cuenta en MudateYa →</a></div>' +
+      '</div>' +
+      '<div style="background:#F8FAFC;border-top:1px solid #E2E8F0;padding:16px 32px;text-align:center"><p style="font-size:11px;color:#94A3B8;font-family:monospace;margin:0">MudateYa · <a href="https://mudateya.ar" style="color:#94A3B8">mudateya.ar</a></p></div>' +
+    '</div>',
+  });
+}
+
 module.exports = async function handler(req, res) {
   // ── CORS: solo aceptar requests desde mudateya.ar ──────────────
   const allowedOrigins = [
@@ -635,6 +677,67 @@ module.exports = async function handler(req, res) {
       }
       return res.status(200).json({ ok: true, invitados: m.mudancerosInvitados });
     }
+
+    // ── Admin: listar mudanceros ──────────────────────────────────────
+    if (action === 'admin-mudanceros' && req.method === 'GET') {
+      const { token } = req.query;
+      if (token !== process.env.ADMIN_TOKEN && token !== 'mya-admin-2026') {
+        return res.status(401).json({ error: 'Token inválido' });
+      }
+      const todos = await getJSON('mudanceros:todos') || [];
+      const mudanceros = [];
+      for (const email of todos) {
+        try {
+          const p = await getJSON(`mudancero:perfil:${email}`);
+          if (p) mudanceros.push(p);
+        } catch(e) {}
+      }
+      return res.status(200).json({ mudanceros });
+    }
+
+    // ── Admin: aprobar / rechazar mudancero ──────────────────────────
+    if (action === 'admin-aprobar-mudancero' && req.method === 'POST') {
+      const { token, email, nuevoEstado } = req.body;
+      if (token !== process.env.ADMIN_TOKEN && token !== 'mya-admin-2026') {
+        return res.status(401).json({ error: 'Token inválido' });
+      }
+      if (!email || !nuevoEstado) return res.status(400).json({ error: 'Faltan datos' });
+
+      const perfil = await getJSON(`mudancero:perfil:${email}`);
+      if (!perfil) return res.status(404).json({ error: 'Mudancero no encontrado' });
+
+      const estadoAnterior = perfil.estado;
+      perfil.estado = nuevoEstado;
+      perfil.fechaCambioEstado = new Date().toISOString();
+      if (nuevoEstado === 'aprobado') {
+        perfil.terminosAceptados = perfil.terminosAceptados || false;
+      }
+      await setJSON(`mudancero:perfil:${email}`, perfil);
+
+      // Si se acaba de aprobar → mandar email de alta con link de términos
+      if (nuevoEstado === 'aprobado' && estadoAnterior !== 'aprobado') {
+        try { await enviarEmailAltaMudancero(perfil); } catch(e) { console.error('Email alta error:', e.message); }
+      }
+
+      return res.status(200).json({ ok: true, estado: perfil.estado });
+    }
+
+    // ── Aceptar términos y condiciones ───────────────────────────────
+    if (action === 'aceptar-terminos' && req.method === 'POST') {
+      const { token } = req.body;
+      if (!token) return res.status(400).json({ error: 'Falta token' });
+      const datos = await getJSON(`terminos:token:${token}`);
+      if (!datos) return res.status(400).json({ error: 'Token inválido o expirado' });
+      const perfil = await getJSON(`mudancero:perfil:${datos.email}`);
+      if (!perfil) return res.status(404).json({ error: 'Perfil no encontrado' });
+      perfil.terminosAceptados   = true;
+      perfil.fechaAceptoTerminos = new Date().toISOString();
+      perfil.versionTerminos     = '1.0';
+      await setJSON(`mudancero:perfil:${datos.email}`, perfil);
+      await redisCall('DEL', `terminos:token:${token}`);
+      return res.status(200).json({ ok: true, nombre: perfil.nombre });
+    }
+
 
     // Catálogo público de mudanceros verificados (para modo dirigido)
     if (action === 'catalogo' && req.method === 'GET') {
