@@ -253,32 +253,47 @@ async function notificarAdmin(perfil) {
   // Bloques de fotos para el email (links directos a Blob)
   var bloquesFotos = '';
   if (perfil.dniFrente || perfil.dniDorso) {
-    bloquesFotos +=
-          '<div style="font-size:13px">' +
-            (dni.numero_dni ? 'DNI: <strong>' + dni.numero_dni + '</strong> · ' : '') +
-            (dni.apellido || '') + ' ' + (dni.nombres || '') + '<br>' +
-            (dni.fecha_vencimiento ? 'Vence: ' + dni.fecha_vencimiento + ' · ' : '') +
-            'Legible: <strong style="color:' + (dni.legible ? '#22C36A' : '#F59E0B') + '">' + (dni.legible ? '✓ SI' : '✗ NO') + '</strong>' +
-          '</div>' +
+    bloquesFotos =
+      '<div style="background:#172018;border-radius:10px;padding:12px 16px;margin:14px 0">' +
+        '<div style="font-size:11px;color:#5A8A78;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">DNI</div>' +
+        '<div style="font-size:13px">' +
+          (dni.numero_dni ? 'DNI: <strong>' + dni.numero_dni + '</strong> · ' : '') +
+          (dni.apellido || '') + ' ' + (dni.nombres || '') + '<br>' +
+          (dni.fecha_vencimiento ? 'Vence: ' + dni.fecha_vencimiento + ' · ' : '') +
+          'Legible: <strong style="color:' + (dni.legible ? '#22C36A' : '#F59E0B') + '">' + (dni.legible ? '✓ SI' : '✗ NO') + '</strong>' +
         '</div>' +
+      '</div>';
+  }
 
-        bloquesFotos +
-
-        '<div style="background:#172018;border-radius:10px;padding:12px 16px;margin:14px 0">' +
-          '<div style="font-size:11px;color:#5A8A78;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Cobro</div>' +
-          '<div style="font-size:13px">' +
-            (perfil.metodoCobro === 'cbu' ? 'CBU/Alias: ' + perfil.cbu : 'MP: ' + perfil.emailMP) +
-            (perfil.titularCuenta ? ' · ' + perfil.titularCuenta : '') +
-          '</div>' +
-        '</div>' +
-
-        '<a href="' + (process.env.SITE_URL || 'https://mudateya.ar') + '/admin"' +
-           ' style="display:inline-block;margin-top:8px;background:#22C36A;color:#041A0E;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700">' +
-          'Revisar y aprobar →' +
-        '</a>' +
-        '<p style="color:#3D6458;font-size:11px;margin-top:16px">ID: ' + perfil.id + ' · ' + perfil.fechaRegistro + '</p>' +
+  var bloquesCobro =
+    '<div style="background:#172018;border-radius:10px;padding:12px 16px;margin:14px 0">' +
+      '<div style="font-size:11px;color:#5A8A78;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Cobro</div>' +
+      '<div style="font-size:13px">' +
+        (perfil.metodoCobro === 'cbu' ? 'CBU/Alias: ' + perfil.cbu : 'MP: ' + perfil.emailMP) +
+        (perfil.titularCuenta ? ' · ' + perfil.titularCuenta : '') +
       '</div>' +
-    '</div>',
+    '</div>';
+
+  await resend.emails.send({
+    from:    'MudateYa <noreply@mudateya.ar>',
+    to:      adminMail,
+    subject: '🚛 Nuevo mudancero — ' + perfil.nombre + ' · ' + perfil.id,
+    html:
+      '<div style="font-family:Arial,sans-serif;max-width:560px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">' +
+      '<div style="background:#22C36A;padding:18px 22px"><h2 style="margin:0;color:#041A0E">🚛 Nuevo mudancero · ' + perfil.id + '</h2></div>' +
+      '<div style="padding:22px">' +
+      '<p><strong>' + perfil.nombre + '</strong>' + (perfil.empresa ? ' · ' + perfil.empresa : '') + '</p>' +
+      '<p style="color:#7AADA0">Email: ' + perfil.email + ' · Tel: ' + perfil.telefono + '</p>' +
+      '<p style="color:#7AADA0">Zona: ' + perfil.zonaBase + ' · Vehículo: ' + perfil.vehiculo + '</p>' +
+      badgeCuil +
+      bloquesFotos +
+      bloquesCobro +
+      '<a href="' + (process.env.SITE_URL || 'https://mudateya.ar') + '/admin"' +
+         ' style="display:inline-block;margin-top:16px;background:#22C36A;color:#041A0E;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700">' +
+        'Revisar y aprobar →' +
+      '</a>' +
+      '<p style="color:#3D6458;font-size:11px;margin-top:16px">ID: ' + perfil.id + ' · ' + perfil.fechaRegistro + '</p>' +
+      '</div></div>',
   });
 }
 
