@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Perfil — MudateYa</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -87,6 +88,25 @@ nav{background:var(--navy);height:56px;display:flex;align-items:center;justify-c
 .info-val{color:var(--text);font-weight:500}
 .web-link{color:var(--blue);text-decoration:none;font-size:12px;font-family:var(--mono);display:flex;align-items:center;gap:4px}
 .web-link:hover{text-decoration:underline}
+
+
+/* Modal login */
+.modal-ov{display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem}
+.modal-ov.open{display:flex}
+.modal-box{background:#fff;border-radius:16px;padding:1.8rem;max-width:400px;width:100%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal-close{position:absolute;top:1rem;right:1rem;background:#F1F5F9;border:1px solid #E2E8F0;color:#64748B;width:28px;height:28px;border-radius:50%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+/* Modal confirmación */
+.confirm-overlay{display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem}
+.confirm-overlay.open{display:flex}
+.confirm-box{background:#fff;border-radius:16px;padding:2rem 1.8rem;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center}
+.confirm-icon{font-size:2.8rem;margin-bottom:.8rem}
+.confirm-title{font-size:18px;font-weight:700;color:#0F1923;margin-bottom:.4rem}
+.confirm-sub{font-size:13px;color:#475569;line-height:1.6;margin-bottom:1.6rem}
+.confirm-nombre{font-weight:700;color:#1A6FFF}
+.confirm-btns{display:flex;gap:10px}
+.confirm-btn-cancel{flex:1;padding:12px;border-radius:10px;border:1.5px solid #CBD5E1;background:#fff;color:#475569;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.confirm-btn-ok{flex:2;padding:12px;border-radius:10px;border:none;background:#1A6FFF;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.confirm-btn-ok:hover{background:#0F52CC}
 
 /* Lightbox */
 #lightbox{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.9);align-items:center;justify-content:center}
@@ -337,28 +357,56 @@ function cerrarLightbox() {
 }
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') cerrarLightbox(); });
 
-function solicitarCotizacion() {
+// ── Login modal ──────────────────────────
+var _googlePerfilInited = false;
+
+function abrirLoginModal() {
+  document.getElementById('loginModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (!_googlePerfilInited) initGLoginPerfil();
+}
+function cerrarLoginModal() {
+  document.getElementById('loginModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function initGLoginPerfil() {
+  fetch('/api/admin-config').then(function(r){ return r.json(); }).then(function(cfg) {
+    if (!cfg.googleClientId) return;
+    google.accounts.id.initialize({
+      client_id: cfg.googleClientId,
+      callback: function(response) {
+        var p = JSON.parse(atob(response.credential.split('.')[1]));
+        var user = { name: p.name, email: p.email, picture: p.picture };
+        sessionStorage.setItem('googleUser', JSON.stringify(user));
+        sessionStorage.setItem('clienteUser', JSON.stringify(user));
+        cerrarLoginModal();
+        // Continuar con el flujo que estaba pendiente
+        solicitarCotizacion();
+      }
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('googleBtnPerfil'),
+      { theme: 'filled_blue', size: 'large', text: 'signin_with', width: 280 }
+    );
+    _googlePerfilInited = true;
+  });
+}
+
+// ── Confirm modal ─────────────────────────
+function cerrarConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+}
+
+function confirmarSolicitud() {
+  cerrarConfirm();
   var email = new URLSearchParams(location.search).get('id');
   var busqueda = null;
   try { busqueda = JSON.parse(sessionStorage.getItem('busquedaActual')); } catch(e){}
   var user = null;
   try { user = JSON.parse(sessionStorage.getItem('googleUser') || sessionStorage.getItem('clienteUser')); } catch(e){}
 
-  if (!user) {
-    // No logueado → volver al index a loguearse
-    sessionStorage.setItem('pendingMudancero', email);
-    window.location.href = '/';
-    return;
-  }
-
-  if (!busqueda || !busqueda.desde || !busqueda.hasta) {
-    alert('No encontramos tu búsqueda. Volvé al inicio e ingresá origen y destino.');
-    return;
-  }
-
   var btn = document.querySelector('.btn-cot');
-  btn.disabled = true;
-  btn.textContent = 'Publicando…';
+  if (btn) { btn.disabled = true; btn.textContent = 'Publicando…'; }
 
   var esFlete = busqueda.tipo === 'flete';
   var ambNum = parseInt(busqueda.ambientes) || 2;
@@ -394,10 +442,34 @@ function solicitarCotizacion() {
       +'</div>';
   })
   .catch(function(e){
-    btn.disabled = false;
-    btn.textContent = 'Solicitar cotización →';
+    if (btn) { btn.disabled = false; btn.textContent = 'Solicitar cotización →'; }
     alert('Error: ' + e.message);
   });
+}
+
+// ── Solicitar (entry point) ───────────────
+function solicitarCotizacion() {
+  var email = new URLSearchParams(location.search).get('id');
+  var user = null;
+  try { user = JSON.parse(sessionStorage.getItem('googleUser') || sessionStorage.getItem('clienteUser')); } catch(e){}
+
+  // Si no está logueado → abrir login modal (no redirigir)
+  if (!user) {
+    abrirLoginModal();
+    return;
+  }
+
+  var busqueda = null;
+  try { busqueda = JSON.parse(sessionStorage.getItem('busquedaActual')); } catch(e){}
+  if (!busqueda || !busqueda.desde || !busqueda.hasta) {
+    alert('No encontramos tu búsqueda. Volvé al inicio e ingresá origen y destino.');
+    return;
+  }
+
+  // Logueado y con búsqueda → mostrar modal de confirmación
+  var nombre = _mudancero ? (_mudancero.empresa || _mudancero.nombre) : 'este mudancero';
+  document.getElementById('confirmNombre').textContent = nombre;
+  document.getElementById('confirmOverlay').classList.add('open');
 }
 
 function seleccionarYVolver() {
@@ -458,5 +530,33 @@ var _mudancero = null;
     </div>
   </div>
 </div>
+
+<!-- MODAL LOGIN -->
+<div class="modal-ov" id="loginModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="cerrarLoginModal()">✕</button>
+    <div style="text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:10px">🔐</div>
+      <div style="font-size:1.2rem;font-weight:700;margin-bottom:.3rem;color:#0F1923">Iniciá sesión</div>
+      <p style="font-size:13px;color:#475569;margin-bottom:1.4rem">Para solicitar la cotización necesitás estar logueado.</p>
+      <div id="googleBtnPerfil" style="display:flex;justify-content:center;margin-bottom:1rem"></div>
+      <p style="font-size:10px;color:#94A3B8;font-family:'DM Mono',monospace">Solo usamos tu email · No publicamos nada en tu cuenta</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMACIÓN -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">🚛</div>
+    <div class="confirm-title">¿Confirmás la solicitud?</div>
+    <div class="confirm-sub">Le vas a pedir cotización a <span class="confirm-nombre" id="confirmNombre">este mudancero</span>. Te va a contactar con su propuesta por email.</div>
+    <div class="confirm-btns">
+      <button class="confirm-btn-cancel" onclick="cerrarConfirm()">Cancelar</button>
+      <button class="confirm-btn-ok" onclick="confirmarSolicitud()">Sí, solicitar →</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
