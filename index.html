@@ -621,6 +621,22 @@ function onFleteFoto(input) {
   reader.readAsDataURL(file);
 }
 
+
+window.initMaps = function initMaps() {
+  ['input-desde','input-hasta','input-flete-desde','input-flete-hasta'].forEach(function(id) {
+    var acId = 'ac-' + id.replace('input-','').replace('-desde','desde').replace('-hasta','hasta');
+    // fix id mapping
+    var ddId = {
+      'input-desde':'ac-desde',
+      'input-hasta':'ac-hasta',
+      'input-flete-desde':'ac-flete-desde',
+      'input-flete-hasta':'ac-flete-hasta'
+    }[id];
+    makeAC(id, ddId);
+  });
+  // Iniciar mapa mini si resultados ya visibles
+  if (document.getElementById('resultados').classList.contains('show')) initMapaMini();
+}
 </script>
 <script data-cfasync="false" async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJwvI7R_CLVclDMxSL8uCKwRdrKQF1Oo8&libraries=places&language=es&region=AR&callback=initMaps"></script>
 </head>
@@ -1264,21 +1280,7 @@ document.addEventListener('click', function(e) {
 // ══════════════════════════════════════════
 // MAPS AUTOCOMPLETE
 // ══════════════════════════════════════════
-window.initMaps = function initMaps() {
-  ['input-desde','input-hasta','input-flete-desde','input-flete-hasta'].forEach(function(id) {
-    var acId = 'ac-' + id.replace('input-','').replace('-desde','desde').replace('-hasta','hasta');
-    // fix id mapping
-    var ddId = {
-      'input-desde':'ac-desde',
-      'input-hasta':'ac-hasta',
-      'input-flete-desde':'ac-flete-desde',
-      'input-flete-hasta':'ac-flete-hasta'
-    }[id];
-    makeAC(id, ddId);
-  });
-  // Iniciar mapa mini si resultados ya visibles
-  if (document.getElementById('resultados').classList.contains('show')) initMapaMini();
-}
+// initMaps definido en head
 // Flags de validación por input
 var _validAddr = {};
 
