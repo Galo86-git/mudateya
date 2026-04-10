@@ -646,8 +646,7 @@ function makeAC(inputId, ddId) {
     deb = setTimeout(function() {
       google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
         input: q,
-        includedRegionCodes: ['ar'],
-        types: ['address']
+        includedRegionCodes: ['ar']
       }).then(function(resp) {
         dd.innerHTML = '';
         var suggs = resp.suggestions || [];
