@@ -711,6 +711,103 @@ window.initMaps = function() {
     makeAC(id, ddMap[id]);
   });
 };
+// ── Funciones adicionales requeridas antes del HTML ──
+var _amb = 2;
+var _fechaLabel = '';
+var _fechaFlete = '';
+
+function toggleAmbPopup(e) {
+  e.stopPropagation();
+  var ap = document.getElementById('ambPopup');
+  var fp = document.getElementById('fechaPopup');
+  if (ap) ap.classList.toggle('open');
+  if (fp) fp.classList.remove('open');
+}
+
+function changeAmb(d) {
+  _amb = Math.max(1, Math.min(12, _amb + d));
+  var n = document.getElementById('ambNum');
+  var disp = document.getElementById('amb-display');
+  var minus = document.getElementById('amb-minus');
+  if (n) n.textContent = _amb;
+  if (disp) disp.textContent = _amb + ' ambiente' + (_amb!==1?'s':'');
+  if (minus) minus.disabled = _amb <= 1;
+}
+
+function toggleFechaPopup(e, tipo) {
+  e.stopPropagation();
+  var id = tipo === 'flete' ? 'fechaFletePopup' : 'fechaPopup';
+  var el = document.getElementById(id);
+  var ap = document.getElementById('ambPopup');
+  if (el) el.classList.toggle('open');
+  if (ap) ap.classList.remove('open');
+}
+
+function setFechaChip(el, val) {
+  document.querySelectorAll('#fechaPopup .fecha-chip').forEach(function(c){ c.classList.remove('sel'); });
+  el.classList.add('sel');
+  _fechaLabel = val;
+  var disp = document.getElementById('fecha-display');
+  if (disp) { disp.textContent = val; disp.classList.remove('ph'); }
+  var fp = document.getElementById('fechaPopup');
+  if (fp) fp.classList.remove('open');
+  var inf = document.getElementById('input-fecha');
+  if (inf) inf.value = '';
+}
+
+function onFechaExacta() {
+  var inp = document.getElementById('input-fecha');
+  if (!inp || !inp.value) return;
+  document.querySelectorAll('#fechaPopup .fecha-chip').forEach(function(c){ c.classList.remove('sel'); });
+  var d = new Date(inp.value + 'T12:00:00');
+  _fechaLabel = d.toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'});
+  var disp = document.getElementById('fecha-display');
+  if (disp) { disp.textContent = _fechaLabel; disp.classList.remove('ph'); }
+  var fp = document.getElementById('fechaPopup');
+  if (fp) fp.classList.remove('open');
+}
+
+function setFechaFlete(el, val) {
+  document.querySelectorAll('#fechaFletePopup .fecha-chip').forEach(function(c){ c.classList.remove('sel'); });
+  el.classList.add('sel');
+  _fechaFlete = val;
+  var disp = document.getElementById('flete-fecha-display');
+  if (disp) { disp.textContent = val; disp.classList.remove('ph'); }
+  var fp = document.getElementById('fechaFletePopup');
+  if (fp) fp.classList.remove('open');
+}
+
+function onFechaFlete() {
+  var inp = document.getElementById('input-flete-fecha');
+  if (!inp || !inp.value) return;
+  document.querySelectorAll('#fechaFletePopup .fecha-chip').forEach(function(c){ c.classList.remove('sel'); });
+  var d = new Date(inp.value + 'T12:00:00');
+  var label = d.toLocaleDateString('es-AR', {day:'numeric',month:'long',year:'numeric'});
+  _fechaFlete = label;
+  var disp = document.getElementById('flete-fecha-display');
+  if (disp) { disp.textContent = label; disp.classList.remove('ph'); }
+  var fp = document.getElementById('fechaFletePopup');
+  if (fp) fp.classList.remove('open');
+}
+
+function buscar() {
+  // Delegamos a la función completa del script principal cuando esté cargado
+  if (typeof _buscarCompleto === 'function') { _buscarCompleto(); return; }
+  var idDesde = _tipo==='mudanza' ? 'input-desde' : 'input-flete-desde';
+  var idHasta = _tipo==='mudanza' ? 'input-hasta' : 'input-flete-hasta';
+  var desde = document.getElementById(idDesde).value.trim();
+  var hasta  = document.getElementById(idHasta).value.trim();
+  if (!desde) { setAddrError(idDesde, '⚠ Ingresá la dirección de origen'); return; }
+  if (!_validAddr[idDesde]) { setAddrError(idDesde, '⚠ Elegí una dirección de la lista de sugerencias'); return; }
+  if (!hasta) { setAddrError(idHasta, '⚠ Ingresá la dirección de destino'); return; }
+  if (!_validAddr[idHasta]) { setAddrError(idHasta, '⚠ Elegí una dirección de la lista de sugerencias'); return; }
+  // Si el script principal ya cargó, buscar ahí
+  if (typeof _busqueda !== 'undefined') {
+    _busqueda = { desde: desde, hasta: hasta, tipo: _tipo, ambientes: _amb, fecha: _fechaLabel || _fechaFlete };
+  }
+  document.getElementById('resultados') && document.getElementById('resultados').classList.add('show');
+}
+
 </script>
 <script data-cfasync="false" async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJwvI7R_CLVclDMxSL8uCKwRdrKQF1Oo8&libraries=places&language=es&region=AR" onload="initMaps()"></script>
 </head>
