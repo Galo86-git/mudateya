@@ -638,6 +638,77 @@ window.initMaps = function initMaps() {
   if (document.getElementById('resultados').classList.contains('show')) initMapaMini();
 }
 </script>
+<script data-cfasync="false">
+var _validAddr = {};
+function setAddrError(inputId, msg) {
+  var inp = document.getElementById(inputId);
+  if (!inp) return;
+  inp.style.border = '2px solid #FF5252';
+  inp.style.background = 'rgba(255,82,82,.06)';
+  var errId = inputId + '-err';
+  var existing = document.getElementById(errId);
+  if (existing) existing.remove();
+  var err = document.createElement('div');
+  err.id = errId;
+  err.style.cssText = 'position:absolute;top:calc(100% + 4px);left:0;right:0;background:#FF5252;color:#fff;font-size:11px;padding:6px 10px;border-radius:6px;z-index:999;font-family:monospace;box-shadow:0 4px 12px rgba(255,82,82,.3)';
+  err.textContent = msg;
+  inp.parentElement.style.position = 'relative';
+  inp.parentElement.appendChild(err);
+  setTimeout(function(){
+    inp.style.border = '';
+    inp.style.background = '';
+    if (err.parentElement) err.remove();
+  }, 3000);
+  inp.focus();
+}
+function makeAC(inputId, ddId) {
+  var input = document.getElementById(inputId);
+  var dd = document.getElementById(ddId);
+  if (!input || !dd) return;
+  var deb;
+  input.addEventListener('input', function() {
+    clearTimeout(deb);
+    _validAddr[inputId] = false;
+    var q = this.value.trim();
+    if (q.length < 2) { dd.classList.remove('open'); return; }
+    deb = setTimeout(function() {
+      new google.maps.places.AutocompleteService().getPlacePredictions(
+        { input: q, componentRestrictions:{country:'ar'}, types:['geocode'] },
+        function(preds, status) {
+          dd.innerHTML = '';
+          if (status !== google.maps.places.PlacesServiceStatus.OK || !preds) { dd.classList.remove('open'); return; }
+          preds.slice(0,5).forEach(function(s) {
+            var li = document.createElement('li');
+            li.className = 'ac-item';
+            li.textContent = s.description;
+            li.addEventListener('mousedown', function(e){ e.preventDefault(); input.value = s.description; dd.classList.remove('open'); _validAddr[inputId] = true; input.style.border=''; input.style.background=''; });
+            li.addEventListener('touchend', function(e){ e.preventDefault(); input.value = s.description; dd.classList.remove('open'); _validAddr[inputId] = true; input.style.border=''; input.style.background=''; });
+            dd.appendChild(li);
+          });
+          dd.classList.add('open');
+        }
+      );
+    }, 280);
+  });
+  input.addEventListener('blur', function(){ setTimeout(function(){ dd.classList.remove('open'); }, 200); });
+  input.addEventListener('keydown', function(e) {
+    var items = dd.querySelectorAll('.ac-item');
+    var active = dd.querySelector('.kb');
+    var idx = active ? Array.from(items).indexOf(active) : -1;
+    if (e.key === 'ArrowDown') { e.preventDefault(); if (active) active.classList.remove('kb'); var n = items[idx+1]||items[0]; if(n){ n.classList.add('kb'); } }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); if (active) active.classList.remove('kb'); var p = items[idx-1]||items[items.length-1]; if(p){ p.classList.add('kb'); } }
+    else if (e.key === 'Enter' && active) { e.preventDefault(); _validAddr[inputId] = true; active.dispatchEvent(new MouseEvent('mousedown')); }
+    else if (e.key === 'Escape') { dd.classList.remove('open'); }
+  });
+  input.addEventListener('click', function(e){ e.stopPropagation(); });
+}
+window.initMaps = function() {
+  ['input-desde','input-hasta','input-flete-desde','input-flete-hasta'].forEach(function(id) {
+    var ddMap = {'input-desde':'ac-desde','input-hasta':'ac-hasta','input-flete-desde':'ac-flete-desde','input-flete-hasta':'ac-flete-hasta'};
+    makeAC(id, ddMap[id]);
+  });
+};
+</script>
 <script data-cfasync="false" async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJwvI7R_CLVclDMxSL8uCKwRdrKQF1Oo8&libraries=places&language=es&region=AR" onload="initMaps()"></script>
 </head>
 <body>
