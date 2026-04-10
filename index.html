@@ -535,6 +535,14 @@ footer{background:#003580;padding:1.5rem}
   .mud-card-foto{width:120px;height:120px}
   .mud-card-precio{display:none}
   .mud-card-body{padding:.8rem}
+  /* Mobile footer dentro del body */
+  .mud-mobile-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+  .mud-mobile-precio{font-size:17px;font-weight:700;color:var(--text);line-height:1}
+  .mud-mobile-precio small{font-size:10px;font-weight:400;color:var(--text2);display:block;font-family:var(--mono)}
+  .mud-mobile-rating{display:inline-flex;align-items:center;gap:5px}
+  .mud-mobile-rating-num{background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:3px 7px;border-radius:5px}
+  .mud-mobile-rating-lbl{font-size:11px;color:var(--text2)}
+  .mud-mobile-ver{display:block;width:100%;margin-top:8px;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;font-family:'Inter',sans-serif;text-align:center;cursor:pointer}
 }
 @media(max-width:600px){
   nav{padding:0 1rem}
@@ -552,6 +560,10 @@ footer{background:#003580;padding:1.5rem}
   .footer-inner{flex-direction:column;align-items:flex-start}
   .card-rapida{flex-direction:column;text-align:center}
   .btn-cr{width:100%}
+}
+@media(min-width:901px){
+  .mud-mobile-footer{display:none}
+  .mud-mobile-ver{display:none}
 }
 </style>
 </head>
@@ -906,7 +918,7 @@ footer{background:#003580;padding:1.5rem}
       </a>
 
     </div>
-    <p style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:2rem">¿Querés ser partner? <a href="mailto:hola@mudateya.ar" style="color:var(--blue);text-decoration:none;font-weight:600">Escribinos →</a></p>
+    <p style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:2rem">¿Querés ser partner? <a href="/cdn-cgi/l/email-protection#ff9790939ebf928a9b9e8b9a869ed19e8d" style="color:var(--blue);text-decoration:none;font-weight:600">Escribinos →</a></p>
   </div>
 </section>
 
@@ -966,7 +978,7 @@ footer{background:#003580;padding:1.5rem}
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ══════════════════════════════════════════
 // CONSTANTES Y ESTADO
 // ══════════════════════════════════════════
@@ -1248,7 +1260,7 @@ function makeAC(inputId, ddId) {
     if (q.length < 2) { dd.classList.remove('open'); return; }
     deb = setTimeout(function() {
       new google.maps.places.AutocompleteService().getPlacePredictions(
-        { input: q, componentRestrictions:{country:'ar'}, types:['geocode','establishment'] },
+        { input: q, componentRestrictions:{country:'ar'}, types:['address'] },
         function(preds, status) {
           dd.innerHTML = '';
           if (status !== google.maps.places.PlacesServiceStatus.OK || !preds) { dd.classList.remove('open'); return; }
@@ -1480,8 +1492,16 @@ function renderResultados() {
       +   '<div class="mud-card-nombre" onclick="verPerfil(\''+m.email+'\')">'+m.nombre+'</div>'
       +   '<div class="mud-card-empresa">'+(m.empresa||'Independiente')+'</div>'
       +   '<div class="mud-tags">'+tags+'</div>'
-      +   '<div class="mud-card-zona">📍 '+( m.zonaBase||'')+'</div>'
+      +   '<div class="mud-card-zona">📍 '+(m.zonaBase||'')+'</div>'
       +   '<div class="mud-card-trabajos">'+m.trabajosCompletados+' trabajos · '+m.nroResenas+' reseñas</div>'
+      +   '<div class="mud-mobile-footer">'
+      +     '<div class="mud-mobile-precio"><small>desde</small>'+fmtPrecio(precio)+'</div>'
+      +     '<div class="mud-mobile-rating">'
+      +       '<span class="mud-mobile-rating-num">'+m.calificacion.toFixed(1)+'</span>'
+      +       '<span class="mud-mobile-rating-lbl">'+ratingLabel+'</span>'
+      +     '</div>'
+      +   '</div>'
+      +   '<button class="mud-mobile-ver" onclick="verPerfil(\''+m.email+'\')">Ver perfil →</button>'
       + '</div>'
       + '<div class="mud-card-precio">'
       +   '<div class="mud-rating-box">'
@@ -1491,7 +1511,7 @@ function renderResultados() {
       +   '</div>'
       +   '<div class="mud-precio-box">'
       +     '<div class="mud-precio-desde">desde</div>'
-      +     '<div class="mud-precio-num">$'+precio.toLocaleString('es-AR')+'</div>'
+      +     '<div class="mud-precio-num">'+fmtPrecio(precio)+'</div>'
       +     '<div class="mud-precio-sub">precio estimado</div>'
       +   '</div>'
       +   '<button class="btn-ver" onclick="verPerfil(\''+m.email+'\')">Ver perfil →</button>'
@@ -1658,8 +1678,4 @@ function closeMenu()  { document.getElementById('navBurger').classList.remove('o
 
 // Init
 document.addEventListener('DOMContentLoaded', function() { updateNav(); });
-document.getElementById('pubModal').addEventListener('click', function(e){ if(e.target===this && document.getElementById('pub-ok').style.display!=='none'){this.classList.remove('open'); document.body.style.overflow='';} });
-document.getElementById('loginModal').addEventListener('click', function(e){ if(e.target===this) cerrarLogin(); });
-</script>
-</body>
-</html>
+document.getElementById('pubModal').addEventListener('click', function(e){ if(e.target===this && document.getElementById('pub-ok').style.display!=='none'){this.classList.remove('open'); document.body.style.overflow='';}
