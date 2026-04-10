@@ -120,6 +120,7 @@ tr:hover td{background:rgba(34,195,106,.03)}
 @media(max-width:900px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.sidebar{display:none}}
 @media(max-width:600px){.metrics-grid{grid-template-columns:1fr 1fr}.admin-main{padding:1rem}}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -758,34 +759,45 @@ function exportarExcel() {
   var headers = [
     'ID', 'Nombre', 'Empresa', 'Teléfono', 'Email',
     'Zona base', 'Zonas extra', 'CUIL', 'Vehículo', 'Cant. vehículos',
-    'Equipo', 'Servicios', 'Días', 'Horarios', 'Extra',
+    'Equipo', 'Servicios', 'Días', 'Horarios', 'Notas extra',
     'Método cobro', 'CBU/Alias', 'Email MP', 'Fecha registro',
     'CUIL verificado', 'DNI legible', 'Estado'
   ];
 
-  var rows = [headers].concat(mudancerosData.map(function(row) {
+  // Campos a excluir (fotos)
+  var FOTO_KEYS = ['dniFrente','dniDorso','fotoVehiculo','fotoUrl','dniFrente64','dniDorso64'];
+
+  // Armar rows desde mudancerosData (ya es array de arrays según el map)
+  var wsData = [headers].concat(mudancerosData.map(function(row) {
     return row.map(function(cell) {
-      var val = (cell === null || cell === undefined) ? '' : String(cell);
-      // Escapar comas y comillas para CSV
-      if (val.includes(',') || val.includes('"') || val.includes('\n')) {
-        val = '"' + val.replace(/"/g, '""') + '"';
-      }
-      return val;
+      if (cell === null || cell === undefined) return '';
+      var s = String(cell);
+      // Truncar si parece base64 o URL de foto
+      if (s.length > 200 && (s.startsWith('data:') || s.startsWith('http') || s.startsWith('blob'))) return '[foto]';
+      return s;
     });
   }));
 
-  var csv = rows.map(function(r){ return r.join(','); }).join('\n');
-  var bom = '\uFEFF'; // BOM para que Excel abra en UTF-8
-  var blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
+  var wb = XLSX.utils.book_new();
+  var ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Ancho de columnas
+  var colWidths = [
+    {wch:18},{wch:22},{wch:22},{wch:16},{wch:28},
+    {wch:22},{wch:22},{wch:16},{wch:22},{wch:10},
+    {wch:16},{wch:22},{wch:16},{wch:16},{wch:20},
+    {wch:14},{wch:22},{wch:28},{wch:20},
+    {wch:16},{wch:14},{wch:12}
+  ];
+  ws['!cols'] = colWidths;
+
+  // Freeze primera fila
+  ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Mudanceros');
+
   var fecha = new Date().toISOString().slice(0,10);
-  a.download = 'mudanceros-mudateya-' + fecha + '.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  XLSX.writeFile(wb, 'mudanceros-mudateya-' + fecha + '.xlsx');
 }
 </script>
 </body>
