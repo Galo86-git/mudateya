@@ -1230,7 +1230,7 @@ document.addEventListener('click', function(e) {
 // ══════════════════════════════════════════
 // MAPS AUTOCOMPLETE
 // ══════════════════════════════════════════
-function initMaps() {
+window.initMaps = function initMaps() {
   ['input-desde','input-hasta','input-flete-desde','input-flete-hasta'].forEach(function(id) {
     var acId = 'ac-' + id.replace('input-','').replace('-desde','desde').replace('-hasta','hasta');
     // fix id mapping
@@ -1316,6 +1316,7 @@ function makeAC(inputId, ddId) {
   var s = document.createElement('script');
   s.src = 'https://maps.googleapis.com/maps/api/js?key='+GMAPS_KEY+'&libraries=places&language=es&region=AR&callback=initMaps&loading=async';
   s.async = true; s.defer = true;
+  s.onerror = function(){ console.error('Google Maps no cargó — verificá la API key o restricciones de dominio'); };
   document.head.appendChild(s);
 })();
 
