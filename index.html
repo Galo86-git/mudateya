@@ -566,6 +566,29 @@ footer{background:#003580;padding:1.5rem}
   .mud-mobile-ver{display:none}
 }
 </style>
+<script>
+var _tipo = 'mudanza';
+function setTipo(t) {
+  _tipo = t;
+  var tabMud = document.getElementById('tab-mud');
+  var tabFle = document.getElementById('tab-flete');
+  var sbMud  = document.getElementById('sb-mudanza');
+  var sbFle  = document.getElementById('sb-flete');
+  var title  = document.getElementById('heroTitle');
+  var sub    = document.getElementById('heroSub');
+  if (tabMud) tabMud.classList.toggle('active', t==='mudanza');
+  if (tabFle) tabFle.classList.toggle('active', t==='flete');
+  if (sbMud)  sbMud.style.display  = t==='mudanza' ? '' : 'none';
+  if (sbFle)  sbFle.style.display  = t==='flete'   ? '' : 'none';
+  if (t === 'flete') {
+    if (title) title.textContent = 'Cotizá tu flete con los mejores de Argentina';
+    if (sub)   sub.textContent   = 'Encontrá fleteros verificados cerca tuyo. Comparás precios y elegís. Publicá gratis.';
+  } else {
+    if (title) title.textContent = 'Cotizá tu mudanza con los mejores de Argentina';
+    if (sub)   sub.textContent   = 'Comparás precios reales de mudanceros verificados y elegís sin compromiso. Publicá gratis.';
+  }
+}
+</script>
 </head>
 <body>
 
