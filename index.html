@@ -592,12 +592,10 @@ function setTipo(t) {
 
 // Funciones llamadas desde onclick inline
 function toggleObj(el) { el.classList.toggle('sel'); }
-
 var _fleteObj = '';
 var fleteOtrosTexto = '';
 var _fleteFotoB64 = null;
 var _fleteFotoMime = '';
-
 function selFleteObj(el, tipo) {
   document.querySelectorAll('#sb-flete .obj-chip').forEach(function(c){ c.classList.remove('sel'); });
   el.classList.add('sel');
@@ -605,14 +603,13 @@ function selFleteObj(el, tipo) {
   var box = document.getElementById('flete-otros-box');
   if (box) box.style.display = tipo === 'otros' ? 'block' : 'none';
 }
-
 function onFleteFoto(input) {
   var file = input.files[0];
   if (!file) return;
   var txtEl = document.getElementById('flete-foto-txt');
   var estadoEl = document.getElementById('flete-ia-estado');
   var resultEl = document.getElementById('flete-ia-result');
-  if (txtEl) txtEl.textContent = '\u2713 ' + file.name;
+  if (txtEl) txtEl.textContent = '✓ ' + file.name;
   if (estadoEl) estadoEl.style.display = 'flex';
   if (resultEl) resultEl.style.display = 'none';
   var reader = new FileReader();
@@ -977,7 +974,7 @@ function onFleteFoto(input) {
       </a>
 
     </div>
-    <p style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:2rem">¿Querés ser partner? <a href="mailto:hola&#64;mudateya&#46;ar" style="color:var(--blue);text-decoration:none;font-weight:600">Escribinos →</a></p>
+    <p style="font-size:12px;color:var(--text3);font-family:var(--mono);margin-top:2rem">¿Querés ser partner? <span style="color:var(--blue);font-weight:600;cursor:pointer" onclick="window.location.href='mail'+('to:hola@')+'mudateya.ar'">Escribinos →</span></p>
   </div>
 </section>
 
@@ -1266,7 +1263,7 @@ document.addEventListener('click', function(e) {
 // ══════════════════════════════════════════
 // MAPS AUTOCOMPLETE
 // ══════════════════════════════════════════
-window.initMaps = window.initMaps = function initMaps() {
+window.initMaps = function initMaps() {
   ['input-desde','input-hasta','input-flete-desde','input-flete-hasta'].forEach(function(id) {
     var acId = 'ac-' + id.replace('input-','').replace('-desde','desde').replace('-hasta','hasta');
     // fix id mapping
