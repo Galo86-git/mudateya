@@ -1,16 +1,5 @@
 {
   "version": 2,
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "x-content-type-options",
-          "value": "nosniff"
-        }
-      ]
-    }
-  ],
   "routes": [
     {
       "src": "/api/(.*)",
@@ -58,7 +47,7 @@
     },
     {
       "src": "/aceptar-terminos",
-      "dest": "/api/aceptar-terminos"
+      "dest": "/aceptar-terminos.html"
     },
     {
       "src": "/mudanzas-en-(.*)",
