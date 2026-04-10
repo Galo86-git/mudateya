@@ -638,7 +638,7 @@ window.initMaps = function initMaps() {
   if (document.getElementById('resultados').classList.contains('show')) initMapaMini();
 }
 </script>
-<script data-cfasync="false" async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJwvI7R_CLVclDMxSL8uCKwRdrKQF1Oo8&libraries=places&language=es&region=AR&callback=initMaps"></script>
+<script data-cfasync="false" async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJwvI7R_CLVclDMxSL8uCKwRdrKQF1Oo8&libraries=places&language=es&region=AR" onload="initMaps()"></script>
 </head>
 <body>
 
