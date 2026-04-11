@@ -1707,7 +1707,7 @@
         var leg = result.routes[0].legs[0];
         var distEl = document.getElementById('mapaDistancia');
         if (distEl && leg) {
-          distEl.textContent = '📍 ' + leg.distance.text + '  ·  🕐 ' + leg.duration.text + ' en auto';
+          distEl.textContent = '📍 ' + leg.distance.text;
           distEl.style.display = 'block';
         }
       }
