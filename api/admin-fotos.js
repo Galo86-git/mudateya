@@ -1,6 +1,6 @@
 // api/admin-fotos.js
 // GET  → lista mudanceros con fotos actuales
-// POST → actualiza foto y/o fotoCamion en Redis
+// POST → actualiza foto, fotoCamion y fotosVehiculo en Redis
 
 var ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'mya-admin-2026';
 
@@ -42,11 +42,12 @@ module.exports = async function handler(req, res) {
       for (var i = 0; i < todos.length; i++) {
         var p = await getJSON('mudancero:perfil:' + todos[i]);
         if (p) lista.push({
-          email:      p.email,
-          nombre:     p.nombre,
-          foto:       p.foto       || '',
-          fotoCamion: p.fotoCamion || '',
-          estado:     p.estado     || '',
+          email:         p.email,
+          nombre:        p.nombre,
+          foto:          p.foto          || '',
+          fotoCamion:    p.fotoCamion    || '',
+          fotosVehiculo: p.fotosVehiculo || [],
+          estado:        p.estado        || '',
         });
       }
       return res.status(200).json({ mudanceros: lista });
@@ -55,7 +56,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // POST — actualizar foto y/o fotoCamion
+  // POST — actualizar fotos
   if (req.method === 'POST') {
     try {
       var body = req.body;
@@ -64,8 +65,9 @@ module.exports = async function handler(req, res) {
       var perfil = await getJSON('mudancero:perfil:' + body.email);
       if (!perfil) return res.status(404).json({ error: 'Mudancero no encontrado' });
 
-      if (body.foto)       perfil.foto       = body.foto;
-      if (body.fotoCamion) perfil.fotoCamion = body.fotoCamion;
+      if (body.foto          !== undefined) perfil.foto          = body.foto;
+      if (body.fotoCamion    !== undefined) perfil.fotoCamion    = body.fotoCamion;
+      if (body.fotosVehiculo !== undefined) perfil.fotosVehiculo = body.fotosVehiculo;
 
       await setJSON('mudancero:perfil:' + body.email, perfil);
       return res.status(200).json({ ok: true });
