@@ -683,12 +683,7 @@ function makeAC(inputId, ddId) {
   input.addEventListener('click', function(e){ e.stopPropagation(); });
 }
 
-window.initMaps = function() {
-  ['input-desde','input-hasta','input-flete-desde','input-flete-hasta'].forEach(function(id) {
-    var ddMap = {'input-desde':'ac-desde','input-hasta':'ac-hasta','input-flete-desde':'ac-flete-desde','input-flete-hasta':'ac-flete-hasta'};
-    makeAC(id, ddMap[id]);
-  });
-};
+// initMaps se define junto a la carga dinámica de Maps más abajo
 function scrollToHero() {
   var hero = document.getElementById('hero') || document.querySelector('.hero');
   if (hero) hero.scrollIntoView({behavior:'smooth'});
@@ -1192,7 +1187,7 @@ function buscar() {
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // ══════════════════════════════════════════
 // CONSTANTES Y ESTADO
 // ══════════════════════════════════════════
@@ -1421,21 +1416,6 @@ document.addEventListener('click', function(e) {
 // ══════════════════════════════════════════
 // MAPS AUTOCOMPLETE
 // ══════════════════════════════════════════
-function initMaps() {
-  ['input-desde','input-hasta','input-flete-desde','input-flete-hasta'].forEach(function(id) {
-    var acId = 'ac-' + id.replace('input-','').replace('-desde','desde').replace('-hasta','hasta');
-    // fix id mapping
-    var ddId = {
-      'input-desde':'ac-desde',
-      'input-hasta':'ac-hasta',
-      'input-flete-desde':'ac-flete-desde',
-      'input-flete-hasta':'ac-flete-hasta'
-    }[id];
-    makeAC(id, ddId);
-  });
-  // Iniciar mapa mini si resultados ya visibles
-  if (document.getElementById('resultados').classList.contains('show')) initMapaMini();
-}
 // Flags de validación por input
 var _validAddr = {};
 
@@ -1508,6 +1488,14 @@ function makeAC(inputId, ddId) {
   s.src = 'https://maps.googleapis.com/maps/api/js?key='+GMAPS_KEY+'&libraries=places&language=es&region=AR&callback=initMaps&loading=async';
   s.async = true; s.defer = true;
   document.head.appendChild(s);
+  // Asegurar que window.initMaps apunte a la función completa cuando Maps llame el callback
+  window.initMaps = function() {
+    ['input-desde','input-hasta','input-flete-desde','input-flete-hasta'].forEach(function(id) {
+      var ddId = {'input-desde':'ac-desde','input-hasta':'ac-hasta','input-flete-desde':'ac-flete-desde','input-flete-hasta':'ac-flete-hasta'}[id];
+      makeAC(id, ddId);
+    });
+    if (document.getElementById('resultados') && document.getElementById('resultados').classList.contains('show')) initMapaMini();
+  };
 })();
 
 // ══════════════════════════════════════════
