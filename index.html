@@ -1484,11 +1484,7 @@ function makeAC(inputId, ddId) {
   input.addEventListener('click', function(e){ e.stopPropagation(); });
 }
 (function() {
-  var s = document.createElement('script');
-  s.src = 'https://maps.googleapis.com/maps/api/js?key='+GMAPS_KEY+'&libraries=places&language=es&region=AR&callback=initMaps&loading=async';
-  s.async = true; s.defer = true;
-  document.head.appendChild(s);
-  // Asegurar que window.initMaps apunte a la función completa cuando Maps llame el callback
+  // Definir callback ANTES de insertar el script — evita race condition si Maps carga desde cache
   window.initMaps = function() {
     ['input-desde','input-hasta','input-flete-desde','input-flete-hasta'].forEach(function(id) {
       var ddId = {'input-desde':'ac-desde','input-hasta':'ac-hasta','input-flete-desde':'ac-flete-desde','input-flete-hasta':'ac-flete-hasta'}[id];
@@ -1496,6 +1492,10 @@ function makeAC(inputId, ddId) {
     });
     if (document.getElementById('resultados') && document.getElementById('resultados').classList.contains('show')) initMapaMini();
   };
+  var s = document.createElement('script');
+  s.src = 'https://maps.googleapis.com/maps/api/js?key='+GMAPS_KEY+'&libraries=places&language=es&region=AR&callback=initMaps&loading=async';
+  s.async = true; s.defer = true;
+  document.head.appendChild(s);
 })();
 
 // ══════════════════════════════════════════
