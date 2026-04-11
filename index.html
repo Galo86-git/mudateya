@@ -1140,7 +1140,7 @@ function buscar() {
     </div>
     <div class="drawer-footer">
       <button class="drawer-btn-clear" onclick="limpiarFiltros();actualizarBadge()">Limpiar</button>
-      <button class="drawer-btn-apply" onclick="cerrarDrawerFiltros()">Ver resultados</button>
+      <button class="drawer-btn-apply" id="btnVerResultados" onclick="cerrarDrawerFiltros()">Ver resultados</button>
     </div>
   </div>
 
@@ -1807,6 +1807,14 @@ function renderResultados() {
     return (b.calificacion||0)-(a.calificacion||0);
   });
   document.getElementById('resCount').innerHTML = '<strong>' + lista.length + '</strong> disponibles';
+  var btnVer = document.getElementById('btnVerResultados');
+  if (btnVer) {
+    btnVer.textContent = lista.length > 0
+      ? 'Ver ' + lista.length + ' resultado' + (lista.length !== 1 ? 's' : '')
+      : 'Sin resultados';
+    btnVer.style.background = lista.length > 0 ? '' : '#94A3B8';
+    btnVer.disabled = lista.length === 0;
+  }
   if (!lista.length) {
     document.getElementById('listaRes').innerHTML = '<div class="no-results">Sin resultados con esos filtros. Probá ampliando la búsqueda.</div>';
     return;
