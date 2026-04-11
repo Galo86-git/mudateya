@@ -509,7 +509,16 @@ var _mudancero = null;
   var m = null;
   try { m = JSON.parse(sessionStorage.getItem('perfilMudancero')); } catch(e){}
 
-  if (!m) {
+  // Intentar obtener email de la URL como fallback
+  var urlEmail = null;
+  try {
+    var params = new URLSearchParams(window.location.search);
+    urlEmail = params.get('id') ? decodeURIComponent(params.get('id')) : null;
+  } catch(e) {}
+
+  var email = (m && m.email) || urlEmail;
+
+  if (!email) {
     document.getElementById('mainContainer').innerHTML =
       '<div style="text-align:center;padding:4rem;color:var(--text3)">'
       +'<div style="font-size:3rem;margin-bottom:1rem">😕</div>'
@@ -520,16 +529,43 @@ var _mudancero = null;
     return;
   }
 
-  _mudancero = m;
+  // Siempre buscar datos frescos de Redis
+  fetch('/api/cotizaciones?action=catalogo')
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      var lista = d.mudanceros || [];
+      var fresco = lista.find(function(x){ return x.email === email; });
+      if (fresco) {
+        // Mergear con sessionStorage — Redis tiene prioridad para fotos
+        m = Object.assign({}, m || {}, fresco);
+        sessionStorage.setItem('perfilMudancero', JSON.stringify(m));
+      }
+      renderConDatos(m || { email: email, nombre: email });
+    })
+    .catch(function() {
+      // Si falla el fetch, usar lo que hay en sessionStorage
+      renderConDatos(m || { email: email, nombre: email });
+    });
 
-  // Calcular índice basado en el email para datos extra consistentes
-  var email = m.email || '';
-  var idx = 0;
-  for (var i = 0; i < email.length; i++) idx += email.charCodeAt(i);
-  idx = idx % 50;
-
-  var extra = getDatosExtra(idx);
-  renderPerfil(m, extra);
+  function renderConDatos(datos) {
+    _mudancero = datos;
+    var idx = 0;
+    var em = datos.email || '';
+    for (var i = 0; i < em.length; i++) idx += em.charCodeAt(i);
+    idx = idx % 50;
+    var extra = getDatosExtra(idx);
+    // Usar fotos reales si existen
+    if (datos.fotosVehiculo && datos.fotosVehiculo.length) {
+      extra.fotos = datos.fotosVehiculo;
+    } else if (datos.fotoCamion) {
+      extra.fotos = [datos.fotoCamion];
+    }
+    // Usar descripción real si existe
+    if (datos.extra) extra.descripcion = datos.extra;
+    // Usar sitio web real si existe
+    if (datos.sitioWeb) extra.sitioWeb = datos.sitioWeb;
+    renderPerfil(datos, extra);
+  }
 })();
 </script>
 <!-- MODAL CONFIRMACIÓN COTIZACIÓN -->
