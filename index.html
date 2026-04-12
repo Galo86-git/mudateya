@@ -905,7 +905,7 @@
         <a href="#" onclick="abrirLogin(event)" class="btn-nav-solid">Iniciar sesión</a>
       </div>
       <div id="nav-with-session" style="display:none;align-items:center;gap:10px">
-        <img id="navAvatar" class="nav-avatar" src="" alt=""/>
+        <img id="navAvatar" class="nav-avatar" src="" alt="" style="display:none"/>
         <span id="navUserName" class="nav-user-name"></span>
         <a href="/mi-mudanza" class="btn-nav-outline" style="font-size:11px">Mis mudanzas</a>
         <button onclick="logout()" class="btn-nav-outline" style="font-size:11px;cursor:pointer">Salir</button>
@@ -2244,7 +2244,7 @@
     var ns=document.getElementById('nav-no-session'), ws=document.getElementById('nav-with-session');
     if (_currentUser) {
       ns.style.display='none'; ws.style.display='flex';
-      var av=document.getElementById('navAvatar'); if(av) av.src=_currentUser.picture||'';
+      var av=document.getElementById('navAvatar'); if(av){ av.src=_currentUser.picture||''; av.style.display=_currentUser.picture?'block':'none'; }
       var nm=document.getElementById('navUserName'); if(nm) nm.textContent=_currentUser.name.split(' ')[0];
     } else { ns.style.display='flex'; ws.style.display='none'; }
   }
