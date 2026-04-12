@@ -1101,6 +1101,14 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, total: parseInt(total) });
     }
 
+    if (action === 'encuesta-stats' && req.method === 'GET') {
+      const token = req.query.token;
+      if (token !== process.env.ADMIN_TOKEN && token !== 'mya-admin-2026') return res.status(403).json({ error: 'No autorizado' });
+      const si = await redisCall('GET', 'encuesta:packs:si');
+      const no = await redisCall('GET', 'encuesta:packs:no');
+      return res.status(200).json({ si: parseInt(si) || 0, no: parseInt(no) || 0 });
+    }
+
     return res.status(400).json({ error: 'Acción no reconocida' });
 
   } catch(e) {
