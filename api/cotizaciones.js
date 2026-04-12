@@ -930,7 +930,17 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, pedidos, total: pedidos.length });
     }
 
-    // ── Verificar token de términos (GET) ────────────────────────────
+    // ── Admin: detalle de un pedido con cotizaciones (GET) ───────────
+    if (action === 'admin-pedido' && req.method === 'GET') {
+      const { token, id } = req.query;
+      if (token !== process.env.ADMIN_TOKEN && token !== 'mya-admin-2026') {
+        return res.status(401).json({ error: 'Token inválido' });
+      }
+      if (!id) return res.status(400).json({ error: 'Falta id' });
+      const p = await getJSON(`mudanza:${id}`);
+      if (!p) return res.status(404).json({ error: 'Pedido no encontrado' });
+      return res.status(200).json({ ok: true, pedido: p });
+    }
     if (action === 'verificar-terminos-token' && req.method === 'GET') {
       const { token } = req.query;
       if (!token) return res.status(400).json({ error: 'Falta token' });
