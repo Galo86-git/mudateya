@@ -315,8 +315,40 @@ tr:hover td{background:rgba(34,195,106,.03)}
 
       <!-- USUARIOS -->
       <div class="page" id="page-usuarios">
-        <div class="page-title">Usuarios</div>
-        <div class="empty"><div class="empty-icon">👥</div>Base de datos de usuarios próximamente.</div>
+        <div class="page-title">Usuarios / Clientes</div>
+
+        <!-- FILTROS -->
+        <div class="table-card" style="margin-bottom:14px">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+            <div>
+              <div style="font-size:10px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Buscar</div>
+              <input type="text" id="usr-filtro-q" oninput="filtrarUsuarios()" placeholder="Email o nombre…" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font);width:220px"/>
+            </div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Ordenar por</div>
+              <select id="usr-orden" onchange="filtrarUsuarios()" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font);background:#fff">
+                <option value="actividad-desc">Última actividad ↓</option>
+                <option value="actividad-asc">Última actividad ↑</option>
+                <option value="mudanzas-desc">Mudanzas ↓</option>
+                <option value="email-asc">Email A→Z</option>
+                <option value="nombre-asc">Nombre A→Z</option>
+              </select>
+            </div>
+            <button class="btn-sm primary" onclick="cargarUsuarios()" style="margin-left:auto">↻ Actualizar</button>
+          </div>
+        </div>
+
+        <!-- STATS -->
+        <div id="usrStats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px"></div>
+
+        <!-- TABLA -->
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">👥 Clientes registrados</span>
+            <span id="usrCount" style="font-size:12px;color:var(--text3);font-family:var(--mono)"></span>
+          </div>
+          <div id="usuariosList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
+        </div>
       </div>
 
       <!-- ZONAS -->
@@ -1304,7 +1336,83 @@ var _showPageOrig = showPage;
 showPage = function(name, e) {
   _showPageOrig(name, e);
   if (name === 'cotizaciones' && !_cotizacionesData.length) cargarCotizaciones();
+  if (name === 'usuarios' && !_usuariosData.length) cargarUsuarios();
 };
+
+// ══════════════════════════════════════════
+// USUARIOS
+// ══════════════════════════════════════════
+var _usuariosData = [];
+
+async function cargarUsuarios() {
+  document.getElementById('usuariosList').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando…</div>';
+  try {
+    var r = await fetch('/api/cotizaciones?action=admin-usuarios&token=mya-admin-2026');
+    var d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Error');
+    _usuariosData = d.clientes || [];
+    filtrarUsuarios();
+  } catch(e) {
+    document.getElementById('usuariosList').innerHTML = '<div style="padding:2rem;text-align:center;color:#EF4444">Error: '+esc(e.message)+'</div>';
+  }
+}
+
+function filtrarUsuarios() {
+  var q     = (document.getElementById('usr-filtro-q').value||'').toLowerCase().trim();
+  var orden = document.getElementById('usr-orden').value;
+
+  var data = _usuariosData.filter(function(u) {
+    if (!q) return true;
+    var hay = (u.email||'') + ' ' + (u.nombre||'');
+    return hay.toLowerCase().indexOf(q) !== -1;
+  });
+
+  data.sort(function(a, b) {
+    if (orden === 'actividad-desc') return new Date(b.ultimaActividad||0) - new Date(a.ultimaActividad||0);
+    if (orden === 'actividad-asc')  return new Date(a.ultimaActividad||0) - new Date(b.ultimaActividad||0);
+    if (orden === 'mudanzas-desc')  return (b.mudanzas||0) - (a.mudanzas||0);
+    if (orden === 'email-asc')      return (a.email||'').localeCompare(b.email||'');
+    if (orden === 'nombre-asc')     return (a.nombre||'').localeCompare(b.nombre||'');
+    return 0;
+  });
+
+  // Stats
+  var conWA = data.filter(function(u){ return u.wa; }).length;
+  document.getElementById('usrStats').innerHTML =
+    stat('👥', data.length, 'Total clientes') +
+    stat('📦', data.reduce(function(s,u){ return s+(u.mudanzas||0); }, 0), 'Mudanzas totales') +
+    stat('📱', conWA, 'Con WhatsApp');
+
+  document.getElementById('usrCount').textContent = data.length + ' clientes';
+
+  if (!data.length) {
+    document.getElementById('usuariosList').innerHTML = '<div style="padding:2rem;text-align:center;color:var(--text3)">No hay clientes registrados.</div>';
+    return;
+  }
+
+  var html = '<div style="overflow-x:auto"><table class="cot-table"><thead><tr>'
+    + '<th>Nombre</th><th>Email</th><th>WhatsApp</th>'
+    + '<th>Mudanzas</th><th>Última actividad</th><th>Registro</th>'
+    + '</tr></thead><tbody>';
+
+  data.forEach(function(u) {
+    var actividad = u.ultimaActividad ? new Date(u.ultimaActividad).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
+    var registro  = u.fechaRegistro  ? new Date(u.fechaRegistro).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '—';
+    var waLink    = u.wa ? '<a href="https://wa.me/'+u.wa.replace(/\D/g,'')+'" target="_blank" style="color:var(--green);font-size:12px;text-decoration:none">'+esc(u.wa)+'</a>' : '<span style="color:var(--text3)">—</span>';
+
+    html += '<tr>'
+      + '<td style="font-weight:500;font-size:13px">'+esc(u.nombre||'—')+'</td>'
+      + '<td class="cot-email">'+esc(u.email||'—')+'</td>'
+      + '<td>'+waLink+'</td>'
+      + '<td style="text-align:center;font-family:var(--mono);font-weight:700;color:var(--navy)">'+(u.mudanzas||0)+'</td>'
+      + '<td style="font-size:12px;color:var(--text2)">'+actividad+'</td>'
+      + '<td style="font-size:12px;color:var(--text3)">'+registro+'</td>'
+      + '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  document.getElementById('usuariosList').innerHTML = html;
+}
 </script>
 
 </body>
