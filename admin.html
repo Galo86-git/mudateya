@@ -177,6 +177,32 @@ tr:hover td{background:rgba(34,195,106,.03)}
 .cot-stat-box{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;text-align:center}
 .cot-stat-num{font-family:var(--mono);font-weight:700;font-size:1.4rem;color:var(--navy)}
 .cot-stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+/* ── MODAL DETALLE PEDIDO ── */
+.pedido-modal-ov{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:flex-start;justify-content:flex-end}
+.pedido-modal-ov.open{display:flex}
+.pedido-modal{background:#fff;width:100%;max-width:520px;height:100vh;overflow-y:auto;box-shadow:-8px 0 40px rgba(0,0,0,.15);display:flex;flex-direction:column}
+.pedido-modal-head{background:var(--navy);padding:1.2rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.pedido-modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:1px;color:#fff}
+.pedido-modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pedido-modal-body{padding:1.5rem;flex:1}
+.pm-section{margin-bottom:1.5rem}
+.pm-section-title{font-size:10px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+.pm-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)}
+.pm-row:last-child{border-bottom:none}
+.pm-label{color:var(--text2)}
+.pm-val{font-weight:500;color:var(--text);text-align:right;max-width:60%}
+.cot-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.8rem}
+.cot-item.aceptada{border-color:var(--green);background:#F0FDF4}
+.cot-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+.cot-item-mud{font-weight:700;font-size:13px;color:var(--navy)}
+.cot-item-precio{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--green)}
+.cot-item-meta{font-size:11px;color:var(--text3);display:flex;gap:.8rem;flex-wrap:wrap;margin-bottom:.4rem}
+.cot-item-nota{font-size:12px;color:var(--text2);line-height:1.5;background:#fff;border-radius:6px;padding:6px 8px;border:1px solid var(--border)}
+.cot-badge{display:inline-block;font-size:9px;padding:2px 7px;border-radius:4px;font-weight:700;font-family:var(--mono)}
+.cot-badge.aceptada{background:#DCFCE7;color:#15803D}
+.cot-badge.pendiente{background:#FEF9C3;color:#854D0E}
+.pm-empty{text-align:center;padding:1.5rem;color:var(--text3);font-size:13px}
+.pm-wa-btn{display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;font-family:var(--font)}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -1294,24 +1320,29 @@ function renderTabla(data) {
 
   var html = '<div style="overflow-x:auto"><table class="cot-table"><thead><tr>'
     + '<th>ID</th><th>Tipo</th><th>Fecha</th><th>Cliente</th>'
-    + '<th>Ruta</th><th>Estado</th><th>Mudancero</th><th>Monto</th>'
+    + '<th>Ruta</th><th>Estado</th><th>Cotizaciones</th><th>Mudancero</th><th>Monto</th>'
     + '</tr></thead><tbody>';
 
   data.forEach(function(p) {
-    var fecha = p.fecha ? new Date(p.fecha).toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
-    var estado = p.estado || 'pendiente';
+    var fecha  = p.fecha ? new Date(p.fecha).toLocaleDateString('es-AR', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+    var estado = p.estado || 'buscando';
     var monto  = p.monto ? '$'+parseInt(p.monto).toLocaleString('es-AR') : '—';
     var desde  = (p.desde||'').split(',')[0];
     var hasta  = (p.hasta||'').split(',')[0];
     var mud    = p.mudanceroNombre || p.mudanceroEmail || '—';
+    var nCot   = p.cotizaciones || 0;
+    var cotChip = nCot > 0
+      ? '<span style="background:#EEF4FF;color:#1A6FFF;font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;cursor:pointer" onclick="abrirPedidoModal(\''+esc(p.id)+'\',event)">'+nCot+' recibida'+(nCot!==1?'s':'')+'</span>'
+      : '<span style="color:var(--text3);font-size:12px">0</span>';
 
-    html += '<tr>'
+    html += '<tr style="cursor:pointer" onclick="abrirPedidoModal(\''+esc(p.id)+'\')">'
       + '<td><span style="font-family:var(--mono);font-size:11px;color:var(--text3)">'+(p.id||'—').slice(-6)+'</span></td>'
       + '<td><span class="cot-tipo '+esc(p.tipo||'')+'">'+(p.tipo==='flete'?'📦 Flete':'🚛 Mudanza')+'</span></td>'
       + '<td style="font-size:12px;white-space:nowrap">'+esc(fecha)+'</td>'
       + '<td><div style="font-size:13px;font-weight:500">'+esc(p.nombre||'—')+'</div><div class="cot-email">'+esc(p.email||'—')+'</div></td>'
       + '<td><div class="cot-ruta">'+esc(desde)+' → '+esc(hasta)+'</div></td>'
       + '<td><span class="cot-estado '+esc(estado)+'">'+esc(estado)+'</span></td>'
+      + '<td>'+cotChip+'</td>'
       + '<td style="font-size:12px;color:var(--text2)">'+esc(mud)+'</td>'
       + '<td style="font-family:var(--mono);font-weight:700;font-size:13px;color:var(--navy)">'+esc(monto)+'</td>'
       + '</tr>';
@@ -1413,7 +1444,97 @@ function filtrarUsuarios() {
   html += '</tbody></table></div>';
   document.getElementById('usuariosList').innerHTML = html;
 }
+
+// ══════════════════════════════════════════
+// MODAL DETALLE PEDIDO
+// ══════════════════════════════════════════
+async function abrirPedidoModal(pedidoId, e) {
+  if (e) e.stopPropagation();
+  document.getElementById('pmTitle').textContent = 'Pedido #' + (pedidoId||'').slice(-6);
+  document.getElementById('pmBody').innerHTML = '<div class="loading"><span class="spinner"></span>Cargando…</div>';
+  document.getElementById('pedidoModal').classList.add('open');
+  try {
+    var r = await fetch('/api/cotizaciones?action=admin-pedido&id='+encodeURIComponent(pedidoId)+'&token=mya-admin-2026');
+    var d = await r.json();
+    if (!d.ok) throw new Error(d.error||'Error');
+    renderPedidoModal(d.pedido);
+  } catch(ex) {
+    var p = _cotizacionesData.find(function(x){ return x.id === pedidoId; });
+    if (p) renderPedidoModalBasic(p);
+    else document.getElementById('pmBody').innerHTML = '<div class="pm-empty">Error al cargar.</div>';
+  }
+}
+
+function cerrarPedidoModal() {
+  document.getElementById('pedidoModal').classList.remove('open');
+}
+
+function renderPedidoModal(p) {
+  var cots  = p.cotizaciones || [];
+  var fecha = p.fechaPublicacion ? new Date(p.fechaPublicacion).toLocaleString('es-AR') : '—';
+  var waBtn = p.clienteWA
+    ? '<a href="https://wa.me/54'+p.clienteWA.replace(/\D/g,'')+'" target="_blank" class="pm-wa-btn">💬 Abrir WhatsApp</a>'
+    : '<span style="color:var(--text3);font-size:12px">No registrado</span>';
+
+  var html = '<div class="pm-section">'
+    + '<div class="pm-section-title">📋 Pedido</div>'
+    + '<div class="pm-row"><span class="pm-label">ID</span><span class="pm-val" style="font-family:var(--mono)">'+esc(p.id||'—')+'</span></div>'
+    + '<div class="pm-row"><span class="pm-label">Tipo</span><span class="pm-val">'+(p.tipo==='flete'?'📦 Flete':'🚛 Mudanza')+'</span></div>'
+    + '<div class="pm-row"><span class="pm-label">Estado</span><span class="pm-val"><span class="cot-estado '+(p.estado||'buscando')+'">'+(p.estado||'buscando')+'</span></span></div>'
+    + '<div class="pm-row"><span class="pm-label">Publicado</span><span class="pm-val">'+esc(fecha)+'</span></div>'
+    + '<div class="pm-row"><span class="pm-label">Fecha mudanza</span><span class="pm-val">'+esc(p.fecha||'—')+'</span></div>'
+    + '<div class="pm-row"><span class="pm-label">Desde</span><span class="pm-val">'+esc(p.desde||'—')+'</span></div>'
+    + '<div class="pm-row"><span class="pm-label">Hasta</span><span class="pm-val">'+esc(p.hasta||'—')+'</span></div>'
+    + (p.ambientes ? '<div class="pm-row"><span class="pm-label">Ambientes</span><span class="pm-val">'+esc(p.ambientes)+'</span></div>' : '')
+    + '</div>'
+    + '<div class="pm-section">'
+    + '<div class="pm-section-title">👤 Cliente</div>'
+    + '<div class="pm-row"><span class="pm-label">Nombre</span><span class="pm-val">'+esc(p.clienteNombre||'—')+'</span></div>'
+    + '<div class="pm-row"><span class="pm-label">Email</span><span class="pm-val">'+esc(p.clienteEmail||'—')+'</span></div>'
+    + '<div class="pm-row"><span class="pm-label">WhatsApp</span><span class="pm-val">'+waBtn+'</span></div>'
+    + '</div>'
+    + '<div class="pm-section">'
+    + '<div class="pm-section-title">💬 Cotizaciones recibidas ('+cots.length+')</div>';
+
+  if (!cots.length) {
+    html += '<div class="pm-empty">Ningún mudancero cotizó todavía.</div>';
+  } else {
+    cots.forEach(function(c) {
+      var esAc = c.estado === 'aceptada' || (p.cotizacionAceptada && p.cotizacionAceptada.id === c.id);
+      var precio = c.precio ? '$'+parseInt(c.precio).toLocaleString('es-AR') : '—';
+      var fc = c.fecha ? new Date(c.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+      html += '<div class="cot-item'+(esAc?' aceptada':'')+'">'
+        + '<div class="cot-item-head"><span class="cot-item-mud">🚛 '+esc(c.mudanceroNombre||c.mudanceroEmail||'—')+'</span><span class="cot-item-precio">'+esc(precio)+'</span></div>'
+        + '<div class="cot-item-meta"><span>📅 '+esc(fc)+'</span>'+(c.tiempoEstimado?'<span>⏱ '+esc(c.tiempoEstimado)+'</span>':'')+'<span class="cot-badge '+(esAc?'aceptada':'pendiente')+'">'+(esAc?'✓ Aceptada':'Pendiente')+'</span></div>'
+        + (c.nota?'<div class="cot-item-nota">'+esc(c.nota)+'</div>':'')
+        + '</div>';
+    });
+  }
+  html += '</div>';
+  document.getElementById('pmBody').innerHTML = html;
+}
+
+function renderPedidoModalBasic(p) {
+  document.getElementById('pmBody').innerHTML = '<div class="pm-section">'
+    + '<div class="pm-section-title">📋 Datos básicos</div>'
+    + '<div class="pm-row"><span class="pm-label">Cliente</span><span class="pm-val">'+esc(p.nombre||p.email||'—')+'</span></div>'
+    + '<div class="pm-row"><span class="pm-label">Estado</span><span class="pm-val"><span class="cot-estado '+(p.estado||'buscando')+'">'+(p.estado||'buscando')+'</span></span></div>'
+    + '<div class="pm-row"><span class="pm-label">Cotizaciones</span><span class="pm-val">'+(p.cotizaciones||0)+'</span></div>'
+    + '</div><div class="pm-empty" style="color:#EF4444">No se pudo cargar el detalle completo.<br>Verificá que el endpoint admin-pedido esté deployado.</div>';
+}
 </script>
+<!-- MODAL DETALLE PEDIDO -->
+<div class="pedido-modal-ov" id="pedidoModal" onclick="if(event.target===this)cerrarPedidoModal()">
+  <div class="pedido-modal">
+    <div class="pedido-modal-head">
+      <div class="pedido-modal-title" id="pmTitle">Detalle del pedido</div>
+      <button class="pedido-modal-close" onclick="cerrarPedidoModal()">✕</button>
+    </div>
+    <div class="pedido-modal-body" id="pmBody">
+      <div class="loading"><span class="spinner"></span>Cargando…</div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
