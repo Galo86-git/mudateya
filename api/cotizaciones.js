@@ -705,39 +705,61 @@ module.exports = async function handler(req, res) {
       if (token !== process.env.ADMIN_TOKEN && token !== 'mya-admin-2026') {
         return res.status(401).json({ error: 'Token inválido' });
       }
+
       // Obtener emails del índice centralizado
       let emails = await getJSON('clientes:todos') || [];
-      // Fallback: reconstruir desde todos los pedidos si el índice está vacío
+
+      // Fallback: reconstruir desde KEYS mudanza:* (cubre pedidos históricos)
       if (!emails.length) {
-        const ids = await getJSON('mudanzas:todos') || [];
         const emailSet = new Set();
+
+        // Primero intentar con mudanzas:todos
+        let ids = await getJSON('mudanzas:todos') || [];
+
+        // Si tampoco hay, usar KEYS como último recurso
+        if (!ids.length) {
+          try {
+            const keysRaw = await redisCall('KEYS', 'mudanza:*');
+            if (Array.isArray(keysRaw)) {
+              ids = keysRaw.map(k => k.replace('mudanza:', ''));
+            }
+          } catch(e) { /* ignorar */ }
+        }
+
         for (const id of ids) {
-          const p = await getJSON(`mudanza:${id}`);
-          if (p && p.clienteEmail) emailSet.add(p.clienteEmail);
+          try {
+            const p = await getJSON(`mudanza:${id}`);
+            if (p && p.clienteEmail) emailSet.add(p.clienteEmail);
+          } catch(e) {}
         }
         emails = Array.from(emailSet);
-        // Persistir para la próxima vez
         if (emails.length) await setJSON('clientes:todos', emails);
       }
+
       const clientes = [];
       for (const email of emails) {
-        // Intentar leer perfil guardado
         let perfil = await getJSON(`cliente:perfil:${email}`);
         if (!perfil) {
-          // Reconstruir desde sus pedidos
+          // Reconstruir perfil desde sus pedidos
           const pedidosIds = await getJSON(`cliente:${email}`) || [];
-          let nombre = '', wa = '', ultimaActividad = null, totalMudanzas = pedidosIds.length;
+          let nombre = '', wa = '', ultimaActividad = null;
+          let totalMudanzas = pedidosIds.length;
           for (const pid of pedidosIds) {
-            const p = await getJSON(`mudanza:${pid}`);
-            if (!p) continue;
-            if (!nombre && p.clienteNombre) nombre = p.clienteNombre;
-            if (!wa && p.clienteWA) wa = p.clienteWA;
-            if (!ultimaActividad || p.fechaPublicacion > ultimaActividad) ultimaActividad = p.fechaPublicacion;
+            try {
+              const p = await getJSON(`mudanza:${pid}`);
+              if (!p) continue;
+              if (!nombre && p.clienteNombre) nombre = p.clienteNombre;
+              if (!wa && p.clienteWA) wa = p.clienteWA;
+              if (!ultimaActividad || p.fechaPublicacion > ultimaActividad) ultimaActividad = p.fechaPublicacion;
+            } catch(e) {}
           }
           perfil = { email, nombre, wa, mudanzas: totalMudanzas, ultimaActividad, fechaRegistro: ultimaActividad, estado: 'activo' };
+          // Guardar para la próxima vez
+          await setJSON(`cliente:perfil:${email}`, perfil);
         }
         clientes.push(perfil);
       }
+
       clientes.sort(function(a, b) {
         return new Date(b.ultimaActividad || 0) - new Date(a.ultimaActividad || 0);
       });
