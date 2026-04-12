@@ -63,9 +63,11 @@ nav{background:var(--navy);height:56px;display:flex;align-items:center;justify-c
 /* Galería */
 .gallery{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:160px 160px;gap:6px;border-radius:var(--r2);overflow:hidden}
 .gallery-img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;transition:opacity .2s}
-.gallery-img:hover{opacity:.9}
+.gallery-img:hover{opacity:.85}
 .gallery-img:first-child{grid-row:1/3}
-@media(max-width:600px){.gallery{grid-template-columns:1fr 1fr;grid-template-rows:120px 120px 120px}.gallery-img:first-child{grid-row:auto}}
+/* A partir de la foto 5, flujo normal debajo */
+.gallery-img:nth-child(n+6){grid-row:auto;grid-column:auto}
+@media(max-width:600px){.gallery{grid-template-columns:1fr 1fr;grid-template-rows:repeat(auto-fill,120px)}.gallery-img:first-child{grid-row:auto}}
 
 /* Reseñas */
 .resena{padding:1rem 0;border-bottom:1px solid var(--border)}
@@ -112,11 +114,18 @@ nav{background:var(--navy);height:56px;display:flex;align-items:center;justify-c
 .confirm-btn-ok:hover{background:#0F52CC}
 
 /* Lightbox */
-#lightbox{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.9);align-items:center;justify-content:center}
+#lightbox{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;flex-direction:column;gap:12px}
 #lightbox.open{display:flex}
-#lightbox img{max-width:90vw;max-height:90vh;border-radius:var(--r2);box-shadow:0 20px 60px rgba(0,0,0,.5)}
-#lightbox-close{position:absolute;top:1.5rem;right:1.5rem;color:#fff;font-size:24px;cursor:pointer;background:rgba(255,255,255,.1);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s}
+#lightbox-img{max-width:90vw;max-height:80vh;border-radius:var(--r2);box-shadow:0 20px 60px rgba(0,0,0,.5);object-fit:contain;transition:opacity .15s}
+#lightbox-img.fade{opacity:0}
+#lightbox-close{position:absolute;top:1.5rem;right:1.5rem;color:#fff;font-size:24px;cursor:pointer;background:rgba(255,255,255,.1);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s;z-index:2}
 #lightbox-close:hover{background:rgba(255,255,255,.2)}
+#lightbox-counter{color:rgba(255,255,255,.6);font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.5px}
+.lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;z-index:2;user-select:none}
+.lightbox-nav:hover{background:rgba(255,255,255,.25)}
+#lightbox-prev{left:1.5rem}
+#lightbox-next{right:1.5rem}
+@media(max-width:600px){#lightbox-prev{left:.5rem}#lightbox-next{right:.5rem}.lightbox-nav{width:36px;height:36px;font-size:16px}}
 </style>
 </head>
 <body>
@@ -135,9 +144,12 @@ nav{background:var(--navy);height:56px;display:flex;align-items:center;justify-c
 </div>
 
 <!-- Lightbox -->
-<div id="lightbox" onclick="cerrarLightbox()">
+<div id="lightbox" onclick="lightboxClickFondo(event)">
   <div id="lightbox-close" onclick="cerrarLightbox()">✕</div>
+  <button class="lightbox-nav" id="lightbox-prev" onclick="lightboxNav(-1)">‹</button>
   <img id="lightbox-img" src="" alt=""/>
+  <div id="lightbox-counter"></div>
+  <button class="lightbox-nav" id="lightbox-next" onclick="lightboxNav(1)">›</button>
 </div>
 
 <script>
@@ -275,10 +287,10 @@ function renderPerfil(m, extra) {
   badges += '<span class="badge badge-gray">📍 '+m.zonaBase+'</span>';
   badges += '<span class="badge badge-gray">'+m.vehiculo+'</span>';
 
-  // Galería
+  // Galería — todas las fotos
   var galeriaHtml = '<div class="gallery">';
-  extra.fotos.slice(0,5).forEach(function(url, i) {
-    galeriaHtml += '<img class="gallery-img" src="'+url+'" alt="Foto '+(i+1)+'" onclick="abrirLightbox(\''+url+'\')" '+(i===0?'':'')+'loading="lazy"/>';
+  extra.fotos.forEach(function(url, i) {
+    galeriaHtml += '<img class="gallery-img" src="'+url+'" alt="Foto '+(i+1)+'" onclick="abrirLightbox('+i+')" loading="lazy"/>';
   });
   galeriaHtml += '</div>';
 
@@ -373,14 +385,50 @@ function renderPerfil(m, extra) {
     +'</div>';
 }
 
-function abrirLightbox(url) {
-  document.getElementById('lightbox-img').src = url;
+var _fotosLightbox = [];
+var _fotoActual = 0;
+
+function _setFotosLightbox(fotos) { _fotosLightbox = fotos; }
+
+function abrirLightbox(idx) {
+  _fotoActual = idx;
+  var img = document.getElementById('lightbox-img');
+  img.src = _fotosLightbox[_fotoActual];
+  _actualizarLightbox();
   document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 function cerrarLightbox() {
   document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
 }
-document.addEventListener('keydown', function(e){ if(e.key==='Escape') cerrarLightbox(); });
+function lightboxClickFondo(e) {
+  if (e.target === document.getElementById('lightbox')) cerrarLightbox();
+}
+function lightboxNav(dir) {
+  var n = _fotosLightbox.length;
+  if (!n) return;
+  _fotoActual = (_fotoActual + dir + n) % n;
+  var img = document.getElementById('lightbox-img');
+  img.classList.add('fade');
+  setTimeout(function() {
+    img.src = _fotosLightbox[_fotoActual];
+    img.classList.remove('fade');
+    _actualizarLightbox();
+  }, 120);
+}
+function _actualizarLightbox() {
+  var n = _fotosLightbox.length;
+  document.getElementById('lightbox-counter').textContent = (n > 1) ? (_fotoActual + 1) + ' / ' + n : '';
+  document.getElementById('lightbox-prev').style.display = n > 1 ? 'flex' : 'none';
+  document.getElementById('lightbox-next').style.display = n > 1 ? 'flex' : 'none';
+}
+document.addEventListener('keydown', function(e) {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'Escape')     cerrarLightbox();
+  if (e.key === 'ArrowLeft')  lightboxNav(-1);
+  if (e.key === 'ArrowRight') lightboxNav(1);
+});
 
 // Formato precio confiable
 function fmtPrecio(n) {
@@ -570,6 +618,7 @@ var _mudancero = null;
     if (datos.sitioWeb) extra.sitioWeb    = datos.sitioWeb;
     if (datos.añosExp)  extra.añosExp     = datos.añosExp;
     renderPerfil(datos, extra);
+    _setFotosLightbox(extra.fotos);
   }
 
   // Siempre buscar datos frescos de Redis
