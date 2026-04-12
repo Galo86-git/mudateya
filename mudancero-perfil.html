@@ -207,19 +207,6 @@ var DESCRIPCIONES = [
   'Empresa de transporte de cargas y mudanzas con base en CABA. Flota propia, GPS en todos los vehículos, seguimiento en tiempo real. Atención personalizada de lunes a domingo.',
 ];
 
-var RESEÑAS_POOL = [
-  {autor:'Mariana G.', texto:'Excelente servicio, llegaron puntual y fueron muy cuidadosos con todos mis muebles. Muy recomendables.', estrellas:5, fecha:'Enero 2026'},
-  {autor:'Sebastián P.', texto:'Muy buena experiencia. Rápidos, organizados y el precio fue justo. La segunda vez que los contrato.', estrellas:5, fecha:'Diciembre 2025'},
-  {autor:'Laura M.', texto:'Professionales y amables. Embalaron todo perfectamente y no se rompió nada.', estrellas:5, fecha:'Noviembre 2025'},
-  {autor:'Tomás V.', texto:'Llegaron en hora y terminaron antes de lo estimado. Precio muy razonable.', estrellas:4, fecha:'Octubre 2025'},
-  {autor:'Carla R.', texto:'Muy buen servicio. El camión era grande y entró todo en un solo viaje. Los recomiendo.', estrellas:5, fecha:'Septiembre 2025'},
-  {autor:'Federico A.', texto:'Buena atención desde el primer contacto. Mudanza sin inconvenientes.', estrellas:4, fecha:'Agosto 2025'},
-  {autor:'Natalia S.', texto:'Super prolijos y cuidadosos. Hasta me ayudaron a acomodar los muebles en el nuevo lugar.', estrellas:5, fecha:'Julio 2025'},
-  {autor:'Gonzalo B.', texto:'Servicio de primera. Puntualidad, buen trato y precio competitivo.', estrellas:5, fecha:'Junio 2025'},
-  {autor:'Valeria C.', texto:'Los recomiendo ampliamente. Hicieron todo en tiempo récord y sin daños.', estrellas:5, fecha:'Mayo 2025'},
-  {autor:'Martín H.', texto:'Segunda vez que los uso y siempre a la altura. Confiables y eficientes.', estrellas:5, fecha:'Abril 2025'},
-];
-
 var SITIOS = [
   'www.mudanzasgomez.com.ar',
   'www.silvafletes.com.ar',
@@ -241,17 +228,11 @@ function getDatosExtra(idx) {
   var desc = idx % DESCRIPCIONES.length;
   var sitio = idx % SITIOS.length;
   var años = AÑOS_EXP[idx % AÑOS_EXP.length];
-  // 4 reseñas por perfil, rotando
-  var resenas = [];
-  for (var i = 0; i < 4; i++) {
-    resenas.push(RESEÑAS_POOL[(idx * 4 + i) % RESEÑAS_POOL.length]);
-  }
   return {
     fotos: FOTOS_SETS[set],
     descripcion: DESCRIPCIONES[desc],
     sitioWeb: SITIOS[sitio],
     añosExp: años,
-    resenas: resenas,
   };
 }
 
@@ -294,16 +275,19 @@ function renderPerfil(m, extra) {
   });
   galeriaHtml += '</div>';
 
-  // Reseñas
-  var resenasHtml = extra.resenas.map(function(r) {
-    var rs = '';
-    for (var i = 1; i <= 5; i++) rs += '<span style="color:'+(i<=r.estrellas?'#F59E0B':'#E2E8F0');rs+=';font-size:13px">★</span>';
-    return '<div class="resena">'
-      +'<div class="resena-header"><span class="resena-nombre">'+r.autor+'</span><span class="resena-fecha">'+r.fecha+'</span></div>'
-      +'<div class="resena-stars">'+rs+'</div>'
-      +'<div class="resena-text">'+r.texto+'</div>'
-      +'</div>';
-  }).join('');
+  // Reseñas — solo si vienen datos reales desde Redis (m.resenas)
+  var resenasHtml = (m.resenas && m.resenas.length) ? (function() {
+    var items = m.resenas.map(function(r) {
+      var rs = '';
+      for (var i = 1; i <= 5; i++) rs += '<span style="color:'+(i<=r.estrellas?'#F59E0B':'#E2E8F0')+';font-size:13px">★</span>';
+      return '<div class="resena">'
+        +'<div class="resena-header"><span class="resena-nombre">'+r.autor+'</span><span class="resena-fecha">'+r.fecha+'</span></div>'
+        +'<div class="resena-stars">'+rs+'</div>'
+        +'<div class="resena-text">'+r.texto+'</div>'
+        +'</div>';
+    }).join('');
+    return '<div class="card"><div class="card-title">Reseñas de clientes</div>'+items+'</div>';
+  })() : '';
 
   document.title = (m.empresa || m.nombre) + ' — MudateYa';
 
@@ -361,11 +345,8 @@ function renderPerfil(m, extra) {
     +galeriaHtml
     +'</div>'
 
-    // Reseñas
-    +'<div class="card">'
-    +'<div class="card-title">Reseñas de clientes</div>'
+    // Reseñas (solo si hay datos reales)
     +resenasHtml
-    +'</div>'
     +'</div>'
 
     // Sidebar
