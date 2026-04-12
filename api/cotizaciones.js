@@ -574,6 +574,8 @@ module.exports = async function handler(req, res) {
       if (!cot) return res.status(404).json({ error: 'Cotización no encontrada' });
       mudanza.estado = 'cotizacion_aceptada';
       mudanza.cotizacionAceptada = cot;
+      mudanza.mudanceroAceptado = cot.mudanceroEmail;
+      mudanza.montoTotal = cot.precio;
       // Agregar datos del cliente para que el mudancero pueda contactarlo
       mudanza.cotizacionAceptada.clienteNombre = mudanza.clienteNombre;
       mudanza.cotizacionAceptada.clienteEmail  = mudanza.clienteEmail;
@@ -886,14 +888,22 @@ module.exports = async function handler(req, res) {
       for (const id of ids) {
         const p = await getJSON(`mudanza:${id}`);
         if (!p) continue;
-        // Nombre del mudancero aceptado si existe
+
+        // Leer mudancero — de mudanceroAceptado o fallback a cotizacionAceptada
+        const mudEmail = p.mudanceroAceptado || (p.cotizacionAceptada && p.cotizacionAceptada.mudanceroEmail) || null;
+        const montoVal = p.montoTotal || p.monto || (p.cotizacionAceptada && p.cotizacionAceptada.precio) || null;
+
         let mudanceroNombre = null;
-        if (p.mudanceroAceptado) {
+        if (mudEmail) {
           try {
-            const mPerf = await getJSON(`mudancero:perfil:${p.mudanceroAceptado}`);
-            if (mPerf) mudanceroNombre = mPerf.nombre || mPerf.empresa || p.mudanceroAceptado;
-          } catch(e) {}
+            const mPerf = await getJSON(`mudancero:perfil:${mudEmail}`);
+            if (mPerf) mudanceroNombre = mPerf.nombre || mPerf.empresa || mudEmail;
+            else mudanceroNombre = (p.cotizacionAceptada && p.cotizacionAceptada.mudanceroNombre) || mudEmail;
+          } catch(e) {
+            mudanceroNombre = (p.cotizacionAceptada && p.cotizacionAceptada.mudanceroNombre) || mudEmail;
+          }
         }
+
         pedidos.push({
           id:              p.id || id,
           tipo:            p.tipo || 'mudanza',
@@ -904,8 +914,8 @@ module.exports = async function handler(req, res) {
           hasta:           p.hasta || null,
           fechaMudanza:    p.fecha || null,
           estado:          p.estado || 'buscando',
-          monto:           p.montoTotal || p.monto || null,
-          mudanceroEmail:  p.mudanceroAceptado || null,
+          monto:           montoVal,
+          mudanceroEmail:  mudEmail,
           mudanceroNombre: mudanceroNombre,
           cotizaciones:    (p.cotizaciones || []).length,
           ambientes:       p.ambientes || null,
