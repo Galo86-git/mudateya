@@ -482,6 +482,7 @@ tr:hover td{background:rgba(34,195,106,.03)}
     <div id="modalContent"></div>
     <div class="modal-footer">
       <button class="btn-sm" onclick="closeModal()">Cerrar</button>
+      <button class="btn-sm" id="btnEditar" onclick="activarEdicion()" style="background:#F0FFF4;border-color:#22C36A;color:#15803D">✏ Editar datos</button>
       <button class="btn-sm danger" id="btnRechazar" onclick="cambiarEstado('Rechazado')">✗ Rechazar</button>
       <button class="btn-sm primary" id="btnAprobar" onclick="cambiarEstado('Aprobado')">✓ Aprobar</button>
     </div>
@@ -1537,7 +1538,91 @@ function renderPedidoModalBasic(p) {
     + '<div class="pm-row"><span class="pm-label">Cotizaciones</span><span class="pm-val">'+(p.cotizaciones||0)+'</span></div>'
     + '</div><div class="pm-empty" style="color:#EF4444">No se pudo cargar el detalle completo.<br>Verificá que el endpoint admin-pedido esté deployado.</div>';
 }
+
+// ── EDICIÓN DE PERFIL DESDE ADMIN ──────────────────────────────────────────
+var _perfilEditando = null;
+
+function activarEdicion(){
+  var m = mudancerosData[currentMudanceroIdx];
+  if(!m) return;
+  _perfilEditando = m;
+
+  var campos = [
+    { key:'nombre',    label:'Nombre',      val: m[1]||'' },
+    { key:'telefono',  label:'Teléfono',    val: m[3]||'' },
+    { key:'email',     label:'Email',       val: m[4]||'', readonly: true },
+    { key:'zonaBase',  label:'Zona base',   val: m[5]||'' },
+    { key:'zonasExtra',label:'Zonas extra', val: m[6]||'' },
+    { key:'vehiculo',  label:'Vehículo',    val: m[8]||'' },
+    { key:'servicios', label:'Servicios',   val: m[11]||'' },
+  ];
+
+  var form = '<div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">';
+  campos.forEach(function(c){
+    form += '<div style="display:flex;flex-direction:column;gap:3px">'
+      + '<label style="font-size:11px;color:#64748B;font-family:monospace;text-transform:uppercase;letter-spacing:.5px">'+c.label+'</label>'
+      + (c.readonly
+          ? '<div style="font-size:13px;color:#94A3B8;padding:7px 10px;background:#F8FAFC;border-radius:6px;border:1px solid #E2E8F0">'+c.val+'</div>'
+          : '<input id="edit-'+c.key+'" value="'+c.val.replace(/"/g,"&quot;")+'" style="font-size:13px;padding:7px 10px;border:1px solid #CBD5E1;border-radius:6px;outline:none;font-family:Inter,sans-serif;color:#0F1923" onfocus="this.style.borderColor='#1A6FFF'" onblur="this.style.borderColor='#CBD5E1'"/>')
+      + '</div>';
+  });
+  form += '</div>';
+
+  document.getElementById('modalContent').innerHTML = form;
+  document.getElementById('btnEditar').style.display = 'none';
+  document.getElementById('btnAprobar').style.display = 'none';
+  document.getElementById('btnRechazar').style.display = 'none';
+
+  var footer = document.querySelector('.modal-footer');
+  var btnGuardar = document.createElement('button');
+  btnGuardar.className = 'btn-sm primary';
+  btnGuardar.id = 'btnGuardar';
+  btnGuardar.textContent = '💾 Guardar cambios';
+  btnGuardar.onclick = guardarEdicion;
+  var btnCancelar = document.createElement('button');
+  btnCancelar.className = 'btn-sm';
+  btnCancelar.textContent = 'Cancelar';
+  btnCancelar.onclick = function(){ openModal(currentMudanceroIdx); };
+  footer.insertBefore(btnCancelar, footer.firstChild);
+  footer.insertBefore(btnGuardar, footer.firstChild);
+}
+
+async function guardarEdicion(){
+  var btn = document.getElementById('btnGuardar');
+  if(btn){ btn.disabled=true; btn.textContent='Guardando…'; }
+  var m = mudancerosData[currentMudanceroIdx];
+
+  var campos = ['nombre','telefono','zonaBase','zonasExtra','vehiculo','servicios'];
+  var cambios = {};
+  campos.forEach(function(k){
+    var el = document.getElementById('edit-'+k);
+    if(el) cambios[k] = el.value.trim();
+  });
+
+  try {
+    var r = await fetch('/api/cotizaciones?action=admin-editar-mudancero', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ token:'mya-admin-2026', email: m[4], cambios: cambios })
+    });
+    var d = await r.json();
+    if(d.error) throw new Error(d.error);
+    // Actualizar data local
+    if(cambios.nombre)     m[1]  = cambios.nombre;
+    if(cambios.telefono)   m[3]  = cambios.telefono;
+    if(cambios.zonaBase)   m[5]  = cambios.zonaBase;
+    if(cambios.zonasExtra) m[6]  = cambios.zonasExtra;
+    if(cambios.vehiculo)   m[8]  = cambios.vehiculo;
+    if(cambios.servicios)  m[11] = cambios.servicios;
+    await openModal(currentMudanceroIdx);
+  } catch(e) {
+    alert('Error al guardar: '+e.message);
+    if(btn){ btn.disabled=false; btn.textContent='💾 Guardar cambios'; }
+  }
+}
+
 </script>
+
 <!-- MODAL DETALLE PEDIDO -->
 <div class="pedido-modal-ov" id="pedidoModal" onclick="if(event.target===this)cerrarPedidoModal()">
   <div class="pedido-modal">
