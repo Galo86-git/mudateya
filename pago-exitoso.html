@@ -1,12 +1,139 @@
-{
-  "name": "mudateya",
-  "version": "1.0.0",
-  "description": "MudateYa — Marketplace de mudanzas Argentina",
-  "private": true,
-  "dependencies": {
-    "mercadopago": "^2.0.6"
-  },
-  "engines": {
-    "node": "20.x"
-  }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>¡Pago exitoso! — MudateYa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#003580;--navy-dark:#001f4d;
+  --green:#22C36A;--green-dim:rgba(34,195,106,.1);--green-glow:rgba(34,195,106,.25);
+  --border:#E2E8F0;--bg:#F8FAFC;--text:#0F1923;--text2:#475569;--text3:#94A3B8;
 }
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;min-height:100vh}
+nav{background:var(--navy);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:#fff;text-decoration:none}
+.nav-logo span{color:var(--green)}
+.nav-link{font-size:13px;color:rgba(255,255,255,.7);text-decoration:none}
+.nav-link:hover{color:#fff}
+.success-hero{background:linear-gradient(135deg,var(--navy-dark) 0%,var(--navy) 100%);padding:3rem 1.5rem 4rem;text-align:center;position:relative;overflow:hidden}
+.success-hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:var(--bg);clip-path:ellipse(55% 100% at 50% 100%)}
+.success-ring{width:80px;height:80px;border-radius:50%;border:3px solid var(--green);display:flex;align-items:center;justify-content:center;animation:ringPulse 2s ease-in-out infinite;margin:0 auto 1.2rem}
+@keyframes ringPulse{0%,100%{box-shadow:0 0 0 0 var(--green-glow)}50%{box-shadow:0 0 0 16px rgba(34,195,106,0)}}
+.success-check{font-size:2.5rem;animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes popIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.success-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2rem,6vw,3rem);letter-spacing:2px;color:#fff;margin-bottom:.5rem;animation:fadeUp .6s .2s ease both;opacity:0}
+.success-sub{font-size:15px;color:rgba(255,255,255,.7);animation:fadeUp .6s .3s ease both;opacity:0;line-height:1.6}
+.success-sub span{color:var(--green);font-weight:600}
+.summary-card{max-width:520px;margin:-1.5rem auto 0;background:#fff;border-radius:16px;border:1px solid var(--border);padding:1.2rem 1.5rem;box-shadow:0 4px 24px rgba(0,0,0,.08);animation:fadeUp .6s .4s ease both;opacity:0;position:relative;z-index:1}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.summary-row:last-child{border-bottom:none;font-weight:700;font-size:15px;color:var(--navy)}
+.summary-label{color:var(--text2)}
+.summary-val{font-weight:600;color:var(--text)}
+.badge-pagado{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,195,106,.2);border-radius:6px;padding:2px 10px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace}
+.actions{text-align:center;padding:2.5rem 1.5rem 3rem;animation:fadeUp .6s .5s ease both;opacity:0}
+.btn-goto{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;padding:13px 28px;border-radius:12px;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;text-decoration:none;transition:all .2s}
+.btn-goto:hover{background:var(--navy-dark)}
+.btn-sec{display:inline-block;margin-left:12px;font-size:13px;color:var(--text3);text-decoration:none;padding:13px 0}
+.btn-sec:hover{color:var(--text2)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">Mudate<span>Ya</span></a>
+  <a href="/mi-mudanza" class="nav-link">Ver mi mudanza →</a>
+</nav>
+
+<div class="success-hero">
+  <div class="success-ring">
+    <div class="success-check">✓</div>
+  </div>
+  <div class="success-title">¡Pago exitoso!</div>
+  <div class="success-sub" id="heroSub">Tu anticipo fue acreditado. <span>El mudancero fue notificado</span> y te contactará pronto.</div>
+</div>
+
+<div class="summary-card">
+  <div class="summary-row">
+    <span class="summary-label">Mudancero</span>
+    <span class="summary-val" id="sumMudancero">—</span>
+  </div>
+  <div class="summary-row">
+    <span class="summary-label" id="sumMontoLabel">Anticipo pagado (50%)</span>
+    <span class="summary-val" id="sumMonto">—</span>
+  </div>
+  <div class="summary-row">
+    <span class="summary-label">Estado</span>
+    <span class="badge-pagado">✓ Acreditado</span>
+  </div>
+  <div class="summary-row">
+    <span class="summary-label" id="sumSaldoLabel">Saldo restante (50%)</span>
+    <span class="summary-val" id="sumSaldo" style="color:var(--text3)">—</span>
+  </div>
+</div>
+
+<div class="actions">
+  <a href="/mi-mudanza" class="btn-goto">Ver mi mudanza →</a>
+  <a href="/" class="btn-sec">Volver al inicio</a>
+</div>
+
+<script>
+// ── REGISTRAR PAGO EN REDIS ───────────────────────────
+(function registrarPago() {
+  var p = new URLSearchParams(window.location.search);
+  var mudanzaId = p.get('mudanzaId');
+  var tipoPago  = p.get('tipoPago');
+  var paymentId = p.get('payment_id') || p.get('collection_id');
+  var status    = p.get('collection_status') || p.get('status');
+
+  if (!mudanzaId || !tipoPago) return;
+  if (status && status !== 'approved') return;
+
+  var key = 'pago_reg_' + mudanzaId + '_' + tipoPago;
+  if (sessionStorage.getItem(key)) { console.log('[pago-exitoso] ya registrado'); return; }
+  sessionStorage.setItem(key, '1');
+
+  fetch('/api/cotizaciones?action=registrar-pago', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-internal-secret': 'mya-internal-2025'
+    },
+    body: JSON.stringify({ mudanzaId: mudanzaId, tipoPago: tipoPago, mpPaymentId: paymentId })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){ console.log('[pago-exitoso] registro ok:', d); })
+  .catch(function(e){ console.warn('[pago-exitoso] error registro:', e.message); });
+})();
+
+// ── MOSTRAR DATOS EN PANTALLA ─────────────────────────
+(function() {
+  var p = new URLSearchParams(window.location.search);
+  var mudancero = p.get('mudancero') || '—';
+  var monto     = parseInt(p.get('monto') || '0');
+  var tipoPago  = p.get('tipoPago') || 'anticipo';
+
+  document.getElementById('sumMudancero').textContent = decodeURIComponent(mudancero);
+
+  if (tipoPago === 'saldo') {
+    document.getElementById('heroSub').innerHTML = '¡Tu mudanza está <span>completamente pagada</span>! Gracias por usar MudateYa.';
+    document.getElementById('sumMontoLabel').textContent = 'Saldo pagado (50%)';
+    document.getElementById('sumSaldoLabel').textContent = 'Total pagado';
+    document.getElementById('sumSaldo').textContent = monto > 0 ? '$' + (monto * 2).toLocaleString('es-AR') : '100% pagado';
+    document.getElementById('sumSaldo').style.color = 'var(--green)';
+  } else {
+    document.getElementById('sumSaldo').textContent = monto > 0 ? '$' + monto.toLocaleString('es-AR') + ' al completar' : '50% al completar la mudanza';
+  }
+
+  document.getElementById('sumMonto').textContent = monto > 0
+    ? '$' + monto.toLocaleString('es-AR')
+    : (tipoPago === 'saldo' ? '50% saldo pagado' : '50% anticipo pagado');
+})();
+</script>
+</body>
+</html>
