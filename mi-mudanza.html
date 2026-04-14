@@ -838,18 +838,42 @@ function renderPagos(){
     return;
   }
   var html = mudanzasData.map(function(m){
-    if(m.cotizacionAceptada || m.precio){
-      var mud = m.cotizacionAceptada || {};
-      var precio = mud.precio || parseInt(m.precio||0);
-      return '<div class="pago-card">'
-        + '<div class="pago-row"><span class="pago-label">Mudanza</span><span class="pago-val">'+esc(m.desde)+' → '+esc(m.hasta)+'</span></div>'
-        + '<div class="pago-row"><span class="pago-label">Mudancero</span><span class="pago-val">'+esc(mud.mudanceroNombre||'—')+'</span></div>'
-        + '<div class="pago-row"><span class="pago-label">Método</span><span class="pago-val">💳 Mercado Pago</span></div>'
-        + '<div class="pago-row"><span class="pago-label">Total</span><span class="pago-val green">$'+precio.toLocaleString('es-AR')+'</span></div>'
-        + '<div class="pago-row"><span class="pago-label">Fecha</span><span class="pago-val">'+(m.fecha||'—')+'</span></div>'
-        + '</div>';
-    }
-    return '';
+    if(!m.cotizacionAceptada && !m.anticipoPagado) return '';
+    var mud = m.cotizacionAceptada || {};
+    var precio = parseInt(mud.precio||0);
+    if(!precio) return '';
+    var anticipo = Math.round(precio * 0.5);
+    var ruta = esc(m.desde).split(',')[0] + ' → ' + esc(m.hasta).split(',')[0];
+    var mudancero = esc(mud.mudanceroNombre||'—');
+
+    var filaAnticipo = '<div class="pago-card" style="margin-bottom:10px">'
+      + '<div class="pago-row" style="background:var(--bg);padding:8px 12px;border-radius:6px 6px 0 0">'
+      +   '<span class="pago-label" style="font-weight:700;color:var(--navy)">50% Anticipo</span>'
+      +   '<span class="pago-val green" style="font-weight:700">$'+anticipo.toLocaleString('es-AR')+'</span>'
+      + '</div>'
+      + '<div class="pago-row"><span class="pago-label">Mudanza</span><span class="pago-val" style="font-size:12px">'+ruta+'</span></div>'
+      + '<div class="pago-row"><span class="pago-label">Mudancero</span><span class="pago-val">'+mudancero+'</span></div>'
+      + '<div class="pago-row"><span class="pago-label">Método</span><span class="pago-val">💳 Mercado Pago</span></div>'
+      + '<div class="pago-row"><span class="pago-label">Estado</span><span class="pago-val" style="'+(m.anticipoPagado?'color:#17A356;font-weight:600':'color:var(--text3)')+'">'+(m.anticipoPagado?'✓ Pagado':'Pendiente')+'</span></div>'
+      + '</div>';
+
+    var filaSaldo = '<div class="pago-card">'
+      + '<div class="pago-row" style="background:var(--bg);padding:8px 12px;border-radius:6px 6px 0 0">'
+      +   '<span class="pago-label" style="font-weight:700;color:var(--navy)">50% Saldo final</span>'
+      +   '<span class="pago-val green" style="font-weight:700">$'+anticipo.toLocaleString('es-AR')+'</span>'
+      + '</div>'
+      + '<div class="pago-row"><span class="pago-label">Mudanza</span><span class="pago-val" style="font-size:12px">'+ruta+'</span></div>'
+      + '<div class="pago-row"><span class="pago-label">Mudancero</span><span class="pago-val">'+mudancero+'</span></div>'
+      + '<div class="pago-row"><span class="pago-label">Método</span><span class="pago-val">💳 Mercado Pago</span></div>'
+      + '<div class="pago-row"><span class="pago-label">Estado</span><span class="pago-val" style="'
+        +(m.saldoPagado?'color:#17A356;font-weight:600'
+          :(m.estado==='completada'&&m.anticipoPagado?'color:#F59E0B;font-weight:600':'color:var(--text3)'))+'">'
+        +(m.saldoPagado?'✓ Pagado'
+          :(m.estado==='completada'&&m.anticipoPagado?'⚡ Pendiente de pago':'A pagar al completar'))
+      +'</span></div>'
+      + '</div>';
+
+    return filaAnticipo + filaSaldo;
   }).filter(Boolean).join('');
   document.getElementById('pagosList').innerHTML = html || '<div class="empty"><div class="empty-icon">💳</div>Sin pagos aún</div>';
 }
@@ -881,7 +905,7 @@ function renderCalificaciones(){
       + (m.calificado
           ? '<div style="color:#F59E0B;font-size:1.3rem;margin-bottom:4px">'+'★'.repeat(m.estrellas||5)+'☆'.repeat(5-(m.estrellas||5))+'</div>'
             + (m.comentario ? '<div style="font-size:13px;color:var(--text2);margin-top:4px;font-style:italic">"'+esc(m.comentario)+'"</div>' : '')
-          : '<button class="btn btn-sky" onclick="abrirCalificacion(\'' + m.id + '\')" style="font-size:12px">⭐ Calificar a ' + esc(nombreMudancero.split(' ')[0]) + '</button>')
+          : '<button class="btn btn-sky" onclick="abrirCalificacion(''+m.id+'')" style="font-size:12px">⭐ Calificar a '+esc(nombreMudancero.split(' ')[0])+'</button>')
       + '</div>';
   }).join('');
 }
