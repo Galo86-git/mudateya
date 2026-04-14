@@ -1,9 +1,31 @@
 // api/webhook-mp.js
 // Recibe notificaciones de Mercado Pago cuando un pago cambia de estado
 // Configurar en: https://www.mercadopago.com.ar/developers/panel/notifications
+// Evento a suscribir: payment
 
 const { MercadoPagoConfig, Payment } = require('mercadopago');
 
+// ── Redis helpers (igual que cotizaciones.js) ─────────────────────────────
+async function redisCall(method, ...args) {
+  const url   = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const res   = await fetch(`${url}/${[method, ...args.map(a => encodeURIComponent(a))].join('/')}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const data = await res.json();
+  return data.result;
+}
+async function getJSON(key) {
+  const val = await redisCall('GET', key);
+  try { return val ? JSON.parse(val) : null; } catch(e) { return null; }
+}
+async function setJSON(key, value, exSeconds) {
+  const str = JSON.stringify(value);
+  if (exSeconds) await redisCall('SET', key, str, 'EX', String(exSeconds));
+  else           await redisCall('SET', key, str);
+}
+
+// ── Handler ───────────────────────────────────────────────────────────────
 module.exports = async function handler(req, res) {
 
   if (req.method !== 'POST') {
@@ -18,60 +40,71 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ status: 'ignorado', type });
     }
 
-    const client = new MercadoPagoConfig({
-      accessToken: process.env.MP_ACCESS_TOKEN,
-    });
-    const paymentClient = new Payment(client);
+    if (!data || !data.id) {
+      return res.status(200).json({ status: 'sin_id' });
+    }
 
     // Obtener el pago completo desde MP
+    const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
+    const paymentClient = new Payment(client);
     const pago = await paymentClient.get({ id: data.id });
 
-    const {
-      status,           // approved | pending | rejected
-      status_detail,
-      external_reference,
-      metadata,
-      transaction_amount,
-      payer,
-    } = pago;
+    const { status, status_detail, external_reference, metadata, transaction_amount } = pago;
 
     console.log(`[Webhook MP] Pago ${data.id} — ${status} (${status_detail})`);
     console.log(`  Referencia: ${external_reference}`);
-    console.log(`  Mudancero:  ${metadata?.mudancero}`);
-    console.log(`  Tipo:       ${metadata?.tipo_pago}`);
+    console.log(`  Tipo:       ${metadata?.tipoPago}`);
+    console.log(`  MudanzaId:  ${metadata?.mudanzaId}`);
     console.log(`  Monto:      $${transaction_amount}`);
 
-    if (status === 'approved') {
-      // ── Acá va tu lógica de negocio ──────────────────────────────────
-      // 1. Guardar en DB: crear registro de mudanza confirmada
-      // 2. Notificar al mudancero (email / WhatsApp)
-      // 3. Notificar al usuario con la confirmación
-      // 4. Si tipo_pago === 'fee': recordar que queda saldo al mudancero
-      //
-      // Ejemplo con base de datos (pseudocódigo):
-      // await db.mudanzas.create({
-      //   estado: 'confirmada',
-      //   tipo_pago: metadata.tipo_pago,
-      //   precio_total: metadata.precio_total,
-      //   fee_pagado: transaction_amount,
-      //   saldo_al_mudancero: metadata.precio_total - transaction_amount,
-      //   mudancero: metadata.mudancero,
-      //   desde: metadata.desde,
-      //   hasta: metadata.hasta,
-      //   payer_email: payer.email,
-      //   mp_payment_id: data.id,
-      // });
-      //
-      // await enviarEmailConfirmacion(payer.email, metadata);
-      // await notificarMudancero(metadata.mudancero, metadata);
-      // ────────────────────────────────────────────────────────────────
+    // Solo procesar pagos aprobados
+    if (status !== 'approved') {
+      return res.status(200).json({ status: 'no_aprobado', pago_status: status });
     }
 
-    return res.status(200).json({ status: 'ok', pago_status: status });
+    // Extraer datos del metadata
+    const mudanzaId = metadata?.mudanzaId;
+    const tipoPago  = metadata?.tipoPago; // 'anticipo' | 'saldo'
+
+    if (!mudanzaId || !tipoPago) {
+      console.warn('[Webhook MP] Sin mudanzaId o tipoPago en metadata');
+      return res.status(200).json({ status: 'sin_metadata' });
+    }
+
+    // Evitar doble procesamiento — verificar si ya fue registrado
+    const m = await getJSON(`mudanza:${mudanzaId}`);
+    if (!m) {
+      console.warn(`[Webhook MP] Mudanza ${mudanzaId} no encontrada en Redis`);
+      return res.status(200).json({ status: 'mudanza_no_encontrada' });
+    }
+
+    // Verificar si ya estaba registrado (idempotencia)
+    if (tipoPago === 'anticipo' && m.anticipoPagado) {
+      return res.status(200).json({ status: 'ya_registrado' });
+    }
+    if (tipoPago === 'saldo' && m.saldoPagado) {
+      return res.status(200).json({ status: 'ya_registrado' });
+    }
+
+    // Registrar el pago
+    if (tipoPago === 'anticipo') {
+      m.anticipoPagado    = true;
+      m.mpAnticipoPagoId  = String(data.id);
+    }
+    if (tipoPago === 'saldo') {
+      m.saldoPagado    = true;
+      m.mpSaldoPagoId  = String(data.id);
+    }
+    m.ultimoUpdatePago = new Date().toISOString();
+
+    await setJSON(`mudanza:${mudanzaId}`, m, 604800);
+
+    console.log(`[Webhook MP] ✅ Pago ${tipoPago} registrado para mudanza ${mudanzaId}`);
+    return res.status(200).json({ status: 'ok', tipoPago, mudanzaId });
 
   } catch (error) {
-    console.error('Error procesando webhook MP:', error);
-    // MP reintenta si devolvés un error, no devolver 500 por errores menores
+    console.error('[Webhook MP] Error:', error.message);
+    // MP reintenta si devolvés error — siempre devolver 200
     return res.status(200).json({ status: 'error_procesado', error: error.message });
   }
 };
