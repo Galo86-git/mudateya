@@ -1615,6 +1615,12 @@ async function guardarEdicion(){
     if(cambios.zonasExtra) m[6]  = cambios.zonasExtra;
     if(cambios.vehiculo)   m[8]  = cambios.vehiculo;
     if(cambios.servicios)  m[11] = cambios.servicios;
+    var bg = document.getElementById('btnGuardar');
+    if(bg) bg.remove();
+    document.querySelectorAll('.modal-footer button').forEach(function(b){ if(b.textContent==='Cancelar') b.remove(); });
+    document.getElementById('btnEditar').style.display = '';
+    document.getElementById('btnAprobar').style.display = '';
+    document.getElementById('btnRechazar').style.display = '';
     await openModal(currentMudanceroIdx);
   } catch(e) {
     alert('Error al guardar: '+e.message);
