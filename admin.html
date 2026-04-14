@@ -1550,7 +1550,7 @@ function activarEdicion(){
   var campos = [
     { key:'nombre',    label:'Nombre',      val: m[1]||'' },
     { key:'telefono',  label:'Teléfono',    val: m[3]||'' },
-    { key:'email',     label:'Email',       val: m[4]||'', readonly: true },
+    { key:'email',     label:'Email',       val: m[4]||'' },
     { key:'zonaBase',  label:'Zona base',   val: m[5]||'' },
     { key:'zonasExtra',label:'Zonas extra', val: m[6]||'' },
     { key:'vehiculo',  label:'Vehículo',    val: m[8]||'' },
@@ -1563,7 +1563,7 @@ function activarEdicion(){
       + '<label style="font-size:11px;color:#64748B;font-family:monospace;text-transform:uppercase;letter-spacing:.5px">'+c.label+'</label>'
       + (c.readonly
           ? '<div style="font-size:13px;color:#94A3B8;padding:7px 10px;background:#F8FAFC;border-radius:6px;border:1px solid #E2E8F0">'+c.val+'</div>'
-          : '<input id="edit-'+c.key+'" value="'+c.val.replace(/"/g,"&quot;")+'" style="font-size:13px;padding:7px 10px;border:1px solid #CBD5E1;border-radius:6px;outline:none;font-family:Inter,sans-serif;color:#0F1923" onfocus="this.style.borderColor=&quot;#1A6FFF&quot;" onblur="this.style.borderColor=&quot;#CBD5E1&quot;"/>')
+          : '<input id="edit-'+c.key+'" value="'+c.val.replace(/"/g,"&quot;")+'" style="font-size:13px;padding:7px 10px;border:1px solid #CBD5E1;border-radius:6px;outline:none;font-family:Inter,sans-serif;color:#0F1923" onfocus="this.style.borderColor='#1A6FFF'" onblur="this.style.borderColor='#CBD5E1'"/>')
       + '</div>';
   });
   form += '</div>';
@@ -1610,6 +1610,7 @@ async function guardarEdicion(){
     // Actualizar data local
     if(cambios.nombre)     m[1]  = cambios.nombre;
     if(cambios.telefono)   m[3]  = cambios.telefono;
+    if(cambios.email)      m[4]  = cambios.email;
     if(cambios.zonaBase)   m[5]  = cambios.zonaBase;
     if(cambios.zonasExtra) m[6]  = cambios.zonasExtra;
     if(cambios.vehiculo)   m[8]  = cambios.vehiculo;
