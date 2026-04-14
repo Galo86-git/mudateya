@@ -670,6 +670,35 @@ module.exports = async function handler(req, res) {
       await setJSON(`mudanza:${mudanzaId}`, m, 604800);
       return res.status(200).json({ ok: true, estado });
     }
+    if (action === 'calificar' && req.method === 'POST') {
+      const { mudanzaId, estrellas, comentario, clienteEmail } = req.body;
+      if (!mudanzaId || !estrellas || !clienteEmail) return res.status(400).json({ error: 'Faltan datos' });
+      const m = await getJSON(`mudanza:${mudanzaId}`);
+      if (!m) return res.status(404).json({ error: 'No encontrada' });
+      if (m.clienteEmail !== clienteEmail) return res.status(403).json({ error: 'Sin permiso' });
+      if (m.estado !== 'completada' || !m.saldoPagado) return res.status(400).json({ error: 'Solo se puede calificar una mudanza completada y pagada' });
+      if (m.calificado) return res.status(400).json({ error: 'Ya calificaste esta mudanza' });
+      m.calificado = true;
+      m.estrellas = parseInt(estrellas);
+      m.comentario = comentario || '';
+      m.fechaCalificacion = new Date().toISOString();
+      await setJSON(`mudanza:${mudanzaId}`, m, 604800);
+      // Guardar reseña en el perfil del mudancero
+      try {
+        const cot = m.cotizacionAceptada;
+        if (cot && cot.mudanceroEmail) {
+          const perfil = await getJSON(`mudancero:${cot.mudanceroEmail}`);
+          if (perfil) {
+            if (!perfil.resenas) perfil.resenas = [];
+            perfil.resenas.push({ estrellas: m.estrellas, comentario: m.comentario, fecha: m.fechaCalificacion, mudanzaId });
+            perfil.promedioEstrellas = Math.round((perfil.resenas.reduce((a, r) => a + r.estrellas, 0) / perfil.resenas.length) * 10) / 10;
+            await setJSON(`mudancero:${cot.mudanceroEmail}`, perfil);
+          }
+        }
+      } catch(e) { console.warn('Error guardando reseña en perfil:', e.message); }
+      return res.status(200).json({ ok: true });
+    }
+
     if (action === 'eliminar' && req.method === 'POST') {
       const { mudanzaId, clienteEmail } = req.body;
       if (!mudanzaId || !clienteEmail) return res.status(400).json({ error: 'Faltan datos' });
