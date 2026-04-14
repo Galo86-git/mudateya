@@ -858,6 +858,23 @@ module.exports = async function handler(req, res) {
     }
 
     // ── Admin: aprobar / rechazar mudancero ──────────────────────────
+    if (action === 'admin-editar-mudancero' && req.method === 'POST') {
+      const { token, email, cambios } = req.body;
+      if (token !== process.env.ADMIN_TOKEN && token !== 'mya-admin-2026') {
+        return res.status(401).json({ error: 'Token inválido' });
+      }
+      if (!email || !cambios) return res.status(400).json({ error: 'Faltan datos' });
+      const perfil = await getJSON(`mudancero:perfil:${email}`);
+      if (!perfil) return res.status(404).json({ error: 'Mudancero no encontrado' });
+      const camposPermitidos = ['nombre','telefono','zonaBase','zonasExtra','vehiculo','servicios'];
+      camposPermitidos.forEach(function(k) {
+        if (cambios[k] !== undefined && cambios[k] !== '') perfil[k] = cambios[k];
+      });
+      perfil.ultimaEdicionAdmin = new Date().toISOString();
+      await setJSON(`mudancero:perfil:${email}`, perfil);
+      return res.status(200).json({ ok: true });
+    }
+
     if (action === 'admin-aprobar-mudancero' && req.method === 'POST') {
       const { token, email, nuevoEstado, verificadoIdentidad, verificadoVehiculo } = req.body;
       if (token !== process.env.ADMIN_TOKEN && token !== 'mya-admin-2026') {
