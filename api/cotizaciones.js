@@ -640,8 +640,11 @@ module.exports = async function handler(req, res) {
       if (tipoPago === 'saldo')    m.saldoPagado = true;
       m.ultimoUpdatePago = new Date().toISOString();
       await setJSON(`mudanza:${mudanzaId}`, m, 604800);
-      // ── Enviar email al mudancero ──────────────────────────────────────
-      try { await notificarMudanceroPago(m, tipoPago); } catch(e) { console.warn('Email pago error:', e.message); }
+      // ── Enviar emails ─────────────────────────────────────────────────
+      try { await notificarMudanceroPago(m, tipoPago); } catch(e) { console.warn('Email mudancero pago error:', e.message); }
+      if (tipoPago === 'anticipo') {
+        try { await notificarClienteAnticipoPagado(m); } catch(e) { console.warn('Email cliente anticipo error:', e.message); }
+      }
       return res.status(200).json({ ok: true });
     }
     if (action === 'cambiar-estado' && req.method === 'POST') {
@@ -660,6 +663,8 @@ module.exports = async function handler(req, res) {
         m.fechaCompletada = new Date().toISOString();
         // Loguear en Google Sheets cuando se completa
         try { await logPedidoSheets(m); } catch(e) { console.warn('Sheets log error:', e.message); }
+        // Email al cliente invitándolo a pagar el saldo
+        try { await notificarClienteSaldoPendiente(m); } catch(e) { console.warn('Email saldo error:', e.message); }
       }
       if (estado === 'en_curso') m.fechaInicio = new Date().toISOString();
       await setJSON(`mudanza:${mudanzaId}`, m, 604800);
@@ -1516,3 +1521,58 @@ async function notificarMudanceroPago(mudanza, tipoPago) {
   });
 }
 
+
+async function notificarClienteAnticipoPagado(mudanza) {
+  if (!process.env.RESEND_API_KEY || !mudanza.clienteEmail) return;
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const cot = mudanza.cotizacionAceptada || {};
+  const saldo = Math.round((cot.precio || 0) * 0.5);
+  const saldoFmt = '$' + saldo.toLocaleString('es-AR');
+  await resend.emails.send({
+    from: 'MudateYa <noreply@mudateya.ar>',
+    to: mudanza.clienteEmail,
+    subject: `✅ Anticipo confirmado — ${(mudanza.desde||'').split(',')[0]} → ${(mudanza.hasta||'').split(',')[0]}`,
+    html: `<div style="font-family:Arial,sans-serif;max-width:580px;margin:0 auto;background:#fff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+      <div style="background:#003580;padding:20px 28px"><span style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:#fff">Mudate</span><span style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:#22C36A">Ya</span><span style="font-size:13px;color:rgba(255,255,255,.7);margin-left:12px">✅ Anticipo confirmado</span></div>
+      <div style="padding:28px">
+        <p style="font-size:15px;color:#0F1923;margin-bottom:20px;line-height:1.6">Tu anticipo fue acreditado. <strong>${cot.mudanceroNombre || 'Tu mudancero'}</strong> fue notificado y te contactará pronto para coordinar los detalles.</p>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+          <tr><td style="color:#64748B;padding:7px 0;width:35%;font-size:13px">De</td><td style="font-weight:600;color:#0F1923;font-size:13px">${mudanza.desde||'—'}</td></tr>
+          <tr style="background:#F5F7FA"><td style="color:#64748B;padding:7px 6px;font-size:13px">A</td><td style="font-weight:600;color:#0F1923;font-size:13px;padding:7px 0">${mudanza.hasta||'—'}</td></tr>
+          <tr><td style="color:#64748B;padding:7px 0;font-size:13px">Fecha</td><td style="font-size:13px;color:#0F1923">${mudanza.fecha||'—'}</td></tr>
+          <tr style="background:#F5F7FA"><td style="color:#64748B;padding:7px 6px;font-size:13px">Mudancero</td><td style="font-weight:600;color:#0F1923;font-size:13px;padding:7px 0">${cot.mudanceroNombre||'—'}</td></tr>
+          <tr><td style="color:#64748B;padding:7px 0;font-size:13px">Saldo pendiente</td><td style="color:#F59E0B;font-weight:700;font-size:14px">${saldoFmt} al completar</td></tr>
+        </table>
+        <a href="https://mudateya.ar/mi-mudanza" style="display:inline-block;background:#003580;color:#fff;padding:13px 26px;border-radius:9px;text-decoration:none;font-weight:700;font-size:14px">Ver mi mudanza →</a>
+      </div>
+      <div style="background:#F5F7FA;border-top:1px solid #E2E8F0;padding:14px 28px;font-size:11px;color:#94A3B8;font-family:monospace">MudateYa · mudateya.ar · ID: ${mudanza.id}</div>
+    </div>`,
+  });
+}
+
+async function notificarClienteSaldoPendiente(mudanza) {
+  if (!process.env.RESEND_API_KEY || !mudanza.clienteEmail) return;
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const cot = mudanza.cotizacionAceptada || {};
+  const saldo = Math.round((cot.precio || 0) * 0.5);
+  const saldoFmt = '$' + saldo.toLocaleString('es-AR');
+  await resend.emails.send({
+    from: 'MudateYa <noreply@mudateya.ar>',
+    to: mudanza.clienteEmail,
+    subject: `🏁 Mudanza completada — Pagá el saldo final ${saldoFmt}`,
+    html: `<div style="font-family:Arial,sans-serif;max-width:580px;margin:0 auto;background:#fff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+      <div style="background:#003580;padding:20px 28px"><span style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:#fff">Mudate</span><span style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:#22C36A">Ya</span><span style="font-size:13px;color:rgba(255,255,255,.7);margin-left:12px">🏁 Mudanza completada</span></div>
+      <div style="padding:28px">
+        <p style="font-size:15px;color:#0F1923;margin-bottom:20px;line-height:1.6"><strong>${cot.mudanceroNombre || 'Tu mudancero'}</strong> marcó la mudanza como completada. Para cerrar el servicio, abonás el saldo final.</p>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
+          <tr><td style="color:#64748B;padding:7px 0;width:35%;font-size:13px">De</td><td style="font-weight:600;color:#0F1923;font-size:13px">${mudanza.desde||'—'}</td></tr>
+          <tr style="background:#F5F7FA"><td style="color:#64748B;padding:7px 6px;font-size:13px">A</td><td style="font-weight:600;color:#0F1923;font-size:13px;padding:7px 0">${mudanza.hasta||'—'}</td></tr>
+          <tr><td style="color:#64748B;padding:7px 0;font-size:13px">Mudancero</td><td style="font-weight:600;color:#0F1923;font-size:13px">${cot.mudanceroNombre||'—'}</td></tr>
+          <tr style="background:#F5F7FA"><td style="color:#64748B;padding:7px 6px;font-size:13px">Saldo a pagar</td><td style="color:#003580;font-weight:700;font-size:16px;padding:7px 0">${saldoFmt}</td></tr>
+        </table>
+        <a href="https://mudateya.ar/mi-mudanza" style="display:inline-block;background:#22C36A;color:#003580;padding:13px 26px;border-radius:9px;text-decoration:none;font-weight:700;font-size:14px">Pagar saldo final →</a>
+      </div>
+      <div style="background:#F5F7FA;border-top:1px solid #E2E8F0;padding:14px 28px;font-size:11px;color:#94A3B8;font-family:monospace">MudateYa · mudateya.ar · ID: ${mudanza.id}</div>
+    </div>`,
+  });
+}
