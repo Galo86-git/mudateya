@@ -156,6 +156,32 @@ tr:hover td{background:rgba(34,195,106,.03)}
 .confirm-modal-ok{flex:2;padding:11px;border-radius:8px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .2s}
 .confirm-modal-ok:hover{opacity:.85}
 
+/* ── FORM EDICIÓN MODAL (igual a mudanceros.html) ── */
+.edit-form{display:flex;flex-direction:column;gap:0}
+.edit-section-title{font-size:10px;font-weight:700;color:#64748B;font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;padding:12px 0 6px;border-bottom:1px solid #E2E8F0;margin-bottom:8px}
+.edit-section-title:first-child{padding-top:4px}
+.edit-field{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.edit-field label{font-size:10px;color:#94A3B8;font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px}
+.edit-field input,.edit-field select,.edit-field textarea{width:100%;padding:9px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;color:#0F1923;background:#F5F7FA;outline:none;transition:border-color .2s}
+.edit-field input:focus,.edit-field select:focus,.edit-field textarea:focus{border-color:#1A6FFF;box-shadow:0 0 0 2px rgba(26,111,255,.1)}
+.edit-field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:12px}
+.edit-field textarea{resize:vertical;min-height:70px;line-height:1.5}
+.edit-cols2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.edit-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.edit-chip{display:flex;align-items:center;gap:5px;padding:6px 10px;border-radius:7px;border:1px solid #E2E8F0;background:#F5F7FA;cursor:pointer;font-size:12px;color:#475569;transition:all .2s;user-select:none}
+.edit-chip:hover{border-color:rgba(34,195,106,.4);background:rgba(34,195,106,.06)}
+.edit-chip.sel{border-color:#22C36A;background:rgba(34,195,106,.08);color:#15803D;font-weight:600}
+.edit-hgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.edit-hchip{padding:7px 4px;border-radius:7px;text-align:center;border:1px solid #E2E8F0;background:#F5F7FA;font-size:11px;font-weight:500;color:#64748B;cursor:pointer;transition:all .2s;user-select:none}
+.edit-hchip:hover{border-color:rgba(34,195,106,.4)}
+.edit-hchip.sel{border-color:#22C36A;background:rgba(34,195,106,.08);color:#15803D}
+.edit-precio-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#F5F7FA;border-radius:8px;border:1px solid #E2E8F0;margin-bottom:5px}
+.edit-precio-lbl{font-size:12px;color:#475569;flex:1}
+.edit-precio-wrap{position:relative;display:flex;align-items:center}
+.edit-precio-prefix{position:absolute;left:10px;font-size:12px;color:#64748B;font-family:var(--mono);pointer-events:none}
+.edit-precio-input{width:130px;padding:7px 10px 7px 22px;border:1px solid #CBD5E1;border-radius:7px;font-size:13px;font-family:var(--mono);color:#0F1923;background:#fff;outline:none;transition:border-color .2s}
+.edit-precio-input:focus{border-color:#1A6FFF}
+
 /* ── COTIZACIONES ── */
 .cot-table{width:100%;border-collapse:collapse;font-size:13px}
 .cot-table th{background:var(--bg);padding:9px 12px;text-align:left;font-size:10px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap}
@@ -1542,104 +1568,123 @@ function renderPedidoModalBasic(p) {
 // ── EDICIÓN DE PERFIL DESDE ADMIN ──────────────────────────────────────────
 var _perfilEditando = null;
 
-var _ZONAS_OPTIONS = [
-  { group: 'Buenos Aires', opts: ['CABA — zona norte','CABA — zona sur','CABA — zona oeste','CABA — zona centro','GBA Norte (San Isidro, Vicente López, etc.)','GBA Sur (Quilmes, Avellaneda, etc.)','GBA Oeste (Morón, Ituzaingó, etc.)','GBA Este (Lanús, Lomas de Zamora, etc.)','La Plata','Mar del Plata','Bahía Blanca'] },
-  { group: 'Centro',       opts: ['Córdoba Capital','Rosario','Santa Fe'] },
-  { group: 'Cuyo',         opts: ['Mendoza','San Juan','San Luis'] },
-  { group: 'Norte',        opts: ['Tucumán','Salta','Jujuy','Santiago del Estero','Catamarca','La Rioja'] },
-  { group: 'Litoral',      opts: ['Entre Ríos','Corrientes','Misiones','Chaco','Formosa'] },
-  { group: 'Patagonia',    opts: ['Neuquén','Bariloche','Río Negro','Chubut','Santa Cruz','Tierra del Fuego'] },
-];
+function _editChipToggle(el) { el.classList.toggle('sel'); }
 
-var _VEHICULO_OPTIONS = ['Camioneta / furgón pequeño (hasta 1.5t)','Camión mediano (1.5t — 3.5t)','Camión grande (3.5t — 7t)','Camión con hidrogrúa','Múltiples vehículos'];
+function _editGetChips(containerId) {
+  var chips = document.querySelectorAll('#'+containerId+' .edit-chip.sel, #'+containerId+' .edit-hchip.sel');
+  return Array.from(chips).map(function(c){ return c.textContent.trim(); }).join(', ');
+}
 
-function _buildSelect(id, opciones, valorActual) {
-  var sel = '<select id="'+id+'" style="font-size:13px;padding:7px 10px;border:1px solid #CBD5E1;border-radius:6px;outline:none;font-family:Inter,sans-serif;color:#0F1923;background:#fff;width:100%">';
-  sel += '<option value="">— Seleccioná —</option>';
-  opciones.forEach(function(g) {
-    sel += '<optgroup label="── '+g.group+' ──">';
-    g.opts.forEach(function(o) {
-      sel += '<option value="'+o+'"'+(o===valorActual?' selected':'')+'>'+o+'</option>';
-    });
-    sel += '</optgroup>';
+function _editSetChips(containerId, valor) {
+  if (!valor) return;
+  var vals = valor.split(',').map(function(v){ return v.trim().toLowerCase(); });
+  var chips = document.querySelectorAll('#'+containerId+' .edit-chip, #'+containerId+' .edit-hchip');
+  chips.forEach(function(c){
+    if (vals.indexOf(c.textContent.trim().toLowerCase()) !== -1) c.classList.add('sel');
   });
-  sel += '</select>';
-  return sel;
 }
 
-function _buildSelectSimple(id, opciones, valorActual) {
-  var sel = '<select id="'+id+'" style="font-size:13px;padding:7px 10px;border:1px solid #CBD5E1;border-radius:6px;outline:none;font-family:Inter,sans-serif;color:#0F1923;background:#fff;width:100%">';
-  sel += '<option value="">— Seleccioná —</option>';
-  opciones.forEach(function(o) {
-    sel += '<option value="'+o+'"'+(o===valorActual?' selected':'')+'>'+o+'</option>';
-  });
-  sel += '</select>';
-  return sel;
+function _fmtPrecioEdit(el) {
+  var raw = el.value.replace(/\D/g,'');
+  if (raw) el.value = parseInt(raw,10).toLocaleString('es-AR');
 }
 
-function _input(id, val) {
-  return '<input id="'+id+'" value="'+(val||'').replace(/"/g,'&quot;')+'" style="font-size:13px;padding:7px 10px;border:1px solid #CBD5E1;border-radius:6px;outline:none;font-family:Inter,sans-serif;color:#0F1923;width:100%" onfocus="this.style.borderColor=\'#1A6FFF\'" onblur="this.style.borderColor=\'#CBD5E1\'"/>';
-}
-
-function _section(titulo) {
-  return '<div style="font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.8px;font-family:monospace;margin-top:14px;margin-bottom:2px;padding-bottom:4px;border-bottom:1px solid #E2E8F0">'+titulo+'</div>';
-}
-
-function _field(label, input) {
-  return '<div style="display:flex;flex-direction:column;gap:3px">'
-    + '<label style="font-size:10px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px">'+label+'</label>'
-    + input
-    + '</div>';
-}
+function _parsePrecio(v) { return (v||'').replace(/\./g,'').replace(/\s/g,''); }
 
 function activarEdicion(){
   var m = mudancerosData[currentMudanceroIdx];
   if(!m) return;
   _perfilEditando = m;
 
-  var form = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">';
+  var ZONAS_HTML =
+    '<option value="">Seleccioná tu zona principal</option>'+
+    '<optgroup label="── Buenos Aires ──">'+
+      '<option>CABA — zona norte</option><option>CABA — zona sur</option><option>CABA — zona oeste</option><option>CABA — zona centro</option>'+
+      '<option>GBA Norte (San Isidro, Vicente López, etc.)</option><option>GBA Sur (Quilmes, Avellaneda, etc.)</option>'+
+      '<option>GBA Oeste (Morón, Ituzaingó, etc.)</option><option>GBA Este (Lanús, Lomas de Zamora, etc.)</option>'+
+      '<option>La Plata</option><option>Mar del Plata</option><option>Bahía Blanca</option>'+
+    '</optgroup>'+
+    '<optgroup label="── Centro ──"><option>Córdoba Capital</option><option>Rosario</option><option>Santa Fe</option></optgroup>'+
+    '<optgroup label="── Cuyo ──"><option>Mendoza</option><option>San Juan</option><option>San Luis</option></optgroup>'+
+    '<optgroup label="── Norte ──"><option>Tucumán</option><option>Salta</option><option>Jujuy</option><option>Santiago del Estero</option><option>Catamarca</option><option>La Rioja</option></optgroup>'+
+    '<optgroup label="── Litoral ──"><option>Entre Ríos</option><option>Corrientes</option><option>Misiones</option><option>Chaco</option><option>Formosa</option></optgroup>'+
+    '<optgroup label="── Patagonia ──"><option>Neuquén</option><option>Bariloche</option><option>Río Negro</option><option>Chubut</option><option>Santa Cruz</option><option>Tierra del Fuego</option></optgroup>'+
+    '<option value="">— Otra ciudad —</option>';
 
-  form += _section('Datos personales');
-  form += _field('Nombre',   _input('edit-nombre',   m[1]));
-  form += _field('Empresa',  _input('edit-empresa',  m[2]));
-  form += _field('Teléfono', _input('edit-telefono', m[3]));
-  form += _field('Email',    _input('edit-email',    m[4]));
-  form += _field('CUIL/CUIT',_input('edit-cuil',     m[7]));
+  var form = '<div class="edit-form">';
 
-  form += _section('Zona de cobertura');
-  form += _field('Zona base',    _buildSelect('edit-zonaBase', _ZONAS_OPTIONS, m[5]));
-  form += _field('Zonas extra',  _input('edit-zonasExtra', m[6]));
+  form += '<div class="edit-section-title">Datos personales</div>';
+  form += '<div class="edit-cols2">';
+  form += '<div class="edit-field"><label>Nombre completo</label><input id="ed-nombre" type="text" value="'+esc(m[1]||'')+'"/></div>';
+  form += '<div class="edit-field"><label>Empresa / razón social</label><input id="ed-empresa" type="text" value="'+esc(m[2]||'')+'"/></div>';
+  form += '<div class="edit-field"><label>WhatsApp / teléfono</label><input id="ed-telefono" type="tel" value="'+esc(m[3]||'')+'"/></div>';
+  form += '<div class="edit-field"><label>Email</label><input id="ed-email" type="text" value="'+esc(m[4]||'')+'"/></div>';
+  form += '</div>';
+  form += '<div class="edit-field"><label>CUIL / CUIT</label><input id="ed-cuil" type="text" placeholder="20-12345678-9" value="'+esc(m[7]||'')+'"/></div>';
+  form += '<div class="edit-field"><label>Sitio web o Instagram (opcional)</label><input id="ed-sitioweb" type="text" placeholder="https://... o @usuario" value=""/></div>';
 
-  form += _section('Vehículo y equipo');
-  form += _field('Vehículo',          _buildSelectSimple('edit-vehiculo',    _VEHICULO_OPTIONS, m[8]));
-  form += _field('Cant. vehículos',   _input('edit-cantVehiculos', m[9]));
-  form += _field('Equipo (personas)', _input('edit-equipo',        m[10]));
+  form += '<div class="edit-section-title">Zona de cobertura</div>';
+  form += '<div class="edit-field"><label>Ciudad / zona base</label><select id="ed-zonaBase">'+ZONAS_HTML+'</select></div>';
+  form += '<div class="edit-field"><label>Zonas adicionales que cubrís</label><input id="ed-zonasExtra" type="text" placeholder="Ej: Tigre, San Fernando, Escobar" value="'+esc(m[6]||'')+'"/></div>';
+  form += '<div class="edit-field"><label>Larga distancia</label><div class="edit-chips" id="ed-distancia">';
+  form += '<div class="edit-chip" onclick="_editChipToggle(this)">🏙️ Solo CABA/GBA</div>';
+  form += '<div class="edit-chip" onclick="_editChipToggle(this)">🗺️ Interior del país</div>';
+  form += '<div class="edit-chip" onclick="_editChipToggle(this)">🌎 Internacional</div>';
+  form += '</div></div>';
 
-  form += _section('Servicio');
-  form += _field('Servicios',   _input('edit-servicios',  m[11]));
-  form += _field('Días',        _input('edit-dias',       m[12]));
-  form += _field('Horarios',    _input('edit-horarios',   m[13]));
-  form += _field('Anticipación',_input('edit-anticipacion', ''));
+  form += '<div class="edit-section-title">Vehículo y capacidad</div>';
+  form += '<div class="edit-cols2">';
+  form += '<div class="edit-field"><label>Tipo de vehículo</label><select id="ed-vehiculo"><option value="">Seleccioná</option><option>Camioneta / furgón pequeño (hasta 1.5t)</option><option>Camión mediano (1.5t — 3.5t)</option><option>Camión grande (3.5t — 7t)</option><option>Camión con hidrogrúa</option><option>Múltiples vehículos</option></select></div>';
+  form += '<div class="edit-field"><label>Cantidad de vehículos</label><select id="ed-cantVehiculos"><option>1</option><option>2</option><option>3</option><option>4 o más</option></select></div>';
+  form += '<div class="edit-field"><label>Equipo (personas)</label><select id="ed-equipo"><option>Solo yo</option><option>2 personas</option><option>3 personas</option><option>4 o más personas</option></select></div>';
+  form += '</div>';
 
-  form += _section('Precios');
-  form += _field('Precio 1 amb', _input('edit-precio1amb', m[15]));
-  form += _field('Precio 2 amb', _input('edit-precio2amb', m[16]));
-  form += _field('Precio 3 amb', _input('edit-precio3amb', m[17]));
-  form += _field('Precio 4+ amb',_input('edit-precio4amb', ''));
-  form += _field('Precio flete', _input('edit-precioFlete',''));
+  form += '<div class="edit-section-title">Servicios que ofrecés</div>';
+  form += '<div class="edit-chips" id="ed-servicios">';
+  ['📦 Mudanzas completas','🏢 Mudanzas de oficina','🚚 Fletes y envíos','📦 Embalaje incluido','🔧 Desmontaje y montaje','🏗️ Sube / escalera','🛡️ Seguro de mudanza','🧹 Limpieza post-mudanza','📦 Guardamuebles','✨ Sin estrés (premium)'].forEach(function(s){
+    form += '<div class="edit-chip" onclick="_editChipToggle(this)">'+s+'</div>';
+  });
+  form += '</div>';
 
-  form += _section('Cobro y pagos');
-  form += _field('Método cobro', _input('edit-metodoCobro', m[15]));
-  form += _field('CBU / Alias',  _input('edit-cbu',         m[16]));
-  form += _field('Email MP',     _input('edit-emailMP',     m[17]));
-  form += _field('Titular',      _input('edit-titular',     ''));
+  form += '<div class="edit-section-title">Disponibilidad</div>';
+  form += '<div class="edit-field"><label>Días disponibles</label><div class="edit-hgrid" id="ed-dias">';
+  ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo','Feriados'].forEach(function(d){
+    form += '<div class="edit-hchip" onclick="_editChipToggle(this)">'+d+'</div>';
+  });
+  form += '</div></div>';
+  form += '<div class="edit-field"><label>Horarios</label><div class="edit-chips" id="ed-horarios">';
+  ['🌅 Mañana (8–12hs)','☀️ Tarde (12–18hs)','🌙 Noche (18–22hs)','⏰ 24 horas'].forEach(function(h){
+    form += '<div class="edit-chip" onclick="_editChipToggle(this)">'+h+'</div>';
+  });
+  form += '</div></div>';
+  form += '<div class="edit-field"><label>Anticipación mínima</label><select id="ed-anticipacion"><option>Mismo día</option><option>24 horas</option><option>48 horas</option><option>1 semana</option></select></div>';
 
-  form += _section('Notas');
-  form += '<div style="display:flex;flex-direction:column;gap:3px"><label style="font-size:10px;color:#94A3B8;font-family:monospace;text-transform:uppercase;letter-spacing:.5px">Descripción / notas</label><textarea id="edit-extra" rows="3" style="font-size:13px;padding:7px 10px;border:1px solid #CBD5E1;border-radius:6px;outline:none;font-family:Inter,sans-serif;color:#0F1923;resize:vertical">'+(m[14]||'')+'</textarea></div>';
+  form += '<div class="edit-section-title">Precios base (ARS)</div>';
+  [['ed-p1','Monoambiente / 1 ambiente'],['ed-p2','2 ambientes'],['ed-p3','3 ambientes'],['ed-p4','4+ ambientes'],['ed-pflete','Flete / envío chico']].forEach(function(r){
+    form += '<div class="edit-precio-row"><span class="edit-precio-lbl">'+r[1]+'</span><div class="edit-precio-wrap"><span class="edit-precio-prefix">$</span><input class="edit-precio-input" id="'+r[0]+'" type="text" placeholder="0" inputmode="numeric" oninput="_fmtPrecioEdit(this)"/></div></div>';
+  });
+
+  form += '<div class="edit-section-title">Datos para cobrar</div>';
+  form += '<div class="edit-cols2">';
+  form += '<div class="edit-field"><label>Método preferido</label><select id="ed-metodoCobro"><option value="cbu">CBU / Alias bancario</option><option value="mp">Cuenta Mercado Pago</option></select></div>';
+  form += '<div class="edit-field"><label>CBU o Alias</label><input id="ed-cbu" type="text" placeholder="MUDANZAS.JUAN o 0000003100..." value=""/></div>';
+  form += '<div class="edit-field"><label>Cuenta Mercado Pago</label><input id="ed-emailMP" type="text" placeholder="Email, CVU o alias de MP" value=""/></div>';
+  form += '<div class="edit-field"><label>Titular de la cuenta</label><input id="ed-titular" type="text" placeholder="Nombre completo o razón social" value=""/></div>';
+  form += '</div>';
+
+  form += '<div class="edit-section-title">Descripción / experiencia</div>';
+  form += '<div class="edit-field"><textarea id="ed-extra" placeholder="Contá tu experiencia, especialidades, años trabajando..."></textarea></div>';
 
   form += '</div>';
 
   document.getElementById('modalContent').innerHTML = form;
+
+  // Pre-seleccionar zona base y vehículo desde array local
+  var zs = document.getElementById('ed-zonaBase');
+  if (zs && m[5]) zs.value = m[5];
+  var vs = document.getElementById('ed-vehiculo');
+  if (vs && m[8]) vs.value = m[8];
+
   document.getElementById('btnEditar').style.display = 'none';
   document.getElementById('btnAprobar').style.display = 'none';
   document.getElementById('btnRechazar').style.display = 'none';
@@ -1657,39 +1702,31 @@ function activarEdicion(){
   footer.insertBefore(btnCancelar, footer.firstChild);
   footer.insertBefore(btnGuardar, footer.firstChild);
 
-  // Cargar datos finos desde Redis (precios, cobro, titular, anticipacion)
+  // Cargar datos completos desde Redis
   fetch('/api/mudancero-data?email=' + encodeURIComponent(m[4])).then(function(r){ return r.json(); }).then(function(d) {
-    if(!d.perfil) return;
+    if (!d.perfil) return;
     var p = d.perfil;
-    var campos = {
-      'edit-empresa':      p.empresa,
-      'edit-cuil':         p.cuil,
-      'edit-cantVehiculos':p.cantVehiculos,
-      'edit-equipo':       p.equipo,
-      'edit-dias':         p.dias,
-      'edit-horarios':     p.horarios,
-      'edit-anticipacion': p.anticipacion,
-      'edit-precio1amb':   p.precio1amb,
-      'edit-precio2amb':   p.precio2amb,
-      'edit-precio3amb':   p.precio3amb,
-      'edit-precio4amb':   p.precio4amb,
-      'edit-precioFlete':  p.precioFlete,
-      'edit-metodoCobro':  p.metodoCobro,
-      'edit-cbu':          p.cbu,
-      'edit-emailMP':      p.emailMP,
-      'edit-titular':      p.titularCuenta,
-      'edit-extra':        p.extra,
+    var textMap = {
+      'ed-empresa':p.empresa,'ed-cuil':p.cuil,'ed-sitioweb':p.sitioWeb,
+      'ed-zonasExtra':p.zonasExtra,'ed-cbu':p.cbu,'ed-emailMP':p.emailMP,
+      'ed-titular':p.titularCuenta,'ed-extra':p.extra
     };
-    Object.keys(campos).forEach(function(id) {
-      var el = document.getElementById(id);
-      if(el && campos[id]) el.value = campos[id];
+    Object.keys(textMap).forEach(function(id){ var el=document.getElementById(id); if(el && textMap[id]) el.value=textMap[id]; });
+    if (p.zonaBase)      { var z=document.getElementById('ed-zonaBase');      if(z) z.value=p.zonaBase; }
+    if (p.vehiculo)      { var v=document.getElementById('ed-vehiculo');      if(v) v.value=p.vehiculo; }
+    if (p.cantVehiculos) { var cv=document.getElementById('ed-cantVehiculos');if(cv) cv.value=p.cantVehiculos; }
+    if (p.equipo)        { var eq=document.getElementById('ed-equipo');       if(eq) eq.value=p.equipo; }
+    if (p.anticipacion)  { var an=document.getElementById('ed-anticipacion'); if(an) an.value=p.anticipacion; }
+    if (p.metodoCobro)   { var mc=document.getElementById('ed-metodoCobro'); if(mc) mc.value=p.metodoCobro; }
+    var precioMap = {'ed-p1':p.precio1amb,'ed-p2':p.precio2amb,'ed-p3':p.precio3amb,'ed-p4':p.precio4amb,'ed-pflete':p.precioFlete};
+    Object.keys(precioMap).forEach(function(id){
+      var el=document.getElementById(id);
+      if(el && precioMap[id]) el.value=parseInt(String(precioMap[id]).replace(/\D/g,''),10).toLocaleString('es-AR');
     });
-    // zonaBase select
-    var zs = document.getElementById('edit-zonaBase');
-    if(zs && p.zonaBase) zs.value = p.zonaBase;
-    // vehiculo select
-    var vs = document.getElementById('edit-vehiculo');
-    if(vs && p.vehiculo) vs.value = p.vehiculo;
+    if (p.servicios) _editSetChips('ed-servicios', p.servicios);
+    if (p.dias)      _editSetChips('ed-dias',      p.dias);
+    if (p.horarios)  _editSetChips('ed-horarios',  p.horarios);
+    if (p.distancia) _editSetChips('ed-distancia', p.distancia);
   }).catch(function(){});
 }
 
@@ -1698,15 +1735,35 @@ async function guardarEdicion(){
   if(btn){ btn.disabled=true; btn.textContent='Guardando…'; }
   var m = mudancerosData[currentMudanceroIdx];
 
-  var claves = ['nombre','empresa','telefono','email','cuil','zonaBase','zonasExtra',
-                'vehiculo','cantVehiculos','equipo','servicios','dias','horarios','anticipacion',
-                'precio1amb','precio2amb','precio3amb','precio4amb','precioFlete',
-                'metodoCobro','cbu','emailMP','titular','extra'];
-  var cambios = {};
-  claves.forEach(function(k){
-    var el = document.getElementById('edit-'+k);
-    if(el) cambios[k] = el.value.trim ? el.value.trim() : el.value;
-  });
+  var cambios = {
+    nombre:        (document.getElementById('ed-nombre')       ||{}).value||'',
+    empresa:       (document.getElementById('ed-empresa')      ||{}).value||'',
+    telefono:      (document.getElementById('ed-telefono')     ||{}).value||'',
+    email:         (document.getElementById('ed-email')        ||{}).value||'',
+    cuil:          (document.getElementById('ed-cuil')         ||{}).value||'',
+    sitioWeb:      (document.getElementById('ed-sitioweb')     ||{}).value||'',
+    zonaBase:      (document.getElementById('ed-zonaBase')     ||{}).value||'',
+    zonasExtra:    (document.getElementById('ed-zonasExtra')   ||{}).value||'',
+    distancia:     _editGetChips('ed-distancia'),
+    vehiculo:      (document.getElementById('ed-vehiculo')     ||{}).value||'',
+    cantVehiculos: (document.getElementById('ed-cantVehiculos')||{}).value||'',
+    equipo:        (document.getElementById('ed-equipo')       ||{}).value||'',
+    servicios:     _editGetChips('ed-servicios'),
+    dias:          _editGetChips('ed-dias'),
+    horarios:      _editGetChips('ed-horarios'),
+    anticipacion:  (document.getElementById('ed-anticipacion') ||{}).value||'',
+    precio1amb:    _parsePrecio((document.getElementById('ed-p1')    ||{}).value),
+    precio2amb:    _parsePrecio((document.getElementById('ed-p2')    ||{}).value),
+    precio3amb:    _parsePrecio((document.getElementById('ed-p3')    ||{}).value),
+    precio4amb:    _parsePrecio((document.getElementById('ed-p4')    ||{}).value),
+    precioFlete:   _parsePrecio((document.getElementById('ed-pflete')||{}).value),
+    metodoCobro:   (document.getElementById('ed-metodoCobro')  ||{}).value||'',
+    cbu:           (document.getElementById('ed-cbu')          ||{}).value||'',
+    emailMP:       (document.getElementById('ed-emailMP')      ||{}).value||'',
+    titularCuenta: (document.getElementById('ed-titular')      ||{}).value||'',
+    extra:         (document.getElementById('ed-extra')        ||{}).value||'',
+  };
+  Object.keys(cambios).forEach(function(k){ if (!cambios[k]) delete cambios[k]; });
 
   try {
     var r = await fetch('/api/cotizaciones?action=admin-editar-mudancero', {
@@ -1716,7 +1773,6 @@ async function guardarEdicion(){
     });
     var d = await r.json();
     if(d.error) throw new Error(d.error);
-    // Actualizar data local en el array
     if(cambios.nombre)     m[1]  = cambios.nombre;
     if(cambios.empresa)    m[2]  = cambios.empresa;
     if(cambios.telefono)   m[3]  = cambios.telefono;
