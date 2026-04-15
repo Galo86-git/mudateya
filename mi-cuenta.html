@@ -767,7 +767,12 @@ function renderCardCotizacion(m) {
         : '<span style="font-size:11px;color:var(--amber);font-family:var(--mono)">⏳ Anticipo pendiente</span>')
       +'</div>';
   } else if (completada) {
-    estadoBtns = '<div style="margin-top:10px;padding:8px 12px;background:var(--blue-light);border:1px solid rgba(26,111,255,.2);border-radius:8px;font-size:12px;color:var(--blue);font-family:var(--mono)">✓ Mudanza completada</div>';
+    var saldoPagado = m.saldoPagado;
+    if (saldoPagado) {
+      estadoBtns = '<div style="margin-top:10px;padding:8px 12px;background:#F0FFF4;border:1px solid #BBF7D0;border-radius:8px;font-size:12px;color:#15803D;font-family:var(--mono)">✓ Mudanza completada · Pago total recibido</div>';
+    } else {
+      estadoBtns = '<div style="margin-top:10px;padding:8px 12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;font-size:12px;color:#C2410C;font-family:var(--mono)">✓ Mudanza completada · ⏳ Esperando pago del saldo final (50%)</div>';
+    }
   }
 
   return '<div class="pedido-card '+(isAcept||enCurso||completada?'aceptado':(noElegido||expirado?'rechazado':''))+'">'
