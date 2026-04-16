@@ -1059,8 +1059,29 @@ module.exports = async function handler(req, res) {
       }
       var textoBusqueda = zona || ((desde||'') + ' ' + (hasta||''));
       var palabrasBuscadas = palabrasZona(textoBusqueda);
+
+      // Detectar si la búsqueda es dentro de AMBA
+      var kwAmba = ['caba','palermo','belgrano','caballito','flores','almagro','boedo','balvanera',
+        'recoleta','retiro','telmo','barracas','mataderos','liniers','devoto','urquiza',
+        'coghlan','saavedra','nunez','colegiales','chacarita','paternal','crespo','once',
+        'congreso','microcentro','madero','nuñez',
+        'isidro','vicente lopez','olivos','martinez','boulogne','beccar','tigre','fernando',
+        'quilmes','avellaneda','lanus','zamora','banfield','moron','ituzaingo','castelar',
+        'haedo','ramos mejia','san justo','merlo','matanza','varela','berazategui',
+        'tres de febrero','maipu','conurbano','amba','gba'];
+      var esBusquedaAmba = kwAmba.some(function(kw){ return normStr(textoBusqueda).includes(normStr(kw)); });
+
+      var kwZonaAmba = ['caba','gba norte','gba sur','gba oeste','gba este'];
+      function esZonaAmba(perfil) {
+        var zb = normStr(perfil.zonaBase||'');
+        var ze = normStr(perfil.zonasExtra||'');
+        return kwZonaAmba.some(function(kw){ return zb.includes(kw) || ze.includes(kw); });
+      }
+
       function cubreZona(perfil) {
         if (!palabrasBuscadas.length) return true;
+        // Si la búsqueda es AMBA, mostrar todos los de CABA o GBA
+        if (esBusquedaAmba) return esZonaAmba(perfil);
         var cobertura = normStr((perfil.zonaBase||'') + ' ' + (perfil.zonasExtra||''));
         var palabrasCobertura = palabrasZona(cobertura);
         if (palabrasBuscadas.some(function(p){ return cobertura.includes(p); })) return true;
