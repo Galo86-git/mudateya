@@ -2214,7 +2214,33 @@
     renderResultados();
   }
   function toggleFZ(v,el) {
-    if(_filtros.zonas.has(v)) _filtros.zonas.delete(v); else _filtros.zonas.add(v);
+    // Zonas AMBA — CABA y cualquier GBA se tratan como un grupo
+    var _zonaAmba = ['CABA','GBA Norte','GBA Sur','GBA Oeste','GBA Este'];
+    var esAmba = _zonaAmba.indexOf(v) !== -1;
+
+    if (esAmba) {
+      // Si alguna zona AMBA ya está activa, agregar/sacar todas juntas
+      var hayAmba = _zonaAmba.some(function(z){ return _filtros.zonas.has(z); });
+      if (hayAmba) {
+        // Desmarcar todas las AMBA
+        _zonaAmba.forEach(function(z){ _filtros.zonas.delete(z); });
+        // Desmarcar visualmente todos los checkboxes AMBA
+        document.querySelectorAll('.filtro-opt input[type=checkbox], .drawer-opt input[type=checkbox]').forEach(function(cb){
+          var label = cb.parentElement ? cb.parentElement.textContent.trim() : '';
+          if (_zonaAmba.some(function(z){ return label.includes(z); })) cb.checked = false;
+        });
+      } else {
+        // Marcar todas las AMBA
+        _zonaAmba.forEach(function(z){ _filtros.zonas.add(z); });
+        // Marcar visualmente todos los checkboxes AMBA
+        document.querySelectorAll('.filtro-opt input[type=checkbox], .drawer-opt input[type=checkbox]').forEach(function(cb){
+          var label = cb.parentElement ? cb.parentElement.textContent.trim() : '';
+          if (_zonaAmba.some(function(z){ return label.includes(z); })) cb.checked = true;
+        });
+      }
+    } else {
+      if(_filtros.zonas.has(v)) _filtros.zonas.delete(v); else _filtros.zonas.add(v);
+    }
     renderResultados();
   }
   function toggleFVer(v,el) {
