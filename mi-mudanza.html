@@ -170,9 +170,32 @@ body{font-family:Inter,sans-serif;background:#fff;color:var(--text);min-height:1
 
 @media(max-width:768px){
   .sidebar{display:none}
-  .main{padding:1rem}
+  .main{padding:.9rem .9rem 80px}
   .stepper{gap:4px}
   .step-label{display:none}
+  .page-title{font-size:1.3rem;margin-bottom:1rem}
+}
+
+/* ── BOTTOM NAV MOBILE ── */
+.mm-mobile-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:300;
+  background:#003580;border-top:2px solid #22C36A;
+  padding:6px 0 max(6px,env(safe-area-inset-bottom));
+}
+.mm-mobile-nav-inner{display:flex;justify-content:space-around;align-items:center}
+.mm-nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:4px 8px;cursor:pointer;border:none;background:none;
+  color:rgba(255,255,255,.5);font-size:9px;font-family:var(--mono);
+  letter-spacing:.3px;text-transform:uppercase;
+  transition:color .2s;min-width:80px;
+}
+.mm-nav-item.active{color:#22C36A}
+.mm-nav-item svg{width:22px;height:22px;stroke-width:1.8}
+
+@media(max-width:768px){
+  .mm-mobile-nav{display:block}
 }
 </style>
 </head>
@@ -243,6 +266,24 @@ body{font-family:Inter,sans-serif;background:#fff;color:var(--text);min-height:1
       <a class="sidebar-item" onclick="showPage('calificaciones',event)" href="#">
         <span class="sidebar-icon">⭐</span> Calificaciones
       </a>
+    </div>
+
+    <!-- BOTTOM NAV MOBILE -->
+    <div class="mm-mobile-nav">
+      <div class="mm-mobile-nav-inner">
+        <button class="mm-nav-item active" id="mmnav-mudanzas" onclick="showPage('mudanzas',event);setMmNav('mudanzas')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          Mis mudanzas
+        </button>
+        <button class="mm-nav-item" id="mmnav-pagos" onclick="showPage('pagos',event);setMmNav('pagos')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Pagos
+        </button>
+        <button class="mm-nav-item" id="mmnav-calificaciones" onclick="showPage('calificaciones',event);setMmNav('calificaciones')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Calificaciones
+        </button>
+      </div>
     </div>
 
     <div class="main">
@@ -970,6 +1011,12 @@ function showPage(name, e){
   if(e && e.currentTarget) e.currentTarget.classList.add('active');
   if(name==='pagos') renderPagos();
   if(name==='calificaciones') renderCalificaciones();
+}
+
+function setMmNav(name) {
+  document.querySelectorAll('.mm-nav-item').forEach(function(b){ b.classList.remove('active'); });
+  var btn = document.getElementById('mmnav-'+name);
+  if(btn) btn.classList.add('active');
 }
 </script>
 </body>
