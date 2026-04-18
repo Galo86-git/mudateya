@@ -1242,12 +1242,13 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === 'admin-fix-estado' && req.method === 'POST') {
-      const { token, mudanzaId } = req.body;
+      const { token, mudanzaId, forzar } = req.body;
       if (token !== process.env.ADMIN_TOKEN && token !== 'mya-admin-2026') return res.status(401).json({ error: 'No autorizado' });
       const m = await getJSON(`mudanza:${mudanzaId}`);
       if (!m) return res.status(404).json({ error: 'No encontrada' });
-      if (!m.saldoPagado) return res.status(400).json({ error: 'Saldo no pagado, no se puede completar' });
+      if (!m.saldoPagado && !forzar) return res.status(400).json({ error: 'Saldo no pagado, no se puede completar' });
       m.estado = 'completada';
+      m.saldoPagado = true;
       if (!m.fechaCompletada) m.fechaCompletada = new Date().toISOString();
       await setJSON(`mudanza:${mudanzaId}`, m, 604800);
       return res.status(200).json({ ok: true, msg: 'Estado actualizado a completada', id: mudanzaId });
