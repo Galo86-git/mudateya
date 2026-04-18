@@ -2399,6 +2399,14 @@
           _currentUser = {name:p.name, email:p.email, picture:p.picture};
           sessionStorage.setItem('googleUser', JSON.stringify(_currentUser));
           sessionStorage.setItem('clienteUser', JSON.stringify(_currentUser));
+          // Guardar rol según destino
+          if (window._pendingRedirect === '/mi-cuenta') {
+            sessionStorage.setItem('rolMudancero', '1');
+            sessionStorage.removeItem('rolCliente');
+          } else {
+            sessionStorage.setItem('rolCliente', '1');
+            sessionStorage.removeItem('rolMudancero');
+          }
           cerrarLogin(); updateNav();
           if (window._pendingRedirect) {
             var dest = window._pendingRedirect;
