@@ -904,8 +904,8 @@
     </ul>
     <div class="nav-right" id="navRight">
       <div id="nav-no-session" style="display:flex;gap:8px">
-        <a href="/mi-cuenta" class="btn-nav-outline">Soy mudancero</a>
-        <a href="#" onclick="abrirLogin(event)" class="btn-nav-solid">Iniciar sesión</a>
+        <a href="#" onclick="abrirLogin(event,'/mi-cuenta')" class="btn-nav-outline">Soy mudancero</a>
+        <a href="#" onclick="abrirLogin(event,'/mi-mudanza')" class="btn-nav-solid">Soy cliente →</a>
       </div>
       <div id="nav-with-session" style="display:none;align-items:center;gap:10px">
         <img id="navAvatar" class="nav-avatar" src="" alt=""/>
@@ -2378,8 +2378,9 @@
   // ══════════════════════════════════════════
   // LOGIN
   // ══════════════════════════════════════════
-  function abrirLogin(e) {
+  function abrirLogin(e, destino) {
     if (e) e.preventDefault();
+    if (destino) window._pendingRedirect = destino;
     document.getElementById('loginModal').classList.add('open');
     document.body.style.overflow='hidden';
     if (!_googleInited) initGLogin();
@@ -2399,6 +2400,12 @@
           sessionStorage.setItem('googleUser', JSON.stringify(_currentUser));
           sessionStorage.setItem('clienteUser', JSON.stringify(_currentUser));
           cerrarLogin(); updateNav();
+          if (window._pendingRedirect) {
+            var dest = window._pendingRedirect;
+            window._pendingRedirect = null;
+            window.location.href = dest;
+            return;
+          }
           if (_pendingPub) { var m=_pendingPub; _pendingPub=null; m==='abierto'?publicarAbierto():pedirCotizacion(); }
         }
       });
