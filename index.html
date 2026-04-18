@@ -1078,27 +1078,41 @@
         <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,6vw,4.5rem);color:#003580;letter-spacing:2px;line-height:.95;margin-bottom:10px">¿POR QUÉ <span style="color:#22C36A">MUDATEYA</span>?</div>
         <div style="font-size:14px;color:var(--text2);max-width:420px;margin:0 auto">La única plataforma con verificación real de identidad y vehículo.</div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:var(--r2);overflow:hidden">
+      <div class="pq-grid">
 
-        <div style="background:#fff;padding:1.4rem 1.2rem">
-          <div style="width:36px;height:36px;border-radius:8px;background:#EEF4FF;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px">🪪</div>
-          <div style="font-size:14px;font-weight:700;color:#003580;margin-bottom:5px">DNI verificado</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.65">Revisamos la identidad de cada mudancero antes de que aparezca en el catálogo. No es una promesa — es un proceso.</div>
+        <div class="pq-card">
+          <div class="pq-ico" style="background:#EEF4FF">🪪</div>
+          <div class="pq-title">DNI verificado</div>
+          <div class="pq-desc">Revisamos la identidad de cada mudancero antes de que aparezca en el catálogo. No es una promesa — es un proceso.</div>
         </div>
 
-        <div style="background:#fff;padding:1.4rem 1.2rem">
-          <div style="width:36px;height:36px;border-radius:8px;background:#EEF4FF;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px">🚛</div>
-          <div style="font-size:14px;font-weight:700;color:#003580;margin-bottom:5px">Vehículo verificado</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.65">Fotos reales del camión o camioneta. Sabés con qué llegás antes de comprometerte con nadie.</div>
+        <div class="pq-card">
+          <div class="pq-ico" style="background:#EEF4FF">🚛</div>
+          <div class="pq-title">Vehículo verificado</div>
+          <div class="pq-desc">Fotos reales del camión o camioneta. Sabés con qué llegás antes de comprometerte con nadie.</div>
         </div>
 
-        <div style="background:#fff;padding:1.4rem 1.2rem">
-          <div style="width:36px;height:36px;border-radius:8px;background:#F0FDF4;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px">💳</div>
-          <div style="font-size:14px;font-weight:700;color:#003580;margin-bottom:5px">Pago protegido</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.65">Pagás por Mercado Pago. Si algo sale mal, tenés respaldo. Sin efectivo, sin riesgo de no cumplimiento.</div>
+        <div class="pq-card">
+          <div class="pq-ico" style="background:#F0FDF4">💳</div>
+          <div class="pq-title">Pago protegido</div>
+          <div class="pq-desc">Pagás por Mercado Pago. Si algo sale mal, tenés respaldo. Sin efectivo, sin riesgo de incumplimiento.</div>
         </div>
 
       </div>
+
+      <style>
+        .pq-grid{display:grid;grid-template-columns:1fr;gap:1px;background:var(--border);border-radius:var(--r2);overflow:hidden}
+        .pq-card{background:#fff;padding:1.1rem 1.2rem;display:flex;flex-direction:column}
+        .pq-ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
+        .pq-title{font-size:15px;font-weight:700;color:#003580;margin-bottom:5px}
+        .pq-desc{font-size:13px;color:var(--text2);line-height:1.6}
+        @media (min-width:640px){
+          .pq-grid{grid-template-columns:repeat(3,1fr)}
+          .pq-card{padding:1.4rem 1.2rem}
+          .pq-title{font-size:14px}
+          .pq-desc{font-size:12px;line-height:1.65}
+        }
+      </style>
     </div>
   </section>
 
