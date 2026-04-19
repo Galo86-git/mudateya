@@ -7,7 +7,27 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js" data-cfasync="false"></script>
+<script data-cfasync="false">
+/* Cargar QRCode con fallback a varias CDNs */
+(function(){
+  var cdns = [
+    'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
+    'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
+    'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js'
+  ];
+  var idx = 0;
+  function tryLoad(){
+    if (idx >= cdns.length) { console.error('[QRCode] Todas las CDNs fallaron'); return; }
+    var s = document.createElement('script');
+    s.src = cdns[idx];
+    s.async = true;
+    s.onerror = function(){ idx++; tryLoad(); };
+    s.onload = function(){ console.log('[QRCode] Cargada desde', cdns[idx]); };
+    document.head.appendChild(s);
+  }
+  tryLoad();
+})();
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -2690,7 +2710,14 @@ function renderQRSemilla() {
 
 function descargarQRSemilla() {
   if (typeof QRCode === 'undefined') {
-    alert('La librería QRCode no cargó. Revisá tu conexión y recargá la página.');
+    // Dar una oportunidad más de cargar
+    setTimeout(function(){
+      if (typeof QRCode === 'undefined') {
+        alert('La librería QRCode no cargó. Recargá la página (Ctrl+Shift+R).');
+      } else {
+        descargarQRSemilla();
+      }
+    }, 800);
     return;
   }
   var SIZE = 1200;
