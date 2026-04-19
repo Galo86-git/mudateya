@@ -291,6 +291,57 @@ tr:hover td{background:rgba(34,195,106,.03)}
 .cot-badge.pendiente{background:#FEF9C3;color:#854D0E}
 .pm-empty{text-align:center;padding:1.5rem;color:var(--text3);font-size:13px}
 .pm-wa-btn{display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;font-family:var(--font)}
+
+/* ── ALIADOS ── */
+.ali-tab{padding:10px 16px;border:none;background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.ali-tab:hover{color:var(--navy)}
+.ali-tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+.ali-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.ali-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
+.ali-row:last-child{border-bottom:none}
+.ali-row:hover{background:#F8FAFC}
+.ali-info{flex:1;min-width:0}
+.ali-name{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:2px}
+.ali-meta{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.ali-meta span{margin-right:10px}
+.ali-amount{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--navy);text-align:right}
+.ali-amount-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.ali-actions{display:flex;gap:6px;flex-wrap:wrap}
+.ali-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;font-family:var(--mono)}
+.ali-badge.activo{background:#DCFCE7;color:#15803D}
+.ali-badge.bloqueado{background:#FEE2E2;color:#B91C1C}
+.ali-slug{display:inline-block;padding:2px 8px;background:#EEF4FF;color:var(--blue);font-family:var(--mono);font-size:10px;font-weight:700;border-radius:4px;letter-spacing:1px}
+.ali-pagar-btn{padding:6px 12px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)}
+.ali-pagar-btn:hover{background:#1ea858}
+.ali-copy-btn{padding:6px 10px;background:#F5F7FA;color:var(--navy);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--mono)}
+.ali-copy-btn:hover{background:#EEF4FF;border-color:var(--blue)}
+.ali-copy-btn.ok{background:var(--green);color:#fff;border-color:var(--green)}
+.ali-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:13px}
+.ali-empty .ico{font-size:2.4rem;margin-bottom:10px}
+
+/* Modal detalle aliado */
+.ali-modal-ov{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);align-items:flex-start;justify-content:flex-end}
+.ali-modal-ov.open{display:flex}
+.ali-modal{background:#fff;width:100%;max-width:560px;height:100vh;overflow-y:auto;box-shadow:-8px 0 40px rgba(0,0,0,.15)}
+.ali-modal-head{background:var(--navy);padding:1.4rem 1.5rem;display:flex;justify-content:space-between;align-items:flex-start;position:sticky;top:0;z-index:10}
+.ali-modal-head-txt .nombre{color:#fff;font-size:18px;font-weight:700;margin-bottom:4px}
+.ali-modal-head-txt .edif{color:rgba(255,255,255,.8);font-size:12px}
+.ali-modal-head-txt .slug{display:inline-block;margin-top:8px;padding:3px 10px;background:var(--green);color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;border-radius:4px;letter-spacing:1px}
+.ali-modal-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;flex-shrink:0}
+.ali-modal-body{padding:1.5rem}
+.ali-section{margin-bottom:1.5rem}
+.ali-section-title{font-size:10px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.ali-stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.ali-stat{background:#F5F7FA;padding:10px 12px;border-radius:8px}
+.ali-stat-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;font-family:var(--mono);margin-bottom:2px}
+.ali-stat-val{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--navy)}
+.ali-dato{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border)}
+.ali-dato:last-child{border-bottom:none}
+.ali-dato-lbl{color:var(--text2)}
+.ali-dato-val{color:var(--text);font-weight:600;text-align:right}
+.ali-op-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px}
+.ali-op-row:last-child{border-bottom:none}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -347,6 +398,9 @@ tr:hover td{background:rgba(34,195,106,.03)}
       </a>
       <a class="sidebar-item" onclick="showPage('cotizaciones',event)" href="#">
         <span class="sidebar-icon">📋</span> Cotizaciones
+      </a>
+      <a class="sidebar-item" onclick="showPage('aliados',event)" href="#">
+        <span class="sidebar-icon">🤝</span> Aliados
       </a>
     </div>
 
@@ -594,6 +648,180 @@ tr:hover td{background:rgba(34,195,106,.03)}
         </div>
       </div>
 
+      <!-- ════════════════════════════════════════════════════════════════
+           PÁGINA ALIADOS
+           ════════════════════════════════════════════════════════════════ -->
+      <div class="page" id="page-aliados">
+        <div class="page-title">🤝 Programa Aliados</div>
+
+        <!-- MÉTRICAS -->
+        <div class="metrics-grid" id="aliadosMetricas" style="margin-bottom:1.2rem">
+          <div class="metric-card">
+            <div class="metric-label">Aliados registrados</div>
+            <div class="metric-value" id="mAliTotal">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Activos (30d)</div>
+            <div class="metric-value" id="mAliActivos">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Ops este mes</div>
+            <div class="metric-value" id="mAliOps">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">A pagar el 10</div>
+            <div class="metric-value" id="mAliPend" style="color:#22C36A">—</div>
+          </div>
+        </div>
+
+        <!-- TABS INTERNOS -->
+        <div style="display:flex;gap:8px;margin-bottom:1.2rem;border-bottom:1px solid var(--border);overflow-x:auto">
+          <button class="ali-tab active" data-tab="liquidar" onclick="aliTab('liquidar')">💰 Liquidar</button>
+          <button class="ali-tab" data-tab="lista" onclick="aliTab('lista')">👥 Todos los aliados</button>
+          <button class="ali-tab" data-tab="ranking" onclick="aliTab('ranking')">🏆 Ranking</button>
+          <button class="ali-tab" data-tab="historial" onclick="aliTab('historial')">📜 Pagos</button>
+          <button class="ali-tab" data-tab="config" onclick="aliTab('config')">⚙️ Config</button>
+        </div>
+
+        <!-- SUB-PÁGINA: LIQUIDAR -->
+        <div class="ali-subpage" id="ali-sub-liquidar">
+          <div class="table-card">
+            <div class="table-header">
+              <span class="table-title">💰 Liquidaciones pendientes del mes</span>
+              <span id="aliLiqCount" style="font-size:12px;color:var(--text3);font-family:var(--mono)"></span>
+            </div>
+            <div style="padding:12px 16px;background:#F0FDF4;border-bottom:1px solid #DCFCE7;font-size:12px;color:#15803D">
+              💡 Pagás los 10 de cada mes las comisiones <strong>acreditadas</strong> (mudanzas completadas). Para cada aliado: copiá alias MP → pagá por MP → marcá pagado.
+            </div>
+            <div id="aliLiqList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
+          </div>
+        </div>
+
+        <!-- SUB-PÁGINA: LISTA -->
+        <div class="ali-subpage" id="ali-sub-lista" style="display:none">
+          <div class="table-card" style="margin-bottom:12px">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+              <input type="text" id="aliSearchQ" placeholder="Nombre, email, edificio…" oninput="renderAliadosLista()" style="flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font)"/>
+              <select id="aliFiltroEstado" onchange="renderAliadosLista()" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff">
+                <option value="">Todos los estados</option>
+                <option value="activo">Activos</option>
+                <option value="bloqueado">Bloqueados</option>
+              </select>
+              <select id="aliOrden" onchange="renderAliadosLista()" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff">
+                <option value="ops">Más ops</option>
+                <option value="pend">Más pendiente</option>
+                <option value="nuevo">Más nuevos</option>
+                <option value="alfa">Alfabético</option>
+              </select>
+              <button class="btn-sm primary" onclick="cargarAliados()" style="margin-left:auto">↻ Actualizar</button>
+            </div>
+          </div>
+          <div class="table-card">
+            <div id="aliListaWrap"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
+          </div>
+        </div>
+
+        <!-- SUB-PÁGINA: RANKING -->
+        <div class="ali-subpage" id="ali-sub-ranking" style="display:none">
+          <div class="table-card" style="margin-bottom:12px">
+            <div style="display:flex;gap:8px;align-items:center">
+              <span style="font-size:13px;color:var(--text2);font-weight:600">Período:</span>
+              <button class="btn-sm" id="rkBtnMes" onclick="cargarRanking('mes')">Este mes</button>
+              <button class="btn-sm" id="rkBtnTrim" onclick="cargarRanking('trimestre')">Trimestre</button>
+              <button class="btn-sm" id="rkBtnAnio" onclick="cargarRanking('anio')">Año</button>
+              <button class="btn-sm primary" onclick="copiarRankingIG()" style="margin-left:auto">📱 Copy para Instagram</button>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-header">
+              <span class="table-title">🏆 Top 10 Aliados</span>
+              <span id="rkPeriodoLbl" style="font-size:12px;color:var(--text3);font-family:var(--mono)"></span>
+            </div>
+            <div id="rkList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
+          </div>
+        </div>
+
+        <!-- SUB-PÁGINA: HISTORIAL PAGOS -->
+        <div class="ali-subpage" id="ali-sub-historial" style="display:none">
+          <div class="table-card">
+            <div class="table-header">
+              <span class="table-title">📜 Historial de pagos</span>
+              <span id="histTotal" style="font-size:12px;color:var(--text3);font-family:var(--mono)"></span>
+            </div>
+            <div id="histList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
+          </div>
+        </div>
+
+        <!-- SUB-PÁGINA: CONFIG -->
+        <div class="ali-subpage" id="ali-sub-config" style="display:none">
+          <div class="table-card">
+            <div class="table-header">
+              <span class="table-title">⚙️ Configuración del programa</span>
+            </div>
+            <div style="padding:20px">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:18px">
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;display:block;margin-bottom:4px">Fijo por mudanza</label>
+                  <input id="cfgFijoMud" type="number" step="1000" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px"/>
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;display:block;margin-bottom:4px">Fijo por flete</label>
+                  <input id="cfgFijoFle" type="number" step="1000" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px"/>
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;display:block;margin-bottom:4px">% Bono trimestral</label>
+                  <input id="cfgTrimPct" type="number" step="0.01" min="0" max="1" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px"/>
+                  <div style="font-size:10px;color:var(--text3);margin-top:3px">Ej: 0.20 = 20%</div>
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;display:block;margin-bottom:4px">Umbral trimestral (ops)</label>
+                  <input id="cfgTrimUmb" type="number" min="0" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px"/>
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;display:block;margin-bottom:4px">% Bono anual</label>
+                  <input id="cfgAnualPct" type="number" step="0.01" min="0" max="1" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px"/>
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;display:block;margin-bottom:4px">Umbral anual (ops)</label>
+                  <input id="cfgAnualUmb" type="number" min="0" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px"/>
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;display:block;margin-bottom:4px">Duración cookie (días)</label>
+                  <input id="cfgCookieDias" type="number" min="1" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px"/>
+                </div>
+              </div>
+
+              <div style="padding:14px;background:#F5F7FA;border-radius:8px;margin-bottom:18px;display:flex;align-items:center;gap:12px">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text)">
+                  <input id="cfgAbierto" type="checkbox"/>
+                  <span>Programa abierto a nuevas inscripciones</span>
+                </label>
+                <span style="font-size:11px;color:var(--text3)">Si está desactivado, la página /aliados muestra mensaje de cierre.</span>
+              </div>
+
+              <button class="btn-sm primary" onclick="guardarConfig()">💾 Guardar configuración</button>
+              <button class="btn-sm" onclick="cargarConfigAliados()" style="margin-left:8px">↻ Recargar</button>
+            </div>
+          </div>
+
+          <!-- QR SEMILLA -->
+          <div class="table-card" style="margin-top:14px">
+            <div class="table-header">
+              <span class="table-title">📱 QR semilla (genérico)</span>
+            </div>
+            <div style="padding:20px;text-align:center">
+              <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6">Este es el QR genérico que apunta a la página de registro de aliados. Imprimilo, mandalo por WhatsApp o pegalo en edificios para captar nuevos aliados.</p>
+              <div id="qrSemillaWrap" style="display:inline-block;background:#fff;padding:20px;border:1px solid var(--border);border-radius:12px;margin-bottom:14px">
+                <canvas id="qrSemilla" width="280" height="280"></canvas>
+              </div>
+              <div style="font-family:var(--mono);font-size:12px;color:var(--text3);margin-bottom:12px">mudateya.ar/aliados</div>
+              <div>
+                <button class="btn-sm primary" onclick="descargarQRSemilla()">⬇️ Descargar PNG</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2010,6 +2238,509 @@ async function guardarEdicion(){
     </div>
   </div>
 </div>
+
+<!-- MODAL DETALLE ALIADO -->
+<div class="ali-modal-ov" id="aliDetalleModal" onclick="if(event.target===this)cerrarAliDetalle()">
+  <div class="ali-modal">
+    <div class="ali-modal-head">
+      <div class="ali-modal-head-txt">
+        <div class="nombre" id="admNombre">—</div>
+        <div class="edif" id="admEdif">—</div>
+        <div class="slug" id="admSlug">—</div>
+      </div>
+      <button class="ali-modal-close" onclick="cerrarAliDetalle()">×</button>
+    </div>
+    <div class="ali-modal-body" id="admBody">
+      <div class="loading"><span class="spinner"></span>Cargando…</div>
+    </div>
+  </div>
+</div>
+
+<!-- QRCode CDN para QR semilla -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// MÓDULO ALIADOS - ADMIN
+// ═══════════════════════════════════════════════════════════
+var _aliados = [];
+var _aliConfig = null;
+
+function ALIT() { return localStorage.getItem('adminToken') || 'mya-admin-2026'; }
+
+async function aliFetch(url, opts) {
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  opts.headers['x-admin-token'] = ALIT();
+  if (opts.body) opts.headers['Content-Type'] = 'application/json';
+  var r = await fetch(url, opts);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return await r.json();
+}
+
+function aliFmt(n) {
+  if (!n && n !== 0) return '—';
+  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function aliFecha(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString('es-AR', { day:'2-digit', month:'short', year:'2-digit' }); }
+  catch(e) { return iso; }
+}
+
+// ── Tabs ──
+function aliTab(tab) {
+  document.querySelectorAll('.ali-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelector('.ali-tab[data-tab="' + tab + '"]').classList.add('active');
+  document.querySelectorAll('.ali-subpage').forEach(function(sp){ sp.style.display = 'none'; });
+  document.getElementById('ali-sub-' + tab).style.display = '';
+  if (tab === 'liquidar') renderLiquidaciones();
+  else if (tab === 'lista') renderAliadosLista();
+  else if (tab === 'ranking') cargarRanking('mes');
+  else if (tab === 'historial') cargarHistorialPagos();
+  else if (tab === 'config') { cargarConfigAliados(); renderQRSemilla(); }
+}
+
+// ── CARGA PRINCIPAL ──
+async function cargarMetricasAliados() {
+  try {
+    var d = await aliFetch('/api/aliados?action=admin-metricas&token=' + ALIT());
+    if (d.ok) {
+      document.getElementById('mAliTotal').textContent = d.metricas.totalAliados;
+      document.getElementById('mAliActivos').textContent = d.metricas.activos30;
+      document.getElementById('mAliOps').textContent = d.metricas.opsMes;
+      document.getElementById('mAliPend').textContent = '$' + aliFmt(d.metricas.pendientePago);
+    }
+  } catch(e) { console.warn('Métricas aliados:', e.message); }
+}
+
+async function cargarAliados() {
+  try {
+    var d = await aliFetch('/api/aliados?action=admin-list&token=' + ALIT());
+    if (d.ok) {
+      _aliados = d.aliados || [];
+      renderLiquidaciones();
+      renderAliadosLista();
+    }
+  } catch(e) {
+    console.warn('Cargar aliados:', e.message);
+    document.getElementById('aliLiqList').innerHTML = '<div class="ali-empty"><div class="ico">⚠️</div>Error al cargar aliados</div>';
+  }
+}
+
+// ── LIQUIDAR ──
+function renderLiquidaciones() {
+  // Solo aliados con monto pendiente > 0
+  var conPendiente = _aliados.filter(function(a){ return a.balance.pendientePago > 0; });
+  conPendiente.sort(function(a,b){ return b.balance.pendientePago - a.balance.pendientePago; });
+  document.getElementById('aliLiqCount').textContent = conPendiente.length + ' pendientes · Total: $' + aliFmt(conPendiente.reduce(function(s,a){ return s + a.balance.pendientePago; }, 0));
+  var cont = document.getElementById('aliLiqList');
+  if (conPendiente.length === 0) {
+    cont.innerHTML = '<div class="ali-empty"><div class="ico">✓</div>No hay liquidaciones pendientes.<div style="font-size:11px;margin-top:5px;color:var(--text3)">Las comisiones aparecen acá cuando una mudanza se completa.</div></div>';
+    return;
+  }
+  var h = '';
+  for (var i=0; i<conPendiente.length; i++) {
+    var a = conPendiente[i];
+    var hoy = new Date();
+    var diaMes = hoy.getDate();
+    var finTrim = (hoy.getMonth()+1) % 3 === 0; // mar, jun, sep, dic
+    var bonoTrimElegible = a.balance.trimestre.elegible && finTrim && diaMes >= 1 && diaMes <= 15;
+    var bonoAnualElegible = a.balance.anio.elegible && hoy.getMonth() === 11 && diaMes >= 20; // solo en diciembre
+    h += '<div class="ali-row">' +
+      '<div class="ali-info">' +
+        '<div class="ali-name">' + esc(a.nombre) + ' <span class="ali-slug">' + a.slug + '</span></div>' +
+        '<div class="ali-meta">' +
+          '<span>📍 ' + esc(a.edificio) + '</span>' +
+          '<span>💳 ' + esc(a.aliasMP) + '</span>' +
+          '<span>📞 ' + esc(a.telefono) + '</span>' +
+        '</div>' +
+        '<div class="ali-meta" style="margin-top:3px">' +
+          '<span>✅ ' + a.balance.acreditadasCount + ' op acreditadas</span>' +
+          (bonoTrimElegible ? '<span style="color:#22C36A;font-weight:700">🏆 Bono trim: $' + aliFmt(a.balance.trimestre.bono) + '</span>' : '') +
+          (bonoAnualElegible ? '<span style="color:#22C36A;font-weight:700">🎁 Bono anual: $' + aliFmt(a.balance.anio.bono) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div>' +
+        '<div class="ali-amount">$' + aliFmt(a.balance.pendientePago) + '</div>' +
+        '<div class="ali-amount-sub">comisiones</div>' +
+      '</div>' +
+      '<div class="ali-actions">' +
+        '<button class="ali-copy-btn" onclick="aliCopiar(\'' + a.aliasMP + '\', this)">📋 Alias</button>' +
+        '<button class="ali-pagar-btn" onclick="aliPagar(\'' + a.email + '\', ' + (bonoTrimElegible ? 'true' : 'false') + ', ' + (bonoAnualElegible ? 'true' : 'false') + ')">💰 Marcar pagado</button>' +
+      '</div>' +
+    '</div>';
+  }
+  cont.innerHTML = h;
+}
+
+function aliCopiar(txt, btn) {
+  navigator.clipboard.writeText(txt).then(function(){
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('ok');
+    setTimeout(function(){ btn.textContent = '📋 Alias'; btn.classList.remove('ok'); }, 1600);
+  });
+}
+
+async function aliPagar(email, incluirTrim, incluirAnual) {
+  var a = _aliados.find(function(x){ return x.email === email; });
+  if (!a) return;
+  var total = a.balance.pendientePago;
+  var bonoTrim = incluirTrim ? a.balance.trimestre.bono : 0;
+  var bonoAnual = incluirAnual ? a.balance.anio.bono : 0;
+  total += bonoTrim + bonoAnual;
+  var msg = '¿Confirmar pago a ' + a.nombre + '?\n\n';
+  msg += 'Comisiones acreditadas: $' + aliFmt(a.balance.acreditadasMonto) + '\n';
+  if (bonoTrim) msg += 'Bono trimestral: $' + aliFmt(bonoTrim) + '\n';
+  if (bonoAnual) msg += 'Bono anual: $' + aliFmt(bonoAnual) + '\n';
+  msg += '─────────────\nTOTAL: $' + aliFmt(total);
+  if (!confirm(msg)) return;
+  try {
+    // Obtener IDs de atribuciones acreditadas
+    var detalle = await aliFetch('/api/aliados?action=admin-detalle&token=' + ALIT() + '&email=' + encodeURIComponent(email));
+    var mudanzaIds = (detalle.balance.acreditadas.ops || []).map(function(op){ return op.mudanzaId; });
+    var body = { email: email, mudanzaIds: mudanzaIds };
+    if (incluirTrim) { body.conceptoBono = 'trimestral'; body.montoBono = bonoTrim; }
+    if (incluirAnual) { body.conceptoBono = 'anual'; body.montoBono = bonoAnual; }
+    // Nota: si hay ambos bonos, solo se paga uno por llamada. Hacemos dos si corresponde.
+    await aliFetch('/api/aliados?action=admin-marcar-pagado', { method:'POST', body: JSON.stringify(body) });
+    if (incluirTrim && incluirAnual) {
+      // Segunda llamada para el otro bono
+      await aliFetch('/api/aliados?action=admin-marcar-pagado', { method:'POST', body: JSON.stringify({ email: email, mudanzaIds: [], conceptoBono: 'anual', montoBono: bonoAnual }) });
+    }
+    alert('✓ Pago registrado por $' + aliFmt(total));
+    await cargarAliados();
+    await cargarMetricasAliados();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+// ── LISTA COMPLETA ──
+function renderAliadosLista() {
+  var q = (document.getElementById('aliSearchQ').value || '').toLowerCase();
+  var fe = document.getElementById('aliFiltroEstado').value;
+  var ord = document.getElementById('aliOrden').value;
+  var list = _aliados.slice();
+  if (q) {
+    list = list.filter(function(a){
+      return (a.nombre||'').toLowerCase().indexOf(q)!==-1 ||
+             (a.email||'').toLowerCase().indexOf(q)!==-1 ||
+             (a.edificio||'').toLowerCase().indexOf(q)!==-1 ||
+             (a.slug||'').toLowerCase().indexOf(q)!==-1;
+    });
+  }
+  if (fe) list = list.filter(function(a){ return a.estado === fe; });
+  if (ord === 'ops') list.sort(function(a,b){ return (b.balance.pagadasCount + b.balance.acreditadasCount) - (a.balance.pagadasCount + a.balance.acreditadasCount); });
+  else if (ord === 'pend') list.sort(function(a,b){ return b.balance.pendientePago - a.balance.pendientePago; });
+  else if (ord === 'nuevo') list.sort(function(a,b){ return new Date(b.creadoEn) - new Date(a.creadoEn); });
+  else if (ord === 'alfa') list.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+
+  var cont = document.getElementById('aliListaWrap');
+  if (list.length === 0) {
+    cont.innerHTML = '<div class="ali-empty"><div class="ico">👥</div>No hay aliados que coincidan</div>';
+    return;
+  }
+  var h = '';
+  for (var i=0; i<list.length; i++) {
+    var a = list[i];
+    var totalOps = a.balance.pagadasCount + a.balance.acreditadasCount;
+    h += '<div class="ali-row" onclick="verDetalleAliado(\'' + a.email + '\')" style="cursor:pointer">' +
+      '<div class="ali-info">' +
+        '<div class="ali-name">' + esc(a.nombre) + ' <span class="ali-slug">' + a.slug + '</span> <span class="ali-badge ' + a.estado + '">' + a.estado + '</span></div>' +
+        '<div class="ali-meta">' +
+          '<span>📧 ' + esc(a.email) + '</span>' +
+          '<span>📍 ' + esc((a.edificio||'').substring(0,40)) + '</span>' +
+          '<span>📅 Alta: ' + aliFecha(a.creadoEn) + '</span>' +
+        '</div>' +
+        '<div class="ali-meta" style="margin-top:3px">' +
+          '<span style="color:#D97706">🟡 ' + a.balance.enCursoCount + ' en curso</span>' +
+          '<span style="color:#15803D">✅ ' + a.balance.acreditadasCount + ' acred.</span>' +
+          '<span style="color:#1E40AF">💰 ' + a.balance.pagadasCount + ' pagadas</span>' +
+          '<span>📊 ' + totalOps + ' ops totales</span>' +
+        '</div>' +
+      '</div>' +
+      '<div>' +
+        '<div class="ali-amount">$' + aliFmt(a.balance.pendientePago) + '</div>' +
+        '<div class="ali-amount-sub">pendiente</div>' +
+      '</div>' +
+    '</div>';
+  }
+  cont.innerHTML = h;
+}
+
+// ── MODAL DETALLE ──
+async function verDetalleAliado(email) {
+  try {
+    var d = await aliFetch('/api/aliados?action=admin-detalle&token=' + ALIT() + '&email=' + encodeURIComponent(email));
+    if (!d.ok) return;
+    var a = d.aliado;
+    var b = d.balance;
+    document.getElementById('admNombre').textContent = a.nombre;
+    document.getElementById('admEdif').textContent = a.edificio;
+    document.getElementById('admSlug').textContent = a.slug;
+
+    var body = '';
+    // Datos personales
+    body += '<div class="ali-section">';
+    body += '<div class="ali-section-title">👤 Datos</div>';
+    body += '<div class="ali-dato"><span class="ali-dato-lbl">Email</span><span class="ali-dato-val">' + esc(a.email) + '</span></div>';
+    body += '<div class="ali-dato"><span class="ali-dato-lbl">Teléfono</span><span class="ali-dato-val">' + esc(a.telefono) + '</span></div>';
+    body += '<div class="ali-dato"><span class="ali-dato-lbl">Alias MP</span><span class="ali-dato-val" style="font-family:var(--mono)">' + esc(a.aliasMP) + '</span></div>';
+    body += '<div class="ali-dato"><span class="ali-dato-lbl">Alta</span><span class="ali-dato-val">' + aliFecha(a.creadoEn) + '</span></div>';
+    if (a.ultimoLogin) body += '<div class="ali-dato"><span class="ali-dato-lbl">Último login</span><span class="ali-dato-val">' + aliFecha(a.ultimoLogin) + '</span></div>';
+    body += '<div class="ali-dato"><span class="ali-dato-lbl">Estado</span><span class="ali-dato-val"><span class="ali-badge ' + a.estado + '">' + a.estado + '</span></span></div>';
+    body += '<div class="ali-dato"><span class="ali-dato-lbl">Link personal</span><span class="ali-dato-val" style="font-family:var(--mono);font-size:11px">mudateya.ar/r/' + a.slug + '</span></div>';
+    body += '</div>';
+
+    // Balance
+    body += '<div class="ali-section">';
+    body += '<div class="ali-section-title">💰 Balance</div>';
+    body += '<div class="ali-stat-grid">';
+    body += '<div class="ali-stat"><div class="ali-stat-lbl">En curso</div><div class="ali-stat-val" style="color:#D97706">' + b.enCurso.count + '</div><div class="ali-stat-lbl" style="margin-top:3px">$' + aliFmt(b.enCurso.monto) + '</div></div>';
+    body += '<div class="ali-stat"><div class="ali-stat-lbl">Acreditadas</div><div class="ali-stat-val" style="color:#15803D">' + b.acreditadas.count + '</div><div class="ali-stat-lbl" style="margin-top:3px">$' + aliFmt(b.acreditadas.monto) + '</div></div>';
+    body += '<div class="ali-stat"><div class="ali-stat-lbl">Pagadas</div><div class="ali-stat-val" style="color:#1E40AF">' + b.pagadas.count + '</div><div class="ali-stat-lbl" style="margin-top:3px">$' + aliFmt(b.pagadas.monto) + '</div></div>';
+    body += '<div class="ali-stat"><div class="ali-stat-lbl">Canceladas</div><div class="ali-stat-val" style="color:#B91C1C">' + b.canceladas.count + '</div></div>';
+    body += '</div>';
+    body += '</div>';
+
+    // Progreso bonos
+    body += '<div class="ali-section">';
+    body += '<div class="ali-section-title">🏆 Progreso bonos · ' + b.trimestre.periodo + '</div>';
+    body += '<div class="ali-dato"><span class="ali-dato-lbl">Bono trimestral (' + Math.round(b.trimestre.bonoPct*100) + '%)</span><span class="ali-dato-val">' + b.trimestre.count + '/' + b.trimestre.umbral + ' ops ' + (b.trimestre.elegible ? '✓ Elegible ($' + aliFmt(b.trimestre.bono) + ')' : '') + '</span></div>';
+    body += '<div class="ali-dato"><span class="ali-dato-lbl">Bono anual (' + Math.round(b.anio.bonoPct*100) + '%)</span><span class="ali-dato-val">' + b.anio.count + '/' + b.anio.umbral + ' ops ' + (b.anio.elegible ? '✓ Elegible ($' + aliFmt(b.anio.bono) + ')' : '') + '</span></div>';
+    body += '</div>';
+
+    // Historial operaciones
+    body += '<div class="ali-section">';
+    body += '<div class="ali-section-title">📋 Últimas operaciones (' + b.historial.length + ')</div>';
+    if (b.historial.length === 0) {
+      body += '<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Sin operaciones aún</div>';
+    } else {
+      var H = b.historial.slice(0, 30);
+      for (var j=0; j<H.length; j++) {
+        var op = H[j];
+        var est = ({en_curso:'🟡 En curso', acreditada:'✅ Acreditada', pagada:'💰 Pagada', cancelada:'❌ Cancelada'})[op.estado] || op.estado;
+        var tipoL = op.tipo === 'flete' ? '🚚 Flete' : (op.tipo === 'bono_trimestral' ? '🏆 Bono trim' : (op.tipo === 'bono_anual' ? '🎁 Bono anual' : '📦 Mudanza'));
+        body += '<div class="ali-op-row">' +
+          '<div><div style="font-weight:600">' + tipoL + '</div><div style="color:var(--text3);font-size:11px">' + aliFecha(op.creadaEn) + ' · ' + est + (op.concepto ? ' · ' + op.concepto : '') + '</div></div>' +
+          '<div style="font-family:var(--mono);font-weight:700;color:var(--navy)">$' + aliFmt(op.monto) + '</div>' +
+        '</div>';
+      }
+    }
+    body += '</div>';
+
+    // Acciones
+    body += '<div class="ali-section">';
+    body += '<div class="ali-section-title">⚙️ Acciones</div>';
+    if (a.estado === 'activo') {
+      body += '<button class="btn-sm" onclick="cambiarEstadoAliado(\'' + a.email + '\', \'bloqueado\')">🔒 Bloquear aliado</button>';
+    } else {
+      body += '<button class="btn-sm primary" onclick="cambiarEstadoAliado(\'' + a.email + '\', \'activo\')">✓ Reactivar aliado</button>';
+    }
+    body += '</div>';
+
+    document.getElementById('admBody').innerHTML = body;
+    document.getElementById('aliDetalleModal').classList.add('open');
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+function cerrarAliDetalle() {
+  document.getElementById('aliDetalleModal').classList.remove('open');
+}
+
+async function cambiarEstadoAliado(email, nuevoEstado) {
+  if (!confirm('¿' + (nuevoEstado === 'activo' ? 'Reactivar' : 'Bloquear') + ' a este aliado?')) return;
+  try {
+    await aliFetch('/api/aliados?action=admin-cambiar-estado', { method:'POST', body: JSON.stringify({ email: email, estado: nuevoEstado }) });
+    cerrarAliDetalle();
+    await cargarAliados();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+// ── RANKING ──
+async function cargarRanking(periodo) {
+  ['rkBtnMes','rkBtnTrim','rkBtnAnio'].forEach(function(id){ document.getElementById(id).classList.remove('primary'); });
+  var btnId = periodo === 'mes' ? 'rkBtnMes' : (periodo === 'trimestre' ? 'rkBtnTrim' : 'rkBtnAnio');
+  document.getElementById(btnId).classList.add('primary');
+  try {
+    var d = await aliFetch('/api/aliados?action=admin-ranking&token=' + ALIT() + '&periodo=' + periodo);
+    document.getElementById('rkPeriodoLbl').textContent = periodo.toUpperCase() + ' · desde ' + aliFecha(d.desde);
+    var cont = document.getElementById('rkList');
+    if (!d.ranking || d.ranking.length === 0) {
+      cont.innerHTML = '<div class="ali-empty"><div class="ico">🏆</div>Aún no hay aliados con actividad en este período</div>';
+      return;
+    }
+    var h = '';
+    for (var i=0; i<d.ranking.length; i++) {
+      var r = d.ranking[i];
+      var medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : '#' + (i+1)));
+      h += '<div class="ali-row">' +
+        '<div style="min-width:40px;font-size:22px;text-align:center">' + medal + '</div>' +
+        '<div class="ali-info">' +
+          '<div class="ali-name">' + esc(r.nombre) + ' <span class="ali-slug">' + r.slug + '</span></div>' +
+          '<div class="ali-meta"><span>📍 ' + esc((r.edificio||'').substring(0,50)) + '</span></div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div class="ali-amount">' + r.ops + ' ops</div>' +
+          '<div class="ali-amount-sub">$' + aliFmt(r.monto) + '</div>' +
+        '</div>' +
+      '</div>';
+    }
+    cont.innerHTML = h;
+  } catch(e) { console.warn('Ranking:', e.message); }
+}
+
+async function copiarRankingIG() {
+  try {
+    var d = await aliFetch('/api/aliados?action=admin-ranking&token=' + ALIT() + '&periodo=mes');
+    if (!d.ranking || d.ranking.length === 0) { alert('No hay ranking aún'); return; }
+    var hoy = new Date();
+    var meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    var txt = '🏆 TOP ALIADOS MUDATEYA · ' + meses[hoy.getMonth()].toUpperCase() + ' ' + hoy.getFullYear() + '\n\n';
+    for (var i=0; i<Math.min(5, d.ranking.length); i++) {
+      var medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : '🎖️'));
+      txt += medal + ' ' + d.ranking[i].nombre + ' — ' + d.ranking[i].ops + ' operaciones\n';
+    }
+    txt += '\n💪 Gracias por confiar en MudateYa\n📲 ¿Querés sumarte? Escaneá el QR en tu edificio';
+    navigator.clipboard.writeText(txt).then(function(){ alert('✓ Copiado al portapapeles'); });
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+// ── HISTORIAL DE PAGOS ──
+async function cargarHistorialPagos() {
+  try {
+    var d = await aliFetch('/api/aliados?action=admin-historial-pagos&token=' + ALIT());
+    var cont = document.getElementById('histList');
+    if (!d.historial || d.historial.length === 0) {
+      cont.innerHTML = '<div class="ali-empty"><div class="ico">📜</div>Sin pagos registrados aún</div>';
+      document.getElementById('histTotal').textContent = '';
+      return;
+    }
+    var total = d.historial.reduce(function(s,p){ return s + p.montoTotal; }, 0);
+    document.getElementById('histTotal').textContent = d.historial.length + ' pagos · Total: $' + aliFmt(total);
+    var h = '';
+    for (var i=0; i<d.historial.length; i++) {
+      var p = d.historial[i];
+      var conceptoTxt = '';
+      if (p.cantidadOps > 0) conceptoTxt += p.cantidadOps + ' ops';
+      if (p.conceptoBono) conceptoTxt += (conceptoTxt ? ' + ' : '') + 'Bono ' + p.conceptoBono;
+      h += '<div class="ali-row">' +
+        '<div class="ali-info">' +
+          '<div class="ali-name">' + esc(p.aliadoEmail) + '</div>' +
+          '<div class="ali-meta">' +
+            '<span>📅 ' + aliFecha(p.fecha) + '</span>' +
+            '<span>📋 ' + conceptoTxt + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ali-amount">$' + aliFmt(p.montoTotal) + '</div>' +
+      '</div>';
+    }
+    cont.innerHTML = h;
+  } catch(e) { console.warn('Historial:', e.message); }
+}
+
+// ── CONFIG ──
+async function cargarConfigAliados() {
+  try {
+    var d = await aliFetch('/api/aliados?action=admin-config&token=' + ALIT());
+    _aliConfig = d.config;
+    document.getElementById('cfgFijoMud').value = _aliConfig.fijoMudanza;
+    document.getElementById('cfgFijoFle').value = _aliConfig.fijoFlete;
+    document.getElementById('cfgTrimPct').value = _aliConfig.trimPct;
+    document.getElementById('cfgTrimUmb').value = _aliConfig.trimUmbral;
+    document.getElementById('cfgAnualPct').value = _aliConfig.anualPct;
+    document.getElementById('cfgAnualUmb').value = _aliConfig.anualUmbral;
+    document.getElementById('cfgCookieDias').value = _aliConfig.cookieDias;
+    document.getElementById('cfgAbierto').checked = !!_aliConfig.programaAbierto;
+  } catch(e) { console.warn('Config:', e.message); }
+}
+
+async function guardarConfig() {
+  var body = {
+    fijoMudanza: parseInt(document.getElementById('cfgFijoMud').value) || 0,
+    fijoFlete: parseInt(document.getElementById('cfgFijoFle').value) || 0,
+    trimPct: parseFloat(document.getElementById('cfgTrimPct').value) || 0,
+    trimUmbral: parseInt(document.getElementById('cfgTrimUmb').value) || 0,
+    anualPct: parseFloat(document.getElementById('cfgAnualPct').value) || 0,
+    anualUmbral: parseInt(document.getElementById('cfgAnualUmb').value) || 0,
+    cookieDias: parseInt(document.getElementById('cfgCookieDias').value) || 90,
+    programaAbierto: document.getElementById('cfgAbierto').checked
+  };
+  try {
+    await aliFetch('/api/aliados?action=admin-config-update', { method:'POST', body: JSON.stringify(body) });
+    alert('✓ Configuración guardada');
+    cargarConfigAliados();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+// ── QR SEMILLA ──
+function renderQRSemilla() {
+  var canvas = document.getElementById('qrSemilla');
+  if (!canvas || typeof QRCode === 'undefined') return;
+  QRCode.toCanvas(canvas, 'https://mudateya.ar/aliados', {
+    width: 280, margin: 1,
+    color: { dark: '#003580', light: '#FFFFFF' }
+  }, function(err){ if (err) console.warn(err); });
+}
+
+function descargarQRSemilla() {
+  var SIZE = 1200;
+  var canvas = document.createElement('canvas');
+  canvas.width = SIZE; canvas.height = SIZE + 240;
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, SIZE, SIZE + 240);
+  // Header
+  ctx.fillStyle = '#003580';
+  ctx.fillRect(0, 0, SIZE, 180);
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 72px Inter, Arial, sans-serif';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillText('MUDATE', SIZE/2 - 90, 110);
+  ctx.fillStyle = '#22C36A';
+  ctx.fillText('YA', SIZE/2 + 155, 110);
+  ctx.font = 'bold 24px Inter, Arial, sans-serif';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillText('PROGRAMA DE ALIADOS', SIZE/2, 160);
+  // QR
+  var qr = document.createElement('canvas');
+  QRCode.toCanvas(qr, 'https://mudateya.ar/aliados', { width: 700, margin: 1, color: { dark: '#003580', light: '#FFFFFF' } }, function(err){
+    if (err) return;
+    ctx.drawImage(qr, (SIZE - 700)/2, 260, 700, 700);
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 54px Inter, Arial, sans-serif';
+    ctx.fillStyle = '#003580';
+    ctx.fillText('GANÁ COMO ALIADO', SIZE/2, 1030);
+    ctx.font = '32px Inter, Arial, sans-serif';
+    ctx.fillStyle = '#475569';
+    ctx.fillText('Escaneá y registrate en 2 minutos', SIZE/2, 1080);
+    ctx.font = '26px Inter, Arial, sans-serif';
+    ctx.fillStyle = '#22C36A';
+    ctx.fillText('$25.000 por mudanza · $10.000 por flete', SIZE/2, 1130);
+    ctx.font = '22px Inter, Arial, sans-serif';
+    ctx.fillStyle = '#94A3B8';
+    ctx.fillText('mudateya.ar/aliados', SIZE/2, 1200);
+    var link = document.createElement('a');
+    link.download = 'MudateYa-QR-Semilla.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+
+// escape HTML - usa la función esc() ya definida en admin
+
+// ── Hook en showPage para cargar datos cuando se entra a Aliados ──
+(function(){
+  var _origShowPage = window.showPage;
+  window.showPage = function(page, ev) {
+    if (_origShowPage) _origShowPage.apply(this, arguments);
+    if (page === 'aliados') {
+      cargarMetricasAliados();
+      cargarAliados();
+    }
+  };
+})();
+</script>
 
 </body>
 </html>
