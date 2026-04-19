@@ -227,7 +227,8 @@ Based on jsqrencode | (C) 2010 tz@execpc.com | GPL v3 License
   <div id="state-loading" class="card">
     <div class="estado-msg">
       <div class="ico">⏳</div>
-      <p>Cargando...</p>
+      <p id="loading-msg">Cargando...</p>
+      <div id="debug-msg" style="font-size:10px;color:#94A3B8;margin-top:20px;font-family:monospace;text-align:left;padding:12px;background:#F5F7FA;border-radius:6px;word-break:break-all;display:none"></div>
     </div>
   </div>
 
@@ -493,12 +494,23 @@ var _aliado = null;
 // ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
+function debugLog(msg){
+  try {
+    console.log('[Aliados]', msg);
+    var d = document.getElementById('debug-msg');
+    if (d) {
+      d.style.display = 'block';
+      d.textContent = (d.textContent + '\n' + msg).trim().split('\n').slice(-10).join('\n');
+    }
+  } catch(e){}
+}
+
 window.addEventListener('load', function(){
   // Timeout de seguridad: si a los 10s seguimos en loading, forzar login
   setTimeout(function(){
     var loading = document.getElementById('state-loading');
     if (loading && !loading.classList.contains('hide')) {
-      console.warn('[Aliados] Timeout de carga — mostrando login');
+      debugLog('TIMEOUT 10s - saliendo a login');
       mostrarToast('La carga tardó demasiado. Pedí otro link de acceso.', true);
       mostrarLogin();
     }
@@ -507,30 +519,28 @@ window.addEventListener('load', function(){
 });
 
 async function inicializar() {
-  console.log('[Aliados] Inicializando...');
-  try { await cargarConfig(); } catch(e) { console.warn('[Aliados] Config falló:', e); }
+  debugLog('Init START');
+  try { await cargarConfig(); } catch(e) { debugLog('Config err: ' + e.message); }
 
   var urlParams = new URLSearchParams(window.location.search);
   var paramToken = urlParams.get('token');
   var savedToken = localStorage.getItem('aliadoSession');
-  console.log('[Aliados] paramToken:', !!paramToken, '| savedToken:', !!savedToken);
+  debugLog('token URL: ' + (paramToken ? paramToken.substring(0,8)+'...' : 'no') + ' | saved: ' + (savedToken ? 'si' : 'no'));
 
   // Caso 1: llega con ?token=... (magic link)
   if (paramToken) {
     try {
-      console.log('[Aliados] Verificando magic link...');
+      debugLog('Verificando magic link...');
       var r = await fetch('/api/aliados?action=verify-magiclink&token=' + encodeURIComponent(paramToken));
       var d = await r.json();
-      console.log('[Aliados] Verify response:', r.status, d);
+      debugLog('Verify status ' + r.status + ': ' + (d.error || (d.ok ? 'OK' : 'FAIL')));
       if (r.ok && d.ok && d.sessionToken) {
         localStorage.setItem('aliadoSession', d.sessionToken);
         _session = d.sessionToken;
-        // Limpiar URL
         try { history.replaceState({}, '', '/aliados'); } catch(e){}
         return cargarPanel();
       } else {
         mostrarToast(d.error || 'Link inválido o expirado', true);
-        // Fallback: si tiene sesión previa, intentar con esa
         if (savedToken) {
           _session = savedToken;
           return cargarPanel();
@@ -538,7 +548,7 @@ async function inicializar() {
         return mostrarLogin();
       }
     } catch(e) {
-      console.error('[Aliados] Error verify:', e);
+      debugLog('Error verify: ' + e.message);
       mostrarToast('Error al validar link', true);
       if (savedToken) { _session = savedToken; return cargarPanel(); }
       return mostrarLogin();
@@ -552,6 +562,7 @@ async function inicializar() {
   }
 
   // Caso 3: primera vez
+  debugLog('Sin token ni sesión → register');
   mostrarRegister();
 }
 
@@ -701,39 +712,42 @@ async function pedirMagicLink() {
 // PANEL
 // ═══════════════════════════════════════════════════════════
 async function cargarPanel() {
-  console.log('[Aliados] cargarPanel()...');
+  debugLog('cargarPanel()');
   if (!_session) _session = localStorage.getItem('aliadoSession');
-  if (!_session) { console.log('[Aliados] Sin sesión'); return mostrarRegister(); }
+  if (!_session) { debugLog('Sin sesión → register'); return mostrarRegister(); }
 
   ocultarTodos();
   document.getElementById('state-loading').classList.remove('hide');
 
   try {
+    debugLog('Pegando a panel...');
     var r = await fetch('/api/aliados?action=panel&token=' + encodeURIComponent(_session));
-    console.log('[Aliados] Panel response status:', r.status);
+    debugLog('Panel status: ' + r.status);
     if (!r.ok) {
-      console.warn('[Aliados] Panel falló, borrando sesión');
+      debugLog('Panel NO OK → borrar sesión, ir a login');
       localStorage.removeItem('aliadoSession');
       _session = null;
       return mostrarLogin();
     }
     var d = await r.json();
-    console.log('[Aliados] Panel data:', d);
+    debugLog('Panel data recibida: ' + (d && d.aliado ? 'aliado=' + d.aliado.slug : 'sin aliado'));
     if (!d || !d.aliado) {
-      console.error('[Aliados] Panel sin datos de aliado');
+      debugLog('Panel sin aliado → login');
       return mostrarLogin();
     }
     _aliado = d.aliado;
     try {
       renderPanel(d);
+      debugLog('renderPanel OK');
     } catch(renderErr) {
-      console.error('[Aliados] Error en renderPanel:', renderErr);
-      mostrarToast('Error al mostrar panel. Revisá consola.', true);
+      debugLog('Render ERROR: ' + renderErr.message);
+      mostrarToast('Error al mostrar panel: ' + renderErr.message, true);
     }
     ocultarTodos();
     document.getElementById('state-panel').classList.remove('hide');
+    debugLog('Panel mostrado ✓');
   } catch(e) {
-    console.error('[Aliados] Error cargar panel:', e);
+    debugLog('Error cargar panel: ' + e.message);
     mostrarToast('Error al cargar panel', true);
     mostrarLogin();
   }
