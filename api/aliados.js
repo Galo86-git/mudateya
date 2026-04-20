@@ -157,6 +157,44 @@ async function enviarEmailBienvenida(aliado) {
   } catch(e) { console.error('Email bienvenida:', e.message); }
 }
 
+// ── Notificación al admin cuando se registra un aliado nuevo ─────────
+async function enviarEmailAdminNuevoAliado(aliado) {
+  try {
+    var resend = new Resend(process.env.RESEND_API_KEY);
+    var fecha = new Date().toLocaleString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    var html = '<div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;color:#0F1923">' +
+      '<div style="text-align:center;margin-bottom:28px">' +
+        '<span style="font-family:Bebas Neue,sans-serif;font-size:36px;letter-spacing:2px;color:#003580">MUDATE</span>' +
+        '<span style="font-family:Bebas Neue,sans-serif;font-size:36px;letter-spacing:2px;color:#22C36A">YA</span>' +
+      '</div>' +
+      '<h2 style="color:#003580;font-size:20px;margin-bottom:6px">🤝 Nuevo Aliado registrado</h2>' +
+      '<p style="color:#94A3B8;font-size:12px;margin-bottom:20px">' + fecha + '</p>' +
+      '<div style="background:#F5F7FA;border-radius:10px;padding:18px;margin-bottom:20px">' +
+        '<table style="width:100%;font-size:14px;color:#475569;border-collapse:collapse">' +
+          '<tr><td style="padding:6px 0;font-weight:600;color:#003580;width:110px">Nombre:</td><td style="padding:6px 0">' + esc(aliado.nombre) + '</td></tr>' +
+          '<tr><td style="padding:6px 0;font-weight:600;color:#003580">Email:</td><td style="padding:6px 0"><a href="mailto:' + esc(aliado.email) + '" style="color:#1A6FFF;text-decoration:none">' + esc(aliado.email) + '</a></td></tr>' +
+          '<tr><td style="padding:6px 0;font-weight:600;color:#003580">Teléfono:</td><td style="padding:6px 0"><a href="https://wa.me/' + esc(String(aliado.telefono||'').replace(/\D/g,'')) + '" style="color:#22C36A;text-decoration:none">' + esc(aliado.telefono || '—') + '</a></td></tr>' +
+          '<tr><td style="padding:6px 0;font-weight:600;color:#003580;vertical-align:top">Edificio:</td><td style="padding:6px 0">' + esc(aliado.edificio || '—') + '</td></tr>' +
+          '<tr><td style="padding:6px 0;font-weight:600;color:#003580">Alias MP:</td><td style="padding:6px 0;font-family:DM Mono,monospace">' + esc(aliado.aliasMP || '—') + '</td></tr>' +
+          '<tr><td style="padding:6px 0;font-weight:600;color:#003580">Código:</td><td style="padding:6px 0"><strong style="color:#22C36A;font-family:DM Mono,monospace;font-size:15px">' + aliado.slug + '</strong></td></tr>' +
+          '<tr><td style="padding:6px 0;font-weight:600;color:#003580">Link personal:</td><td style="padding:6px 0;font-family:DM Mono,monospace;font-size:12px"><a href="https://mudateya.ar/r/' + aliado.slug + '" style="color:#1A6FFF;text-decoration:none">mudateya.ar/r/' + aliado.slug + '</a></td></tr>' +
+        '</table>' +
+      '</div>' +
+      '<div style="text-align:center;margin:24px 0">' +
+        '<a href="https://mudateya.ar/admin" style="display:inline-block;padding:12px 28px;background:#003580;color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:14px">Ver en panel admin →</a>' +
+      '</div>' +
+      '<hr style="border:none;border-top:1px solid #E2E8F0;margin:28px 0">' +
+      '<p style="color:#94A3B8;font-size:11px;text-align:center">Notificación automática · MudateYa</p>' +
+      '</div>';
+    await resend.emails.send({
+      from: 'MudateYa <noreply@mudateya.ar>',
+      to: 'jgalozaldivar@gmail.com',
+      subject: '🤝 Nuevo Aliado: ' + aliado.nombre + ' (' + aliado.slug + ')',
+      html: html
+    });
+  } catch(e) { console.error('Email admin nuevo aliado:', e.message); }
+}
+
 // ── Cálculo de balance de un aliado ─────────────────────────────────
 async function calcularBalance(email) {
   var aliado = await getJSON('aliado:' + email);
@@ -392,6 +430,7 @@ module.exports = async function handler(req, res) {
       }
 
       await enviarEmailBienvenida(aliado);
+      await enviarEmailAdminNuevoAliado(aliado);
 
       return res.status(200).json({
         ok: true,
