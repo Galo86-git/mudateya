@@ -324,6 +324,10 @@ Based on jsqrencode | (C) 2010 tz@execpc.com | GPL v3 License
         <div class="ben-txt"><strong id="ben-fle-lbl">$10.000 por flete</strong><span>Por cada flete cerrado que viene por tu link</span></div>
       </div>
       <div class="ben">
+        <div class="ben-ico">🤝</div>
+        <div class="ben-txt"><strong id="ben-alta-lbl">$5.500 por activación</strong><span>Cada mudancero o fletero que das de alta con tu QR</span></div>
+      </div>
+      <div class="ben">
         <div class="ben-ico">📈</div>
         <div class="ben-txt"><strong id="ben-tri-lbl">+20% bono trimestral</strong><span>Con al menos 3 operaciones en el trimestre</span></div>
       </div>
@@ -721,6 +725,8 @@ async function cargarConfig() {
   // Actualizar labels
   document.getElementById('ben-mud-lbl').textContent = '$' + formatoAR(_config.fijoMudanza) + ' por mudanza';
   document.getElementById('ben-fle-lbl').textContent = '$' + formatoAR(_config.fijoFlete) + ' por flete';
+  var altaLbl = document.getElementById('ben-alta-lbl');
+  if (altaLbl) altaLbl.textContent = '$' + formatoAR(_config.fijoAlta || 5500) + ' por activación';
   document.getElementById('ben-tri-lbl').textContent = '+' + Math.round(_config.trimPct*100) + '% bono trimestral';
   document.getElementById('ben-ann-lbl').textContent = '+' + Math.round(_config.anualPct*100) + '% bono anual';
   // Inicializar calculadora
@@ -1041,8 +1047,18 @@ function renderPanel(d) {
       var fechaObj = h.creadaEn ? new Date(h.creadaEn) : new Date();
       var fechaRel = fechaRelativa(fechaObj);
       var tipo = h.tipo || 'mudanza';
-      var tipoIco = tipo === 'flete' ? '🚚' : (tipo === 'bono_trimestral' ? '🏆' : (tipo === 'bono_anual' ? '🎁' : '📦'));
-      var tipoLbl = tipo === 'flete' ? 'Flete' : (tipo === 'bono_trimestral' ? 'Bono trimestral' : (tipo === 'bono_anual' ? 'Bono anual' : 'Mudanza'));
+      var tipoIco = tipo === 'flete' ? '🚚'
+                  : tipo === 'bono_trimestral' ? '🏆'
+                  : tipo === 'bono_anual' ? '🎁'
+                  : tipo === 'alta_mudancero' ? '🧑‍🔧'
+                  : tipo === 'alta_fletero' ? '🚛'
+                  : '📦';
+      var tipoLbl = tipo === 'flete' ? 'Flete'
+                  : tipo === 'bono_trimestral' ? 'Bono trimestral'
+                  : tipo === 'bono_anual' ? 'Bono anual'
+                  : tipo === 'alta_mudancero' ? 'Alta mudancero'
+                  : tipo === 'alta_fletero' ? 'Alta fletero'
+                  : 'Mudanza';
       var estadoLbl = ({en_curso:'⏳ En curso', acreditada:'✅ Acreditada', pagada:'💰 Pagada', cancelada:'❌ Cancelada'})[h.estado] || (h.estado || '—');
       html += '<div class="op-card">' +
         '<div class="op-card-top">' +
