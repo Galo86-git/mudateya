@@ -108,6 +108,7 @@ module.exports = async function handler(req, res) {
     var emailMP         = body.emailMP;
     var titularCuenta   = body.titularCuenta;
     var fecha           = body.fecha;
+    var refAliado       = body.refAliado || null; // slug del aliado que refirió (ej. 'A7K2')
 
     // ── VALIDACIONES BÁSICAS ────────────────────────────────────
     if (!nombre || !telefono || !email || !zonaBase || !vehiculo) {
@@ -200,6 +201,7 @@ module.exports = async function handler(req, res) {
       fechaRegistro:   new Date().toISOString(),
       fechaFormulario: fecha || new Date().toLocaleString('es-AR'),
       calificacion: 0, nroResenas: 0, trabajosCompletados: 0,
+      refAliado:       refAliado || null,
     };
 
     // ── GUARDAR EN REDIS ────────────────────────────────────────
@@ -212,6 +214,12 @@ module.exports = async function handler(req, res) {
     var todos = await getJSON('mudanceros:todos') || [];
     if (!todos.includes(email)) todos.push(email);
     await setJSON('mudanceros:todos', todos);
+
+    // ── HOOK ALIADOS: crear atribución de alta si vino por un ref ──
+    if (refAliado) {
+      try { await hookCrearAtribucionAlta(email, refAliado, vehiculo); }
+      catch(e) { console.warn('hookCrearAtribucionAlta:', e.message); }
+    }
 
     // ── NOTIFICAR AL ADMIN ──────────────────────────────────────
     try { await notificarAdmin(perfil); } catch(e) { console.warn('Email admin:', e.message); }
@@ -399,4 +407,26 @@ function paso(num, texto) {
     '<div style="width:22px;height:22px;border-radius:50%;background:#22C36A;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + num + '</div>' +
     '<div style="font-size:13px;color:#475569;line-height:1.5">' + texto + '</div>' +
   '</div>';
+}
+
+// ── HOOK ALIADOS: crear atribución de alta en el programa de Aliados ──
+// Si el mudancero llegó con un slug de aliado (cookie mya_ref), creamos
+// la atribución en estado 'en_curso'. Al acreditar desde el admin → 'acreditada'.
+async function hookCrearAtribucionAlta(mudanceroEmail, slug, vehiculo) {
+  try {
+    var secret = process.env.INTERNAL_API_SECRET;
+    if (!secret) return;
+    // Heurística: si el vehículo es furgón/camioneta, es "alta de fletero"
+    var tipo = /furg|camioneta|flete/i.test(String(vehiculo || '')) ? 'fletero' : 'mudancero';
+    var base = process.env.SITE_URL || 'https://mudateya.ar';
+    await fetch(base.replace(/\/$/, '') + '/api/aliados?action=internal-alta-crear', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-internal-secret': secret },
+      body: JSON.stringify({
+        mudanceroEmail: mudanceroEmail,
+        slug: String(slug).toUpperCase(),
+        tipo: tipo
+      })
+    });
+  } catch(e) { console.warn('hookCrearAtribucionAlta:', e.message); }
 }
