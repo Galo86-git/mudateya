@@ -1223,11 +1223,7 @@
           <div class="drawer-section-h">Zona</div>
           <div class="drawer-opts">
             <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:4px 10px 2px;pointer-events:none">Buenos Aires</div>
-            <label class="drawer-opt"><input type="checkbox" onchange="toggleFZ('CABA',this);actualizarBadge()"/> 📍 CABA</label>
-            <label class="drawer-opt"><input type="checkbox" onchange="toggleFZ('GBA Norte',this);actualizarBadge()"/> 📍 GBA Norte</label>
-            <label class="drawer-opt"><input type="checkbox" onchange="toggleFZ('GBA Sur',this);actualizarBadge()"/> 📍 GBA Sur</label>
-            <label class="drawer-opt"><input type="checkbox" onchange="toggleFZ('GBA Oeste',this);actualizarBadge()"/> 📍 GBA Oeste</label>
-            <label class="drawer-opt"><input type="checkbox" onchange="toggleFZ('GBA Este',this);actualizarBadge()"/> 📍 GBA Este</label>
+            <label class="drawer-opt"><input type="checkbox" onchange="toggleFZ('CABA',this);actualizarBadge()"/> 📍 AMBA <span style="color:var(--text3);font-size:11px;font-weight:400">(CABA + GBA)</span></label>
             <label class="drawer-opt"><input type="checkbox" onchange="toggleFZ('La Plata',this);actualizarBadge()"/> 📍 La Plata</label>
             <label class="drawer-opt"><input type="checkbox" onchange="toggleFZ('Mar del Plata',this);actualizarBadge()"/> 📍 Mar del Plata</label>
             <label class="drawer-opt"><input type="checkbox" onchange="toggleFZ('Bahía Blanca',this);actualizarBadge()"/> 📍 Bahía Blanca</label>
@@ -1301,11 +1297,7 @@
         <div class="filtro-section">
           <div class="filtro-h">Zona</div>
           <div class="filtro-opt" style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding-bottom:0;cursor:default;pointer-events:none">Buenos Aires</div>
-          <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('CABA',this)"/> CABA</label></div>
-          <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('GBA Norte',this)"/> GBA Norte</label></div>
-          <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('GBA Sur',this)"/> GBA Sur</label></div>
-          <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('GBA Oeste',this)"/> GBA Oeste</label></div>
-          <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('GBA Este',this)"/> GBA Este</label></div>
+          <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('CABA',this)"/> AMBA <span style="color:var(--text3);font-size:11px;font-weight:400">(CABA + GBA)</span></label></div>
           <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('La Plata',this)"/> La Plata</label></div>
           <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('Mar del Plata',this)"/> Mar del Plata</label></div>
           <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('Bahía Blanca',this)"/> Bahía Blanca</label></div>
@@ -2086,30 +2078,26 @@
     renderResultados();
   }
   function toggleFZ(v,el) {
-    // Zonas AMBA — CABA y cualquier GBA se tratan como un grupo
+    // Zonas AMBA — CABA y cualquier GBA se tratan como un grupo.
+    // La UI muestra un solo checkbox "AMBA" que internamente representa las 5 zonas.
     var _zonaAmba = ['CABA','GBA Norte','GBA Sur','GBA Oeste','GBA Este'];
     var esAmba = _zonaAmba.indexOf(v) !== -1;
 
     if (esAmba) {
-      // Si alguna zona AMBA ya está activa, agregar/sacar todas juntas
+      // Si alguna zona AMBA ya está activa, sacar todas; si no, agregar todas
       var hayAmba = _zonaAmba.some(function(z){ return _filtros.zonas.has(z); });
       if (hayAmba) {
-        // Desmarcar todas las AMBA
         _zonaAmba.forEach(function(z){ _filtros.zonas.delete(z); });
-        // Desmarcar visualmente todos los checkboxes AMBA
-        document.querySelectorAll('.filtro-opt input[type=checkbox], .drawer-opt input[type=checkbox]').forEach(function(cb){
-          var label = cb.parentElement ? cb.parentElement.textContent.trim() : '';
-          if (_zonaAmba.some(function(z){ return label.includes(z); })) cb.checked = false;
-        });
       } else {
-        // Marcar todas las AMBA
         _zonaAmba.forEach(function(z){ _filtros.zonas.add(z); });
-        // Marcar visualmente todos los checkboxes AMBA
-        document.querySelectorAll('.filtro-opt input[type=checkbox], .drawer-opt input[type=checkbox]').forEach(function(cb){
-          var label = cb.parentElement ? cb.parentElement.textContent.trim() : '';
-          if (_zonaAmba.some(function(z){ return label.includes(z); })) cb.checked = true;
-        });
       }
+      // Mantener sincronizado el checkbox "AMBA" en drawer y desktop (usa value 'CABA' como representante)
+      var nuevoEstado = !hayAmba;
+      document.querySelectorAll('.filtro-opt input[type=checkbox], .drawer-opt input[type=checkbox]').forEach(function(cb){
+        if (cb === el) return;
+        var oc = cb.getAttribute('onchange') || '';
+        if (oc.indexOf("toggleFZ('CABA'") !== -1) cb.checked = nuevoEstado;
+      });
     } else {
       if(_filtros.zonas.has(v)) _filtros.zonas.delete(v); else _filtros.zonas.add(v);
     }
