@@ -91,6 +91,20 @@ Based on jsqrencode | (C) 2010 tz@execpc.com | GPL v3 License
   .ben-txt strong{color:var(--navy);font-size:14px;display:block;margin-bottom:2px}
   .ben-txt span{color:var(--text2)}
 
+  /* Cómo funciona */
+  .comof{background:#fff;border:1px solid var(--border);border-radius:var(--r2);padding:18px 18px 8px;margin-bottom:20px}
+  .comof-head{display:flex;gap:10px;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+  .comof-ico{font-size:22px}
+  .comof-title{font-size:15px;font-weight:700;color:var(--navy)}
+  .comof-sub{font-size:12px;color:var(--text2);margin-top:2px}
+  .paso{display:flex;gap:14px;align-items:flex-start;padding:10px 0;border-bottom:1px dashed #E2E8F0}
+  .paso:last-child{border-bottom:none}
+  .paso-num{width:28px;height:28px;min-width:28px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .paso-num.g{background:var(--green)}
+  .paso-txt{flex:1;line-height:1.5;padding-top:3px}
+  .paso-txt strong{color:var(--navy);font-size:14px;display:block;margin-bottom:2px}
+  .paso-txt span{color:var(--text2);font-size:13px}
+
   /* ── FORM ── */
   .field{margin-bottom:14px}
   .field label{display:block;font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.6px;color:var(--text3);margin-bottom:5px;font-weight:600}
@@ -212,23 +226,43 @@ Based on jsqrencode | (C) 2010 tz@execpc.com | GPL v3 License
   .calc-ico{font-size:28px;flex-shrink:0}
   .calc-title{font-size:15px;font-weight:700;color:var(--navy);line-height:1.2}
   .calc-sub{font-size:11px;color:var(--text3);margin-top:2px}
-  .calc-slider-wrap{margin-bottom:14px}
-  .calc-slider-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:13px;color:var(--text2)}
-  .calc-slider-label strong{font-size:22px;color:var(--navy);font-family:var(--mono);font-weight:700}
-  .calc-slider-hint{color:var(--green);font-weight:600;font-size:12px}
-  .calc-slider{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:linear-gradient(to right,var(--green) 0%,var(--green) var(--fill,20%),var(--bg) var(--fill,20%),var(--bg) 100%);outline:none;cursor:pointer}
-  .calc-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:var(--navy);border:3px solid #fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:transform .15s}
-  .calc-slider::-webkit-slider-thumb:active{transform:scale(1.2)}
-  .calc-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--navy);border:3px solid #fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.2)}
-  .calc-slider-axis{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px;padding:0 4px}
-  .calc-tabs{display:flex;gap:6px;margin-bottom:14px;padding:4px;background:var(--bg);border-radius:8px}
-  .calc-tab{flex:1;padding:8px;border:none;background:transparent;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;border-radius:6px;font-family:inherit;transition:all .2s}
-  .calc-tab.active{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.1)}
-  .calc-result{background:var(--bg);border-radius:8px;padding:12px}
   .calc-result-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;color:var(--text2)}
   .calc-result-row .num{font-family:var(--mono);color:var(--navy);font-weight:600}
   .calc-result-total{display:flex;justify-content:space-between;align-items:center;padding:12px 0 4px;border-top:2px dashed var(--green);margin-top:6px;font-size:14px;font-weight:700;color:var(--navy)}
   .num-big{font-family:var(--mono);font-size:22px;color:var(--green);font-weight:800}
+
+  /* Ejemplo estático de ganancia */
+  .ejemplo-ops{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:12px}
+  .ejemplo-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:14px;color:var(--text2)}
+  .ejemplo-label{display:flex;align-items:center;gap:8px}
+  .ejemplo-label strong{color:var(--navy);font-size:15px}
+  .ejemplo-ico{font-size:18px}
+  .ejemplo-val{font-family:var(--mono);color:var(--navy);font-weight:600;font-size:14px}
+  .ejemplo-val strong{color:var(--navy);font-weight:700;font-size:16px}
+  .ejemplo-sep{height:1px;background:var(--border);margin:6px 0}
+  /* Filas con contador +/- */
+  .counter-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:14px;color:var(--text2);gap:10px;flex-wrap:wrap}
+  .counter-ctrls{display:flex;align-items:center;gap:8px}
+  .counter-btn{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:#fff;color:var(--navy);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1;transition:all .15s;font-family:inherit}
+  .counter-btn:hover{background:var(--bg);border-color:var(--navy)}
+  .counter-btn:active{transform:scale(.92)}
+  .counter-btn:disabled{opacity:.35;cursor:not-allowed}
+  .counter-val{font-family:var(--mono);font-weight:700;color:var(--navy);font-size:16px;min-width:22px;text-align:center}
+  .counter-cu{font-family:var(--mono);font-size:11px;color:var(--text3);margin-left:6px;white-space:nowrap}
+  /* Grid de totales: mes / trimestre / año */
+  .tot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+  .tot-card{background:var(--bg);border-radius:8px;padding:10px 8px;text-align:center}
+  .tot-card-hl{background:#E8FBF0;border:1px solid #22C36A33}
+  .tot-lbl{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:4px}
+  .tot-val{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--navy);line-height:1.1}
+  .tot-val.big{font-size:18px;color:var(--green)}
+  .tot-sub{font-size:10px;color:var(--text3);margin-top:3px;min-height:12px}
+  @media (max-width:420px){
+    .tot-val{font-size:13px}
+    .tot-val.big{font-size:15px}
+    .counter-cu{display:none}
+  }
+  .ejemplo-foot{font-size:12px;color:var(--text2);text-align:center;padding:6px 8px;line-height:1.5;background:#E8FBF0;border-radius:8px}
 
   /* ── PANEL HERO MEJORADO ── */
   .panel-hero{background:linear-gradient(135deg,var(--navy) 0%,#002860 100%);color:#fff;padding:22px 20px;border-radius:var(--r2);margin-bottom:14px;position:relative;overflow:hidden}
@@ -337,47 +371,105 @@ Based on jsqrencode | (C) 2010 tz@execpc.com | GPL v3 License
       </div>
     </div>
 
-    <!-- Calculadora interactiva de ganancia -->
+    <!-- Cómo funciona -->
+    <div class="comof">
+      <div class="comof-head">
+        <div class="comof-ico">🧭</div>
+        <div>
+          <div class="comof-title">Cómo funciona</div>
+          <div class="comof-sub">De registrarte a cobrar, en 6 pasos</div>
+        </div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">1</div>
+        <div class="paso-txt"><strong>Te registrás gratis</strong><span>Completás el form acá abajo. Te damos un QR y un link único (ej. <code style="font-family:var(--mono);font-size:12px;background:#F5F7FA;padding:1px 6px;border-radius:4px">mudateya.ar/r/A7K2</code>)</span></div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">2</div>
+        <div class="paso-txt"><strong>Compartís tu QR</strong><span>En el ascensor del edificio, grupos de WhatsApp, Instagram, tarjetas personales. Como quieras.</span></div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">3</div>
+        <div class="paso-txt"><strong>Alguien contrata o se suma</strong><span>Cada mudanza, flete o mudancero/fletero que se registre por tu link queda atribuido a vos por 90 días.</span></div>
+      </div>
+      <div class="paso">
+        <div class="paso-num">4</div>
+        <div class="paso-txt"><strong>Seguís tus ganancias en vivo</strong><span>Entrás al panel y ves todo: operaciones en curso, acreditadas y lo que te toca cobrar este mes.</span></div>
+      </div>
+      <div class="paso">
+        <div class="paso-num g">5</div>
+        <div class="paso-txt"><strong>Cobrás los 10 de cada mes</strong><span>Te transferimos por Mercado Pago al alias que dejaste. Sin trámites.</span></div>
+      </div>
+      <div class="paso">
+        <div class="paso-num g">6</div>
+        <div class="paso-txt"><strong>Sumás bonos si escalás</strong><span>+20% trimestral llegando a 3 operaciones, +10% anual llegando a 10. Todo arriba del fijo.</span></div>
+      </div>
+    </div>
+
+    <!-- Calculadora interactiva con +/− -->
     <div class="calc">
       <div class="calc-head">
         <div class="calc-ico">💸</div>
         <div class="calc-txt">
-          <div class="calc-title">Calculá cuánto podés ganar</div>
-          <div class="calc-sub">Ajustá el slider según tu estimación</div>
+          <div class="calc-title">Calculá tu ganancia</div>
+          <div class="calc-sub">Refiriendo nomás. Vos compartís el QR, nosotros hacemos el resto.</div>
         </div>
       </div>
-      <div class="calc-slider-wrap">
-        <div class="calc-slider-label">
-          <span><strong id="calcOps">4</strong> operaciones por mes</span>
-          <span class="calc-slider-hint" id="calcTipo">mudanzas</span>
+
+      <div class="ejemplo-ops">
+        <div class="counter-row">
+          <span class="ejemplo-label"><span class="ejemplo-ico">📦</span>Mudanzas</span>
+          <div class="counter-ctrls">
+            <button type="button" class="counter-btn" onclick="calcAjustar('mud',-1)" aria-label="Restar mudanza">−</button>
+            <span class="counter-val" id="cntMud">1</span>
+            <button type="button" class="counter-btn" onclick="calcAjustar('mud',1)" aria-label="Sumar mudanza">+</button>
+            <span class="counter-cu num" id="cuMud">$25.000 c/u</span>
+          </div>
         </div>
-        <input id="calcSlider" type="range" min="1" max="20" value="4" oninput="updateCalc()" class="calc-slider"/>
-        <div class="calc-slider-axis">
-          <span>1</span><span>5</span><span>10</span><span>15</span><span>20</span>
+        <div class="counter-row">
+          <span class="ejemplo-label"><span class="ejemplo-ico">🚚</span>Fletes</span>
+          <div class="counter-ctrls">
+            <button type="button" class="counter-btn" onclick="calcAjustar('fle',-1)" aria-label="Restar flete">−</button>
+            <span class="counter-val" id="cntFle">1</span>
+            <button type="button" class="counter-btn" onclick="calcAjustar('fle',1)" aria-label="Sumar flete">+</button>
+            <span class="counter-cu num" id="cuFle">$10.000 c/u</span>
+          </div>
+        </div>
+        <div class="counter-row">
+          <span class="ejemplo-label"><span class="ejemplo-ico">🤝</span>Altas</span>
+          <div class="counter-ctrls">
+            <button type="button" class="counter-btn" onclick="calcAjustar('alta',-1)" aria-label="Restar alta">−</button>
+            <span class="counter-val" id="cntAlta">1</span>
+            <button type="button" class="counter-btn" onclick="calcAjustar('alta',1)" aria-label="Sumar alta">+</button>
+            <span class="counter-cu num" id="cuAlta">$5.500 c/u</span>
+          </div>
+        </div>
+        <div class="ejemplo-sep"></div>
+        <div class="ejemplo-row">
+          <span class="ejemplo-label"><strong id="ejeOpsMes">3 operaciones por mes</strong></span>
+          <span class="ejemplo-val num"><strong id="ejeMes">$40.500</strong></span>
         </div>
       </div>
-      <div class="calc-tabs">
-        <button class="calc-tab active" id="calcTabMud" onclick="setCalcTipo('mud')">📦 Mudanzas</button>
-        <button class="calc-tab" id="calcTabFle" onclick="setCalcTipo('fle')">🚚 Fletes</button>
-      </div>
-      <div class="calc-result">
-        <div class="calc-result-row">
-          <span>Fijos al año</span>
-          <span id="calcFijos" class="num">$1.200.000</span>
+
+      <div class="tot-grid">
+        <div class="tot-card">
+          <div class="tot-lbl">Por mes</div>
+          <div class="tot-val num" id="totMes">$40.500</div>
+          <div class="tot-sub"> </div>
         </div>
-        <div class="calc-result-row">
-          <span>Bono trimestral (+20%)</span>
-          <span id="calcTrim" class="num">$240.000</span>
+        <div class="tot-card">
+          <div class="tot-lbl">Por trimestre</div>
+          <div class="tot-val num" id="totTrim">$145.800</div>
+          <div class="tot-sub" id="totTrimSub">+ bono 20%</div>
         </div>
-        <div class="calc-result-row">
-          <span>Bono anual (+10%)</span>
-          <span id="calcAnual" class="num">$120.000</span>
-        </div>
-        <div class="calc-result-total">
-          <span>Total al año</span>
-          <span id="calcTotal" class="num-big">$1.560.000</span>
+        <div class="tot-card tot-card-hl">
+          <div class="tot-lbl">Al año</div>
+          <div class="tot-val num big" id="totAnio">$558.900</div>
+          <div class="tot-sub" id="totAnioSub">+ bonos</div>
         </div>
       </div>
+
+      <div class="ejemplo-foot" id="ejeFoot">💪 Cumplís los umbrales trimestral (3 ops) y anual (10 ops). Los bonos están incluidos.</div>
     </div>
 
     <div class="card">
@@ -729,8 +821,8 @@ async function cargarConfig() {
   if (altaLbl) altaLbl.textContent = '$' + formatoAR(_config.fijoAlta || 5500) + ' por activación';
   document.getElementById('ben-tri-lbl').textContent = '+' + Math.round(_config.trimPct*100) + '% bono trimestral';
   document.getElementById('ben-ann-lbl').textContent = '+' + Math.round(_config.anualPct*100) + '% bono anual';
-  // Inicializar calculadora
-  updateCalc();
+  // Inicializar ejemplo de ganancia
+  renderEjemplo();
   // Si programa cerrado
   if (_config.programaAbierto === false) {
     document.getElementById('btnRegister').textContent = 'Programa cerrado a nuevas inscripciones';
@@ -738,38 +830,91 @@ async function cargarConfig() {
   }
 }
 
-// ── CALCULADORA INTERACTIVA ──
-var _calcTipo = 'mud'; // 'mud' o 'fle'
+// ── CALCULADORA INTERACTIVA (+/−) ──
+var _calc = { mud: 1, fle: 1, alta: 1 };
+var _calcMax = { mud: 20, fle: 20, alta: 10 };
 
-function setCalcTipo(t){
-  _calcTipo = t;
-  document.getElementById('calcTabMud').classList.toggle('active', t === 'mud');
-  document.getElementById('calcTabFle').classList.toggle('active', t === 'fle');
-  document.getElementById('calcTipo').textContent = t === 'mud' ? 'mudanzas' : 'fletes';
-  updateCalc();
+function calcAjustar(tipo, delta){
+  var v = _calc[tipo] + delta;
+  if (v < 0) v = 0;
+  if (v > _calcMax[tipo]) v = _calcMax[tipo];
+  _calc[tipo] = v;
+  renderEjemplo();
 }
 
-function updateCalc(){
+function renderEjemplo(){
   if (!_config) return;
-  var ops = parseInt(document.getElementById('calcSlider').value) || 4;
-  var fijo = _calcTipo === 'mud' ? _config.fijoMudanza : _config.fijoFlete;
-  var opsAnual = ops * 12;
-  var opsTrim = ops * 3;
-  var montoAnual = opsAnual * fijo;
-  var montoTrim = opsTrim * fijo;
-  // Bonos (solo si cumple umbrales)
-  var bonoTrim = opsTrim >= _config.trimUmbral ? Math.round(montoTrim * _config.trimPct) * 4 : 0;
-  var bonoAnual = opsAnual >= _config.anualUmbral ? Math.round(montoAnual * _config.anualPct) : 0;
-  var total = montoAnual + bonoTrim + bonoAnual;
-  document.getElementById('calcOps').textContent = ops;
-  document.getElementById('calcFijos').textContent = '$' + formatoAR(montoAnual);
-  document.getElementById('calcTrim').textContent = bonoTrim ? '$' + formatoAR(bonoTrim) : 'No calificás aún';
-  document.getElementById('calcAnual').textContent = bonoAnual ? '$' + formatoAR(bonoAnual) : 'No calificás aún';
-  document.getElementById('calcTotal').textContent = '$' + formatoAR(total);
-  // Fill visual del slider
-  var slider = document.getElementById('calcSlider');
-  var pct = ((ops - 1) / 19) * 100;
-  slider.style.setProperty('--fill', pct + '%');
+  var fijoMud  = _config.fijoMudanza || 25000;
+  var fijoFle  = _config.fijoFlete   || 10000;
+  var fijoAlta = _config.fijoAlta    || 5500;
+  var trimPct     = _config.trimPct     != null ? _config.trimPct     : 0.20;
+  var trimUmbral  = _config.trimUmbral  != null ? _config.trimUmbral  : 3;
+  var anualPct    = _config.anualPct    != null ? _config.anualPct    : 0.10;
+  var anualUmbral = _config.anualUmbral != null ? _config.anualUmbral : 10;
+
+  var mud  = _calc.mud;
+  var fle  = _calc.fle;
+  var alta = _calc.alta;
+  var opsMes = mud + fle + alta;
+
+  var montoMes  = mud*fijoMud + fle*fijoFle + alta*fijoAlta;
+  var montoTrim = montoMes * 3;
+  var montoAnio = montoMes * 12;
+  var opsTrim = opsMes * 3;
+  var opsAnio = opsMes * 12;
+
+  var bonoTrim  = opsTrim >= trimUmbral   ? Math.round(montoTrim * trimPct)   : 0;
+  var bonoAnual = opsAnio >= anualUmbral  ? Math.round(montoAnio * anualPct)  : 0;
+
+  // Totales con bonos
+  var totalTrim = montoTrim + bonoTrim;
+  var totalAnio = montoAnio + (bonoTrim * 4) + bonoAnual;
+
+  var set = function(id, val){ var el = document.getElementById(id); if (el) el.textContent = val; };
+  set('cntMud',  mud);
+  set('cntFle',  fle);
+  set('cntAlta', alta);
+  set('cuMud',   '$' + formatoAR(fijoMud)  + ' c/u');
+  set('cuFle',   '$' + formatoAR(fijoFle)  + ' c/u');
+  set('cuAlta',  '$' + formatoAR(fijoAlta) + ' c/u');
+  set('ejeOpsMes', opsMes + ' ' + (opsMes === 1 ? 'operación por mes' : 'operaciones por mes'));
+  set('ejeMes',    '$' + formatoAR(montoMes));
+  set('totMes',    '$' + formatoAR(montoMes));
+  set('totTrim',   '$' + formatoAR(totalTrim));
+  set('totAnio',   '$' + formatoAR(totalAnio));
+
+  // Subs: mostrar si los bonos aplican o no
+  var trimSub = document.getElementById('totTrimSub');
+  if (trimSub) trimSub.textContent = bonoTrim > 0 ? '+ bono 20%' : 'sin bono aún';
+  var anioSub = document.getElementById('totAnioSub');
+  if (anioSub) anioSub.textContent = bonoAnual > 0 ? '+ bonos' : (bonoTrim > 0 ? '+ bono trim' : 'sin bonos aún');
+
+  // Footer contextual
+  var foot = document.getElementById('ejeFoot');
+  if (foot) {
+    if (opsMes === 0) {
+      foot.innerHTML = '👆 Sumá operaciones con el + para ver cuánto podés ganar.';
+    } else if (opsAnio < trimUmbral * 4) {
+      var faltanTrim = trimUmbral - opsTrim;
+      if (faltanTrim > 0) {
+        foot.innerHTML = '⏳ Te faltan <strong>' + faltanTrim + '</strong> ' + (faltanTrim===1?'operación':'operaciones') + ' por trimestre para desbloquear el bono del 20%.';
+      } else {
+        foot.innerHTML = '✓ Cumplís el umbral trimestral. Te faltan <strong>' + (anualUmbral - opsAnio) + '</strong> ops al año para el bono anual.';
+      }
+    } else if (bonoAnual === 0) {
+      foot.innerHTML = '✓ Cumplís el umbral trimestral (+20%). Te faltan <strong>' + (anualUmbral - opsAnio) + '</strong> ops al año para el bono anual (+10%).';
+    } else {
+      foot.innerHTML = '💪 Cumplís los umbrales trimestral (' + trimUmbral + ' ops) y anual (' + anualUmbral + ' ops). Los bonos están incluidos.';
+    }
+  }
+
+  // Deshabilitar botones en límites
+  ['mud','fle','alta'].forEach(function(t){
+    var btns = document.querySelectorAll('[onclick="calcAjustar(\''+t+'\',-1)"]');
+    btns.forEach(function(b){ b.disabled = _calc[t] <= 0; });
+    var btnsP = document.querySelectorAll('[onclick="calcAjustar(\''+t+'\',1)"]');
+    btnsP.forEach(function(b){ b.disabled = _calc[t] >= _calcMax[t]; });
+  });
 }
 
 // ═══════════════════════════════════════════════════════════
