@@ -743,6 +743,7 @@ tr:hover td{background:rgba(34,195,106,.03)}
         <!-- TABS INTERNOS -->
         <div style="display:flex;gap:8px;margin-bottom:1.2rem;border-bottom:1px solid var(--border);overflow-x:auto">
           <button class="ali-tab active" data-tab="liquidar" onclick="aliTab('liquidar')">💰 Liquidar</button>
+          <button class="ali-tab" data-tab="altas" onclick="aliTab('altas')">🏅 Altas</button>
           <button class="ali-tab" data-tab="lista" onclick="aliTab('lista')">👥 Todos los aliados</button>
           <button class="ali-tab" data-tab="ranking" onclick="aliTab('ranking')">🏆 Ranking</button>
           <button class="ali-tab" data-tab="historial" onclick="aliTab('historial')">📜 Pagos</button>
@@ -760,6 +761,20 @@ tr:hover td{background:rgba(34,195,106,.03)}
               💡 Pagás los 10 de cada mes las comisiones <strong>acreditadas</strong> (mudanzas completadas). Para cada aliado: copiá alias MP → pagá por MP → marcá pagado.
             </div>
             <div id="aliLiqList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
+          </div>
+        </div>
+
+        <!-- SUB-PÁGINA: ALTAS -->
+        <div class="ali-subpage" id="ali-sub-altas" style="display:none">
+          <div class="table-card">
+            <div class="table-header">
+              <span class="table-title">🏅 Altas pendientes de acreditación</span>
+              <span id="aliAltasCount" style="font-size:12px;color:var(--text3);font-family:var(--mono)"></span>
+            </div>
+            <div style="padding:12px 16px;background:#FFFBEB;border-bottom:1px solid #FDE68A;font-size:12px;color:#92400E">
+              💡 Cuando un mudancero/fletero se registra por el link de un aliado, se crea una atribución <strong>en_curso</strong>. Al <strong>aprobar al mudancero desde la sección Mudanceros</strong>, tocá "Acreditar" acá para sumarle los $ al aliado. Si lo rechazás, usá "Cancelar".
+            </div>
+            <div id="aliAltasList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
           </div>
         </div>
 
@@ -833,6 +848,11 @@ tr:hover td{background:rgba(34,195,106,.03)}
                 <div>
                   <label style="font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;display:block;margin-bottom:4px">Fijo por flete</label>
                   <input id="cfgFijoFle" type="number" step="1000" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px"/>
+                </div>
+                <div>
+                  <label style="font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;display:block;margin-bottom:4px">Fijo por alta</label>
+                  <input id="cfgFijoAlta" type="number" step="500" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px"/>
+                  <div style="font-size:10px;color:var(--text3);margin-top:3px">Alta mudancero/fletero</div>
                 </div>
                 <div>
                   <label style="font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);text-transform:uppercase;display:block;margin-bottom:4px">% Bono trimestral</label>
@@ -2361,10 +2381,85 @@ function aliTab(tab) {
   document.querySelectorAll('.ali-subpage').forEach(function(sp){ sp.style.display = 'none'; });
   document.getElementById('ali-sub-' + tab).style.display = '';
   if (tab === 'liquidar') renderLiquidaciones();
+  else if (tab === 'altas') cargarAltasPendientes();
   else if (tab === 'lista') renderAliadosLista();
   else if (tab === 'ranking') cargarRanking('mes');
   else if (tab === 'historial') cargarHistorialPagos();
   else if (tab === 'config') { cargarConfigAliados(); renderQRSemilla(); }
+}
+
+// ── Altas pendientes ──
+async function cargarAltasPendientes() {
+  var wrap = document.getElementById('aliAltasList');
+  wrap.innerHTML = '<div class="loading"><span class="spinner"></span>Cargando…</div>';
+  try {
+    var d = await aliFetch('/api/aliados?action=admin-altas-pendientes&token=' + ALIT());
+    if (!d.ok) throw new Error(d.error || 'Error');
+    document.getElementById('aliAltasCount').textContent = (d.total || 0) + ' pendientes';
+    if (!d.pendientes || !d.pendientes.length) {
+      wrap.innerHTML = '<div style="padding:32px 16px;text-align:center;color:var(--text3);font-size:13px">✨ No hay altas pendientes de acreditación</div>';
+      return;
+    }
+    var h = '';
+    for (var i=0; i<d.pendientes.length; i++) {
+      var a = d.pendientes[i];
+      var fecha = new Date(a.creadaEn).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'2-digit'});
+      var ico = a.tipo === 'alta_fletero' ? '🚛' : '🧑‍🔧';
+      var lbl = a.tipo === 'alta_fletero' ? 'Alta fletero' : 'Alta mudancero';
+      var mudEmail = (a.mudanceroEmail || '').replace(/'/g, "\\'");
+      h += '<div class="ali-row" style="padding:14px 16px">' +
+        '<div class="ali-info" style="flex:1;min-width:0">' +
+          '<div class="ali-name" style="display:flex;align-items:center;gap:6px">' +
+            '<span style="font-size:16px">' + ico + '</span>' +
+            '<span>' + lbl + '</span>' +
+            '<span style="font-size:11px;color:var(--text3);font-family:var(--mono)">· $' + aliFmt(a.monto||0) + '</span>' +
+          '</div>' +
+          '<div class="ali-meta" style="margin-top:2px">' +
+            '<span>👤 Mudancero: <strong>' + a.mudanceroEmail + '</strong></span> ' +
+            '<span>🤝 Aliado: <strong>' + (a.aliadoNombre||'') + ' (' + a.aliadoSlug + ')</strong></span> ' +
+            '<span>📅 ' + fecha + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ali-actions" style="display:flex;gap:6px;flex-shrink:0">' +
+          '<button class="btn-sm" style="background:var(--green);color:#fff;border:none;padding:7px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px" onclick="acreditarAltaAdmin(\'' + mudEmail + '\')">✓ Acreditar</button>' +
+          '<button class="btn-sm" style="background:#fff;color:#DC2626;border:1px solid #DC2626;padding:7px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px" onclick="cancelarAltaAdmin(\'' + mudEmail + '\')">✗ Cancelar</button>' +
+        '</div>' +
+      '</div>';
+    }
+    wrap.innerHTML = h;
+  } catch(e) {
+    wrap.innerHTML = '<div style="padding:20px;color:#DC2626;font-size:13px">Error: ' + e.message + '</div>';
+  }
+}
+
+async function acreditarAltaAdmin(mudanceroEmail) {
+  if (!confirm('¿Acreditar esta alta al aliado? Se le sumará el fijo + contará para sus bonos trimestral/anual.')) return;
+  try {
+    var r = await fetch('/api/aliados?action=admin-acreditar-alta', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-token':ALIT()},
+      body: JSON.stringify({ mudanceroEmail: mudanceroEmail })
+    });
+    var d = await r.json();
+    if (!r.ok || !d.ok) throw new Error(d.error || d.motivo || 'Error');
+    cargarAltasPendientes();
+    if (typeof cargarAliados === 'function') cargarAliados();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function cancelarAltaAdmin(mudanceroEmail) {
+  if (!confirm('¿Cancelar esta alta? El aliado NO va a cobrar por este mudancero.')) return;
+  try {
+    var r = await fetch('/api/aliados?action=admin-cancelar-alta', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-token':ALIT()},
+      body: JSON.stringify({ mudanceroEmail: mudanceroEmail })
+    });
+    var d = await r.json();
+    if (!r.ok || !d.ok) throw new Error(d.error || d.motivo || 'Error');
+    cargarAltasPendientes();
+    if (typeof cargarAliados === 'function') cargarAliados();
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 // ── CARGA PRINCIPAL ──
@@ -2711,6 +2806,8 @@ async function cargarConfigAliados() {
     _aliConfig = d.config;
     document.getElementById('cfgFijoMud').value = _aliConfig.fijoMudanza;
     document.getElementById('cfgFijoFle').value = _aliConfig.fijoFlete;
+    var inpFA = document.getElementById('cfgFijoAlta');
+    if (inpFA) inpFA.value = _aliConfig.fijoAlta || 5500;
     document.getElementById('cfgTrimPct').value = _aliConfig.trimPct;
     document.getElementById('cfgTrimUmb').value = _aliConfig.trimUmbral;
     document.getElementById('cfgAnualPct').value = _aliConfig.anualPct;
@@ -2724,6 +2821,7 @@ async function guardarConfig() {
   var body = {
     fijoMudanza: parseInt(document.getElementById('cfgFijoMud').value) || 0,
     fijoFlete: parseInt(document.getElementById('cfgFijoFle').value) || 0,
+    fijoAlta: parseInt((document.getElementById('cfgFijoAlta')||{}).value) || 5500,
     trimPct: parseFloat(document.getElementById('cfgTrimPct').value) || 0,
     trimUmbral: parseInt(document.getElementById('cfgTrimUmb').value) || 0,
     anualPct: parseFloat(document.getElementById('cfgAnualPct').value) || 0,
