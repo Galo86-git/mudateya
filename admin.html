@@ -570,15 +570,22 @@ tr:hover td{background:rgba(34,195,106,.03)}
       <!-- PAGOS -->
       <div class="page" id="page-pagos">
         <div class="page-title">Pagos</div>
-        <div class="table-card" style="margin-bottom:1.5rem">
+        <div class="table-card" style="margin-bottom:1.2rem">
           <div class="table-header">
-            <span class="table-title">💰 Liquidaciones pendientes a mudanceros</span>
-            <span style="font-size:11px;color:#64748B;font-family:var(--mono)">85% del total a transferir al mudancero</span>
+            <span class="table-title">💰 Liquidables ya</span>
+            <span style="font-size:11px;color:#64748B;font-family:var(--mono)" id="liqResumen">—</span>
           </div>
           <div id="liquidacionesList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
         </div>
+        <div class="table-card" style="margin-bottom:1.2rem">
+          <div class="table-header">
+            <span class="table-title">⏳ En retención</span>
+            <span style="font-size:11px;color:#64748B;font-family:var(--mono)" id="retResumen">14 días hábiles desde el pago del cliente</span>
+          </div>
+          <div id="retencionList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
+        </div>
         <div class="table-card">
-          <div class="table-header"><span class="table-title">Historial de pagos</span></div>
+          <div class="table-header"><span class="table-title">📜 Historial de pagos</span></div>
           <div id="pagosList"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
         </div>
       </div>
@@ -1276,56 +1283,223 @@ async function accionTransfer(id, accion){
 // ── PAGOS PAGE ─────────────────────────────────────────────────────────────
 function renderPagosFull(){ renderLiquidaciones(); renderHistorialPagos(); }
 
-function renderLiquidaciones(){
-  var liquidaciones = {};
-  pagosData.forEach(function(p){
-    var mudancero = p.mudancero || '—';
-    var monto = parseFloat(p.precio || 0);
-    var esFlete = (p.tipo||'').toUpperCase() === 'FLETE';
-    var feePct = esFlete ? 0.20 : 0.15;
-    var fee = Math.round(monto * feePct);
-    var aTransferir = monto - fee;
-    if(!liquidaciones[mudancero]) liquidaciones[mudancero] = { mudancero, total:0, trabajos:0 };
-    liquidaciones[mudancero].total += aTransferir;
-    liquidaciones[mudancero].trabajos++;
-  });
-  transferenciasData.filter(function(t){ return t.estado === 'confirmada'; }).forEach(function(t){
-    var mudancero = t.mudancero||'—';
-    var monto = parseInt((t.monto||'0').replace(/\D/g,''));
-    if(!liquidaciones[mudancero]) liquidaciones[mudancero] = { mudancero, total:0, trabajos:0 };
-    liquidaciones[mudancero].total += Math.round(monto * 0.85);
-    liquidaciones[mudancero].trabajos++;
-  });
+// ═══════════════════════════════════════════════════════════
+// DÍAS HÁBILES ARGENTINA — tipo Mercado Pago
+// ═══════════════════════════════════════════════════════════
+// Feriados nacionales AR 2026-2027 (fijos + movibles más relevantes)
+// Lista mínima: año nuevo, carnaval, 24 marzo, Malvinas, Semana Santa viernes,
+// trabajador, 25 mayo, Güemes, Belgrano, 9 julio, San Martín, Diversidad,
+// Soberanía, Inmaculada, Navidad. Se agregan feriados turísticos puente cuando
+// están definidos por decreto.
+var FERIADOS_AR = [
+  // 2026
+  '2026-01-01','2026-02-16','2026-02-17','2026-03-23','2026-03-24','2026-04-02',
+  '2026-04-03','2026-05-01','2026-05-25','2026-06-15','2026-06-20','2026-07-09',
+  '2026-08-17','2026-10-12','2026-11-23','2026-12-08','2026-12-25',
+  // 2027 (previstos)
+  '2027-01-01','2027-02-08','2027-02-09','2027-03-24','2027-03-25','2027-03-26',
+  '2027-04-02','2027-05-01','2027-05-25','2027-06-15','2027-06-20','2027-07-09',
+  '2027-08-16','2027-10-11','2027-11-22','2027-12-08','2027-12-25'
+];
 
-  var items = Object.values(liquidaciones);
-  document.getElementById('liquidacionesList').innerHTML = items.length === 0
-    ? '<div class="empty"><div class="empty-icon">✓</div>Sin liquidaciones pendientes</div>'
-    : '<table><thead><tr><th>Mudancero</th><th>Trabajos</th><th>Total a transferir</th><th>Estado</th></tr></thead><tbody>'
-      + items.map(function(l){
-          return '<tr><td class="td-name">'+l.mudancero+'</td><td class="td-mono">'+l.trabajos+'</td><td class="td-mono" style="color:#1A6FFF;font-weight:600;font-size:14px">$'+Math.round(l.total).toLocaleString('es-AR')+'</td><td><span class="badge pending">Pendiente de pago</span></td></tr>';
+function esFeriadoOFinde(d) {
+  if (!d) return true;
+  var dow = d.getDay(); // 0 = domingo, 6 = sábado
+  if (dow === 0 || dow === 6) return true;
+  var yyyy = d.getFullYear();
+  var mm = String(d.getMonth()+1).padStart(2,'0');
+  var dd = String(d.getDate()).padStart(2,'0');
+  var key = yyyy + '-' + mm + '-' + dd;
+  return FERIADOS_AR.indexOf(key) !== -1;
+}
+
+// Suma N días hábiles a una fecha (excluye fines de semana y feriados AR)
+function sumarDiasHabiles(fechaIso, n) {
+  if (!fechaIso) return null;
+  var d = new Date(fechaIso);
+  if (isNaN(d)) return null;
+  var count = 0;
+  while (count < n) {
+    d.setDate(d.getDate() + 1);
+    if (!esFeriadoOFinde(d)) count++;
+  }
+  return d;
+}
+
+// Cuenta días hábiles restantes hasta una fecha futura (0 si ya pasó)
+function diasHabilesHasta(fechaObjetivo) {
+  if (!fechaObjetivo) return 0;
+  var hoy = new Date();
+  hoy.setHours(0,0,0,0);
+  var obj = new Date(fechaObjetivo);
+  obj.setHours(0,0,0,0);
+  if (obj <= hoy) return 0;
+  var dias = 0;
+  var cursor = new Date(hoy);
+  while (cursor < obj) {
+    cursor.setDate(cursor.getDate() + 1);
+    if (!esFeriadoOFinde(cursor)) dias++;
+  }
+  return dias;
+}
+
+function fmtFechaCorta(d) {
+  if (!d) return '—';
+  var date = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(date)) return '—';
+  return date.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+var DIAS_LIQUIDACION = 14;
+
+// ═══════════════════════════════════════════════════════════
+// Clasifica cada pago: liquidable ya o en retención
+// ═══════════════════════════════════════════════════════════
+function clasificarPagos() {
+  var liquidables = [];
+  var enRetencion = [];
+  pagosData.forEach(function(p){
+    // Solo cuentan los que NO fueron liquidados todavía
+    if (p.liquidadoEn) return;
+    if (!p.fechaPago) return; // no podemos calcular
+    var fechaLiberacion = sumarDiasHabiles(p.fechaPago, DIAS_LIQUIDACION);
+    if (!fechaLiberacion) return;
+    var hoy = new Date();
+    var item = {
+      mudanzaId: p.mudanzaId,
+      id: p.id,
+      tipoPago: p.tipoPago,
+      mudancero: p.mudancero,
+      mudanceroEmail: p.mudanceroEmail,
+      cliente: p.clienteNombre,
+      ruta: (p.desde||'').split(',')[0] + ' → ' + (p.hasta||'').split(',')[0],
+      neto: p.neto,
+      bruto: p.montoPagado,
+      fee: p.fee,
+      feePct: p.feePct,
+      tipo: p.tipo,
+      fechaPago: p.fechaPago,
+      fechaLiberacion: fechaLiberacion,
+      diasRestantes: diasHabilesHasta(fechaLiberacion)
+    };
+    if (fechaLiberacion <= hoy) liquidables.push(item);
+    else enRetencion.push(item);
+  });
+  // Ordenar: liquidables por fecha más antigua, retención por fecha más cercana a liberarse
+  liquidables.sort(function(a,b){ return new Date(a.fechaPago) - new Date(b.fechaPago); });
+  enRetencion.sort(function(a,b){ return a.fechaLiberacion - b.fechaLiberacion; });
+  return { liquidables: liquidables, enRetencion: enRetencion };
+}
+
+function tipoPagoBadge(tp) {
+  if (tp === 'anticipo') return '<span class="badge" style="background:rgba(26,111,255,.1);color:#1A6FFF;border:1px solid rgba(26,111,255,.25);font-size:10px">Anticipo</span>';
+  if (tp === 'saldo')    return '<span class="badge" style="background:rgba(34,195,106,.1);color:#15803D;border:1px solid rgba(34,195,106,.25);font-size:10px">Saldo</span>';
+  return '<span class="badge" style="font-size:10px">—</span>';
+}
+
+function renderLiquidaciones(){
+  var data = clasificarPagos();
+  var liquidables = data.liquidables;
+  var retencion = data.enRetencion;
+
+  // Resumen en el header
+  var totalLiq = liquidables.reduce(function(s,p){ return s+p.neto; },0);
+  var totalRet = retencion.reduce(function(s,p){ return s+p.neto; },0);
+  document.getElementById('liqResumen').textContent = liquidables.length + ' pagos · Total neto: $' + Math.round(totalLiq).toLocaleString('es-AR');
+  document.getElementById('retResumen').textContent = retencion.length + ' pagos en retención · Total: $' + Math.round(totalRet).toLocaleString('es-AR');
+
+  // Tabla liquidables
+  document.getElementById('liquidacionesList').innerHTML = liquidables.length === 0
+    ? '<div class="empty"><div class="empty-icon">✓</div>Sin liquidaciones disponibles en este momento</div>'
+    : '<table><thead><tr>'
+      + '<th>Mudancero</th><th>Tipo</th><th>Ruta</th><th>Bruto</th><th>Fee</th><th>Neto</th><th>Pagado</th><th>Disponible</th><th></th>'
+      + '</tr></thead><tbody>'
+      + liquidables.map(function(p){
+          return '<tr>'
+            +'<td class="td-name">'+esc(p.mudancero)+'</td>'
+            +'<td>'+tipoPagoBadge(p.tipoPago)+'</td>'
+            +'<td style="font-size:11px;color:var(--text2)">'+esc(p.ruta)+'</td>'
+            +'<td class="td-mono">$'+Math.round(p.bruto).toLocaleString('es-AR')+'</td>'
+            +'<td class="td-mono" style="color:var(--red);font-size:11px">-$'+Math.round(p.fee).toLocaleString('es-AR')+' ('+p.feePct+'%)</td>'
+            +'<td class="td-mono" style="color:#1A6FFF;font-weight:700;font-size:14px">$'+Math.round(p.neto).toLocaleString('es-AR')+'</td>'
+            +'<td class="td-mono" style="font-size:11px">'+fmtFechaCorta(p.fechaPago)+'</td>'
+            +'<td class="td-mono" style="font-size:11px;color:#15803D;font-weight:600">desde '+fmtFechaCorta(p.fechaLiberacion)+'</td>'
+            +'<td><button class="btn" style="background:#22C36A;color:#003580;padding:6px 12px;border-radius:6px;border:none;font-size:11px;font-weight:700;cursor:pointer" onclick="marcarLiquidado(\''+p.mudanzaId+'\',\''+p.tipoPago+'\',this)">✓ Liquidado</button></td>'
+            +'</tr>';
         }).join('')
       + '</tbody></table>'
-      + '<div style="padding:12px 14px;background:#F5F7FA;border-top:1px solid var(--border);font-size:11px;color:#64748B;font-family:var(--mono)">Total a liquidar: <strong style="color:#1A6FFF">$'+items.reduce(function(s,l){ return s+l.total; },0).toLocaleString('es-AR')+'</strong></div>';
+      + '<div style="padding:12px 14px;background:#F0FDF4;border-top:1px solid #BBF7D0;font-size:12px;color:#15803D;font-family:var(--mono);font-weight:600">💸 Total a liquidar hoy: $'+Math.round(totalLiq).toLocaleString('es-AR')+'</div>';
+
+  // Tabla en retención
+  document.getElementById('retencionList').innerHTML = retencion.length === 0
+    ? '<div class="empty"><div class="empty-icon">✓</div>No hay pagos en retención</div>'
+    : '<table><thead><tr>'
+      + '<th>Mudancero</th><th>Tipo</th><th>Ruta</th><th>Neto</th><th>Pagado</th><th>Se libera</th><th>Faltan</th>'
+      + '</tr></thead><tbody>'
+      + retencion.map(function(p){
+          var faltan = p.diasRestantes;
+          var color = faltan <= 3 ? '#F59E0B' : 'var(--text3)';
+          return '<tr>'
+            +'<td class="td-name">'+esc(p.mudancero)+'</td>'
+            +'<td>'+tipoPagoBadge(p.tipoPago)+'</td>'
+            +'<td style="font-size:11px;color:var(--text2)">'+esc(p.ruta)+'</td>'
+            +'<td class="td-mono" style="color:#1A6FFF;font-weight:600">$'+Math.round(p.neto).toLocaleString('es-AR')+'</td>'
+            +'<td class="td-mono" style="font-size:11px">'+fmtFechaCorta(p.fechaPago)+'</td>'
+            +'<td class="td-mono" style="font-size:11px">'+fmtFechaCorta(p.fechaLiberacion)+'</td>'
+            +'<td class="td-mono" style="font-size:11px;color:'+color+';font-weight:600">'+faltan+' d. háb.</td>'
+            +'</tr>';
+        }).join('')
+      + '</tbody></table>'
+      + '<div style="padding:12px 14px;background:#FFFBEB;border-top:1px solid #FDE68A;font-size:12px;color:#92400E;font-family:var(--mono)">⏳ Total en retención: $'+Math.round(totalRet).toLocaleString('es-AR')+'</div>';
 }
 
 function renderHistorialPagos(){
-  document.getElementById('pagosList').innerHTML = pagosData.length === 0
+  // Historial: todos los pagos ya liquidados + info de los no liquidados
+  var historial = pagosData.slice().sort(function(a,b){
+    return new Date(b.fechaPago||0) - new Date(a.fechaPago||0);
+  });
+  document.getElementById('pagosList').innerHTML = historial.length === 0
     ? '<div class="empty"><div class="empty-icon">💳</div>Sin pagos registrados aún</div>'
-    : '<table><thead><tr><th>Mudancero</th><th>Tipo</th><th>Desde → Hasta</th><th>Monto</th><th>Fecha</th><th>Estado</th></tr></thead><tbody>'
-      + pagosData.slice().reverse().map(function(p){
-          var estadoBadge = p.estado === 'completada'
-            ? '<span class="badge paid">Completada</span>'
-            : '<span class="badge pending">'+( p.estado||'—')+'</span>';
+    : '<table><thead><tr>'
+      + '<th>Mudancero</th><th>Tipo</th><th>Ruta</th><th>Neto</th><th>Pagado</th><th>Liquidado</th><th>Estado</th>'
+      + '</tr></thead><tbody>'
+      + historial.map(function(p){
+          var estadoBadge = p.liquidadoEn
+            ? '<span class="badge paid" style="font-size:10px">✓ Liquidado</span>'
+            : '<span class="badge pending" style="font-size:10px">⏳ Por liquidar</span>';
+          var rutaCorta = (p.desde||'').split(',')[0] + ' → ' + (p.hasta||'').split(',')[0];
           return '<tr>'
-            +'<td class="td-name">'+(p.mudancero||'—')+'</td>'
-            +'<td class="td-mono">'+(p.tipo||'mudanza')+'</td>'
-            +'<td style="font-size:11px">'+(p.desde||'—')+' → '+(p.hasta||'—')+'</td>'
-            +'<td class="td-mono" style="color:#1A6FFF">$'+parseFloat(p.precio||0).toLocaleString('es-AR')+'</td>'
-            +'<td class="td-mono">'+(p.fecha ? new Date(p.fecha).toLocaleDateString('es-AR') : '—')+'</td>'
+            +'<td class="td-name">'+esc(p.mudancero||'—')+'</td>'
+            +'<td>'+tipoPagoBadge(p.tipoPago)+'</td>'
+            +'<td style="font-size:11px">'+esc(rutaCorta)+'</td>'
+            +'<td class="td-mono" style="color:#1A6FFF">$'+Math.round(p.neto).toLocaleString('es-AR')+'</td>'
+            +'<td class="td-mono" style="font-size:11px">'+fmtFechaCorta(p.fechaPago)+'</td>'
+            +'<td class="td-mono" style="font-size:11px">'+(p.liquidadoEn ? fmtFechaCorta(p.liquidadoEn) : '—')+'</td>'
             +'<td>'+estadoBadge+'</td>'
             +'</tr>';
         }).join('')
       + '</tbody></table>';
+}
+
+async function marcarLiquidado(mudanzaId, tipoPago, btn) {
+  if (!confirm('¿Confirmás que transferiste el neto al mudancero para este pago?\n\nEsto no se puede deshacer fácilmente.')) return;
+  if (btn) { btn.disabled = true; btn.textContent = '...'; }
+  try {
+    var r = await fetch('/api/cotizaciones?action=admin-marcar-liquidado&token=mya-admin-2026', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ mudanzaId: mudanzaId, tipoPago: tipoPago })
+    });
+    var d = await r.json();
+    if (d.error) throw new Error(d.error);
+    // Actualizar en memoria
+    var row = pagosData.find(function(p){ return p.mudanzaId === mudanzaId && p.tipoPago === tipoPago; });
+    if (row) row.liquidadoEn = d.liquidadoEn;
+    renderPagosFull();
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = '✓ Liquidado'; }
+    alert('Error: ' + e.message);
+  }
 }
 
 // ── ZONAS ──────────────────────────────────────────────────────────────────
