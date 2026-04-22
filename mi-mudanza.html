@@ -899,7 +899,7 @@ async function pagarAnticipo(m) {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
           mudanceroNombre: cot.mudanceroNombre,
-          monto: precio,
+          monto: anticipo,
           desde: m.desde, hasta: m.hasta,
           ambientes: m.ambientes,
           mudanzaId: m.id,
