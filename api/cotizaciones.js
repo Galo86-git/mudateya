@@ -1779,34 +1779,32 @@ async function enviarEmailAceptacion(mudanza, cot) {
       from: 'MudateYa <noreply@mudateya.ar>',
       to: cot.mudanceroEmail,
       subject: `🎉 ¡Aceptaron tu cotización! — ${mudanza.desde} → ${mudanza.hasta}`,
-      html: `<div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
-        <div style="background:#22C36A;padding:18px 22px">
-          <h2 style="margin:0;color:#041A0E">🎉 ¡Te eligieron!</h2>
+      html: `<div style="font-family:Arial,sans-serif;max-width:580px;margin:0 auto;background:#fff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+        <div style="background:#003580;padding:20px 28px">
+          <span style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:#fff">Mudate</span><span style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:#22C36A">Ya</span>
+          <span style="font-size:13px;color:rgba(255,255,255,.7);margin-left:12px">🎉 Te eligieron</span>
         </div>
-        <div style="padding:22px">
-          <p style="color:#7AADA0;line-height:1.7">
-            <strong style="color:#E8F5EE">${mudanza.clienteNombre}</strong> aceptó tu cotización.
-            Te avisaremos cuando confirme el pago.
+        <div style="padding:28px">
+          <p style="font-size:15px;color:#0F1923;margin-bottom:20px;line-height:1.6">
+            <strong>${mudanza.clienteNombre}</strong> aceptó tu cotización. Te avisaremos cuando confirme el pago del anticipo.
           </p>
-          <div style="background:#172018;border-radius:10px;padding:14px 18px;margin:14px 0">
-            <table style="width:100%">
-              <tr><td style="color:#7AADA0;padding:5px 0;width:35%">Ruta</td><td>${mudanza.desde} → ${mudanza.hasta}</td></tr>
-              <tr><td style="color:#7AADA0;padding:5px 0">Fecha</td><td>${mudanza.fecha}</td></tr>
-              <tr><td style="color:#7AADA0;padding:5px 0">Tamaño</td><td>${mudanza.ambientes}</td></tr>
-              <tr><td style="color:#7AADA0;padding:5px 0">Precio acordado</td><td style="color:#22C36A;font-weight:700">${precioFmt}</td></tr>
-            </table>
+          <table style="width:100%;border-collapse:collapse;margin-bottom:18px">
+            <tr><td style="color:#64748B;padding:7px 0;width:35%;font-size:13px">Ruta</td><td style="font-weight:600;color:#0F1923;font-size:13px">${mudanza.desde} → ${mudanza.hasta}</td></tr>
+            <tr style="background:#F5F7FA"><td style="color:#64748B;padding:7px 6px;font-size:13px">Fecha</td><td style="font-weight:600;color:#0F1923;font-size:13px;padding:7px 0">${mudanza.fecha||'—'}</td></tr>
+            <tr><td style="color:#64748B;padding:7px 0;font-size:13px">Tamaño</td><td style="font-size:13px;color:#0F1923">${mudanza.ambientes||'—'}</td></tr>
+            <tr style="background:#F5F7FA"><td style="color:#64748B;padding:7px 6px;font-size:13px">Precio acordado</td><td style="color:#22C36A;font-weight:700;font-size:15px;padding:7px 0">${precioFmt}</td></tr>
+          </table>
+          <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:14px 16px;margin-bottom:20px">
+            <div style="font-size:13px;color:#15803D;line-height:1.6">
+              💡 <strong>¿Cuándo recibís el pago?</strong><br>
+              MudateYa procesa las liquidaciones cada <strong>15 días hábiles</strong> una vez confirmada la mudanza.
+            </div>
           </div>
-          <div style="background:#0D2018;border:1px solid #1E3028;border-radius:10px;padding:14px 18px;margin-bottom:14px">
-            <p style="color:#7AADA0;font-size:13px;margin:0">
-              💡 <strong style="color:#E8F5EE">¿Cuándo recibís el pago?</strong><br>
-              MudateYa procesa las liquidaciones cada <strong style="color:#22C36A">15 días hábiles</strong>
-              una vez confirmada la mudanza.
-            </p>
-          </div>
-          <a href="${siteUrl}/mi-cuenta" style="display:inline-block;background:#22C36A;color:#041A0E;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700">
+          <a href="${siteUrl}/mi-cuenta" style="display:inline-block;background:#003580;color:#fff;padding:13px 26px;border-radius:9px;text-decoration:none;font-weight:700;font-size:14px">
             Ver en mi panel →
           </a>
         </div>
+        <div style="background:#F5F7FA;border-top:1px solid #E2E8F0;padding:14px 28px;font-size:11px;color:#94A3B8;font-family:monospace">MudateYa · mudateya.ar · ID: ${mudanza.id}</div>
       </div>`,
       attachments,
     });
@@ -1824,33 +1822,32 @@ async function notificarMudanceroInvitado(mudanza, perfil) {
     from: 'MudateYa <noreply@mudateya.ar>',
     to:   perfil.email,
     subject: `⭐ Te eligieron — ${mudanza.desde} → ${mudanza.hasta}`,
-    html: `<div style="font-family:Arial,sans-serif;max-width:580px;background:#0D1410;color:#E8F5EE;border-radius:16px;overflow:hidden">
-      <div style="background:#22C36A;padding:18px 22px">
-        <h2 style="margin:0;color:#041A0E">⭐ ¡Un cliente te eligió!</h2>
+    html: `<div style="font-family:Arial,sans-serif;max-width:580px;margin:0 auto;background:#fff;border:1px solid #E2E8F0;border-radius:16px;overflow:hidden">
+      <div style="background:#003580;padding:20px 28px">
+        <span style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:#fff">Mudate</span><span style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:#22C36A">Ya</span>
+        <span style="font-size:13px;color:rgba(255,255,255,.7);margin-left:12px">⭐ Un cliente te eligió</span>
       </div>
-      <div style="padding:22px">
-        <p style="color:#7AADA0;line-height:1.7">
-          Hola <strong style="color:#E8F5EE">${perfil.nombre}</strong>,<br>
-          <strong style="color:#E8F5EE">${mudanza.clienteNombre || 'Un cliente'}</strong> revisó tu perfil y te invitó a cotizar su mudanza.
+      <div style="padding:28px">
+        <p style="font-size:15px;color:#0F1923;margin-bottom:20px;line-height:1.6">
+          Hola <strong>${perfil.nombre}</strong>, <strong>${mudanza.clienteNombre || 'un cliente'}</strong> revisó tu perfil y te invitó a cotizar su mudanza.
         </p>
-        <div style="background:#172018;border-radius:10px;padding:14px 18px;margin:14px 0">
-          <table style="width:100%">
-            <tr><td style="color:#7AADA0;padding:5px 0;width:35%">De</td><td><strong>${mudanza.desde}</strong></td></tr>
-            <tr><td style="color:#7AADA0;padding:5px 0">A</td><td><strong>${mudanza.hasta}</strong></td></tr>
-            <tr><td style="color:#7AADA0;padding:5px 0">Tamaño</td><td>${mudanza.ambientes || '—'}</td></tr>
-            <tr><td style="color:#7AADA0;padding:5px 0">Fecha</td><td>${mudanza.fecha || '—'}</td></tr>
-            ${mudanza.precio_estimado ? `<tr><td style="color:#7AADA0;padding:5px 0">Estimado cliente</td><td style="color:#22C36A;font-weight:700">$${parseInt(mudanza.precio_estimado).toLocaleString('es-AR')}</td></tr>` : ''}
-          </table>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:18px">
+          <tr><td style="color:#64748B;padding:7px 0;width:35%;font-size:13px">De</td><td style="font-weight:600;color:#0F1923;font-size:13px">${mudanza.desde}</td></tr>
+          <tr style="background:#F5F7FA"><td style="color:#64748B;padding:7px 6px;font-size:13px">A</td><td style="font-weight:600;color:#0F1923;font-size:13px;padding:7px 0">${mudanza.hasta}</td></tr>
+          <tr><td style="color:#64748B;padding:7px 0;font-size:13px">Tamaño</td><td style="font-size:13px;color:#0F1923">${mudanza.ambientes || '—'}</td></tr>
+          <tr style="background:#F5F7FA"><td style="color:#64748B;padding:7px 6px;font-size:13px">Fecha</td><td style="font-size:13px;color:#0F1923;padding:7px 0">${mudanza.fecha || '—'}</td></tr>
+          ${mudanza.precio_estimado ? `<tr><td style="color:#64748B;padding:7px 0;font-size:13px">Estimado cliente</td><td style="color:#22C36A;font-weight:700;font-size:14px">$${parseInt(mudanza.precio_estimado).toLocaleString('es-AR')}</td></tr>` : ''}
+        </table>
+        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:14px 16px;margin-bottom:20px">
+          <div style="font-size:13px;color:#15803D;line-height:1.6">
+            💡 Esta es una solicitud <strong>directa</strong> — el cliente te eligió a vos específicamente entre los mudanceros disponibles.
+          </div>
         </div>
-        <div style="background:#0D2018;border:1px solid rgba(34,195,106,.3);border-radius:10px;padding:12px 16px;margin-bottom:16px">
-          <p style="color:#7AADA0;font-size:13px;margin:0">
-            💡 Esta es una solicitud <strong style="color:#E8F5EE">directa</strong> — el cliente te eligió a vos específicamente entre los mudanceros disponibles.
-          </p>
-        </div>
-        <a href="${siteUrl}/mi-cuenta" style="display:inline-block;background:#22C36A;color:#041A0E;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700">
+        <a href="${siteUrl}/mi-cuenta" style="display:inline-block;background:#003580;color:#fff;padding:13px 26px;border-radius:9px;text-decoration:none;font-weight:700;font-size:14px">
           Enviar cotización →
         </a>
       </div>
+      <div style="background:#F5F7FA;border-top:1px solid #E2E8F0;padding:14px 28px;font-size:11px;color:#94A3B8;font-family:monospace">MudateYa · mudateya.ar</div>
     </div>`,
   });
 }
