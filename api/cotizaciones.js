@@ -703,12 +703,16 @@ module.exports = async function handler(req, res) {
           const cot = m.cotizacionAceptada || {};
           m.anticipoMonto = Math.round((parseInt(cot.precio || 0)) * 0.5);
         }
+        // Fecha puntual del anticipo (para calcular liquidaciones a 14 días hábiles)
+        if (!m.fechaAnticipoPagado) m.fechaAnticipoPagado = new Date().toISOString();
       }
       if (tipoPago === 'saldo') {
         m.saldoPagado = true;
         // Al pagar el saldo, la mudanza queda completada
         m.estado = 'completada';
         if (!m.fechaCompletada) m.fechaCompletada = new Date().toISOString();
+        // Fecha puntual del saldo (para calcular liquidaciones a 14 días hábiles)
+        if (!m.fechaSaldoPagado) m.fechaSaldoPagado = new Date().toISOString();
         // Loguear en Sheets
         try { await logPedidoSheets(m); } catch(e) { console.warn('Sheets log error:', e.message); }
         // ── Hook aliados: acreditar comisión (la mudanza está completa + 100% pagada) ──
@@ -1076,23 +1080,63 @@ module.exports = async function handler(req, res) {
       for (const id of activas) {
         try {
           const m = await getJSON(`mudanza:${id}`);
-          if (m && (m.anticipoPagado || m.saldoPagado)) {
+          if (!m) continue;
+          if (!m.anticipoPagado && !m.saldoPagado) continue;
+
+          const cot = m.cotizacionAceptada || {};
+          const precioTotal = parseInt(cot.precio || 0);
+          const tipo = m.tipo || 'mudanza';
+          const esFlete = String(tipo).toLowerCase() === 'flete';
+          const feePct = esFlete ? 0.20 : 0.15;
+
+          // 1 registro por pago (anticipo + saldo = 2 filas)
+          if (m.anticipoPagado) {
+            const montoBruto = parseInt(m.anticipoMonto || Math.round(precioTotal * 0.5));
+            const feeAbs = Math.round(montoBruto * feePct);
             rows.push({
-              id: m.id,
-              desde: m.desde,
-              hasta: m.hasta,
-              clienteEmail: m.clienteEmail,
+              id:            m.id + '-anticipo',
+              mudanzaId:     m.id,
+              tipoPago:      'anticipo',
+              desde:         m.desde,
+              hasta:         m.hasta,
+              clienteEmail:  m.clienteEmail,
               clienteNombre: m.clienteNombre,
-              anticipoPagado: m.anticipoPagado || false,
-              saldoPagado: m.saldoPagado || false,
-              precio: m.cotizacionAceptada ? (m.cotizacionAceptada.precio || 0) : (m.precio_estimado || 0),
-              tipo: m.tipo || 'mudanza',
-              mudancero: m.cotizacionAceptada ? (m.cotizacionAceptada.mudanceroNombre || '—') : '—',
-              mudanceroEmail: m.cotizacionAceptada ? (m.cotizacionAceptada.mudanceroEmail || '') : '',
-              fecha: m.fechaPublicacion || '',
-              precio_estimado: m.precio_estimado || 0,
-              estado: m.estado,
-              fechaPublicacion: m.fechaPublicacion,
+              tipo,
+              mudancero:     cot.mudanceroNombre || '—',
+              mudanceroEmail:cot.mudanceroEmail || '',
+              precio:        precioTotal,
+              montoPagado:   montoBruto,
+              feePct:        Math.round(feePct * 100),
+              fee:           feeAbs,
+              neto:          montoBruto - feeAbs,
+              fechaPago:     m.fechaAnticipoPagado || m.ultimoUpdatePago || m.fechaPublicacion || null,
+              liquidadoEn:   m.liquidacionAnticipoEn || null,
+              estado:        m.estado,
+            });
+          }
+          if (m.saldoPagado) {
+            const anticipoReal = parseInt(m.anticipoMonto || Math.round(precioTotal * 0.5));
+            const montoBruto = Math.max(0, precioTotal - anticipoReal);
+            const feeAbs = Math.round(montoBruto * feePct);
+            rows.push({
+              id:            m.id + '-saldo',
+              mudanzaId:     m.id,
+              tipoPago:      'saldo',
+              desde:         m.desde,
+              hasta:         m.hasta,
+              clienteEmail:  m.clienteEmail,
+              clienteNombre: m.clienteNombre,
+              tipo,
+              mudancero:     cot.mudanceroNombre || '—',
+              mudanceroEmail:cot.mudanceroEmail || '',
+              precio:        precioTotal,
+              montoPagado:   montoBruto,
+              feePct:        Math.round(feePct * 100),
+              fee:           feeAbs,
+              neto:          montoBruto - feeAbs,
+              fechaPago:     m.fechaSaldoPagado || m.ultimoUpdatePago || m.fechaCompletada || null,
+              liquidadoEn:   m.liquidacionSaldoEn || null,
+              estado:        m.estado,
             });
           }
         } catch(e) {}
@@ -1119,6 +1163,22 @@ module.exports = async function handler(req, res) {
     }
 
     // ── Admin: aprobar / rechazar mudancero ──────────────────────────
+    if (action === 'admin-marcar-liquidado' && req.method === 'POST') {
+      const { token } = req.query;
+      if (token !== process.env.ADMIN_TOKEN && token !== 'mya-admin-2026') {
+        return res.status(401).json({ error: 'Token inválido' });
+      }
+      const { mudanzaId, tipoPago } = req.body;
+      if (!mudanzaId || !tipoPago) return res.status(400).json({ error: 'Faltan datos' });
+      const m = await getJSON(`mudanza:${mudanzaId}`);
+      if (!m) return res.status(404).json({ error: 'Mudanza no encontrada' });
+      const ahora = new Date().toISOString();
+      if (tipoPago === 'anticipo') m.liquidacionAnticipoEn = ahora;
+      if (tipoPago === 'saldo')    m.liquidacionSaldoEn = ahora;
+      await setJSON(`mudanza:${mudanzaId}`, m, 604800);
+      return res.status(200).json({ ok: true, liquidadoEn: ahora });
+    }
+
     if (action === 'admin-editar-mudancero' && req.method === 'POST') {
       const { token, email, cambios } = req.body;
       if (token !== process.env.ADMIN_TOKEN && token !== 'mya-admin-2026') {
