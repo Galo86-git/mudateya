@@ -24,8 +24,77 @@ nav{background:var(--navy);height:56px;display:flex;align-items:center;justify-c
 .nav-back:hover{color:#fff}
 
 /* Layout */
-.container{max-width:1000px;margin:0 auto;padding:2rem 1.5rem 4rem;display:grid;grid-template-columns:1fr 300px;gap:1.5rem;align-items:start}
-@media(max-width:768px){.container{grid-template-columns:1fr;padding:1rem 1rem 3rem}}
+.container{max-width:1200px;margin:0 auto;padding:1.2rem 1.5rem 4rem}
+.photo-strip{border-radius:var(--r3);overflow:hidden;margin-bottom:1.2rem;background:#E2E8F0;position:relative}
+.photo-strip-grid{display:grid;gap:4px;height:340px}
+.photo-strip-grid.g1{grid-template-columns:1fr}
+.photo-strip-grid.g2{grid-template-columns:1fr 1fr}
+.photo-strip-grid.g3{grid-template-columns:2fr 1fr 1fr}
+.photo-strip-grid.g3 .ps-cell:first-child{grid-row:span 2}
+.photo-strip-grid.g4{grid-template-columns:2fr 1fr 1fr;grid-template-rows:1fr 1fr}
+.photo-strip-grid.g4 .ps-cell:first-child{grid-row:span 2}
+.ps-cell{position:relative;overflow:hidden;cursor:pointer;background:#F5F7FA}
+.ps-cell img{width:100%;height:100%;object-fit:cover;transition:transform .4s;display:block}
+.ps-cell:hover img{transform:scale(1.03)}
+.ps-overlay{position:absolute;inset:0;background:rgba(0,53,128,.75);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;gap:6px;opacity:0;transition:opacity .2s}
+.ps-cell:hover .ps-overlay{opacity:1}
+.ps-more-btn{position:absolute;bottom:12px;right:12px;background:#fff;color:#003580;border:none;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.2);font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px;z-index:2}
+.ps-more-btn:hover{background:#F5F7FA}
+.ps-empty{height:180px;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-size:13px;font-family:var(--mono);background:linear-gradient(135deg,#003580,#1A6FFF);color:rgba(255,255,255,.6)}
+
+/* Grid principal 2 columnas (desktop) */
+.main-grid{display:grid;grid-template-columns:1fr 340px;gap:1.5rem;align-items:start}
+
+/* Hero compacto */
+.hero-card{background:#fff;border-radius:var(--r3);border:1px solid var(--border);padding:1.4rem;margin-bottom:1.2rem;display:flex;gap:16px;align-items:flex-start}
+.hero-avatar-compact{flex-shrink:0;width:76px;height:76px;border-radius:14px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#fff;letter-spacing:1.5px;overflow:hidden}
+.hero-avatar-compact img{width:100%;height:100%;object-fit:cover}
+.hero-info-compact{flex:1;min-width:0}
+.hero-name-compact{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:1px;color:var(--text);line-height:1;margin-bottom:4px}
+.hero-empresa-compact{font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:10px}
+.hero-badges-compact{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.hero-rating-compact{display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid var(--border)}
+.hero-rating-num{background:#003580;color:#fff;border-radius:7px 7px 7px 2px;padding:4px 9px;font-size:15px;font-weight:700;line-height:1}
+.hero-rating-label{font-size:13px;color:var(--text);font-weight:600}
+.hero-rating-sub{font-size:12px;color:var(--text3);font-family:var(--mono)}
+
+/* Tabs */
+.tabs-bar{display:flex;gap:2px;background:#F5F7FA;border-radius:10px;padding:4px;margin-bottom:1rem;border:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tabs-bar::-webkit-scrollbar{display:none}
+.tab-btn{flex:1;padding:10px 14px;border:none;background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;border-radius:7px;transition:all .18s;font-family:'Inter',sans-serif;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:6px}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{background:#fff;color:#003580;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.tab-badge{background:rgba(0,53,128,.1);color:#003580;font-size:10px;padding:1px 6px;border-radius:5px;font-family:var(--mono);font-weight:700}
+.tab-btn.active .tab-badge{background:#003580;color:#fff}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* Sidebar mejorado */
+.sidebar-card{background:#fff;border-radius:var(--r3);border:1px solid var(--border);padding:1.4rem;margin-bottom:1.2rem;position:sticky;top:72px}
+.sidebar-info-block{display:flex;flex-direction:column;gap:10px;padding:14px 0;border-top:1px solid var(--border);margin-top:14px}
+.sidebar-info-row{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)}
+.sidebar-info-row .ico{width:22px;text-align:center;font-size:14px}
+.sidebar-info-row .lbl{color:var(--text3);font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.3px;min-width:80px}
+.sidebar-info-row .val{color:var(--text);font-weight:600;flex:1}
+.sidebar-trust-row{display:flex;flex-direction:column;gap:7px;padding-top:14px;margin-top:14px;border-top:1px solid var(--border)}
+.sidebar-trust-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--emerald);font-weight:600}
+.sidebar-trust-item.inactive{color:var(--text3);font-weight:400}
+.sidebar-trust-item .ico{font-size:13px}
+
+/* Mobile: todo apilado, sin tabs */
+@media(max-width:900px){
+  .container{padding:1rem 1rem 3rem}
+  .main-grid{grid-template-columns:1fr;gap:1rem}
+  .photo-strip-grid{height:240px}
+  .photo-strip-grid.g3,.photo-strip-grid.g4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+  .photo-strip-grid.g3 .ps-cell:first-child,.photo-strip-grid.g4 .ps-cell:first-child{grid-row:span 1}
+  .photo-strip-grid.g3 .ps-cell:nth-child(4),.photo-strip-grid.g4 .ps-cell:nth-child(4){display:none}
+  .tabs-bar{display:none}
+  .tab-panel{display:block !important;margin-bottom:1rem}
+  .sidebar-card{position:static}
+  .hero-avatar-compact{width:62px;height:62px;font-size:1.5rem}
+  .hero-name-compact{font-size:1.6rem}
+}
 
 /* Hero card */
 .hero-card{background:#fff;border-radius:var(--r3);border:1px solid var(--border);overflow:hidden;margin-bottom:1.2rem}
@@ -335,12 +404,7 @@ function renderPerfil(m, extra) {
   badges += '<span class="badge badge-gray">📍 '+m.zonaBase+'</span>';
   badges += '<span class="badge badge-gray">'+m.vehiculo+'</span>';
 
-  // Galería — todas las fotos
-  var galeriaHtml = '<div class="gallery">';
-  extra.fotos.forEach(function(url, i) {
-    galeriaHtml += '<img class="gallery-img" src="'+url+'" alt="Foto '+(i+1)+'" onclick="abrirLightbox('+i+')" loading="lazy"/>';
-  });
-  galeriaHtml += '</div>';
+  // Fotos ahora se renderizan en el photo-strip arriba (no en galería abajo)
 
   // ── RESEÑAS DESTACADAS ──────────────────────────────────────
   // Helper: fecha relativa en español (hace 2 semanas, hace 1 mes, etc.)
@@ -455,79 +519,122 @@ function renderPerfil(m, extra) {
 
   document.title = (m.empresa || m.nombre) + ' — MudateYa';
 
+  // ═══ Photo strip: grilla arriba con hasta 4 fotos + botón "Ver todas" ═══
+  var photoStripHtml;
+  var fotos = extra.fotos || [];
+  if (fotos.length === 0) {
+    photoStripHtml = '<div class="photo-strip"><div class="ps-empty">Sin fotos disponibles</div></div>';
+  } else {
+    var shown = fotos.slice(0, 4);
+    var gClass = 'g' + shown.length;
+    var cells = shown.map(function(url, i){
+      return '<div class="ps-cell" onclick="abrirLightbox('+i+')">'
+        +'<img src="'+url+'" alt="Foto '+(i+1)+'" loading="lazy"/>'
+        +'<div class="ps-overlay">🔍 Ver</div>'
+      +'</div>';
+    }).join('');
+    var moreBtn = fotos.length > 4
+      ? '<button class="ps-more-btn" onclick="abrirLightbox(0)">📷 Ver las '+fotos.length+' fotos</button>'
+      : (fotos.length > 1 ? '<button class="ps-more-btn" onclick="abrirLightbox(0)">📷 Ver todas</button>' : '');
+    photoStripHtml = '<div class="photo-strip"><div class="photo-strip-grid '+gClass+'">'+cells+'</div>'+moreBtn+'</div>';
+  }
+
+  // ═══ Hero compacto ═══
+  var heroCompactHtml = '<div class="hero-card">'
+    +'<div class="hero-avatar-compact">'
+      +(m.foto ? '<img src="'+m.foto+'" alt="'+m.nombre+'">' : initials)
+    +'</div>'
+    +'<div class="hero-info-compact">'
+      +'<div class="hero-name-compact">'+(m.empresa||m.nombre)+'</div>'
+      +'<div class="hero-empresa-compact">'+(m.empresa ? '' : 'Prestador independiente')+(extra.añosExp?' · '+extra.añosExp+' años de experiencia':'')+'</div>'
+      +'<div class="hero-badges-compact">'+badges+'</div>'
+      +(m.calificacion > 0 ? '<div class="hero-rating-compact">'
+        +'<span class="hero-rating-num">'+m.calificacion.toFixed(1)+'</span>'
+        +'<span class="hero-rating-label">'+ratingLabel+'</span>'
+        +'<span class="hero-rating-sub">· '+totalCalifs+(totalCalifs===1?' reseña':' reseñas')+' · '+m.trabajosCompletados+' mudanzas</span>'
+      +'</div>' : '')
+    +'</div>'
+  +'</div>';
+
+  // ═══ Servicios HTML (para tab) ═══
+  var serviciosHtml = m.servicios ? (function() {
+    var ICONOS = {
+      'embalaje':'📦', 'desembalaje':'📦', 'desmontaje':'🔧', 'montaje':'🔧',
+      'piano':'🎹', 'caja fuerte':'🔒', 'arte':'🖼️', 'plantas':'🌿',
+      'electrodomésticos':'🏠', 'oficina':'🏢', 'guardamuebles':'🏭',
+      'limpieza':'🧹', 'escaleras':'🪜', 'ascensor':'🛗', 'flete':'🚛',
+      'seguro':'🛡', 'larga distancia':'📍',
+    };
+    var chips = m.servicios.split(',').map(function(s) {
+      s = s.trim();
+      if (!s) return '';
+      var icono = '✓';
+      var sl = s.toLowerCase();
+      Object.keys(ICONOS).forEach(function(k) { if (sl.includes(k)) icono = ICONOS[k]; });
+      return '<div class="servicio-chip">'+icono+' '+s+'</div>';
+    }).join('');
+    return '<div class="card"><div class="card-title">Servicios incluidos</div><div class="servicios-grid">'+chips+'</div></div>';
+  })() : '<div class="card"><div class="card-title">Servicios</div><p class="desc-text" style="color:var(--text3)">Este mudancero no especificó servicios adicionales.</p></div>';
+
+  // ═══ Sobre nosotros (para tab) ═══
+  var sobreHtml = '<div class="card"><div class="card-title">Sobre nosotros</div><p class="desc-text">'+extra.descripcion+'</p></div>';
+
+  // ═══ Sidebar info rows ═══
+  var sidebarInfoRows = ''
+    +(extra.añosExp  ? '<div class="sidebar-info-row"><span class="ico">🗓</span><span class="lbl">Exp.</span><span class="val">'+extra.añosExp+' años</span></div>' : '')
+    +'<div class="sidebar-info-row"><span class="ico">📍</span><span class="lbl">Zona</span><span class="val">'+m.zonaBase+'</span></div>'
+    +'<div class="sidebar-info-row"><span class="ico">🚚</span><span class="lbl">Vehículo</span><span class="val">'+m.vehiculo+'</span></div>'
+    +'<div class="sidebar-info-row"><span class="ico">✓</span><span class="lbl">Trabajos</span><span class="val">'+m.trabajosCompletados+' completados</span></div>';
+
+  var sidebarTrust = ''
+    +'<div class="sidebar-trust-item'+(m.verificadoIdentidad?'':' inactive')+'"><span class="ico">'+(m.verificadoIdentidad?'✅':'⚪')+'</span>Identidad verificada</div>'
+    +'<div class="sidebar-trust-item'+(m.verificadoVehiculo?'':' inactive')+'"><span class="ico">'+(m.verificadoVehiculo?'✅':'⚪')+'</span>Vehículo verificado</div>'
+    +'<div class="sidebar-trust-item'+(m.verificadoSeguro?'':' inactive')+'"><span class="ico">'+(m.verificadoSeguro?'✅':'⚪')+'</span>Seguro de carga</div>';
+
+  // Tab default: Reseñas si hay calificaciones, sino Sobre nosotros
+  var defaultTab = (m.nroResenas > 0) ? 'resenas' : 'sobre';
+  var tabsBar = '<div class="tabs-bar" id="tabsBar">'
+    +'<button class="tab-btn'+(defaultTab==='resenas'?' active':'')+'" data-tab="resenas" onclick="switchTab(\'resenas\')">⭐ Reseñas'
+      +(totalCalifs>0?'<span class="tab-badge">'+totalCalifs+'</span>':'')+'</button>'
+    +'<button class="tab-btn'+(defaultTab==='sobre'?' active':'')+'" data-tab="sobre" onclick="switchTab(\'sobre\')">📝 Sobre nosotros</button>'
+    +'<button class="tab-btn" data-tab="servicios" onclick="switchTab(\'servicios\')">🛠 Servicios</button>'
+  +'</div>';
+
   document.getElementById('mainContainer').innerHTML =
-    // Columna principal
-    '<div>'
-    // Hero
-    +'<div class="hero-card">'
-    +'<div class="hero-cover"><div class="hero-cover-pattern"></div>'
-    +(m.foto
-      ? '<img class="hero-avatar" src="'+m.foto+'" alt="'+m.nombre+'" style="object-fit:cover">'
-      : '<div class="hero-avatar">'+initials+'</div>')
-    +'</div>'
-    +'<div class="hero-body">'
-    +'<div class="hero-name">'+(m.empresa||m.nombre)+'</div>'
-    +'<div class="hero-empresa">'+(m.empresa ? '' : 'Prestador independiente')+'</div>'
-    +'<div class="hero-badges">'+badges+'</div>'
-    +'</div>'
-    +'<div class="rating-row">'
-    +'<div class="rating-num-big">'+m.calificacion.toFixed(1)+'</div>'
-    +'<div><div class="rating-stars">'+starsHtml+'</div>'
-    +'<div class="rating-label">'+ratingLabel+' · '+m.nroResenas+' reseñas · '+m.trabajosCompletados+' mudanzas</div>'
-    +'</div></div>'
-    +'</div>'
-
-    // ⭐ Reseñas destacadas (NUEVO: posición prominente después del hero)
-    +reviewsHtml
-
-    // Descripción
-    +'<div class="card">'
-    +'<div class="card-title">Sobre nosotros</div>'
-    +'<p class="desc-text">'+extra.descripcion+'</p>'
-    +'</div>'
-
-    // Servicios
-    +(m.servicios ? (function() {
-      var ICONOS = {
-        'embalaje':'📦', 'desembalaje':'📦', 'desmontaje':'🔧', 'montaje':'🔧',
-        'piano':'🎹', 'caja fuerte':'🔒', 'arte':'🖼️', 'plantas':'🌿',
-        'electrodomésticos':'🏠', 'oficina':'🏢', 'guardamuebles':'🏭',
-        'limpieza':'🧹', 'escaleras':'🪜', 'ascensor':'🛗', 'flete':'🚛',
-        'seguro':'🛡', 'larga distancia':'📍',
-      };
-      var chips = m.servicios.split(',').map(function(s) {
-        s = s.trim();
-        if (!s) return '';
-        var icono = '✓';
-        var sl = s.toLowerCase();
-        Object.keys(ICONOS).forEach(function(k) { if (sl.includes(k)) icono = ICONOS[k]; });
-        return '<div class="servicio-chip">'+icono+' '+s+'</div>';
-      }).join('');
-      return '<div class="card"><div class="card-title">Servicios incluidos</div><div class="servicios-grid">'+chips+'</div></div>';
-    })() : '')
-
-    // Galería
-    +'<div class="card">'
-    +'<div class="card-title">Fotos del servicio</div>'
-    +galeriaHtml
-    +'</div>'
-    +'</div>'
-
-    // Sidebar
-    +'<div>'
-    +'<div class="sidebar-card">'
-    +'<div class="precio-desde">Precio desde</div>'
-    +'<div class="precio-num">'+fmtPrecio(precio)+'</div>'
-    +'<button class="btn-cot" onclick="solicitarCotizacion()">Solicitar cotización →</button>'
-    +'<div class="divider"></div>'
-    +'<div class="info-row"><span class="info-lbl">Experiencia</span><span class="info-val">'+extra.añosExp+' años</span></div>'
-    +'<div class="info-row"><span class="info-lbl">Zona principal</span><span class="info-val">'+m.zonaBase+'</span></div>'
-    +'<div class="info-row"><span class="info-lbl">Vehículo</span><span class="info-val">'+m.vehiculo+'</span></div>'
-    +'<div class="info-row"><span class="info-lbl">Trabajos</span><span class="info-val">'+m.trabajosCompletados+' completados</span></div>'
-    +'<div class="divider"></div>'
-    +'<a href="https://'+extra.sitioWeb+'" target="_blank" class="web-link">🌐 '+extra.sitioWeb+'</a>'
-    +'</div>'
+    // Photo strip arriba (full width)
+    photoStripHtml
+    // Grid principal 2 columnas
+    +'<div class="main-grid">'
+      // Columna principal
+      +'<div>'
+        +heroCompactHtml
+        +tabsBar
+        +'<div class="tab-panel'+(defaultTab==='resenas'?' active':'')+'" id="tab-resenas">'+reviewsHtml+'</div>'
+        +'<div class="tab-panel'+(defaultTab==='sobre'?' active':'')+'" id="tab-sobre">'+sobreHtml+'</div>'
+        +'<div class="tab-panel" id="tab-servicios">'+serviciosHtml+'</div>'
+      +'</div>'
+      // Sidebar (sticky en desktop)
+      +'<div>'
+        +'<div class="sidebar-card">'
+          +'<div class="precio-desde">Precio desde</div>'
+          +'<div class="precio-num">'+fmtPrecio(precio)+'</div>'
+          +'<button class="btn-cot" onclick="solicitarCotizacion()">Solicitar cotización →</button>'
+          +'<div class="sidebar-info-block">'+sidebarInfoRows+'</div>'
+          +'<div class="sidebar-trust-row">'+sidebarTrust+'</div>'
+          +(extra.sitioWeb ? '<a href="https://'+extra.sitioWeb+'" target="_blank" class="web-link" style="margin-top:14px;display:inline-block">🌐 '+extra.sitioWeb+'</a>' : '')
+        +'</div>'
+      +'</div>'
     +'</div>';
+}
+
+// Switch de tabs (desktop)
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  var btn = document.querySelector('.tab-btn[data-tab="'+name+'"]');
+  var panel = document.getElementById('tab-'+name);
+  if (btn) btn.classList.add('active');
+  if (panel) panel.classList.add('active');
 }
 
 var _fotosLightbox = [];
