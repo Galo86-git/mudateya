@@ -1415,13 +1415,13 @@ module.exports = async function handler(req, res) {
           if (!p || p.estado !== 'aprobado') continue;
           if (palabrasBuscadas.length > 0 && !cubreZona(p)) continue;
 
-          // Enriquecer reseñas con nombre del cliente (buscando en cada mudanza)
-          // Solo incluimos reseñas con comentario (las silenciosas de solo-estrellas no las mostramos).
+          // Enriquecer reseñas con nombre del cliente (buscando en cada mudanza).
+          // Incluimos todas (con o sin comentario) — el frontend decide el render.
           var resenasEnriquecidas = [];
           if (Array.isArray(p.resenas) && p.resenas.length) {
             for (var i = 0; i < p.resenas.length; i++) {
               var r = p.resenas[i];
-              if (!r || !r.comentario || !String(r.comentario).trim()) continue;
+              if (!r) continue;
               var autor = 'Cliente';
               try {
                 if (r.mudanzaId) {
@@ -1439,7 +1439,7 @@ module.exports = async function handler(req, res) {
               } catch(_e) {}
               resenasEnriquecidas.push({
                 estrellas: r.estrellas || 5,
-                comentario: r.comentario,
+                comentario: r.comentario || '',
                 fecha: r.fecha || '',
                 autor: autor
               });
