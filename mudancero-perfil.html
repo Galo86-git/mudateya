@@ -78,6 +78,63 @@ nav{background:var(--navy);height:56px;display:flex;align-items:center;justify-c
 .resena-stars{display:flex;gap:2px;margin-bottom:6px}
 .resena-text{font-size:13px;color:var(--text2);line-height:1.65;font-weight:300}
 
+/* ── Sección reseñas destacadas (hero de reviews) ── */
+.reviews-hero{background:#fff;border-radius:var(--r3);border:1px solid var(--border);padding:1.6rem 1.4rem;margin-bottom:1.2rem;box-shadow:0 2px 12px rgba(0,0,0,.04)}
+.reviews-head{display:flex;align-items:center;gap:16px;padding-bottom:1.1rem;border-bottom:1px solid var(--border);margin-bottom:1.1rem;flex-wrap:wrap}
+.reviews-score{display:flex;align-items:baseline;gap:10px}
+.reviews-score-num{font-family:'Bebas Neue',sans-serif;font-size:3.2rem;letter-spacing:1px;color:#F59E0B;line-height:1}
+.reviews-score-info{display:flex;flex-direction:column;gap:3px}
+.reviews-score-stars{font-size:17px;letter-spacing:2px;color:#F59E0B;line-height:1}
+.reviews-score-stars .empty{color:#E2E8F0}
+.reviews-score-label{font-size:12px;color:var(--text2);font-family:var(--mono)}
+.reviews-verified{margin-left:auto;display:inline-flex;align-items:center;gap:6px;background:var(--emerald-subtle);color:var(--emerald);border:1px solid rgba(34,195,106,.25);border-radius:8px;padding:5px 10px;font-size:11px;font-family:var(--mono);font-weight:600}
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.review-card{background:#F8FAFC;border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;transition:all .2s}
+.review-card:hover{border-color:#CBD5E1;background:#fff;transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.review-card-stars{color:#F59E0B;font-size:14px;letter-spacing:2px;line-height:1}
+.review-card-stars .empty{color:#E2E8F0}
+.review-card-text{font-size:13px;color:var(--text);line-height:1.55;font-weight:400;flex:1;min-height:60px}
+.review-card-author{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);margin-top:2px}
+.review-card-name{font-size:12px;font-weight:600;color:var(--text)}
+.review-card-date{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.reviews-actions{margin-top:1.1rem;text-align:center}
+.reviews-see-all{display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--blue);border:1px solid var(--blue);border-radius:10px;padding:9px 18px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.reviews-see-all:hover{background:var(--blue);color:#fff}
+.reviews-empty{padding:1.6rem;text-align:center;color:var(--text3)}
+.reviews-empty-icon{font-size:2rem;opacity:.5;margin-bottom:6px}
+.reviews-empty-text{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:3px}
+.reviews-empty-sub{font-size:11px;color:var(--text3);font-family:var(--mono)}
+/* Modal reseñas */
+.rev-modal{display:none;position:fixed;inset:0;background:rgba(15,25,35,.6);z-index:9999;align-items:flex-end;justify-content:center;padding:0;animation:revFade .2s ease}
+.rev-modal.open{display:flex}
+@keyframes revFade{from{opacity:0}to{opacity:1}}
+.rev-modal-card{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:620px;max-height:92vh;overflow-y:auto;box-shadow:0 -8px 30px rgba(0,0,0,.25);animation:revSlide .25s ease-out}
+@keyframes revSlide{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.rev-modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:2}
+.rev-modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;color:var(--text)}
+.rev-modal-close{width:34px;height:34px;border:none;background:var(--bg2);border-radius:50%;cursor:pointer;font-size:16px;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:background .2s}
+.rev-modal-close:hover{background:#E2E8F0;color:var(--text)}
+.rev-modal-body{padding:6px 22px 22px}
+.rev-modal-item{padding:16px 0;border-bottom:1px solid var(--border)}
+.rev-modal-item:last-child{border-bottom:none}
+.rev-modal-item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.rev-modal-item-name{font-size:14px;font-weight:600;color:var(--text)}
+.rev-modal-item-date{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.rev-modal-item-stars{color:#F59E0B;font-size:14px;letter-spacing:2px;margin-bottom:8px;line-height:1}
+.rev-modal-item-stars .empty{color:#E2E8F0}
+.rev-modal-item-text{font-size:13.5px;color:var(--text2);line-height:1.65;font-weight:400}
+@media (max-width:700px){
+  .reviews-grid{grid-template-columns:1fr;gap:10px}
+  .review-card-text{min-height:auto}
+  .reviews-score-num{font-size:2.6rem}
+  .reviews-verified{margin-left:0;width:100%;justify-content:center;margin-top:4px}
+}
+@media (min-width:701px){
+  .rev-modal{align-items:center;padding:20px}
+  .rev-modal-card{border-radius:16px;max-height:85vh}
+  @keyframes revSlide{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+}
+
 /* Sidebar */
 .sidebar-card{background:#fff;border-radius:var(--r3);border:1px solid var(--border);padding:1.4rem;margin-bottom:1.2rem;position:sticky;top:72px}
 .precio-desde{font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
@@ -275,19 +332,88 @@ function renderPerfil(m, extra) {
   });
   galeriaHtml += '</div>';
 
-  // Reseñas — solo si vienen datos reales desde Redis (m.resenas)
-  var resenasHtml = (m.resenas && m.resenas.length) ? (function() {
-    var items = m.resenas.map(function(r) {
-      var rs = '';
-      for (var i = 1; i <= 5; i++) rs += '<span style="color:'+(i<=r.estrellas?'#F59E0B':'#E2E8F0')+';font-size:13px">★</span>';
-      return '<div class="resena">'
-        +'<div class="resena-header"><span class="resena-nombre">'+r.autor+'</span><span class="resena-fecha">'+r.fecha+'</span></div>'
-        +'<div class="resena-stars">'+rs+'</div>'
-        +'<div class="resena-text">'+r.texto+'</div>'
-        +'</div>';
+  // ── RESEÑAS DESTACADAS ──────────────────────────────────────
+  // Helper: fecha relativa en español (hace 2 semanas, hace 1 mes, etc.)
+  function fechaRelativa(fechaStr) {
+    if (!fechaStr) return '';
+    var d = new Date(fechaStr);
+    if (isNaN(d)) return fechaStr; // fallback: si ya viene formateada
+    var diff = (Date.now() - d.getTime()) / 1000; // segundos
+    if (diff < 60) return 'hace un momento';
+    if (diff < 3600) { var m = Math.floor(diff/60); return 'hace ' + m + ' min'; }
+    if (diff < 86400) { var h = Math.floor(diff/3600); return 'hace ' + h + (h===1?' hora':' horas'); }
+    var dias = Math.floor(diff/86400);
+    if (dias === 1) return 'hace 1 día';
+    if (dias < 7) return 'hace ' + dias + ' días';
+    if (dias < 30) { var w = Math.floor(dias/7); return 'hace ' + w + (w===1?' semana':' semanas'); }
+    if (dias < 365) { var mo = Math.floor(dias/30); return 'hace ' + mo + (mo===1?' mes':' meses'); }
+    var y = Math.floor(dias/365);
+    return 'hace ' + y + (y===1?' año':' años');
+  }
+  function truncar(texto, n) {
+    if (!texto) return '';
+    if (texto.length <= n) return texto;
+    return texto.slice(0, n).replace(/\s+\S*$/, '') + '…';
+  }
+  function renderStars(n, size) {
+    var html = '';
+    for (var i = 1; i <= 5; i++) {
+      html += '<span'+(i > n ? ' class="empty"' : '')+'>★</span>';
+    }
+    return html;
+  }
+
+  // Ordenar reseñas por fecha (más recientes primero)
+  var resenasOrd = (m.resenas && m.resenas.length) ? m.resenas.slice().sort(function(a,b){
+    return new Date(b.fecha||0) - new Date(a.fecha||0);
+  }) : [];
+  var tieneResenas = resenasOrd.length > 0;
+
+  // Guardar globalmente para que el modal pueda acceder
+  window._resenasMudancero = resenasOrd;
+  window._mudanceroNombre = m.empresa || m.nombre || '';
+
+  var reviewsHtml;
+  if (tieneResenas) {
+    var ratingBigLabel = m.calificacion >= 4.8 ? 'Excepcional' : m.calificacion >= 4.5 ? 'Muy bueno' : m.calificacion >= 4 ? 'Bueno' : 'Bien';
+    var topReviews = resenasOrd.slice(0, 3);
+    var cards = topReviews.map(function(r) {
+      return '<div class="review-card">'
+        +'<div class="review-card-stars">'+renderStars(r.estrellas||5)+'</div>'
+        +'<div class="review-card-text">"'+truncar(r.texto||'', 120)+'"</div>'
+        +'<div class="review-card-author">'
+          +'<span class="review-card-name">'+(r.autor||'Cliente')+'</span>'
+          +'<span class="review-card-date">'+fechaRelativa(r.fecha||'')+'</span>'
+        +'</div>'
+      +'</div>';
     }).join('');
-    return '<div class="card"><div class="card-title">Reseñas de clientes</div>'+items+'</div>';
-  })() : '';
+    var verTodasBtn = resenasOrd.length > 3
+      ? '<div class="reviews-actions"><button class="reviews-see-all" onclick="abrirResenasModal()">Ver las '+resenasOrd.length+' reseñas →</button></div>'
+      : '';
+    reviewsHtml = '<div class="reviews-hero">'
+      +'<div class="reviews-head">'
+        +'<div class="reviews-score">'
+          +'<span class="reviews-score-num">'+m.calificacion.toFixed(1)+'</span>'
+          +'<div class="reviews-score-info">'
+            +'<span class="reviews-score-stars">'+renderStars(Math.round(m.calificacion))+'</span>'
+            +'<span class="reviews-score-label">'+ratingBigLabel+' · '+resenasOrd.length+(resenasOrd.length===1?' reseña':' reseñas')+'</span>'
+          +'</div>'
+        +'</div>'
+        +'<span class="reviews-verified">✓ Reseñas verificadas</span>'
+      +'</div>'
+      +'<div class="reviews-grid">'+cards+'</div>'
+      +verTodasBtn
+    +'</div>';
+  } else {
+    // Empty state: sin reseñas
+    reviewsHtml = '<div class="reviews-hero">'
+      +'<div class="reviews-empty">'
+        +'<div class="reviews-empty-icon">⭐</div>'
+        +'<div class="reviews-empty-text">Mudancero nuevo en la plataforma</div>'
+        +'<div class="reviews-empty-sub">Aún no tiene reseñas · Sé el primero en confiar</div>'
+      +'</div>'
+    +'</div>';
+  }
 
   document.title = (m.empresa || m.nombre) + ' — MudateYa';
 
@@ -312,6 +438,9 @@ function renderPerfil(m, extra) {
     +'<div class="rating-label">'+ratingLabel+' · '+m.nroResenas+' reseñas · '+m.trabajosCompletados+' mudanzas</div>'
     +'</div></div>'
     +'</div>'
+
+    // ⭐ Reseñas destacadas (NUEVO: posición prominente después del hero)
+    +reviewsHtml
 
     // Descripción
     +'<div class="card">'
@@ -344,9 +473,6 @@ function renderPerfil(m, extra) {
     +'<div class="card-title">Fotos del servicio</div>'
     +galeriaHtml
     +'</div>'
-
-    // Reseñas (solo si hay datos reales)
-    +resenasHtml
     +'</div>'
 
     // Sidebar
@@ -658,6 +784,57 @@ var _mudancero = null;
     </div>
   </div>
 </div>
+
+<!-- Modal de todas las reseñas -->
+<div id="revModal" class="rev-modal" onclick="if(event.target===this) cerrarResenasModal()">
+  <div class="rev-modal-card">
+    <div class="rev-modal-head">
+      <div class="rev-modal-title">⭐ Reseñas de clientes</div>
+      <button class="rev-modal-close" onclick="cerrarResenasModal()" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="rev-modal-body" id="revModalBody"></div>
+  </div>
+</div>
+
+<script>
+function abrirResenasModal(){
+  var lista = window._resenasMudancero || [];
+  if (!lista.length) return;
+  function renderStarsModal(n){ var h=''; for(var i=1;i<=5;i++) h+='<span'+(i>n?' class="empty"':'')+'>★</span>'; return h; }
+  function fechaRel(f){
+    if(!f) return '';
+    var d = new Date(f); if(isNaN(d)) return f;
+    var diff = (Date.now()-d.getTime())/1000;
+    if(diff<60) return 'hace un momento';
+    if(diff<3600) return 'hace '+Math.floor(diff/60)+' min';
+    if(diff<86400){ var h=Math.floor(diff/3600); return 'hace '+h+(h===1?' hora':' horas'); }
+    var dias=Math.floor(diff/86400);
+    if(dias===1) return 'hace 1 día';
+    if(dias<7) return 'hace '+dias+' días';
+    if(dias<30){ var w=Math.floor(dias/7); return 'hace '+w+(w===1?' semana':' semanas'); }
+    if(dias<365){ var mo=Math.floor(dias/30); return 'hace '+mo+(mo===1?' mes':' meses'); }
+    var y=Math.floor(dias/365);
+    return 'hace '+y+(y===1?' año':' años');
+  }
+  var html = lista.map(function(r){
+    return '<div class="rev-modal-item">'
+      +'<div class="rev-modal-item-head">'
+        +'<span class="rev-modal-item-name">'+(r.autor||'Cliente')+'</span>'
+        +'<span class="rev-modal-item-date">'+fechaRel(r.fecha||'')+'</span>'
+      +'</div>'
+      +'<div class="rev-modal-item-stars">'+renderStarsModal(r.estrellas||5)+'</div>'
+      +'<div class="rev-modal-item-text">"'+(r.texto||'')+'"</div>'
+    +'</div>';
+  }).join('');
+  document.getElementById('revModalBody').innerHTML = html;
+  document.getElementById('revModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function cerrarResenasModal(){
+  document.getElementById('revModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
 
 </body>
 </html>
