@@ -744,6 +744,13 @@ function renderMudanzaCard(m, idx){
         : '')
     +   (m.saldoPagado ? '<span style="font-size:12px;color:var(--blue);font-family:var(--mono);padding:8px 0">✓ Saldo pagado</span>' : '')
     + '</div>'
+    // Aviso de ajuste de precio (solo cuando va a pagar anticipo — no ya lo pagó)
+    + (m.estado==='cotizacion_aceptada' && !m.anticipoPagado && m.cotizacionAceptada && !(m.ajustePrecio && m.ajustePrecio.estado==='pendiente_aprobacion')
+        ? '<div style="background:#EFF6FF;border:1px solid #93C5FD;border-left:3px solid #1A6FFF;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:11.5px;color:#1E3A8A;line-height:1.5">'
+          +'<strong style="color:#1E40AF;font-family:var(--mono);font-size:10px;letter-spacing:.4px;text-transform:uppercase">💡 Precio sujeto a ajuste</strong><br>'
+          +'Si el día de la mudanza hubiera condiciones no previstas (más volumen, accesos complicados, piso sin ascensor), el mudancero puede proponerte un ajuste justificado. Vos decidís: lo aceptás o <strong>recuperás tu anticipo completo</strong>.'
+        +'</div>'
+        : '')
     + '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px">ID: '+m.id+'</div>'
     + '</div>';
 }
@@ -899,7 +906,7 @@ async function pagarAnticipo(m) {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
           mudanceroNombre: cot.mudanceroNombre,
-          monto: anticipo,
+          monto: precio,
           desde: m.desde, hasta: m.hasta,
           ambientes: m.ambientes,
           mudanzaId: m.id,
@@ -1008,7 +1015,20 @@ function renderPagos(){
 
     return filaAnticipo + filaSaldo;
   }).filter(Boolean).join('');
-  document.getElementById('pagosList').innerHTML = html || '<div class="empty"><div class="empty-icon">💳</div>Sin pagos aún</div>';
+
+  // Si hay algún anticipo pendiente de pago, mostrar banner de aviso arriba
+  var hayAnticipoPendiente = mudanzasData.some(function(m){
+    return m.cotizacionAceptada && !m.anticipoPagado && m.estado === 'cotizacion_aceptada'
+      && !(m.ajustePrecio && m.ajustePrecio.estado === 'pendiente_aprobacion');
+  });
+  var bannerAjuste = hayAnticipoPendiente
+    ? '<div style="background:#EFF6FF;border:1px solid #93C5FD;border-left:4px solid #1A6FFF;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12.5px;color:#1E3A8A;line-height:1.55">'
+      +'<strong style="color:#1E40AF;font-family:var(--mono);font-size:11px;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:4px">💡 Precio sujeto a ajuste</strong>'
+      +'Si el día de la mudanza hay condiciones no previstas (más volumen, accesos complicados, etc.), el mudancero puede proponerte un ajuste. Vos decidís: aceptás, o <strong>recuperás tu anticipo completo</strong>.'
+      +'</div>'
+    : '';
+
+  document.getElementById('pagosList').innerHTML = bannerAjuste + (html || '<div class="empty"><div class="empty-icon">💳</div>Sin pagos aún</div>');
 }
 
 // ── CALIFICACIONES ─────────────────────────────────────────────────────────
