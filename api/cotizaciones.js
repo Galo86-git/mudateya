@@ -755,7 +755,7 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'Faltan datos (mudanzaId, mudanceroEmail, nuevoPrecio, motivo)' });
       }
       const nuevo = parseInt(String(nuevoPrecio).replace(/\D/g, ''), 10);
-      if (!nuevo || nuevo < 1000) return res.status(400).json({ error: 'Precio inválido' });
+      if (!nuevo || nuevo < 1) return res.status(400).json({ error: 'Precio inválido' });
       if (motivo.trim().length < 8) return res.status(400).json({ error: 'El motivo debe tener al menos 8 caracteres' });
 
       const m = await getJSON(`mudanza:${mudanzaId}`);
