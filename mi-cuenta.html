@@ -1213,7 +1213,7 @@ function onAjusteInput() {
     deltaEl.style.color = 'var(--text3)';
   }
   // Habilitar botón solo si hay precio válido + motivo de min 8 chars
-  btn.disabled = !(nuevo >= 1000 && motivo.length >= 8);
+  btn.disabled = !(nuevo >= 1 && motivo.length >= 8);
 }
 
 async function confirmarAjuste() {
@@ -1222,7 +1222,7 @@ async function confirmarAjuste() {
   var motivo = document.getElementById('ajMotivo').value.trim();
   var btn = document.getElementById('ajBtn');
   var msg = document.getElementById('ajMsg');
-  if (nuevo < 1000) { msg.textContent = 'Precio inválido'; msg.style.color='var(--red)'; return; }
+  if (nuevo < 1) { msg.textContent = 'Ingresá un precio válido'; msg.style.color='var(--red)'; return; }
   if (motivo.length < 8) { msg.textContent = 'El motivo debe tener al menos 8 caracteres'; msg.style.color='var(--red)'; return; }
   btn.disabled = true; btn.textContent = 'Enviando…';
   try {
