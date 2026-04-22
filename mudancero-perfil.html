@@ -380,7 +380,7 @@ function renderPerfil(m, extra) {
     var cards = topReviews.map(function(r) {
       return '<div class="review-card">'
         +'<div class="review-card-stars">'+renderStars(r.estrellas||5)+'</div>'
-        +'<div class="review-card-text">"'+truncar(r.texto||'', 120)+'"</div>'
+        +'<div class="review-card-text">"'+truncar(r.comentario||r.texto||'', 120)+'"</div>'
         +'<div class="review-card-author">'
           +'<span class="review-card-name">'+(r.autor||'Cliente')+'</span>'
           +'<span class="review-card-date">'+fechaRelativa(r.fecha||'')+'</span>'
@@ -396,13 +396,29 @@ function renderPerfil(m, extra) {
           +'<span class="reviews-score-num">'+m.calificacion.toFixed(1)+'</span>'
           +'<div class="reviews-score-info">'
             +'<span class="reviews-score-stars">'+renderStars(Math.round(m.calificacion))+'</span>'
-            +'<span class="reviews-score-label">'+ratingBigLabel+' · '+resenasOrd.length+(resenasOrd.length===1?' reseña':' reseñas')+'</span>'
+            +'<span class="reviews-score-label">'+ratingBigLabel+' · '+(m.nroResenas||resenasOrd.length)+((m.nroResenas||resenasOrd.length)===1?' calificación':' calificaciones')+'</span>'
           +'</div>'
         +'</div>'
         +'<span class="reviews-verified">✓ Reseñas verificadas</span>'
       +'</div>'
       +'<div class="reviews-grid">'+cards+'</div>'
       +verTodasBtn
+    +'</div>';
+  } else if (m.nroResenas > 0) {
+    // Tiene calificaciones con estrellas pero sin comentario escrito
+    var ratingBigLabel2 = m.calificacion >= 4.8 ? 'Excepcional' : m.calificacion >= 4.5 ? 'Muy bueno' : m.calificacion >= 4 ? 'Bueno' : 'Bien';
+    reviewsHtml = '<div class="reviews-hero">'
+      +'<div class="reviews-head">'
+        +'<div class="reviews-score">'
+          +'<span class="reviews-score-num">'+m.calificacion.toFixed(1)+'</span>'
+          +'<div class="reviews-score-info">'
+            +'<span class="reviews-score-stars">'+renderStars(Math.round(m.calificacion))+'</span>'
+            +'<span class="reviews-score-label">'+ratingBigLabel2+' · '+m.nroResenas+(m.nroResenas===1?' calificación':' calificaciones')+'</span>'
+          +'</div>'
+        +'</div>'
+        +'<span class="reviews-verified">✓ Reseñas verificadas</span>'
+      +'</div>'
+      +'<div style="padding:14px;text-align:center;color:var(--text3);font-size:12px;font-family:var(--mono)">Clientes calificaron sin dejar comentario</div>'
     +'</div>';
   } else {
     // Empty state: sin reseñas
@@ -823,7 +839,7 @@ function abrirResenasModal(){
         +'<span class="rev-modal-item-date">'+fechaRel(r.fecha||'')+'</span>'
       +'</div>'
       +'<div class="rev-modal-item-stars">'+renderStarsModal(r.estrellas||5)+'</div>'
-      +'<div class="rev-modal-item-text">"'+(r.texto||'')+'"</div>'
+      +'<div class="rev-modal-item-text">"'+(r.comentario||r.texto||'')+'"</div>'
     +'</div>';
   }).join('');
   document.getElementById('revModalBody').innerHTML = html;
