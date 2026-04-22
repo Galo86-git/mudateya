@@ -1038,6 +1038,16 @@ async function enviarCotizacion(mudanzaId){
 // ════════════════════════════════════════════════════
 // HISTORIAL
 // ════════════════════════════════════════════════════
+// Helper: devuelve el precio FINAL de la mudanza.
+// Si el cliente aceptó un ajuste, cotizacionAceptada.precio refleja el nuevo monto.
+// Si no, se usa la cotización original del mudancero (miCotizacion).
+function precioFinalMudanza(m) {
+  if (m && m.cotizacionAceptada && m.cotizacionAceptada.mudanceroEmail === currentUser.email) {
+    return parseInt(m.cotizacionAceptada.precio || 0);
+  }
+  return parseInt((m && m.miCotizacion && m.miCotizacion.precio) || 0);
+}
+
 function loadHistorial(){
   var aceptadas = misCotizaciones.filter(function(m){
     var ACTIVOS = ['cotizacion_aceptada','en_curso','completada'];
@@ -1048,15 +1058,17 @@ function loadHistorial(){
     return;
   }
   document.getElementById('historialList').innerHTML = aceptadas.map(function(m){
-    var cot = m.miCotizacion;
-    var fee = Math.round(calcFee(cot.precio, m.ambientes));
+    var precio = precioFinalMudanza(m);
+    var fee = Math.round(calcFee(precio, m.ambientes));
     var estadoLabel = m.estado==='completada'?'✓ Completado':m.estado==='en_curso'?'▶ En curso':'✓ Aceptado';
+    var huboAjuste = m.ajustePrecio && m.ajustePrecio.estado === 'aceptado';
+    var badgeAjuste = huboAjuste ? '<span style="margin-left:8px;background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;border-radius:6px;padding:1px 7px;font-size:10px;font-family:var(--mono);font-weight:600">✓ Ajustado</span>' : '';
     return '<div class="pedido-card aceptado">'
       +'<div class="pedido-header"><div>'
-      +'<div class="pedido-ruta">'+esc(m.desde)+' → '+esc(m.hasta)+'</div>'
+      +'<div class="pedido-ruta">'+esc(m.desde)+' → '+esc(m.hasta)+badgeAjuste+'</div>'
       +'<div class="pedido-fecha">📅 '+(m.fecha||'—')+' · '+(m.ambientes||'—')+'</div>'
       +'</div><span class="badge aceptado">'+estadoLabel+'</span></div>'
-      +'<div class="pedido-precio">$'+(cot.precio-fee).toLocaleString('es-AR')+'</div>'
+      +'<div class="pedido-precio">$'+(precio-fee).toLocaleString('es-AR')+'</div>'
       +'<div class="pedido-precio-sub">vos cobrás · fee MYA ('+calcFeeLabel(m.ambientes)+'): $'+fee.toLocaleString('es-AR')+'</div>'
       +'</div>';
   }).join('');
@@ -1070,7 +1082,7 @@ function loadGanancias(){
   var aceptadas = misCotizaciones.filter(function(m){
     return ACTIVOS.indexOf(m.estado)!==-1 && m.cotizacionAceptada && m.cotizacionAceptada.id===m.miCotizacion?.id;
   });
-  var total = aceptadas.reduce(function(s,m){ return s+((m.miCotizacion?.precio||0)*calcNeto(m.ambientes)); },0);
+  var total = aceptadas.reduce(function(s,m){ return s+(precioFinalMudanza(m)*calcNeto(m.ambientes)); },0);
   var prom = aceptadas.length>0 ? Math.round(total/aceptadas.length) : 0;
   document.getElementById('g-total').textContent='$'+Math.round(total).toLocaleString('es-AR');
   document.getElementById('g-trabajos').textContent=aceptadas.length;
@@ -1087,12 +1099,14 @@ function loadGanancias(){
     +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Vos cobrás</th>'
     +'</tr></thead><tbody>'
     +aceptadas.map(function(m){
-      var cot=m.miCotizacion, fee=Math.round(calcFee(cot.precio, m.ambientes));
+      var precio = precioFinalMudanza(m), fee=Math.round(calcFee(precio, m.ambientes));
+      var huboAjuste = m.ajustePrecio && m.ajustePrecio.estado === 'aceptado';
+      var ajusteHint = huboAjuste ? '<span style="font-size:9px;color:#15803D;margin-left:4px;font-weight:600">· AJUSTADO</span>' : '';
       return '<tr style="border-bottom:1px solid var(--border)">'
-        +'<td style="padding:11px 14px;font-size:12px;color:var(--text2)">'+esc(m.desde.split(',')[0])+' → '+esc(m.hasta.split(',')[0])+'</td>'
-        +'<td style="padding:11px 14px;font-size:12px;font-family:var(--mono)">$'+cot.precio.toLocaleString('es-AR')+'</td>'
+        +'<td style="padding:11px 14px;font-size:12px;color:var(--text2)">'+esc(m.desde.split(',')[0])+' → '+esc(m.hasta.split(',')[0])+ajusteHint+'</td>'
+        +'<td style="padding:11px 14px;font-size:12px;font-family:var(--mono)">$'+precio.toLocaleString('es-AR')+'</td>'
         +'<td style="padding:11px 14px;font-size:12px;font-family:var(--mono);color:var(--red)">-$'+fee.toLocaleString('es-AR')+'</td>'
-        +'<td style="padding:11px 14px;font-size:13px;font-family:var(--mono);color:var(--blue);font-weight:600">$'+(cot.precio-fee).toLocaleString('es-AR')+'</td>'
+        +'<td style="padding:11px 14px;font-size:13px;font-family:var(--mono);color:var(--blue);font-weight:600">$'+(precio-fee).toLocaleString('es-AR')+'</td>'
         +'</tr>';
     }).join('')
     +'</tbody></table>';
