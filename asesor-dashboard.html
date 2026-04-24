@@ -67,8 +67,15 @@
   .filter-pill .count{opacity:.75;font-weight:500;margin-left:4px}
 
   /* ── PEDIDOS LIST ── */
-  .section-title{font-size:11px;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:10px;padding-left:4px;display:flex;align-items:center;justify-content:space-between}
+  .section-title{font-size:11px;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:10px;padding-left:4px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
   .section-title .count-tag{color:var(--text3);font-weight:500;text-transform:none;font-size:11px}
+
+  .sort-wrap{display:flex;gap:6px;align-items:center}
+  .sort-lbl{font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;margin-right:2px}
+  .sort-btn{background:#fff;border:1px solid var(--border);border-radius:14px;padding:5px 11px;font-size:11.5px;font-weight:600;color:var(--text2);cursor:pointer;font-family:var(--font);text-transform:none;letter-spacing:0;display:inline-flex;align-items:center;gap:4px;transition:all .15s}
+  .sort-btn:hover{border-color:var(--text2);color:var(--text)}
+  .sort-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .sort-btn .arr{font-size:10px;opacity:.8}
   .empty{background:#fff;border:1px dashed var(--border);border-radius:var(--r2);padding:48px 20px;text-align:center;color:var(--text3);font-size:13px}
 
   .pedidos-grid{display:grid;grid-template-columns:1fr;gap:12px}
@@ -306,8 +313,15 @@
   </div>
 
   <div class="section-title">
-    <span>Mis pedidos</span>
-    <span class="count-tag" id="listCountTag"></span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span>Mis pedidos</span>
+      <span class="count-tag" id="listCountTag"></span>
+    </div>
+    <div class="sort-wrap">
+      <span class="sort-lbl">Ordenar:</span>
+      <button class="sort-btn active" data-sort="fecha" onclick="toggleSort('fecha')">Fecha <span class="arr" id="arr-fecha">↓</span></button>
+      <button class="sort-btn" data-sort="monto" onclick="toggleSort('monto')">Monto <span class="arr" id="arr-monto">↓</span></button>
+    </div>
   </div>
   <div id="pedidosList">
     <div class="loading-full"><span class="loader-inline"></span></div>
@@ -517,6 +531,8 @@ var TOKEN = localStorage.getItem('asesorToken');
 var ASESOR = null;
 var PEDIDOS = [];
 var CURRENT_FILTER = 'todos';
+// Ordenamiento: campo ('fecha'|'monto') + dirección ('asc'|'desc')
+var SORT = { by: 'fecha', dir: 'desc' };
 var MUDANCERAS_ZONA = [];
 var FSW_STEP = 1;
 var FSW_DATA = { cliente:{}, mudanza:{}, packs:{ esencial:null, integral:null, llave:null } };
@@ -642,6 +658,61 @@ function getFiltered(lista) {
   return lista.filter(function(p){ return (p.estado || 'borrador') === CURRENT_FILTER; });
 }
 
+// ── ORDENAMIENTO ──────────────────────────────────────────────────
+// Devuelve la suma de los 3 packs del pedido (monto total en juego).
+// Si el pedido no tiene packs, devuelve 0.
+function montoPedido(p) {
+  var packs = p.packs || [];
+  var total = 0;
+  for (var i = 0; i < packs.length; i++) {
+    var v = Number(packs[i].precio) || 0;
+    total += v;
+  }
+  return total;
+}
+
+function getSorted(lista) {
+  var copia = lista.slice();
+  copia.sort(function(a, b) {
+    var diff;
+    if (SORT.by === 'monto') {
+      diff = montoPedido(a) - montoPedido(b);
+    } else {
+      // Fecha: usamos creadoEn (ISO) — comparación por string funciona para ISO
+      var fa = a.creadoEn || '';
+      var fb = b.creadoEn || '';
+      diff = fa < fb ? -1 : (fa > fb ? 1 : 0);
+    }
+    return SORT.dir === 'asc' ? diff : -diff;
+  });
+  return copia;
+}
+
+function toggleSort(by) {
+  if (SORT.by === by) {
+    // Mismo campo → alternar dirección
+    SORT.dir = SORT.dir === 'desc' ? 'asc' : 'desc';
+  } else {
+    // Campo distinto → usar ese + descendente por default
+    SORT.by = by;
+    SORT.dir = 'desc';
+  }
+  // Update UI: botones activos + flechitas
+  var btns = document.querySelectorAll('.sort-btn');
+  btns.forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-sort') === SORT.by);
+  });
+  var arrow = SORT.dir === 'desc' ? '↓' : '↑';
+  // La flecha va solo en el activo; el otro vuelve a ↓ como neutral
+  var otherBy = by === 'fecha' ? 'monto' : 'fecha';
+  var aActive = document.getElementById('arr-' + SORT.by);
+  var aOther  = document.getElementById('arr-' + otherBy);
+  if (aActive) aActive.textContent = arrow;
+  if (aOther)  aOther.textContent = '↓';
+
+  renderPedidos(PEDIDOS);
+}
+
 function esc(s) {
   if (s == null) return '';
   return String(s).replace(/[<>&"']/g, function(c){
@@ -671,8 +742,8 @@ function renderPedidos(lista) {
     return;
   }
 
-  // Aplicar filtro
-  var filtrados = getFiltered(lista);
+  // Aplicar filtro + ordenamiento
+  var filtrados = getSorted(getFiltered(lista));
 
   // Contador al lado del título
   if (countTag) {
