@@ -467,6 +467,9 @@ tr:hover td{background:rgba(34,195,106,.03)}
       <a class="sidebar-item" onclick="showPage('aliados',event)" href="#">
         <span class="sidebar-icon">🤝</span> Aliados
       </a>
+      <a class="sidebar-item" onclick="showPage('asesores',event)" href="#">
+        <span class="sidebar-icon">🏢</span> Asesores
+      </a>
     </div>
 
     <!-- BOTTOM NAV MOBILE -->
@@ -502,7 +505,8 @@ tr:hover td{background:rgba(34,195,106,.03)}
       <button onclick="showPage('fotos',event);setMobileNav('fotos');toggleMobileMenu()" style="display:flex;align-items:center;gap:12px;width:100%;padding:13px 20px;background:none;border:none;color:#fff;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;border-bottom:1px solid rgba(255,255,255,.08)">🖼️ Fotos</button>
       <button onclick="showPage('zonas',event);setMobileNav('zonas');toggleMobileMenu()" style="display:flex;align-items:center;gap:12px;width:100%;padding:13px 20px;background:none;border:none;color:#fff;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;border-bottom:1px solid rgba(255,255,255,.08)">🗺️ Zonas</button>
       <button onclick="showPage('transferencias',event);setMobileNav('transferencias');toggleMobileMenu()" style="display:flex;align-items:center;gap:12px;width:100%;padding:13px 20px;background:none;border:none;color:#fff;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;border-bottom:1px solid rgba(255,255,255,.08)">🏦 Transferencias</button>
-      <button onclick="showPage('aliados',event);setMobileNav('aliados');toggleMobileMenu()" style="display:flex;align-items:center;gap:12px;width:100%;padding:13px 20px;background:none;border:none;color:#fff;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif">🤝 Aliados</button>
+      <button onclick="showPage('aliados',event);setMobileNav('aliados');toggleMobileMenu()" style="display:flex;align-items:center;gap:12px;width:100%;padding:13px 20px;background:none;border:none;color:#fff;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif;border-bottom:1px solid rgba(255,255,255,.08)">🤝 Aliados</button>
+      <button onclick="showPage('asesores',event);setMobileNav('asesores');toggleMobileMenu()" style="display:flex;align-items:center;gap:12px;width:100%;padding:13px 20px;background:none;border:none;color:#fff;font-size:14px;cursor:pointer;font-family:'Inter',sans-serif">🏢 Asesores</button>
     </div>
 
     <div class="admin-main">
@@ -915,6 +919,97 @@ tr:hover td{background:rgba(34,195,106,.03)}
           </div>
         </div>
       </div>
+
+      <!-- ASESORES (Plan Referidos Inmobiliarios) -->
+      <div class="page" id="page-asesores">
+        <div class="page-title">🏢 Plan Referidos — Asesores Inmobiliarios</div>
+
+        <!-- MÉTRICAS -->
+        <div class="metrics-grid" id="asesoresMetricas" style="margin-bottom:1.2rem">
+          <div class="metric-card">
+            <div class="metric-label">Asesores registrados</div>
+            <div class="metric-value" id="mAsrTotal">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Activos</div>
+            <div class="metric-value" id="mAsrActivos">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Pedidos creados</div>
+            <div class="metric-value" id="mAsrPedidos">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Zonas con mudanceras</div>
+            <div class="metric-value" id="mAsrZonas" style="color:#22C36A">—</div>
+          </div>
+        </div>
+
+        <!-- TABS INTERNOS -->
+        <div style="display:flex;gap:8px;margin-bottom:1.2rem;border-bottom:1px solid var(--border);overflow-x:auto">
+          <button class="ali-tab active" data-asrtab="zonas" onclick="asrTab('zonas')">🗺️ Mudanceras por zona</button>
+          <button class="ali-tab" data-asrtab="lista" onclick="asrTab('lista')">👥 Asesores</button>
+          <button class="ali-tab" data-asrtab="pedidos" onclick="asrTab('pedidos')">📋 Pedidos creados</button>
+        </div>
+
+        <!-- SUB-PÁGINA: ZONAS -->
+        <div class="asr-subpage" id="asr-sub-zonas">
+          <div class="table-card" style="margin-bottom:12px">
+            <div style="padding:14px 16px;background:#FFFBEB;border-bottom:1px solid #FDE68A;font-size:12px;color:#92400E;line-height:1.5">
+              💡 Elegí una zona y seleccioná las mudanceras aprobadas que el asesor va a ver como opciones para armar los 3 packs. Solo aparecen las mudanceras que ya tienen <strong>precios de pack cargados</strong> en su perfil.
+            </div>
+            <div style="padding:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+              <label style="font-size:12px;color:var(--text2);font-weight:600">Zona:</label>
+              <select id="asrZonaSel" onchange="asrCargarZonaDetalle()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;min-width:220px">
+                <option value="">— Seleccioná una zona —</option>
+              </select>
+              <button class="btn-sm" onclick="asrRefrescarMudanceras()" style="margin-left:auto">↻ Actualizar</button>
+            </div>
+          </div>
+          <div class="table-card">
+            <div id="asrZonaDetalle"><div style="padding:28px;text-align:center;color:var(--text3);font-size:13px">Elegí una zona arriba para empezar.</div></div>
+          </div>
+        </div>
+
+        <!-- SUB-PÁGINA: LISTA -->
+        <div class="asr-subpage" id="asr-sub-lista" style="display:none">
+          <div class="table-card" style="margin-bottom:12px">
+            <div style="padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+              <input type="text" id="asrSearchQ" placeholder="Nombre, email, inmobiliaria…" oninput="renderAsesoresLista()" style="flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font)"/>
+              <select id="asrFiltroEstado" onchange="renderAsesoresLista()" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff">
+                <option value="">Todos los estados</option>
+                <option value="activo">Activos</option>
+                <option value="suspendido">Suspendidos</option>
+                <option value="bloqueado">Bloqueados</option>
+              </select>
+              <button class="btn-sm primary" onclick="cargarAsesores()" style="margin-left:auto">↻ Actualizar</button>
+            </div>
+          </div>
+          <div class="table-card">
+            <div id="asrListaWrap"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
+          </div>
+        </div>
+
+        <!-- SUB-PÁGINA: PEDIDOS -->
+        <div class="asr-subpage" id="asr-sub-pedidos" style="display:none">
+          <div class="table-card" style="margin-bottom:12px">
+            <div style="padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+              <input type="text" id="asrPedSearchQ" placeholder="Cliente, asesor, email…" oninput="renderPedidosAsesores()" style="flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font)"/>
+              <select id="asrPedFiltroEstado" onchange="renderPedidosAsesores()" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff">
+                <option value="">Todos los estados</option>
+                <option value="borrador">Borrador</option>
+                <option value="enviado">Enviado</option>
+                <option value="elegido">Elegido</option>
+                <option value="pagado">Pagado</option>
+              </select>
+              <button class="btn-sm primary" onclick="cargarPedidosAsesores()" style="margin-left:auto">↻ Actualizar</button>
+            </div>
+          </div>
+          <div class="table-card">
+            <div id="asrPedidosWrap"><div class="loading"><span class="spinner"></span>Cargando…</div></div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -2447,6 +2542,12 @@ function activarEdicion(){
     form += '<div class="edit-precio-row"><span class="edit-precio-lbl">'+r[1]+'</span><div class="edit-precio-wrap"><span class="edit-precio-prefix">$</span><input class="edit-precio-input" id="'+r[0]+'" type="text" placeholder="0" inputmode="numeric" oninput="_fmtPrecioEdit(this)"/></div></div>';
   });
 
+  form += '<div class="edit-section-title">Precios Pack — Plan Referidos (ARS)</div>';
+  form += '<div style="padding:8px 12px;background:#FFFBEB;border-left:3px solid #F59E0B;border-radius:6px;margin-bottom:10px;font-size:11px;color:#92400E;line-height:1.5">Precios que ve el asesor inmobiliario al armar packs para su cliente. Dejalos en 0 si esta mudancera no participa del Plan Referidos.</div>';
+  [['ed-pack-esencial','Esencial'],['ed-pack-integral','Integral'],['ed-pack-llave','Llave en Mano']].forEach(function(r){
+    form += '<div class="edit-precio-row"><span class="edit-precio-lbl">'+r[1]+'</span><div class="edit-precio-wrap"><span class="edit-precio-prefix">$</span><input class="edit-precio-input" id="'+r[0]+'" type="text" placeholder="0" inputmode="numeric" oninput="_fmtPrecioEdit(this)"/></div></div>';
+  });
+
   form += '<div class="edit-section-title">Datos para cobrar</div>';
   form += '<div class="edit-cols2">';
   form += '<div class="edit-field"><label>Método preferido</label><select id="ed-metodoCobro"><option value="cbu">CBU / Alias bancario</option><option value="mp">Cuenta Mercado Pago</option></select></div>';
@@ -2511,6 +2612,13 @@ function activarEdicion(){
       var el=document.getElementById(id);
       if(el && precioMap[id]) el.value=parseInt(String(precioMap[id]).replace(/\D/g,''),10).toLocaleString('es-AR');
     });
+    // Precios Pack (Plan Referidos)
+    var pp = p.preciosPack || {};
+    var packMap = {'ed-pack-esencial':pp.esencial, 'ed-pack-integral':pp.integral, 'ed-pack-llave':pp.llave};
+    Object.keys(packMap).forEach(function(id){
+      var el = document.getElementById(id);
+      if (el && packMap[id]) el.value = parseInt(String(packMap[id]).replace(/\D/g,''), 10).toLocaleString('es-AR');
+    });
     if (p.servicios) _editSetChips('ed-servicios', p.servicios);
     if (p.dias)      _editSetChips('ed-dias',      p.dias);
     if (p.horarios)  _editSetChips('ed-horarios',  p.horarios);
@@ -2552,6 +2660,18 @@ async function guardarEdicion(){
     extra:         (document.getElementById('ed-extra')        ||{}).value||'',
   };
   Object.keys(cambios).forEach(function(k){ if (!cambios[k]) delete cambios[k]; });
+
+  // Precios Pack (Plan Referidos) — se envía como objeto, incluso si alguno es 0
+  var ppEsc = _parsePrecio((document.getElementById('ed-pack-esencial')||{}).value);
+  var ppInt = _parsePrecio((document.getElementById('ed-pack-integral')||{}).value);
+  var ppLla = _parsePrecio((document.getElementById('ed-pack-llave')   ||{}).value);
+  if (ppEsc || ppInt || ppLla) {
+    cambios.preciosPack = {
+      esencial: Number(ppEsc) || 0,
+      integral: Number(ppInt) || 0,
+      llave:    Number(ppLla) || 0
+    };
+  }
 
   try {
     var r = await fetch('/api/cotizaciones?action=admin-editar-mudancero', {
@@ -3188,8 +3308,416 @@ function descargarQRSemilla() {
       cargarMetricasAliados();
       cargarAliados();
     }
+    if (page === 'asesores') {
+      cargarAsesoresMetricas();
+      cargarAsesores();
+      cargarZonasAsignadas();
+    }
   };
 })();
+
+// ══════════════════════════════════════════════════════════════════════
+// ASESORES — Plan Referidos Inmobiliarios
+// ══════════════════════════════════════════════════════════════════════
+var _asesoresData = [];
+var _pedidosAsesoresData = [];
+var _asrZonasAsignadas = [];
+var _asrMudancerasZona = []; // mudanceras actualmente asignadas a la zona seleccionada
+var _asrMudancerasAprobadas = []; // todas las mudanceras aprobadas del sistema
+
+function ASRT() { return localStorage.getItem('adminToken') || 'mya-admin-2026'; }
+
+async function asrFetch(url, opts) {
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  opts.headers['x-admin-token'] = ASRT();
+  if (opts.body) opts.headers['Content-Type'] = 'application/json';
+  var r = await fetch(url, opts);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return await r.json();
+}
+
+function asrFecha(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString('es-AR', { day:'2-digit', month:'short', year:'2-digit' }); }
+  catch(e) { return iso; }
+}
+
+function asrFmt(n) {
+  if (!n && n !== 0) return '—';
+  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function asrEsc(s) {
+  if (s == null) return '';
+  return String(s).replace(/[<>&"']/g, function(c){
+    return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+// ── Tabs ──
+function asrTab(tab) {
+  document.querySelectorAll('.ali-tab[data-asrtab]').forEach(function(b){ b.classList.remove('active'); });
+  var btn = document.querySelector('.ali-tab[data-asrtab="' + tab + '"]');
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.asr-subpage').forEach(function(sp){ sp.style.display = 'none'; });
+  var sp = document.getElementById('asr-sub-' + tab);
+  if (sp) sp.style.display = '';
+  if (tab === 'zonas')   cargarZonasAsignadas();
+  if (tab === 'lista')   renderAsesoresLista();
+  if (tab === 'pedidos') cargarPedidosAsesores();
+}
+
+// ── Métricas ──
+async function cargarAsesoresMetricas() {
+  try {
+    // Asesores
+    var dA = await asrFetch('/api/asesores?action=admin-list&token=' + ASRT());
+    var asrs = dA.asesores || [];
+    document.getElementById('mAsrTotal').textContent = asrs.length;
+    document.getElementById('mAsrActivos').textContent = asrs.filter(function(a){ return a.estado === 'activo'; }).length;
+    // Pedidos
+    var dP = await asrFetch('/api/asesores?action=admin-pedidos&token=' + ASRT());
+    document.getElementById('mAsrPedidos').textContent = (dP.pedidos || []).length;
+    // Zonas con asignación
+    var dZ = await asrFetch('/api/asesores?action=admin-listar-zonas&token=' + ASRT());
+    document.getElementById('mAsrZonas').textContent = (dZ.zonas || []).length;
+  } catch(e) {
+    console.warn('Error métricas asesores:', e.message);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// TAB: LISTA DE ASESORES
+// ══════════════════════════════════════════════════════════════════════
+async function cargarAsesores() {
+  var wrap = document.getElementById('asrListaWrap');
+  if (wrap) wrap.innerHTML = '<div class="loading"><span class="spinner"></span>Cargando…</div>';
+  try {
+    var d = await asrFetch('/api/asesores?action=admin-list&token=' + ASRT());
+    if (!d.ok) throw new Error(d.error || 'Error');
+    _asesoresData = d.asesores || [];
+    renderAsesoresLista();
+  } catch(e) {
+    if (wrap) wrap.innerHTML = '<div style="padding:2rem;text-align:center;color:#EF4444">Error: ' + asrEsc(e.message) + '</div>';
+  }
+}
+
+function renderAsesoresLista() {
+  var wrap = document.getElementById('asrListaWrap');
+  if (!wrap) return;
+  var q = (document.getElementById('asrSearchQ').value || '').toLowerCase().trim();
+  var estadoFiltro = document.getElementById('asrFiltroEstado').value;
+
+  var data = _asesoresData.filter(function(a){
+    if (estadoFiltro && a.estado !== estadoFiltro) return false;
+    if (!q) return true;
+    var hay = (a.nombre || '') + ' ' + (a.email || '') + ' ' + (a.inmobiliaria || '') + ' ' + (a.zona || '');
+    return hay.toLowerCase().indexOf(q) !== -1;
+  });
+
+  if (!data.length) {
+    wrap.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text3);font-size:13px">Sin asesores ' + (q || estadoFiltro ? 'que coincidan con los filtros' : 'registrados todavía') + '.</div>';
+    return;
+  }
+
+  var h = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
+    '<thead><tr style="background:#F8FAFC;border-bottom:1px solid var(--border)">' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Nombre</th>' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Inmobiliaria</th>' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Zona</th>' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Pedidos</th>' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Alta</th>' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Estado</th>' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Acciones</th>' +
+    '</tr></thead><tbody>';
+
+  data.forEach(function(a){
+    var badge = a.estado === 'activo' ? '<span style="display:inline-block;padding:3px 10px;background:#F0FDF4;color:#15803D;border-radius:12px;font-size:11px;font-weight:600">Activo</span>' :
+                a.estado === 'suspendido' ? '<span style="display:inline-block;padding:3px 10px;background:#FEF3C7;color:#92400E;border-radius:12px;font-size:11px;font-weight:600">Suspendido</span>' :
+                '<span style="display:inline-block;padding:3px 10px;background:#FEE2E2;color:#991B1B;border-radius:12px;font-size:11px;font-weight:600">Bloqueado</span>';
+    var wa = (a.telefono || '').replace(/\D/g,'');
+    var emailSafe = asrEsc(a.email).replace(/'/g, "\\'");
+    h += '<tr style="border-bottom:1px solid var(--border)">' +
+      '<td style="padding:10px 12px"><div style="font-weight:600;color:var(--navy)">' + asrEsc(a.nombre || '—') + '</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">' +
+        '<a href="mailto:' + asrEsc(a.email) + '" style="color:var(--text3);text-decoration:none">' + asrEsc(a.email) + '</a>' +
+        (wa ? ' · <a href="https://wa.me/' + wa + '" target="_blank" style="color:#22C36A;text-decoration:none">' + asrEsc(a.telefono) + '</a>' : '') +
+      '</div></td>' +
+      '<td style="padding:10px 12px">' + asrEsc(a.inmobiliaria || '—') + '</td>' +
+      '<td style="padding:10px 12px">' + asrEsc(a.zona || '—') + '</td>' +
+      '<td style="padding:10px 12px;font-family:var(--mono);font-weight:600">' + (a.cantPedidos || 0) + '</td>' +
+      '<td style="padding:10px 12px;font-family:var(--mono);color:var(--text3);font-size:12px">' + asrFecha(a.creadoEn) + '</td>' +
+      '<td style="padding:10px 12px">' + badge + '</td>' +
+      '<td style="padding:10px 12px">';
+    if (a.estado === 'activo') {
+      h += '<button class="btn-sm" onclick="asrCambiarEstado(\'' + emailSafe + '\',\'suspendido\')" style="font-size:11px">Suspender</button>';
+    } else {
+      h += '<button class="btn-sm primary" onclick="asrCambiarEstado(\'' + emailSafe + '\',\'activo\')" style="font-size:11px">Activar</button>';
+    }
+    h += '</td></tr>';
+  });
+
+  h += '</tbody></table></div>';
+  wrap.innerHTML = h;
+}
+
+async function asrCambiarEstado(email, estado) {
+  if (!confirm('¿Cambiar estado del asesor a "' + estado + '"?')) return;
+  try {
+    var d = await asrFetch('/api/asesores?action=admin-cambiar-estado', {
+      method: 'POST',
+      body: JSON.stringify({ email: email, estado: estado })
+    });
+    if (!d.ok) throw new Error(d.error || 'Error');
+    await cargarAsesores();
+    cargarAsesoresMetricas();
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// TAB: ZONAS (asignar mudanceras por zona)
+// ══════════════════════════════════════════════════════════════════════
+async function cargarZonasAsignadas() {
+  try {
+    var d = await asrFetch('/api/asesores?action=admin-listar-zonas&token=' + ASRT());
+    if (!d.ok) throw new Error(d.error || 'Error');
+    _asrZonasAsignadas = d.zonas || [];
+    var sel = document.getElementById('asrZonaSel');
+    if (!sel) return;
+    var valorActual = sel.value;
+    // Armamos opciones: todas las válidas + marcamos cuáles tienen asignación
+    var opts = '<option value="">— Seleccioná una zona —</option>';
+    (d.zonasValidas || []).forEach(function(z){
+      var tiene = _asrZonasAsignadas.indexOf(z) !== -1;
+      opts += '<option value="' + asrEsc(z) + '">' + asrEsc(z) + (tiene ? ' ✓' : '') + '</option>';
+    });
+    sel.innerHTML = opts;
+    if (valorActual) sel.value = valorActual;
+  } catch(e) {
+    console.warn('Error cargando zonas:', e.message);
+  }
+}
+
+async function asrCargarZonaDetalle() {
+  var sel = document.getElementById('asrZonaSel');
+  var zona = sel.value;
+  var wrap = document.getElementById('asrZonaDetalle');
+  if (!zona) {
+    wrap.innerHTML = '<div style="padding:28px;text-align:center;color:var(--text3);font-size:13px">Elegí una zona arriba para empezar.</div>';
+    return;
+  }
+  wrap.innerHTML = '<div class="loading"><span class="spinner"></span>Cargando mudanceras…</div>';
+
+  try {
+    // 1. Mudanceras actualmente asignadas a esta zona
+    var dZ = await asrFetch('/api/asesores?action=admin-mudanceros-zona&zona=' + encodeURIComponent(zona) + '&token=' + ASRT());
+    _asrMudancerasZona = dZ.mudanceras || [];
+
+    // 2. Todas las mudanceras aprobadas del sistema (desde /api/admin?type=mudanceros)
+    if (!_asrMudancerasAprobadas.length) {
+      var rAll = await fetch('/api/admin?type=mudanceros');
+      var dAll = await rAll.json();
+      var rows = dAll.rows || [];
+      // rows[i]: [fecha, nombre, empresa, telefono, email, zonaBase, zonasExtra, ..., vehiculo, ...]
+      // Traemos los perfiles completos para saber si tienen preciosPack
+      _asrMudancerasAprobadas = [];
+      for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var email = row[4];
+        if (!email) continue;
+        // Verificar estado aprobado desde el row (posición depende del array, usamos getEstado existente)
+        var est = (typeof getEstado === 'function') ? getEstado(row) : '';
+        if (est && est !== 'Aprobado') continue;
+        _asrMudancerasAprobadas.push({
+          email:   email,
+          nombre:  row[1] || '',
+          empresa: row[2] || row[1] || '',
+          zonaBase:row[5] || '',
+          zonasExtra: row[6] || ''
+        });
+      }
+    }
+
+    renderZonaEditor(zona);
+  } catch(e) {
+    wrap.innerHTML = '<div style="padding:2rem;text-align:center;color:#EF4444">Error: ' + asrEsc(e.message) + '</div>';
+  }
+}
+
+function renderZonaEditor(zona) {
+  var wrap = document.getElementById('asrZonaDetalle');
+  var asignadasEmails = _asrMudancerasZona.map(function(m){ return m.email; });
+  var mudancerasConPack = _asrMudancerasZona.filter(function(m){
+    var pp = m.preciosPack || {};
+    return (Number(pp.esencial)||0) > 0 || (Number(pp.integral)||0) > 0 || (Number(pp.llave)||0) > 0;
+  }).length;
+
+  var h = '<div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;align-items:center;gap:10px">' +
+    '<div><div style="font-size:16px;font-weight:700;color:var(--navy)">📍 ' + asrEsc(zona) + '</div>' +
+    '<div style="font-size:12px;color:var(--text3);margin-top:2px">' + _asrMudancerasZona.length + ' mudanceras asignadas · ' + mudancerasConPack + ' con precios Pack cargados</div></div>' +
+    '<div style="margin-left:auto;display:flex;gap:8px">' +
+      '<button class="btn-sm primary" id="asrBtnGuardarZona" onclick="asrGuardarZona(\'' + asrEsc(zona) + '\')" disabled>💾 Guardar asignación</button>' +
+    '</div></div>';
+
+  // Mudanceras actualmente asignadas
+  if (_asrMudancerasZona.length) {
+    h += '<div style="padding:14px 18px 6px;font-size:11px;font-weight:700;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px">Asignadas actualmente</div>';
+    h += '<div style="padding:0 18px 12px">';
+    _asrMudancerasZona.forEach(function(m){
+      var pp = m.preciosPack || {};
+      var tieneTodos = (Number(pp.esencial)||0) > 0 && (Number(pp.integral)||0) > 0 && (Number(pp.llave)||0) > 0;
+      var warn = tieneTodos ? '' : '<span style="display:inline-block;padding:2px 8px;background:#FEF3C7;color:#92400E;border-radius:10px;font-size:10px;font-weight:600;margin-left:8px">⚠ Falta cargar precios Pack</span>';
+      var estadoBadge = m.estado === 'aprobado' ? '' : '<span style="display:inline-block;padding:2px 8px;background:#FEE2E2;color:#991B1B;border-radius:10px;font-size:10px;font-weight:600;margin-left:8px">' + asrEsc(m.estado || '?') + '</span>';
+      h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F1F5F9">' +
+        '<div style="flex:1"><div style="font-weight:600;color:var(--navy);font-size:14px">' + asrEsc(m.empresa || m.nombre) + warn + estadoBadge + '</div>' +
+        '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px">' + asrEsc(m.email) + '</div>' +
+        '<div style="font-size:11px;color:var(--text2);margin-top:4px">Esencial $' + asrFmt(pp.esencial) + ' · Integral $' + asrFmt(pp.integral) + ' · Llave $' + asrFmt(pp.llave) + '</div></div>' +
+        '</div>';
+    });
+    h += '</div>';
+  }
+
+  // Checklist de todas las mudanceras aprobadas
+  h += '<div style="padding:14px 18px 6px;font-size:11px;font-weight:700;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px">Todas las mudanceras aprobadas</div>';
+  h += '<div style="padding:4px 18px 16px"><input type="text" id="asrFiltroMud" placeholder="🔍 Buscar por nombre, empresa o email…" oninput="asrFiltrarMudanceras()" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:10px"/>';
+  h += '<div id="asrChecklistMud" style="max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">';
+
+  if (!_asrMudancerasAprobadas.length) {
+    h += '<div style="padding:20px;text-align:center;color:var(--text3);font-size:12px">No hay mudanceras aprobadas en el sistema.</div>';
+  } else {
+    _asrMudancerasAprobadas.forEach(function(m){
+      var checked = asignadasEmails.indexOf(m.email) !== -1 ? 'checked' : '';
+      var cubre = (m.zonaBase === zona) || (m.zonasExtra && m.zonasExtra.indexOf(zona) !== -1);
+      var cubreLbl = cubre ? '<span style="display:inline-block;padding:1px 6px;background:#F0FDF4;color:#15803D;border-radius:8px;font-size:10px;font-weight:600;margin-left:6px">opera en zona</span>' : '';
+      var emailSafe = asrEsc(m.email).replace(/'/g, "\\'");
+      h += '<label class="asr-mud-row" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #F1F5F9;cursor:pointer;font-size:13px">' +
+        '<input type="checkbox" value="' + asrEsc(m.email) + '" ' + checked + ' onchange="asrMarcarCambioZona()" style="width:18px;height:18px;accent-color:var(--green)"/>' +
+        '<div style="flex:1"><div style="font-weight:600;color:var(--navy)">' + asrEsc(m.empresa || m.nombre) + cubreLbl + '</div>' +
+        '<div style="font-size:11px;color:var(--text3);font-family:var(--mono)">' + asrEsc(m.email) + (m.zonaBase ? ' · ' + asrEsc(m.zonaBase) : '') + '</div></div>' +
+        '</label>';
+    });
+  }
+  h += '</div></div>';
+
+  wrap.innerHTML = h;
+}
+
+function asrFiltrarMudanceras() {
+  var q = (document.getElementById('asrFiltroMud').value || '').toLowerCase().trim();
+  var rows = document.querySelectorAll('#asrChecklistMud .asr-mud-row');
+  rows.forEach(function(r){
+    if (!q) { r.style.display = ''; return; }
+    var txt = r.textContent.toLowerCase();
+    r.style.display = txt.indexOf(q) !== -1 ? '' : 'none';
+  });
+}
+
+function asrMarcarCambioZona() {
+  var btn = document.getElementById('asrBtnGuardarZona');
+  if (btn) btn.disabled = false;
+}
+
+async function asrGuardarZona(zona) {
+  var checkboxes = document.querySelectorAll('#asrChecklistMud input[type="checkbox"]:checked');
+  var emails = [];
+  checkboxes.forEach(function(cb){ emails.push(cb.value); });
+  var btn = document.getElementById('asrBtnGuardarZona');
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+  try {
+    var d = await asrFetch('/api/asesores?action=admin-asignar-zona', {
+      method: 'POST',
+      body: JSON.stringify({ zona: zona, emails: emails })
+    });
+    if (!d.ok) throw new Error(d.error || 'Error');
+    alert('✓ Zona "' + zona + '" actualizada: ' + d.cantidad + ' mudanceras asignadas.');
+    // Refrescar
+    await cargarZonasAsignadas();
+    await asrCargarZonaDetalle();
+    cargarAsesoresMetricas();
+  } catch(e) {
+    alert('Error: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '💾 Guardar asignación'; }
+  }
+}
+
+async function asrRefrescarMudanceras() {
+  _asrMudancerasAprobadas = []; // forzar recarga
+  await asrCargarZonaDetalle();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// TAB: PEDIDOS CREADOS POR ASESORES
+// ══════════════════════════════════════════════════════════════════════
+async function cargarPedidosAsesores() {
+  var wrap = document.getElementById('asrPedidosWrap');
+  if (wrap) wrap.innerHTML = '<div class="loading"><span class="spinner"></span>Cargando…</div>';
+  try {
+    var d = await asrFetch('/api/asesores?action=admin-pedidos&token=' + ASRT());
+    if (!d.ok) throw new Error(d.error || 'Error');
+    _pedidosAsesoresData = d.pedidos || [];
+    renderPedidosAsesores();
+  } catch(e) {
+    if (wrap) wrap.innerHTML = '<div style="padding:2rem;text-align:center;color:#EF4444">Error: ' + asrEsc(e.message) + '</div>';
+  }
+}
+
+function renderPedidosAsesores() {
+  var wrap = document.getElementById('asrPedidosWrap');
+  if (!wrap) return;
+  var q = (document.getElementById('asrPedSearchQ').value || '').toLowerCase().trim();
+  var estadoFiltro = document.getElementById('asrPedFiltroEstado').value;
+
+  var data = _pedidosAsesoresData.filter(function(p){
+    if (estadoFiltro && p.estado !== estadoFiltro) return false;
+    if (!q) return true;
+    var hay = (p.cliente && p.cliente.nombre ? p.cliente.nombre : '') + ' ' +
+              (p.cliente && p.cliente.email  ? p.cliente.email  : '') + ' ' +
+              (p.asesorEmail || '') + ' ' +
+              (p.mudanza && p.mudanza.destino ? p.mudanza.destino : '');
+    return hay.toLowerCase().indexOf(q) !== -1;
+  });
+
+  if (!data.length) {
+    wrap.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text3);font-size:13px">Sin pedidos ' + (q || estadoFiltro ? 'que coincidan con los filtros' : 'creados todavía') + '.</div>';
+    return;
+  }
+
+  var h = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
+    '<thead><tr style="background:#F8FAFC;border-bottom:1px solid var(--border)">' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Fecha</th>' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Cliente</th>' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Asesor</th>' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Destino</th>' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Packs</th>' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Estado</th>' +
+      '<th style="text-align:left;padding:10px 12px;font-weight:600;color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Link</th>' +
+    '</tr></thead><tbody>';
+
+  data.forEach(function(p){
+    var est = p.estado || 'borrador';
+    var estStyle = est === 'pagado'   ? 'background:#DCFCE7;color:#15803D' :
+                   est === 'elegido'  ? 'background:#DBEAFE;color:#1E40AF' :
+                   est === 'enviado'  ? 'background:#FEF3C7;color:#92400E' :
+                                        'background:#F1F5F9;color:#64748B';
+    var precios = (p.packs || []).map(function(pk){ return '$' + asrFmt(pk.precio); }).join(' / ');
+    h += '<tr style="border-bottom:1px solid var(--border)">' +
+      '<td style="padding:10px 12px;font-family:var(--mono);color:var(--text3);font-size:12px">' + asrFecha(p.creadoEn) + '</td>' +
+      '<td style="padding:10px 12px"><div style="font-weight:600;color:var(--navy)">' + asrEsc(p.cliente && p.cliente.nombre || '—') + '</div>' +
+        '<div style="font-size:11px;color:var(--text3);font-family:var(--mono)">' + asrEsc(p.cliente && p.cliente.email || '') + '</div></td>' +
+      '<td style="padding:10px 12px;font-size:12px">' + asrEsc(p.asesorEmail || '—') + '</td>' +
+      '<td style="padding:10px 12px;font-size:12px">' + asrEsc(p.mudanza && p.mudanza.destino || '—') + '</td>' +
+      '<td style="padding:10px 12px;font-family:var(--mono);font-size:11px;color:var(--text2)">' + precios + '</td>' +
+      '<td style="padding:10px 12px"><span style="display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;text-transform:capitalize;' + estStyle + '">' + asrEsc(est) + '</span></td>' +
+      '<td style="padding:10px 12px"><a href="/cliente-packs?id=' + asrEsc(p.id) + '" target="_blank" style="color:var(--blue);text-decoration:none;font-size:12px">Abrir →</a></td>' +
+      '</tr>';
+  });
+
+  h += '</tbody></table></div>';
+  wrap.innerHTML = h;
+}
+
 </script>
 
 </body>
