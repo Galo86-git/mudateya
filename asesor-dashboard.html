@@ -108,6 +108,45 @@
   .ac-item:hover,.ac-item.kb{background:#F0F7FF;color:var(--blue)}
 
   /* Packs picker */
+  /* ══ TABLA COMPARATIVA DE PACKS (arriba del selector) ══ */
+  .packs-info{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:20px}
+  @media(min-width:760px){ .packs-info{grid-template-columns:repeat(3,1fr);gap:12px} }
+
+  .pack-info{position:relative;background:#fff;border:2px solid var(--border);border-radius:var(--r2);padding:20px 18px 18px;display:flex;flex-direction:column;transition:all .2s;min-height:280px}
+  .pack-info:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(15,25,35,.08)}
+
+  /* Pack del medio: Integral (recomendado) */
+  .pack-info.featured{border-color:var(--green);box-shadow:0 8px 24px rgba(34,195,106,.15)}
+  .pack-info.featured .pack-info-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 14px;border-radius:20px;white-space:nowrap;text-transform:uppercase}
+
+  .pack-info-eyebrow{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--green);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:4px}
+  .pack-info.featured .pack-info-eyebrow{color:var(--green)}
+  .pack-info:nth-child(1) .pack-info-eyebrow{color:var(--text3)}
+  .pack-info:nth-child(3) .pack-info-eyebrow{color:#D97706}
+
+  .pack-info-title{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;color:var(--navy);line-height:1;margin-bottom:8px}
+  .pack-info-sub{font-size:12.5px;color:var(--text2);font-style:italic;line-height:1.45;margin-bottom:14px;min-height:38px}
+
+  .pack-info-divider{height:1px;background:var(--border);margin-bottom:14px}
+
+  .pack-info-feats{list-style:none;padding:0;margin:0;flex:1;display:flex;flex-direction:column;gap:9px}
+  .pack-info-feats li{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--text2);line-height:1.45}
+  .pack-info-feats li .fi-ico{flex-shrink:0;font-weight:700;margin-top:1px;color:var(--green);font-size:13px}
+  .pack-info-feats li.na{color:var(--text3)}
+  .pack-info-feats li.na .fi-ico{color:var(--text3)}
+
+  .pack-info-ribbon{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .pack-info:nth-child(1) .pack-info-ribbon{background:#F1F5F9;color:#64748B}
+  .pack-info.featured .pack-info-ribbon{background:rgba(34,195,106,.12);color:var(--green)}
+  .pack-info:nth-child(3) .pack-info-ribbon{background:rgba(217,119,6,.12);color:#D97706}
+
+  .packs-info-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--navy);margin-bottom:6px}
+  .packs-info-sub{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5}
+
+  .selector-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--navy);margin:28px 0 6px;padding-top:10px;border-top:2px dashed var(--border)}
+  .selector-sub{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5}
+
+  /* Selector de mudanceras existente */
   .nivel-block{background:#fff;border:1px solid var(--border);border-radius:var(--r2);margin-bottom:12px;overflow:hidden}
   .nivel-head{padding:12px 14px;background:linear-gradient(90deg,var(--navy),#0057BF);color:#fff;display:flex;align-items:center;justify-content:space-between}
   .nivel-head .lvl-name{font-weight:700;font-size:14px}
@@ -277,8 +316,65 @@
     <!-- STEP 3: Armar los 3 packs -->
     <div class="fsw-step" data-step="3">
       <h2>Armá los 3 packs</h2>
-      <p class="subtitle">Elegí 1 mudancera para cada nivel. Todas están verificadas por MudateYa.</p>
+      <p class="subtitle">Primero mirá qué incluye cada paquete. Después elegí 1 mudancera para cada nivel.</p>
       <div class="form-err" id="err-3"></div>
+
+      <!-- ─── TABLA COMPARATIVA (informativa) ─── -->
+      <div class="packs-info">
+
+        <!-- ESENCIAL -->
+        <div class="pack-info">
+          <div class="pack-info-ribbon">🥉</div>
+          <div class="pack-info-eyebrow">Paquete 1</div>
+          <div class="pack-info-title">Esencial</div>
+          <div class="pack-info-sub">Solo mudanza. Vos embalás, nosotros llevamos.</div>
+          <div class="pack-info-divider"></div>
+          <ul class="pack-info-feats">
+            <li><span class="fi-ico">✓</span>Camión + 2 operarios</li>
+            <li><span class="fi-ico">✓</span>Carga, traslado, descarga</li>
+            <li><span class="fi-ico">✓</span>Hasta 4 horas de trabajo</li>
+            <li class="na"><span class="fi-ico">—</span>Cliente provee embalaje</li>
+          </ul>
+        </div>
+
+        <!-- INTEGRAL (recomendado) -->
+        <div class="pack-info featured">
+          <div class="pack-info-badge">★ Recomendado</div>
+          <div class="pack-info-ribbon">🥈</div>
+          <div class="pack-info-eyebrow">Paquete 2</div>
+          <div class="pack-info-title">Integral</div>
+          <div class="pack-info-sub">Embalamos, llevamos, desembalamos. Vos solo mirás.</div>
+          <div class="pack-info-divider"></div>
+          <ul class="pack-info-feats">
+            <li><span class="fi-ico">✓</span>Todo lo del Esencial</li>
+            <li><span class="fi-ico">✓</span>Cajas y material incluidos</li>
+            <li><span class="fi-ico">✓</span>Equipo de embaladores (3-4 pax)</li>
+            <li><span class="fi-ico">✓</span>Desembalaje en destino</li>
+          </ul>
+        </div>
+
+        <!-- LLAVE EN MANO -->
+        <div class="pack-info">
+          <div class="pack-info-ribbon">🥇</div>
+          <div class="pack-info-eyebrow">Paquete 3</div>
+          <div class="pack-info-title">Llave en mano</div>
+          <div class="pack-info-sub">Te va a trabajar. Volvés a una casa armada.</div>
+          <div class="pack-info-divider"></div>
+          <ul class="pack-info-feats">
+            <li><span class="fi-ico">✓</span>Todo lo del Integral</li>
+            <li><span class="fi-ico">✓</span>Desarme y armado de muebles</li>
+            <li><span class="fi-ico">✓</span>Instalación de TV y electro</li>
+            <li><span class="fi-ico">✓</span>Limpieza post-mudanza</li>
+            <li><span class="fi-ico">✓</span>Retiro de cartón/descarte</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- ─── SELECTOR DE MUDANCERAS ─── -->
+      <div class="selector-title">Elegí tus 3 opciones</div>
+      <div class="selector-sub">Una mudancera para cada nivel, con el precio real que cobra.</div>
+
       <div id="packsPicker">
         <div class="loading-full"><span class="loader-inline"></span></div>
       </div>
