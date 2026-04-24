@@ -99,7 +99,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#0F1923;min-height:100
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .page-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:1px;margin-bottom:1.5rem;color:#0F1923}
 
-.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:2rem}
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-bottom:2rem}
 .metric-card{background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:1.2rem}
 .metric-label{font-size:10px;color:#64748B;font-family:var(--mono);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
 .metric-val{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;line-height:1;letter-spacing:1px}
@@ -520,6 +520,8 @@ tr:hover td{background:rgba(34,195,106,.03)}
           <div class="metric-card amber"><div class="metric-label">Mudanceros activos</div><div class="metric-val" id="m-mudanceros">—</div><div class="metric-sub" id="m-pendientes-sub">— pendientes</div></div>
           <div class="metric-card red"><div class="metric-label">Mudanzas</div><div class="metric-val" id="m-mudanzas">—</div><div class="metric-sub">registradas</div></div>
           <div class="metric-card" style="background:#F0FDF4;border-color:#BBF7D0"><div class="metric-label" style="color:#15803D">Encuesta Packs</div><div class="metric-val" style="color:#15803D" id="m-encuesta-si">—</div><div class="metric-sub" id="m-encuesta-sub">cargando…</div></div>
+          <div class="metric-card" style="background:#FEF9E7;border-color:#FDE68A;cursor:pointer" onclick="showPage('aliados',event)"><div class="metric-label" style="color:#92400E">🤝 Aliados</div><div class="metric-val" style="color:#92400E" id="m-aliados">—</div><div class="metric-sub" id="m-aliados-sub">cargando…</div></div>
+          <div class="metric-card" style="background:#EEF4FF;border-color:#BFDBFE;cursor:pointer" onclick="showPage('asesores',event)"><div class="metric-label" style="color:#1E40AF">🏢 Asesores</div><div class="metric-val" style="color:#1E40AF" id="m-asesores">—</div><div class="metric-sub" id="m-asesores-sub">cargando…</div></div>
         </div>
         <div class="table-card" id="dash-transfer-section" style="display:none">
           <div class="table-header">
@@ -1127,7 +1129,7 @@ function toggleMobileMenu() {
 
 // ── DATA LOADING ───────────────────────────────────────────────────────────
 async function loadAll(){
-  await Promise.all([loadMudanceros(), loadPagos(), loadTransferencias(), loadEncuesta()]);
+  await Promise.all([loadMudanceros(), loadPagos(), loadTransferencias(), loadEncuesta(), loadAliadosDash(), loadAsesoresDash()]);
   renderDashboard();
 }
 
@@ -1142,6 +1144,70 @@ async function loadEncuesta(){
     document.getElementById('m-encuesta-sub').textContent = total ? Math.round(si/total*100)+'% interés (' + total + ' respuestas)' : 'sin respuestas aún';
   } catch(e) {
     document.getElementById('m-encuesta-sub').textContent = 'error al cargar';
+  }
+}
+
+// ── Aliados (Dashboard card) ──
+async function loadAliadosDash(){
+  try {
+    var r = await fetch('/api/aliados?action=admin-list&token=mya-admin-2026', {
+      headers: { 'x-admin-token': 'mya-admin-2026' }
+    });
+    var d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Error');
+    var lista = d.aliados || [];
+    var total = lista.length;
+    var activos = lista.filter(function(a){ return a.estado === 'activo'; }).length;
+    // "Con ops este mes" = aliados con atribuciones creadas este mes
+    var hoy = new Date();
+    var mesActual = hoy.getFullYear() + '-' + String(hoy.getMonth()+1).padStart(2,'0');
+    var conOpsMes = lista.filter(function(a){
+      var ops = a.atribuciones || a.operaciones || [];
+      if (!ops.length) return false;
+      return ops.some(function(op){
+        var f = op.fechaCreada || op.fecha || op.creadaEn;
+        return f && String(f).startsWith(mesActual);
+      });
+    }).length;
+    document.getElementById('m-aliados').textContent = total;
+    document.getElementById('m-aliados-sub').textContent = activos + ' activos · ' + conOpsMes + ' con ops este mes';
+  } catch(e) {
+    document.getElementById('m-aliados').textContent = '—';
+    document.getElementById('m-aliados-sub').textContent = 'error al cargar';
+  }
+}
+
+// ── Asesores (Dashboard card) ──
+async function loadAsesoresDash(){
+  try {
+    // Asesores registrados
+    var rA = await fetch('/api/asesores?action=admin-list&token=mya-admin-2026', {
+      headers: { 'x-admin-token': 'mya-admin-2026' }
+    });
+    var dA = await rA.json();
+    if (!dA.ok) throw new Error(dA.error || 'Error');
+    var asesores = dA.asesores || [];
+    var total = asesores.length;
+
+    // Pedidos creados este mes
+    var rP = await fetch('/api/asesores?action=admin-pedidos&token=mya-admin-2026', {
+      headers: { 'x-admin-token': 'mya-admin-2026' }
+    });
+    var dP = await rP.json();
+    var pedidos = (dP && dP.ok) ? (dP.pedidos || []) : [];
+    var hoy = new Date();
+    var mesActual = hoy.getFullYear() + '-' + String(hoy.getMonth()+1).padStart(2,'0');
+    var pedidosMes = pedidos.filter(function(p){
+      return p.creadoEn && String(p.creadoEn).startsWith(mesActual);
+    }).length;
+
+    document.getElementById('m-asesores').textContent = total;
+    document.getElementById('m-asesores-sub').textContent = total === 0
+      ? 'sin asesores todavía'
+      : pedidosMes + ' pedido' + (pedidosMes === 1 ? '' : 's') + ' este mes';
+  } catch(e) {
+    document.getElementById('m-asesores').textContent = '—';
+    document.getElementById('m-asesores-sub').textContent = 'error al cargar';
   }
 }
 
