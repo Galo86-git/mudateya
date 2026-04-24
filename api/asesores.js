@@ -60,13 +60,22 @@ function normFono(t) {
   return String(t||'').replace(/\D/g,'');
 }
 
-// ── Zonas válidas (mismas que usa el resto de MudateYa) ─────────────
+// ── Zonas válidas ──────────────────────────────────────────────────
+// AMBA engloba CABA + todas las GBA (Norte, Oeste, Sur)
 var ZONAS_VALIDAS = [
-  'CABA', 'Zona Norte GBA', 'Zona Oeste GBA', 'Zona Sur GBA',
-  'La Plata', 'Mar del Plata', 'Rosario', 'Córdoba', 'Mendoza', 'Otra'
+  'AMBA', 'La Plata', 'Mar del Plata', 'Rosario', 'Córdoba', 'Mendoza', 'Otra'
 ];
+// Subzonas legacy que ahora caen bajo AMBA (auto-migración en runtime)
+var ZONAS_LEGACY_AMBA = {
+  'CABA': 'AMBA',
+  'Zona Norte GBA': 'AMBA',
+  'Zona Oeste GBA': 'AMBA',
+  'Zona Sur GBA':   'AMBA'
+};
 function normZona(z) {
-  return String(z||'').trim();
+  var v = String(z||'').trim();
+  if (ZONAS_LEGACY_AMBA[v]) return ZONAS_LEGACY_AMBA[v];
+  return v;
 }
 
 // ── Niveles de pack ─────────────────────────────────────────────────
@@ -1127,6 +1136,67 @@ module.exports = async function handler(req, res) {
       if (!checkAdmin(admToken5)) return res.status(401).json({ error: 'No autorizado' });
       var zonasAsig = await getJSON('asesor:zonas-asignadas') || [];
       return res.status(200).json({ ok:true, zonas: zonasAsig, zonasValidas: ZONAS_VALIDAS });
+    }
+
+    // ── ADMIN-MIGRAR-ZONAS-AMBA (one-shot): unifica CABA + 3 GBA en AMBA ──
+    // Mergea asignaciones Redis viejas a la nueva clave AMBA sin duplicar,
+    // y actualiza la zona de los asesores existentes que tenían subzona vieja.
+    if (action === 'admin-migrar-zonas-amba' && req.method === 'POST') {
+      var admTokenMg = req.body.token || req.headers['x-admin-token'];
+      if (!checkAdmin(admTokenMg)) return res.status(401).json({ error: 'No autorizado' });
+
+      var ZONAS_VIEJAS = ['CABA', 'Zona Norte GBA', 'Zona Oeste GBA', 'Zona Sur GBA'];
+      var ambaEmails = await getJSON('asesor:mudanceros-zona:AMBA') || [];
+      var ambaSet = {};
+      for (var zi = 0; zi < ambaEmails.length; zi++) ambaSet[ambaEmails[zi]] = true;
+
+      // 1. Mergear mudanceras de cada zona vieja en AMBA
+      var mergeados = 0;
+      for (var zv = 0; zv < ZONAS_VIEJAS.length; zv++) {
+        var zVieja = ZONAS_VIEJAS[zv];
+        var emailsVieja = await getJSON('asesor:mudanceros-zona:' + zVieja) || [];
+        for (var em = 0; em < emailsVieja.length; em++) {
+          var mail = emailsVieja[em];
+          if (!ambaSet[mail]) {
+            ambaSet[mail] = true;
+            ambaEmails.push(mail);
+            mergeados++;
+          }
+        }
+        // Borrar la clave vieja
+        if (emailsVieja.length > 0) {
+          await redisCall('DEL', 'asesor:mudanceros-zona:' + zVieja);
+        }
+      }
+      await setJSON('asesor:mudanceros-zona:AMBA', ambaEmails);
+
+      // 2. Actualizar índice de zonas asignadas
+      var zonasAsignadas = await getJSON('asesor:zonas-asignadas') || [];
+      var zonasFiltradas = zonasAsignadas.filter(function(z){ return ZONAS_VIEJAS.indexOf(z) === -1; });
+      if (zonasFiltradas.indexOf('AMBA') === -1 && ambaEmails.length > 0) zonasFiltradas.push('AMBA');
+      await setJSON('asesor:zonas-asignadas', zonasFiltradas);
+
+      // 3. Actualizar la zona de los asesores registrados que tenían subzona vieja
+      var allEmails = await getJSON('asesores:todos') || [];
+      var asesoresMigrados = 0;
+      for (var ae = 0; ae < allEmails.length; ae++) {
+        var aesEmail = allEmails[ae];
+        var aesPerfil = await getJSON('asesor:' + aesEmail);
+        if (!aesPerfil) continue;
+        if (ZONAS_VIEJAS.indexOf(aesPerfil.zona) !== -1) {
+          aesPerfil.zona = 'AMBA';
+          await setJSON('asesor:' + aesEmail, aesPerfil);
+          asesoresMigrados++;
+        }
+      }
+
+      return res.status(200).json({
+        ok: true,
+        ambaTotal: ambaEmails.length,
+        mudancerasMergeadas: mergeados,
+        asesoresMigrados: asesoresMigrados,
+        zonasViejasEliminadas: ZONAS_VIEJAS
+      });
     }
 
     // ── ADMIN-PEDIDOS: ver todos los pedidos creados por asesores ─
