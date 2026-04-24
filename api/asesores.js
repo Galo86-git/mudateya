@@ -283,8 +283,14 @@ async function enviarEmailMudanceroPedidoAsesor(mudanza, cot, mudancero) {
   try {
     var resend = new Resend(process.env.RESEND_API_KEY);
     var nivelLbl = NIVELES_LABEL[mudanza.nivelPack] || mudanza.nivelPack;
-    var precioFmt = '$' + Number(cot.precio).toLocaleString('es-AR');
-    var anticipoFmt = '$' + Math.round(Number(cot.precio) * 0.5).toLocaleString('es-AR');
+    var precioBruto = Number(cot.precio) || 0;
+    var comision = Math.round(precioBruto * 0.25);
+    var neto = precioBruto - comision;
+    var anticipo = Math.round(precioBruto * 0.5);
+    var precioFmt = '$' + precioBruto.toLocaleString('es-AR');
+    var comisionFmt = '$' + comision.toLocaleString('es-AR');
+    var netoFmt = '$' + neto.toLocaleString('es-AR');
+    var anticipoFmt = '$' + anticipo.toLocaleString('es-AR');
     var html = '<div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;color:#0F1923">' +
       '<div style="text-align:center;margin-bottom:28px">' +
         '<span style="font-family:Bebas Neue,sans-serif;font-size:36px;letter-spacing:2px;color:#003580">MUDATE</span>' +
@@ -292,7 +298,7 @@ async function enviarEmailMudanceroPedidoAsesor(mudanza, cot, mudancero) {
       '</div>' +
       '<h2 style="color:#003580;font-size:22px;margin-bottom:10px">🎯 Nueva mudanza aceptada — Plan Referidos</h2>' +
       '<p style="color:#475569;font-size:14px;line-height:1.6;margin-bottom:16px">Hola ' + esc(mudancero.nombre) + ', un asesor inmobiliario eligió tu empresa para el pack <strong>' + esc(nivelLbl) + '</strong> y el cliente ya confirmó. Cuando pague el anticipo vas a poder ver el teléfono en tu panel.</p>' +
-      '<div style="background:#F5F7FA;border-radius:10px;padding:16px;margin-bottom:18px">' +
+      '<div style="background:#F5F7FA;border-radius:10px;padding:16px;margin-bottom:14px">' +
         '<table style="width:100%;font-size:14px;color:#475569;border-collapse:collapse">' +
           '<tr><td style="padding:5px 0;font-weight:600;color:#003580;width:110px">Cliente:</td><td style="padding:5px 0">' + esc(mudanza.clienteNombre) + '</td></tr>' +
           '<tr><td style="padding:5px 0;font-weight:600;color:#003580">Origen:</td><td style="padding:5px 0">' + esc(mudanza.desde) + '</td></tr>' +
@@ -301,8 +307,15 @@ async function enviarEmailMudanceroPedidoAsesor(mudanza, cot, mudancero) {
           '<tr><td style="padding:5px 0;font-weight:600;color:#003580">Ambientes:</td><td style="padding:5px 0">' + esc(mudanza.ambientes || '—') + '</td></tr>' +
           (mudanza.notasCliente ? '<tr><td style="padding:5px 0;font-weight:600;color:#003580;vertical-align:top">Notas:</td><td style="padding:5px 0;font-style:italic">' + esc(mudanza.notasCliente) + '</td></tr>' : '') +
           '<tr><td style="padding:5px 0;font-weight:600;color:#003580">Pack:</td><td style="padding:5px 0">' + esc(nivelLbl) + '</td></tr>' +
-          '<tr><td style="padding:5px 0;font-weight:600;color:#003580">Total:</td><td style="padding:5px 0"><strong style="color:#22C36A;font-size:16px">' + precioFmt + '</strong></td></tr>' +
-          '<tr><td style="padding:5px 0;font-weight:600;color:#003580">Anticipo (50%):</td><td style="padding:5px 0;font-family:DM Mono,monospace">' + anticipoFmt + '</td></tr>' +
+        '</table>' +
+      '</div>' +
+      '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:14px 16px;margin-bottom:18px">' +
+        '<div style="font-size:11px;font-weight:700;color:#92400E;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">💰 Desglose del pago</div>' +
+        '<table style="width:100%;font-size:13.5px;color:#475569;border-collapse:collapse">' +
+          '<tr><td style="padding:4px 0">Total pagado por el cliente</td><td style="padding:4px 0;text-align:right;font-family:DM Mono,monospace;font-weight:600;color:#0F1923">' + precioFmt + '</td></tr>' +
+          '<tr><td style="padding:4px 0;color:#92400E">Comisión MudateYa (25% — Plan Referidos)</td><td style="padding:4px 0;text-align:right;font-family:DM Mono,monospace;color:#92400E">−' + comisionFmt + '</td></tr>' +
+          '<tr style="border-top:2px solid #FDE68A"><td style="padding:8px 0 4px;font-weight:700;color:#003580">Neto para vos</td><td style="padding:8px 0 4px;text-align:right;font-family:DM Mono,monospace;font-weight:800;color:#22C36A;font-size:16px">' + netoFmt + '</td></tr>' +
+          '<tr><td style="padding:4px 0;color:#64748B;font-size:12px">Anticipo (50% del total)</td><td style="padding:4px 0;text-align:right;font-family:DM Mono,monospace;color:#64748B;font-size:12px">' + anticipoFmt + '</td></tr>' +
         '</table>' +
       '</div>' +
       '<div style="text-align:center;margin:24px 0">' +
