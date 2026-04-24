@@ -9,6 +9,7 @@
     { "src": "/mi-mudanza", "dest": "/mi-mudanza.html" },
     { "src": "/pago-exitoso", "dest": "/pago-exitoso.html" },
     { "src": "/terminos", "dest": "/terminos.html" },
+    { "src": "/aceptar-terminos", "dest": "/aceptar-terminos.html" },
     { "src": "/privacidad", "dest": "/privacidad.html" },
     { "src": "/contacto", "dest": "/contacto.html" },
     { "src": "/asesores", "dest": "/asesores.html" },
