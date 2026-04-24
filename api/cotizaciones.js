@@ -1931,7 +1931,10 @@ async function logPedidoSheets(mudanza) {
 
   const cot = mudanza.cotizacionAceptada || {};
   const esFlete = mudanza.tipo === 'flete' || mudanza.ambientes === 'Flete';
-  const feePct = esFlete ? 0.20 : 0.15;
+  // Plan Referidos (leads de asesores inmobiliarios): 25% flat
+  // Mudanzas normales: 15% · Fletes normales: 20%
+  const esPlanReferidos = mudanza.origenAsesor === true;
+  const feePct = esPlanReferidos ? 0.25 : (esFlete ? 0.20 : 0.15);
   const precio = parseInt(cot.precio || 0);
   const fee = Math.round(precio * feePct);
   const neto = precio - fee;
@@ -1960,7 +1963,8 @@ async function logPedidoSheets(mudanza) {
     'Precio total':    fmt(precio),
     'Fee MudateYa':    fmt(fee),
     'Neto mudancero':  fmt(neto),
-    '% Fee':           esFlete ? '20%' : '15%',
+    '% Fee':           esPlanReferidos ? '25%' : (esFlete ? '20%' : '15%'),
+    'Origen':          esPlanReferidos ? 'PLAN REFERIDOS' : 'DIRECTO',
     'Anticipo pagado': mudanza.anticipoPagado ? 'SI' : 'NO',
     'Saldo pagado':    mudanza.saldoPagado    ? 'SI' : 'NO',
     Estado:            'COMPLETADA',
@@ -1982,7 +1986,9 @@ async function notificarMudanceroPago(mudanza, tipoPago) {
   const esAnticipo = tipoPago === 'anticipo';
   const precioTotal = cot.precio || 0;
   const esFlete = (mudanza.tipo || '').toLowerCase() === 'flete';
-  const comisionPct = esFlete ? 0.20 : 0.15;
+  // Plan Referidos: 25% · Mudanza normal: 15% · Flete normal: 20%
+  const esPlanReferidos = mudanza.origenAsesor === true;
+  const comisionPct = esPlanReferidos ? 0.25 : (esFlete ? 0.20 : 0.15);
   const monto = Math.round(precioTotal * 0.5);
   const montoFmt = '$' + monto.toLocaleString('es-AR');
   const netoMudancero = Math.round(precioTotal * (1 - comisionPct));
