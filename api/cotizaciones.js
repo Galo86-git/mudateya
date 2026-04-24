@@ -433,6 +433,37 @@ async function hookCancelarAtribucion(mudanzaId) {
   } catch(e) { console.warn('hookCancelarAtribucion:', e.message); }
 }
 
+// ── Hook ASESORES (Plan Referidos) ──────────────────────────────────
+async function asesoresCall(actionName, body) {
+  try {
+    var url = 'https://mudateya.ar/api/asesores?action=' + actionName;
+    var r = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': process.env.INTERNAL_API_SECRET || ''
+      },
+      body: JSON.stringify(body || {})
+    });
+    if (!r.ok) return { ok:false };
+    return await r.json();
+  } catch(e) {
+    console.warn('asesoresCall error:', e.message);
+    return { ok:false };
+  }
+}
+
+// Marca un pedido-asesor como pagado (anticipo) o completado (saldo)
+async function hookAsesorPagado(pedidoAsesorId, tipoPago) {
+  if (!pedidoAsesorId) return;
+  try {
+    await asesoresCall('internal-marcar-pagado', {
+      pedidoAsesorId: pedidoAsesorId,
+      tipoPago: tipoPago || 'anticipo'
+    });
+  } catch(e) { console.warn('hookAsesorPagado:', e.message); }
+}
+
 module.exports = async function handler(req, res) {
   // ── CORS: solo aceptar requests desde mudateya.ar ──────────────
   const allowedOrigins = [
@@ -718,6 +749,10 @@ module.exports = async function handler(req, res) {
           const cot = m.cotizacionAceptada || {};
           m.anticipoMonto = Math.round((parseInt(cot.precio || 0)) * 0.5);
         }
+        // Hook Asesores: si la mudanza vino del Plan Referidos, marcar el pedido-asesor como pagado
+        if (m.pedidoAsesorId) {
+          try { await hookAsesorPagado(m.pedidoAsesorId, 'anticipo'); } catch(e) { console.warn('Hook asesor anticipo:', e.message); }
+        }
       }
       if (tipoPago === 'saldo') {
         m.saldoPagado = true;
@@ -728,6 +763,10 @@ module.exports = async function handler(req, res) {
         try { await logPedidoSheets(m); } catch(e) { console.warn('Sheets log error:', e.message); }
         // ── Hook aliados: acreditar comisión (la mudanza está completa + 100% pagada) ──
         try { await hookAcreditarAliado(mudanzaId); } catch(e) { console.warn('Hook aliado acreditar:', e.message); }
+        // Hook Asesores: si vino del Plan Referidos, marcar como completado
+        if (m.pedidoAsesorId) {
+          try { await hookAsesorPagado(m.pedidoAsesorId, 'saldo'); } catch(e) { console.warn('Hook asesor saldo:', e.message); }
+        }
       }
       m.ultimoUpdatePago = new Date().toISOString();
       await setJSON(`mudanza:${mudanzaId}`, m, 604800);
