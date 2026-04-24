@@ -96,6 +96,15 @@
   .ped-packs{display:flex;gap:6px;flex-wrap:wrap}
   .ped-pack-chip{font-size:11px;background:var(--bg);padding:4px 9px;border-radius:10px;color:var(--text2);font-family:var(--mono)}
   .ped-pack-chip strong{color:var(--navy)}
+
+  /* ── Pack elegido destacado (estados elegido/pagado) ── */
+  .ped-elegido{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#F0FDF4 0%,#FFFFFF 100%);border:1.5px solid #BBF7D0;border-radius:var(--r2);padding:12px 14px;margin-top:2px}
+  .ped-elegido-medal{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:#fff;border:1.5px solid #BBF7D0;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .ped-elegido-info{flex:1;min-width:0}
+  .ped-elegido-eyebrow{font-size:9.5px;font-family:var(--mono);color:#15803D;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
+  .ped-elegido-nivel{font-size:15px;font-weight:700;color:var(--navy);line-height:1.1}
+  .ped-elegido-empresa{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+  .ped-elegido-precio{flex-shrink:0;font-family:'Bebas Neue',sans-serif;font-size:22px;color:#15803D;letter-spacing:.5px;line-height:1}
   .ped-acciones{margin-top:12px;padding-top:12px;border-top:1px solid #F1F5F9;display:flex;gap:6px;flex-wrap:wrap}
   .ped-btn{font-size:12px;padding:6px 12px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-family:var(--font);color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:4px}
   .ped-btn:hover{background:var(--bg);color:var(--navy)}
@@ -659,14 +668,18 @@ function getFiltered(lista) {
 }
 
 // ── ORDENAMIENTO ──────────────────────────────────────────────────
-// Devuelve la suma de los 3 packs del pedido (monto total en juego).
-// Si el pedido no tiene packs, devuelve 0.
+// Devuelve el monto representativo del pedido para ordenar.
+// - Si el cliente ya eligió un nivel → ese precio
+// - Si no, la suma de los 3 packs (total "en juego")
 function montoPedido(p) {
   var packs = p.packs || [];
+  if (p.nivelElegido) {
+    var elegido = packs.find(function(pk){ return pk.nivel === p.nivelElegido; });
+    if (elegido) return Number(elegido.precio) || 0;
+  }
   var total = 0;
   for (var i = 0; i < packs.length; i++) {
-    var v = Number(packs[i].precio) || 0;
-    total += v;
+    total += Number(packs[i].precio) || 0;
   }
   return total;
 }
@@ -766,18 +779,44 @@ function renderPedidos(lista) {
     var cliente = (p.cliente && p.cliente.nombre) || '—';
     var dest = (p.mudanza && p.mudanza.destino) || '—';
     var fecha = fechaCorta(p.creadoEn);
-    var packs = (p.packs || []).map(function(pk){
-      return '<span class="ped-pack-chip">' + esc(pk.nivel.charAt(0).toUpperCase() + pk.nivel.slice(1)) + ' <strong>$' + fmt(pk.precio) + '</strong></span>';
-    }).join('');
     var clienteUrl = '/cliente-packs?id=' + encodeURIComponent(p.id);
     var pIdSafe = esc(p.id).replace(/'/g,"\\'");
+
+    // Labels y medallas por nivel
+    var MEDAL = { esencial: '🥉', integral: '🥈', llave: '🥇' };
+    var LBL = { esencial: 'Esencial', integral: 'Integral', llave: 'Llave en Mano' };
+
+    // Si el cliente ya eligió → bloque destacado con 1 solo pack
+    var packsHtml;
+    if (p.nivelElegido && (estado === 'elegido' || estado === 'pagado')) {
+      var nivel = p.nivelElegido;
+      var elegido = (p.packs || []).find(function(pk){ return pk.nivel === nivel; }) || {};
+      packsHtml =
+        '<div class="ped-elegido">' +
+          '<div class="ped-elegido-medal">' + (MEDAL[nivel] || '✓') + '</div>' +
+          '<div class="ped-elegido-info">' +
+            '<div class="ped-elegido-eyebrow">✓ Cliente eligió</div>' +
+            '<div class="ped-elegido-nivel">' + esc(LBL[nivel] || nivel) + '</div>' +
+            (elegido.empresa ? '<div class="ped-elegido-empresa">' + esc(elegido.empresa) + '</div>' : '') +
+          '</div>' +
+          '<div class="ped-elegido-precio">$' + fmt(elegido.precio || 0) + '</div>' +
+        '</div>';
+    } else {
+      // Estados iniciales (borrador / enviado / expirado) → 3 chips
+      packsHtml = '<div class="ped-packs">' +
+        (p.packs || []).map(function(pk){
+          return '<span class="ped-pack-chip">' + esc(LBL[pk.nivel] || pk.nivel) + ' <strong>$' + fmt(pk.precio) + '</strong></span>';
+        }).join('') +
+      '</div>';
+    }
+
     h += '<div class="ped-card">' +
       '<div class="ped-top">' +
         '<div><div class="ped-cliente">' + esc(cliente) + '</div><div class="ped-meta">' + fecha + ' · ' + esc(p.id) + '</div></div>' +
         '<span class="ped-estado ' + estado + '">' + estado + '</span>' +
       '</div>' +
       '<div class="ped-dest">→ ' + esc(dest) + '</div>' +
-      '<div class="ped-packs">' + packs + '</div>' +
+      packsHtml +
       '<div class="ped-acciones">' +
         '<a class="ped-btn" href="' + clienteUrl + '" target="_blank">👁 Ver lo que ve el cliente</a>' +
         (estado === 'borrador' ? '<button class="ped-btn primary" onclick="reenviarPedido(\'' + pIdSafe + '\')">📤 Enviar al cliente</button>' : '') +
