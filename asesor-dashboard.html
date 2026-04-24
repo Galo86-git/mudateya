@@ -454,9 +454,14 @@ function fswOpen() {
   ['c-nombre','c-email','c-telefono','m-origen','m-destino','m-fecha','m-ambientes','m-notas'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
   });
-  // Fecha default: mañana
+  // Fecha default: mañana + mínimo hoy
+  var hoy = new Date();
+  var hoyStr = hoy.getFullYear() + '-' + String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0');
   var t = new Date(); t.setDate(t.getDate() + 1);
-  document.getElementById('m-fecha').value = t.toISOString().slice(0,10);
+  var manianaStr = t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0');
+  var fechaEl = document.getElementById('m-fecha');
+  fechaEl.setAttribute('min', hoyStr);
+  fechaEl.value = manianaStr;
   document.getElementById('fsw').classList.add('open');
   fswRenderStep();
   document.body.style.overflow = 'hidden';
@@ -536,6 +541,10 @@ async function fswNext() {
     if (!m.destino) return showErr(2, 'Ingresá el destino.');
     if (!/\d/.test(m.destino)) return showErr(2, 'El destino tiene que incluir la altura (número de la calle).');
     if (!m.fecha) return showErr(2, 'Elegí una fecha.');
+    // Validar que la fecha no sea anterior a hoy
+    var hoyChk = new Date(); hoyChk.setHours(0,0,0,0);
+    var fChk = new Date(m.fecha + 'T00:00:00');
+    if (fChk < hoyChk) return showErr(2, 'La fecha de la mudanza no puede ser anterior a hoy.');
     if (!m.ambientes) return showErr(2, 'Elegí los ambientes.');
     FSW_DATA.mudanza = m;
     FSW_STEP = 3; fswRenderStep(); return;
