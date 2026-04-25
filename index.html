@@ -1665,23 +1665,35 @@
   // ══════════════════════════════════════════
   // Calcula km en background usando DirectionsService (sin pintar mapa).
   // Guarda el valor en _busqueda.km — se manda al backend al publicar.
+  // Devuelve una Promise que resuelve al obtener el km (o tras error / timeout).
   function _calcularKmBusqueda() {
-    if (!window.google || !_busqueda.desde || !_busqueda.hasta) return;
-    try {
-      var ds = new google.maps.DirectionsService();
-      ds.route({
-        origin: _busqueda.desde + ', Argentina',
-        destination: _busqueda.hasta + ', Argentina',
-        travelMode: google.maps.TravelMode.DRIVING
-      }, function(result, status) {
-        if (status === 'OK' && result && result.routes && result.routes[0] && result.routes[0].legs && result.routes[0].legs[0]) {
-          var leg = result.routes[0].legs[0];
-          if (leg.distance && leg.distance.value) {
-            _busqueda.km = Math.round(leg.distance.value / 1000);
+    return new Promise(function(resolve) {
+      if (!window.google || !_busqueda.desde || !_busqueda.hasta) { resolve(null); return; }
+      // Si ya tenemos km calculado, resolver de inmediato
+      if (_busqueda.km && _busqueda.km > 0) { resolve(_busqueda.km); return; }
+      try {
+        var ds = new google.maps.DirectionsService();
+        var resolved = false;
+        // Timeout de seguridad: 4s máximo esperando a Google
+        var to = setTimeout(function(){ if (!resolved) { resolved = true; resolve(_busqueda.km || null); } }, 4000);
+        ds.route({
+          origin: _busqueda.desde + ', Argentina',
+          destination: _busqueda.hasta + ', Argentina',
+          travelMode: google.maps.TravelMode.DRIVING
+        }, function(result, status) {
+          if (resolved) return;
+          resolved = true;
+          clearTimeout(to);
+          if (status === 'OK' && result && result.routes && result.routes[0] && result.routes[0].legs && result.routes[0].legs[0]) {
+            var leg = result.routes[0].legs[0];
+            if (leg.distance && leg.distance.value) {
+              _busqueda.km = Math.round(leg.distance.value / 1000);
+            }
           }
-        }
-      });
-    } catch(e) { /* silencioso */ }
+          resolve(_busqueda.km || null);
+        });
+      } catch(e) { resolve(null); }
+    });
   }
 
   function initMapaMini() {
@@ -2312,6 +2324,10 @@
         ? (50000 + (_busqueda.ambientes - 1) * 30000)
         : 20000;
     }
+
+    // Garantizar que el km esté calculado antes de publicar.
+    // Si ya está, resuelve instantáneo. Si no, espera a Google Maps (máx 4s).
+    try { await _calcularKmBusqueda(); } catch(e) { /* silencioso */ }
 
     try {
       await fetch('/api/cotizaciones?action=publicar', {
