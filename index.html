@@ -1211,6 +1211,15 @@
             <input type="checkbox" onchange="toggleFServicio('Desmontaje y montaje',this);actualizarBadge()"/>
           </label>
         </div>
+        <!-- Verificaciones -->
+        <div class="drawer-section">
+          <div class="drawer-section-h">Verificaciones</div>
+          <label class="tg-row" onclick="_tgClick(event,this)">
+            <span class="tg-lbl">🛡 Con seguro</span>
+            <span class="tg-switch"></span>
+            <input type="checkbox" onchange="toggleFVer('seg',this);actualizarBadge()"/>
+          </label>
+        </div>
         <!-- Zona -->
         <div class="drawer-section">
           <div class="drawer-section-h">Zona</div>
@@ -1249,15 +1258,6 @@
             <label class="drawer-opt"><input type="checkbox" onchange="toggleFZ('Santa Cruz',this);actualizarBadge()"/> 📍 Santa Cruz</label>
             <label class="drawer-opt"><input type="checkbox" onchange="toggleFZ('Tierra del Fuego',this);actualizarBadge()"/> 📍 Tierra del Fuego</label>
           </div>
-        </div>
-        <!-- Verificaciones -->
-        <div class="drawer-section">
-          <div class="drawer-section-h">Verificaciones</div>
-          <label class="tg-row" onclick="_tgClick(event,this)">
-            <span class="tg-lbl">🛡 Con seguro</span>
-            <span class="tg-switch"></span>
-            <input type="checkbox" onchange="toggleFVer('seg',this);actualizarBadge()"/>
-          </label>
         </div>
       </div>
       <div class="drawer-footer">
@@ -1305,6 +1305,14 @@
           </label>
         </div>
         <div class="filtro-section">
+          <div class="filtro-h">Verificaciones</div>
+          <label class="tg-row" onclick="_tgClick(event,this)">
+            <span class="tg-lbl">🛡 Con seguro</span>
+            <span class="tg-switch"></span>
+            <input type="checkbox" onchange="toggleFVer('seg',this)"/>
+          </label>
+        </div>
+        <div class="filtro-section">
           <div class="filtro-h">Zona</div>
           <div class="filtro-opt" style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding-bottom:0;cursor:default;pointer-events:none">Buenos Aires</div>
           <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('CABA',this)"/> AMBA <span style="color:var(--text3);font-size:11px;font-weight:400">(CABA + GBA)</span></label></div>
@@ -1339,14 +1347,6 @@
           <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('Chubut',this)"/> Chubut</label></div>
           <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('Santa Cruz',this)"/> Santa Cruz</label></div>
           <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFZ('Tierra del Fuego',this)"/> Tierra del Fuego</label></div>
-        </div>
-        <div class="filtro-section">
-          <div class="filtro-h">Verificaciones</div>
-          <label class="tg-row" onclick="_tgClick(event,this)">
-            <span class="tg-lbl">🛡 Con seguro</span>
-            <span class="tg-switch"></span>
-            <input type="checkbox" onchange="toggleFVer('seg',this)"/>
-          </label>
         </div>
         <button class="btn-clear" onclick="limpiarFiltros()">Limpiar filtros</button>
       </div>
