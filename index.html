@@ -2274,6 +2274,45 @@
         if (ls && exp && new Date(exp) > new Date()) refAliado = ls;
       }
     } catch(e){}
+
+    // ── Calcular precio_estimado realista basado en el catálogo ──
+    // Modo dirigido: precio del mudancero seleccionado (más barato si hay varios)
+    // Modo abierto: mediana de precios del catálogo
+    var pAmt = function(v){ return parseInt(String(v||0).replace(/\./g,'').replace(/,/g,'')) || 0; };
+    var getPrecioMud = function(mud) {
+      if (!mud || !mud.precios) return 0;
+      if (_busqueda.tipo === 'flete') return pAmt(mud.precios.flete);
+      var amb = Math.max(1, _busqueda.ambientes || 2);
+      var clave = ['amb1','amb2','amb3','amb4'][Math.min(amb,4)-1] || 'amb1';
+      return pAmt(mud.precios[clave]) || pAmt(mud.precios.amb1);
+    };
+    var precioEstimadoCalc = 0;
+    var preciosCatalogo = (_todos || []).map(getPrecioMud).filter(function(p){ return p > 0; });
+    if (modo === 'dirigido' && _sel && _sel.size > 0) {
+      // De los seleccionados, tomar el menor precio (lo más conservador para el cliente)
+      var precSeleccionados = Array.from(_sel).map(function(em){
+        var mud = (_todos || []).find(function(x){ return x.email === em; });
+        return getPrecioMud(mud);
+      }).filter(function(p){ return p > 0; });
+      if (precSeleccionados.length) {
+        precSeleccionados.sort(function(a,b){ return a-b; });
+        precioEstimadoCalc = precSeleccionados[0]; // el más barato seleccionado
+      }
+    } else if (preciosCatalogo.length) {
+      // Modo abierto: mediana del catálogo
+      preciosCatalogo.sort(function(a,b){ return a-b; });
+      var mid = Math.floor(preciosCatalogo.length / 2);
+      precioEstimadoCalc = preciosCatalogo.length % 2 === 0
+        ? Math.round((preciosCatalogo[mid-1] + preciosCatalogo[mid]) / 2)
+        : preciosCatalogo[mid];
+    }
+    // Fallback si el catálogo está vacío o no tiene precios
+    if (!precioEstimadoCalc) {
+      precioEstimadoCalc = _busqueda.tipo === 'mudanza'
+        ? (50000 + (_busqueda.ambientes - 1) * 30000)
+        : 20000;
+    }
+
     try {
       await fetch('/api/cotizaciones?action=publicar', {
         method:'POST', headers:{'Content-Type':'application/json'},
@@ -2282,7 +2321,7 @@
           desde:_busqueda.desde, hasta:_busqueda.hasta,
           ambientes:_busqueda.tipo==='mudanza' ? (_busqueda.ambientes+' ambientes') : 'Flete',
           fecha:_busqueda.fecha, servicios:objetos, zonaBase:_busqueda.desde,
-          precio_estimado:_busqueda.tipo==='mudanza' ? (50000+(_busqueda.ambientes-1)*30000) : 20000,
+          precio_estimado: precioEstimadoCalc,
           tipo:_busqueda.tipo, modoCotizacion:modo,
           mudancerosInvitados:modo==='dirigido' ? Array.from(_sel) : [],
           refAliado: refAliado,
