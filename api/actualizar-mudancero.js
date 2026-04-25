@@ -44,9 +44,23 @@ async function subirFotoBlob(base64, nombre) {
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
+
+  // ── GET: leer perfil completo desde Redis (incluye preciosLeads) ──
+  if (req.method === 'GET') {
+    const email = req.query.email;
+    if (!email) return res.status(400).json({ error: 'Falta email' });
+    try {
+      const perfil = await getJSON(`mudancero:perfil:${email}`);
+      if (!perfil) return res.status(404).json({ error: 'Perfil no encontrado' });
+      return res.status(200).json({ ok: true, perfil });
+    } catch(e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método no permitido' });
 
   const data = req.body;
@@ -111,6 +125,17 @@ module.exports = async function handler(req, res) {
         amb4: data.precio4amb || perfil.precios?.amb4 || '',
         flete:data.precioFlete|| perfil.precios?.flete|| '',
       },
+      // Precios para Leads Plan Referidos Inmobiliarios (25% comisión)
+      // Estructura: 5 tamaños × 3 packs. Cada nivel guardado como número (0 si vacío).
+      // Si data.preciosLeads viene → reemplaza el bloque entero.
+      // Si no viene → preserva lo que ya estaba en Redis (no rompe).
+      preciosLeads: data.preciosLeads !== undefined ? data.preciosLeads : (perfil.preciosLeads || {
+        amb1:    { esencial: 0, integral: 0, llave: 0 },
+        amb2:    { esencial: 0, integral: 0, llave: 0 },
+        amb3:    { esencial: 0, integral: 0, llave: 0 },
+        amb4:    { esencial: 0, integral: 0, llave: 0 },
+        amb5plus:{ esencial: 0, integral: 0, llave: 0 }
+      }),
       foto:          fotoUrl,
       fotoCamion:    fotoCamionUrl,
       fotosVehiculo: fotosVehUrls,
