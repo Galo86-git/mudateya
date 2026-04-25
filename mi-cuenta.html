@@ -740,9 +740,6 @@ async function initApp(){
 
   loadPedidos();
   loadPerfil();
-  // Cargar el perfil completo de Redis al inicio para tener precios.porKm disponible
-  // sin importar a qué tab entre el mudancero (necesario para el desglose en cotizar).
-  cargarPreciosLeads();
 }
 
 function showScreen(name){
@@ -1005,9 +1002,25 @@ function renderCardDisponible(m) {
     precioMostrar = parseInt(m.precio_estimado||0);
     labelPrecio = 'Precio estimado';
   }
-  var subDesglose = (precioBaseMud > 0 && costoKm > 0)
-    ? '<div style="font-size:10px;color:var(--blue);font-family:var(--mono);margin-top:2px">$'+precioBaseMud.toLocaleString('es-AR')+' + '+km+' km × $'+precioPorKm.toLocaleString('es-AR')+'</div>'
-    : '';
+  // ── Bloque desglose: base + km → total ──
+  var bloqueDesglose = '';
+  if (precioBaseMud > 0 && costoKm > 0) {
+    bloqueDesglose = '<div style="margin-top:8px;padding:10px 12px;background:#EEF4FF;border:1px solid #C7D7F5;border-radius:10px;font-family:var(--mono)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2);margin-bottom:4px">'
+      +'<span>Precio base ('+(esFlete?'flete':(ambN+' amb'))+')</span><span style="font-weight:600;color:var(--text)">$'+precioBaseMud.toLocaleString('es-AR')+'</span>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2);margin-bottom:6px">'
+      +'<span>'+km+' km × $'+precioPorKm.toLocaleString('es-AR')+'</span><span style="font-weight:600;color:var(--text)">$'+costoKm.toLocaleString('es-AR')+'</span>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;border-top:1px dashed #C7D7F5;padding-top:6px">'
+      +'<span style="font-weight:700;color:var(--blue)">Total</span><span style="font-weight:700;color:var(--blue);font-size:15px">$'+precioMostrar.toLocaleString('es-AR')+'</span>'
+      +'</div>'
+      +'</div>';
+  } else if (precioBaseMud > 0 && km > 0 && precioPorKm === 0) {
+    bloqueDesglose = '<div style="margin-top:8px;padding:8px 12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;font-size:11px;color:#C2410C;font-family:var(--mono)">'
+      +'⚠ '+km+' km de viaje · Cargá tu precio por km en el perfil para auto-calcular'
+      +'</div>';
+  }
   return '<div class="pedido-card nuevo">'
     +'<div class="pedido-header"><div>'
     +'<div class="pedido-ruta">'+esc(m.desde)+' → '+esc(m.hasta)+'</div>'
@@ -1018,10 +1031,10 @@ function renderCardDisponible(m) {
     +(m.servicios?'<span class="pedido-tag">'+(esFlete?'📦':'🏠')+' '+m.servicios+'</span>':'')
     +(m.extras?'<span class="pedido-tag" style="color:#F59E0B">⚠ '+m.extras+'</span>':'')
     +'</div>'
-    +'<div style="display:flex;align-items:flex-end;justify-content:space-between">'
-    +'<div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">'+labelPrecio+'</div>'
-    +'<div class="pedido-precio">$'+precioMostrar.toLocaleString('es-AR')+'</div>'
-    + subDesglose
+    + bloqueDesglose
+    +'<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:'+(bloqueDesglose?'10px':'0')+'">'
+    +'<div>'
+    +(bloqueDesglose ? '' : '<div style="font-size:11px;color:var(--text3);font-family:var(--mono)">'+labelPrecio+'</div><div class="pedido-precio">$'+precioMostrar.toLocaleString('es-AR')+'</div>')
     +'<div style="font-size:10px;color:'+(hs<4?'var(--red)':'var(--amber)')+';font-family:var(--mono);margin-top:3px">⏱ Expira en '+hs+'hs</div>'
     +'</div><div class="pedido-actions" style="display:flex;gap:6px">'
     +'<button class="btn btn-red" style="font-size:12px;padding:8px 12px" onclick="rechazarPedido(\''+m.id+'\',this)">✕ Pasar</button>'
@@ -1103,16 +1116,39 @@ function renderCardCotizacion(m) {
     }
   }
 
+  // ── Desglose de la cotización: base + km → total ──
+  var cotKm = parseInt(m.km||0);
+  var cotPrecioBase = parseInt(cot?.precioBase||0);
+  var cotPrecioKm = parseInt(cot?.precioKm||0);
+  var cotTotal = parseInt(cot?.precio||0);
+  var bloqueCotDesglose = '';
+  if (cotPrecioBase > 0 && cotPrecioKm > 0) {
+    var pkmUnit = cotKm > 0 ? Math.round(cotPrecioKm / cotKm) : 0;
+    bloqueCotDesglose = '<div style="margin-top:8px;padding:10px 12px;background:#EEF4FF;border:1px solid #C7D7F5;border-radius:10px;font-family:var(--mono)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2);margin-bottom:4px">'
+      +'<span>Precio base</span><span style="font-weight:600;color:var(--text)">$'+cotPrecioBase.toLocaleString('es-AR')+'</span>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2);margin-bottom:6px">'
+      +'<span>'+cotKm+' km'+(pkmUnit>0?' × $'+pkmUnit.toLocaleString('es-AR'):'')+'</span><span style="font-weight:600;color:var(--text)">$'+cotPrecioKm.toLocaleString('es-AR')+'</span>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;border-top:1px dashed #C7D7F5;padding-top:6px">'
+      +'<span style="font-weight:700;color:var(--blue)">Tu cotización</span><span style="font-weight:700;color:var(--blue);font-size:16px">$'+cotTotal.toLocaleString('es-AR')+'</span>'
+      +'</div>'
+      +'</div>';
+  } else {
+    bloqueCotDesglose = '<div class="pedido-precio">$'+(cotTotal?cotTotal.toLocaleString('es-AR'):'—')+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);font-family:var(--mono)">tu cotización</div>';
+  }
+
   return '<div class="pedido-card '+(isAcept||enCurso||completada?'aceptado':(noElegido||expirado?'rechazado':''))+'">'
     +'<div class="pedido-header"><div>'
     +'<div class="pedido-ruta">'+esc(m.desde)+' → '+esc(m.hasta)+'</div>'
-    +'<div class="pedido-fecha">📅 '+(m.fecha||'—')+' · '+(m.ambientes||'—')+'</div>'
+    +'<div class="pedido-fecha">📅 '+(m.fecha||'—')+' · '+(m.ambientes||'—')+(cotKm>0?' · '+cotKm+' km':'')+'</div>'
     +'</div>'+badge+'</div>'
     +(m.fotos&&m.fotos.length ? '<div style="display:flex;gap:6px;margin:8px 0">'
       +m.fotos.map(function(f,fi){ return '<img src="'+f+'" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border2);cursor:zoom-in" onclick="verFotoGrande(\''+m.id+'\','+fi+')">'; }).join('')
       +'</div>' : '')
-    +'<div class="pedido-precio">$'+(cot?.precio?.toLocaleString('es-AR')||'—')+'</div>'
-    +'<div style="font-size:11px;color:var(--text3);font-family:var(--mono)">tu cotización</div>'
+    + bloqueCotDesglose
     +(cot?.nota?'<div style="font-size:12px;color:var(--text2);margin-top:5px;font-style:italic">"'+cot.nota+'"</div>':'')
     +((isAcept||enCurso||completada)&&(clienteNombre||clienteWA) ? '<div style="margin-top:10px;background:var(--blue-light);border:1px solid rgba(26,111,255,.2);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px">'
       +'<div style="flex:1">'
@@ -1194,18 +1230,8 @@ function usarPrecioSugerido(total) {
   inp.focus();
 }
 
-async function abrirCotizacion(mudanza){
+function abrirCotizacion(mudanza){
   if(!mudanza) return;
-  // Garantizar que el perfil de Redis esté cargado (incluye precios.porKm).
-  // Si no se llamó cargarPreciosLeads() todavía (ej: el mudancero entró directo a Pedidos
-  // sin pasar por Mi Perfil), lo cargamos ahora.
-  if (!mudanceroPerfilRedis) {
-    try {
-      var r = await fetch('/api/actualizar-mudancero?email=' + encodeURIComponent(currentUser.email));
-      var d = await r.json();
-      if (d && d.ok && d.perfil) mudanceroPerfilRedis = d.perfil;
-    } catch(e) { /* silencioso */ }
-  }
   var ps = parseInt(mudanza.precio_estimado||0);
 
   // ── Calcular precios precargados ──
