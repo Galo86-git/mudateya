@@ -1170,7 +1170,7 @@ function abrirCotizacion(mudanza){
   if(!mudanza) return;
   var ps = parseInt(mudanza.precio_estimado||0);
 
-  // ── Calcular precio precargado: precio_amb_segun_busqueda + (km × precio_por_km) ──
+  // ── Calcular precios precargados ──
   var km = parseInt(mudanza.km||0);
   var perfilRedis = mudanceroPerfilRedis || {};
   var precioPorKm = parseInt((perfilRedis.precios && perfilRedis.precios.porKm) || perfilRedis.precioPorKm || 0);
@@ -1198,30 +1198,40 @@ function abrirCotizacion(mudanza){
     precioBase = parseInt(precios.amb4||0) || 0;
     lblBase = ambN + ' amb';
   }
-
-  // Costo del km (si hay distancia y precio por km cargado)
   var costoKm = (km > 0 && precioPorKm > 0) ? (km * precioPorKm) : 0;
 
-  // Precio precargado: base + km. Si falta base → fallback al precio_estimado del cliente
-  var precioPrecargado;
-  var desgloseHTML = '';
-  if (precioBase > 0) {
-    precioPrecargado = precioBase + costoKm;
-    if (costoKm > 0) {
-      desgloseHTML = '<div style="font-size:10.5px;color:#1A6FFF;font-family:var(--mono);margin-top:5px;line-height:1.5">'
-        + '✓ $' + precioBase.toLocaleString('es-AR') + ' (' + lblBase + ') + ' + km + ' km × $' + precioPorKm.toLocaleString('es-AR')
-        + '</div>';
-    } else {
-      desgloseHTML = '<div style="font-size:10.5px;color:#1A6FFF;font-family:var(--mono);margin-top:5px">'
-        + '✓ Tu precio cargado para ' + lblBase
-        + '</div>';
-    }
-  } else {
-    // Fallback: no hay precio cargado para ese tamaño → usar el del cliente
-    precioPrecargado = ps;
-    desgloseHTML = '<div style="font-size:10.5px;color:#F59E0B;font-family:var(--mono);margin-top:5px">'
+  // Si no hay precio base cargado en el perfil, usar precio_estimado del cliente como fallback
+  var precioBaseInicial = precioBase > 0 ? precioBase : ps;
+  var warningBaseHTML = '';
+  if (precioBase === 0) {
+    warningBaseHTML = '<div style="font-size:10.5px;color:#F59E0B;font-family:var(--mono);margin-top:5px">'
       + '⚠ No tenés precio cargado para ' + (lblBase || 'este tamaño') + ' — revisá tu perfil'
       + '</div>';
+  } else {
+    warningBaseHTML = '<div style="font-size:10.5px;color:#1A6FFF;font-family:var(--mono);margin-top:5px">'
+      + '✓ Tu precio cargado para ' + lblBase
+      + '</div>';
+  }
+
+  // Bloque distancia (solo si hay km y precio por km)
+  var bloqueDistanciaHTML = '';
+  if (km > 0 && precioPorKm > 0) {
+    bloqueDistanciaHTML =
+      '<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Distancia (' + km + ' km)</label>'
+      + '<div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:12px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span>'
+      + '<input type="text" id="cot-km-monto" value="' + fmtMiles(costoKm) + '" inputmode="numeric" style="width:100%;padding:11px 14px 11px 26px;border:1px solid var(--border2);border-radius:10px;font-size:14px;font-family:var(--mono);color:var(--text);background:var(--surface2);outline:none;font-weight:600" oninput="formatearPrecioInput(this);_recalcularTotalCot()"/></div>'
+      + '<div style="font-size:10.5px;color:#1A6FFF;font-family:var(--mono);margin-top:5px">'
+      + '✓ ' + km + ' km × $' + precioPorKm.toLocaleString('es-AR')
+      + '</div></div>';
+  } else if (km > 0 && precioPorKm === 0) {
+    // Hay distancia pero el mudancero no tiene precio por km cargado
+    bloqueDistanciaHTML =
+      '<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Distancia (' + km + ' km)</label>'
+      + '<div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:12px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span>'
+      + '<input type="text" id="cot-km-monto" value="" placeholder="0" inputmode="numeric" style="width:100%;padding:11px 14px 11px 26px;border:1px solid var(--border2);border-radius:10px;font-size:14px;font-family:var(--mono);color:var(--text);background:var(--surface2);outline:none;font-weight:600" oninput="formatearPrecioInput(this);_recalcularTotalCot()"/></div>'
+      + '<div style="font-size:10.5px;color:#F59E0B;font-family:var(--mono);margin-top:5px">'
+      + '⚠ No tenés precio por km cargado — definilo en tu perfil para auto-calcular'
+      + '</div></div>';
   }
 
   var modal = document.createElement('div');
@@ -1231,10 +1241,18 @@ function abrirCotizacion(mudanza){
     +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:.4rem">Enviar cotización</div>'
     +'<div style="font-size:13px;color:var(--text2);margin-bottom:1.2rem">'+mudanza.desde+' → '+mudanza.hasta+' · '+(mudanza.ambientes||'')+(km>0?' · <span style="color:#1A6FFF;font-weight:600">'+km+' km</span>':'')+'</div>'
     +'<div style="display:flex;flex-direction:column;gap:12px">'
-    +'<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Tu precio ($ARS) <span style="color:#1A6FFF">*</span></label>'
+    // Input 1: Precio base por ambientes
+    +'<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Precio base ($ARS) <span style="color:#1A6FFF">*</span></label>'
     +'<div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:12px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span>'
-    +'<input type="text" id="cot-precio" value="'+fmtMiles(precioPrecargado)+'" inputmode="numeric" style="width:100%;padding:11px 14px 11px 26px;border:1px solid var(--border2);border-radius:10px;font-size:14px;font-family:var(--mono);color:var(--text);background:var(--surface2);outline:none;font-weight:600" oninput="formatearPrecioInput(this)"/></div>'
-    + desgloseHTML
+    +'<input type="text" id="cot-precio-base" value="'+fmtMiles(precioBaseInicial)+'" inputmode="numeric" style="width:100%;padding:11px 14px 11px 26px;border:1px solid var(--border2);border-radius:10px;font-size:14px;font-family:var(--mono);color:var(--text);background:var(--surface2);outline:none;font-weight:600" oninput="formatearPrecioInput(this);_recalcularTotalCot()"/></div>'
+    + warningBaseHTML
+    + '</div>'
+    // Input 2: Distancia (si aplica)
+    + bloqueDistanciaHTML
+    // Total destacado
+    + '<div id="cot-total-row" style="background:linear-gradient(135deg,#EEF4FF 0%,#F8FAFD 100%);border:1px solid #C7D7F5;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center">'
+    +   '<span style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)">Total a cobrar</span>'
+    +   '<span id="cot-total-mostrar" style="font-family:var(--mono);font-weight:700;color:var(--blue);font-size:18px">$' + (precioBaseInicial + costoKm).toLocaleString('es-AR') + '</span>'
     + '</div>'
     +'<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Tiempo estimado</label>'
     +'<input type="text" id="cot-tiempo" placeholder="Ej: 3-4 horas" style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:Inter,sans-serif;color:var(--text);background:var(--surface2);outline:none"/></div>'
@@ -1248,11 +1266,27 @@ function abrirCotizacion(mudanza){
   document.body.appendChild(modal);
 }
 
+// Recalcula el total mostrado en el modal sumando base + km
+function _recalcularTotalCot() {
+  var baseEl = document.getElementById('cot-precio-base');
+  var kmEl = document.getElementById('cot-km-monto');
+  var totalEl = document.getElementById('cot-total-mostrar');
+  if (!baseEl || !totalEl) return;
+  var rawBase = parseInt((baseEl.value || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0;
+  var rawKm = kmEl ? (parseInt((kmEl.value || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0) : 0;
+  var total = rawBase + rawKm;
+  totalEl.textContent = '$' + total.toLocaleString('es-AR');
+}
+
 async function enviarCotizacion(mudanzaId){
-  var precio = document.getElementById('cot-precio').value;
+  var baseEl = document.getElementById('cot-precio-base');
+  var kmEl = document.getElementById('cot-km-monto');
+  var rawBase = parseInt((baseEl.value || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0;
+  var rawKm = kmEl ? (parseInt((kmEl.value || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0) : 0;
+  var totalCotizado = rawBase + rawKm;
   var nota = document.getElementById('cot-nota').value.trim();
   var tiempo = document.getElementById('cot-tiempo').value.trim();
-  if(!precio || parseInt(precio)<=0){ alert('Ingresá un precio válido'); return; }
+  if(!totalCotizado || totalCotizado <= 0){ alert('Ingresá un precio válido'); return; }
   var btn = document.getElementById('btnEnviarCot');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px;vertical-align:middle;display:inline-block"></span>Enviando…';
@@ -1260,7 +1294,7 @@ async function enviarCotizacion(mudanzaId){
   try{
     var r = await fetch('/api/cotizaciones?action=cotizar',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({mudanzaId, mudanceroEmail:currentUser.email, mudanceroNombre:m[1]||currentUser.name, mudanceroTel:m[3]||'', precio:precio, nota, tiempoEstimado:tiempo})
+      body:JSON.stringify({mudanzaId, mudanceroEmail:currentUser.email, mudanceroNombre:m[1]||currentUser.name, mudanceroTel:m[3]||'', precio:String(totalCotizado), nota, tiempoEstimado:tiempo, precioBase:rawBase, precioKm:rawKm})
     });
     var d = await r.json();
     if(d.error) throw new Error(d.error);
