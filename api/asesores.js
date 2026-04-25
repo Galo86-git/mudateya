@@ -616,6 +616,16 @@ module.exports = async function handler(req, res) {
       var mtSess = await getAsesorDesdeToken(mtToken);
       if (!mtSess) return res.status(401).json({ error: 'Sesión expirada' });
 
+      // Mapear ambientes (número que pasa el frontend) a la clave de preciosLeads
+      // 1 → amb1 · 2 → amb2 · 3 → amb3 · 4 → amb4 · 5+ → amb5plus
+      var ambN = parseInt(String(req.query.ambientes || '').replace(/\D/g, '')) || 0;
+      var ambKey = 'amb2'; // fallback razonable: 2 ambientes
+      if (ambN === 1)      ambKey = 'amb1';
+      else if (ambN === 2) ambKey = 'amb2';
+      else if (ambN === 3) ambKey = 'amb3';
+      else if (ambN === 4) ambKey = 'amb4';
+      else if (ambN >= 5)  ambKey = 'amb5plus';
+
       // Usamos el índice global de mudanceros del sistema
       var mtTodosEmails = await getJSON('mudanceros:todos') || [];
       var mtMudanceras = [];
@@ -623,12 +633,23 @@ module.exports = async function handler(req, res) {
         var mt = await getJSON('mudancero:perfil:' + mtTodosEmails[mi]);
         if (!mt) continue;
         if (mt.estado && mt.estado !== 'aprobado') continue;
-        var mtPrecios = mt.preciosPack || {};
-        var mtEsc = Number(mtPrecios.esencial) || 0;
-        var mtInt = Number(mtPrecios.integral) || 0;
-        var mtLla = Number(mtPrecios.llave)    || 0;
-        // Filtramos las que no tienen ningún precio pack cargado
+
+        // Precios para Leads Plan Referidos: leer del tamaño elegido
+        var mtPrecLeads = (mt.preciosLeads && mt.preciosLeads[ambKey]) || null;
+        var mtEsc = mtPrecLeads ? (Number(mtPrecLeads.esencial) || 0) : 0;
+        var mtInt = mtPrecLeads ? (Number(mtPrecLeads.integral) || 0) : 0;
+        var mtLla = mtPrecLeads ? (Number(mtPrecLeads.llave)    || 0) : 0;
+
+        // Fallback a preciosPack viejo (para mudanceros que aún no migraron)
+        if (mtEsc === 0 && mtInt === 0 && mtLla === 0 && mt.preciosPack) {
+          mtEsc = Number(mt.preciosPack.esencial) || 0;
+          mtInt = Number(mt.preciosPack.integral) || 0;
+          mtLla = Number(mt.preciosPack.llave)    || 0;
+        }
+
+        // Filtramos las que no tienen ningún precio pack cargado para este tamaño
         if (mtEsc === 0 && mtInt === 0 && mtLla === 0) continue;
+
         mtMudanceras.push({
           email:       mt.email,
           nombre:      mt.nombre,
@@ -643,6 +664,8 @@ module.exports = async function handler(req, res) {
 
       return res.status(200).json({
         ok: true,
+        ambientes: ambN || null,
+        ambientesUsado: ambKey,
         mudanceras: mtMudanceras,
         niveles: NIVELES,
         nivelesLabel: NIVELES_LABEL
