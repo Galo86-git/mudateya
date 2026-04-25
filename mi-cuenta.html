@@ -462,12 +462,16 @@ body{font-family:Inter,sans-serif;background:#fff;color:var(--text);min-height:1
         </div>
         <div class="card" style="margin-bottom:1rem">
           <div class="card-header"><span class="card-title">💰 Precios base ($ARS)</span></div>
+          <div class="leads-banner" style="background:linear-gradient(135deg,#FEF3C7 0%,#FFFBEB 100%);border:1px solid #FDE68A;color:#92400E">
+            ⚠️ <b>Comisión MudateYa: 15% en mudanzas / 20% en fletes</b> — Solo pagás cuando completás el trabajo. Sin costos fijos.
+          </div>
           <div style="padding:1.2rem;display:grid;gap:8px">
             <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)"><span style="flex:1;font-size:13px;color:var(--text2)">Monoambiente / 1 ambiente</span><div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-p1" placeholder="55.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:#fff;outline:none"/></div></div>
             <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)"><span style="flex:1;font-size:13px;color:var(--text2)">2 ambientes</span><div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-p2" placeholder="90.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:#fff;outline:none"/></div></div>
             <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)"><span style="flex:1;font-size:13px;color:var(--text2)">3 ambientes</span><div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-p3" placeholder="135.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:#fff;outline:none"/></div></div>
             <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)"><span style="flex:1;font-size:13px;color:var(--text2)">4+ ambientes</span><div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-p4" placeholder="180.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:#fff;outline:none"/></div></div>
             <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)"><span style="flex:1;font-size:13px;color:var(--text2)">Flete / envío chico</span><div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-pflete" placeholder="18.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:#fff;outline:none"/></div></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#EEF4FF;border-radius:10px;border:1px solid #C7D7F5;margin-top:6px"><span style="flex:1;font-size:13px;color:var(--blue);font-weight:600">🛣 Precio por km <span style="font-weight:400;color:var(--text3);font-size:11px;font-family:var(--mono)">(opcional · para distancias largas)</span></span><div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-pkm" placeholder="800" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:#fff;outline:none"/></div></div>
           </div>
         </div>
 
@@ -567,6 +571,7 @@ function esc(s){ if(!s) return ''; var d=document.createElement('div'); d.textCo
 
 var currentUser = null;
 var mudanceroData = null;
+var mudanceroPerfilRedis = null; // perfil completo de Redis (incluye precios.porKm, preciosLeads, etc.)
 var mudanzasDisponibles = [];
 var misCotizaciones = [];
 
@@ -1073,20 +1078,86 @@ function formatearPrecioInput(input) {
 function getPrecioRaw(inputEl) {
   return parseInt((inputEl.value || '0').replace(/\./g, '')) || 0;
 }
+// Llenar el input de precio con la sugerencia + feedback visual
+function usarPrecioSugerido(total) {
+  var inp = document.getElementById('cot-precio');
+  if (!inp) return;
+  inp.value = total.toLocaleString('es-AR');
+  // pequeño flash visual
+  inp.style.transition = 'all .3s';
+  inp.style.borderColor = '#22C36A';
+  inp.style.background = '#F0FDF4';
+  setTimeout(function(){
+    inp.style.borderColor = '';
+    inp.style.background = '';
+  }, 700);
+  inp.focus();
+}
+
 function abrirCotizacion(mudanza){
   if(!mudanza) return;
   var ps = parseInt(mudanza.precio_estimado||0);
+
+  // ── Cálculo sugerido (km × precio_por_km + precio_base_ambientes) ──
+  // Solo se muestra si tenemos km de la mudanza Y precio por km del mudancero
+  var sugerenciaHTML = '';
+  var km = parseInt(mudanza.km||0);
+  var perfilRedis = mudanceroPerfilRedis || {};
+  var precioPorKm = parseInt((perfilRedis.precios && perfilRedis.precios.porKm) || perfilRedis.precioPorKm || 0);
+  if (km > 0 && precioPorKm > 0) {
+    // Determinar precio base por ambientes desde el perfil Redis
+    var ambStr = String(mudanza.ambientes || '');
+    var ambN = parseInt(ambStr.replace(/\D/g,'')) || 0;
+    var esFlete = (mudanza.tipo === 'flete') || ambStr.toLowerCase().indexOf('flete') !== -1;
+    var precios = perfilRedis.precios || {};
+    var precioBase = 0;
+    var lblBase = '';
+    if (esFlete) {
+      precioBase = parseInt(precios.flete||0) || 0;
+      lblBase = 'Flete base';
+    } else if (ambN === 1) {
+      precioBase = parseInt(precios.amb1||0) || 0;
+      lblBase = 'Trabajo base (1 amb)';
+    } else if (ambN === 2) {
+      precioBase = parseInt(precios.amb2||0) || 0;
+      lblBase = 'Trabajo base (2 amb)';
+    } else if (ambN === 3) {
+      precioBase = parseInt(precios.amb3||0) || 0;
+      lblBase = 'Trabajo base (3 amb)';
+    } else if (ambN >= 4) {
+      precioBase = parseInt(precios.amb4||0) || 0;
+      lblBase = 'Trabajo base (' + ambN + ' amb)';
+    } else {
+      precioBase = parseInt(precios.amb2||0) || 0;
+      lblBase = 'Trabajo base';
+    }
+    var costoKm = km * precioPorKm;
+    var totalSugerido = precioBase + costoKm;
+    if (totalSugerido > 0) {
+      sugerenciaHTML =
+        '<div id="cot-sugerencia" style="background:#EEF4FF;border:1px solid #C7D7F5;border-radius:10px;padding:12px 14px;margin-top:8px;font-family:Inter,sans-serif">'
+        + '<div style="font-size:10px;font-weight:700;color:#1A6FFF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-family:var(--mono)">💡 Sugerencia de cálculo</div>'
+        + '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--text2);margin-bottom:4px"><span>' + lblBase + '</span><span style="font-family:var(--mono);color:var(--text)">$' + precioBase.toLocaleString('es-AR') + '</span></div>'
+        + '<div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--text2);margin-bottom:6px"><span>Distancia: ' + km + ' km × $' + precioPorKm.toLocaleString('es-AR') + '/km</span><span style="font-family:var(--mono);color:var(--text)">$' + costoKm.toLocaleString('es-AR') + '</span></div>'
+        + '<div style="border-top:1px dashed #C7D7F5;padding-top:6px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:700;color:var(--text)">Total sugerido</span><span style="font-family:var(--mono);font-weight:700;color:#1A6FFF;font-size:14px">$' + totalSugerido.toLocaleString('es-AR') + '</span></div>'
+        + '<button onclick="usarPrecioSugerido(' + totalSugerido + ')" style="margin-top:10px;width:100%;padding:8px 12px;background:#1A6FFF;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">Usar este precio →</button>'
+        + '</div>';
+    }
+  }
+
   var modal = document.createElement('div');
   modal.id = 'cotModal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem';
-  modal.innerHTML = '<div style="background:#fff;border:1px solid #E2E8F0;border-radius:20px;padding:1.8rem;max-width:460px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.6)">'
+  modal.innerHTML = '<div style="background:#fff;border:1px solid #E2E8F0;border-radius:20px;padding:1.8rem;max-width:460px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.6);max-height:92vh;overflow-y:auto">'
     +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:.4rem">Enviar cotización</div>'
-    +'<div style="font-size:13px;color:var(--text2);margin-bottom:1.2rem">'+mudanza.desde+' → '+mudanza.hasta+' · '+(mudanza.ambientes||'')+'</div>'
+    +'<div style="font-size:13px;color:var(--text2);margin-bottom:1.2rem">'+mudanza.desde+' → '+mudanza.hasta+' · '+(mudanza.ambientes||'')+(km>0?' · <span style="color:#1A6FFF;font-weight:600">'+km+' km</span>':'')+'</div>'
     +'<div style="display:flex;flex-direction:column;gap:12px">'
     +'<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Tu precio ($ARS) <span style="color:#1A6FFF">*</span></label>'
     +'<div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:12px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span>'
     +'<input type="text" id="cot-precio" value="'+fmtMiles(ps)+'" inputmode="numeric" style="width:100%;padding:11px 14px 11px 26px;border:1px solid var(--border2);border-radius:10px;font-size:14px;font-family:var(--mono);color:var(--text);background:var(--surface2);outline:none;font-weight:600" oninput="formatearPrecioInput(this)"/></div>'
-    +'<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px">Precio estimado del cliente: $'+ps.toLocaleString('es-AR')+'</div></div>'
+    +'<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:4px">Precio estimado del cliente: $'+ps.toLocaleString('es-AR')+'</div>'
+    + sugerenciaHTML
+    + '</div>'
     +'<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Tiempo estimado</label>'
     +'<input type="text" id="cot-tiempo" placeholder="Ej: 3-4 horas" style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:Inter,sans-serif;color:var(--text);background:var(--surface2);outline:none"/></div>'
     +'<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Nota para el cliente</label>'
@@ -1252,7 +1323,14 @@ async function cargarPreciosLeads(){
     var r = await fetch('/api/actualizar-mudancero?email=' + encodeURIComponent(currentUser.email));
     var d = await r.json();
     if (!d.ok || !d.perfil) return;
+    mudanceroPerfilRedis = d.perfil; // disponible globalmente
     var pl = d.perfil.preciosLeads || {};
+    // Cargar precio por km
+    var pkmInput = document.getElementById('pf-pkm');
+    if (pkmInput) {
+      var pkm = (d.perfil.precios && d.perfil.precios.porKm) || d.perfil.precioPorKm || '';
+      if (pkm && Number(pkm) > 0) pkmInput.value = pkm;
+    }
     var ambs = ['amb1','amb2','amb3','amb4','amb5plus'];
     var nivs = ['esencial','integral','llave'];
     ambs.forEach(function(a){
@@ -1294,7 +1372,7 @@ async function guardarPerfil(){
     preciosLeads[amb][nivel] = _parseLeadsValue(inp.value);
   });
 
-  var datos={nombre:document.getElementById('pf-nombre').value.trim(),empresa:document.getElementById('pf-empresa').value.trim(),telefono:document.getElementById('pf-tel').value.trim(),email:currentUser.email,zonaBase:document.getElementById('pf-zona').value,zonasExtra:document.getElementById('pf-zonas-extra').value.trim(),vehiculo:document.getElementById('pf-vehiculo').value,cantVehiculos:document.getElementById('pf-cant-vehiculos').value,equipo:document.getElementById('pf-equipo').value,servicios,dias,horarios,anticipacion:document.getElementById('pf-anticipacion').value,precio1amb:document.getElementById('pf-p1').value,precio2amb:document.getElementById('pf-p2').value,precio3amb:document.getElementById('pf-p3').value,precio4amb:document.getElementById('pf-p4').value,precioFlete:document.getElementById('pf-pflete').value,extra:document.getElementById('pf-notas').value.trim(),preciosLeads:preciosLeads};
+  var datos={nombre:document.getElementById('pf-nombre').value.trim(),empresa:document.getElementById('pf-empresa').value.trim(),telefono:document.getElementById('pf-tel').value.trim(),email:currentUser.email,zonaBase:document.getElementById('pf-zona').value,zonasExtra:document.getElementById('pf-zonas-extra').value.trim(),vehiculo:document.getElementById('pf-vehiculo').value,cantVehiculos:document.getElementById('pf-cant-vehiculos').value,equipo:document.getElementById('pf-equipo').value,servicios,dias,horarios,anticipacion:document.getElementById('pf-anticipacion').value,precio1amb:document.getElementById('pf-p1').value,precio2amb:document.getElementById('pf-p2').value,precio3amb:document.getElementById('pf-p3').value,precio4amb:document.getElementById('pf-p4').value,precioFlete:document.getElementById('pf-pflete').value,precioPorKm:(document.getElementById('pf-pkm')||{}).value||'',extra:document.getElementById('pf-notas').value.trim(),preciosLeads:preciosLeads};
   localStorage.setItem('banking_'+currentUser.email, JSON.stringify({metodoCobro:document.getElementById('pf-metodoCobro').value,cbu:document.getElementById('pf-cbu').value.trim(),emailMP:document.getElementById('pf-emailMP').value.trim(),titular:document.getElementById('pf-titular').value.trim()}));
   try{
     var r=await fetch('/api/actualizar-mudancero',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
