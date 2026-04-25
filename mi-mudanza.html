@@ -691,6 +691,27 @@ function renderMudanzaCard(m, idx){
     +   '<span class="badge '+badgeClass+'">'+badgeText+'</span>'
     + '</div>'
     + '<div class="stepper">'+stepperHtml+'</div>'
+    + (function(){
+        // Aviso de mudanceros que pasaron — solo modo dirigido y mudanza aún en búsqueda
+        if (m.modoCotizacion !== 'dirigido' || m.estado !== 'buscando') return '';
+        var rechazados = m.rechazadosPor || [];
+        if (rechazados.length === 0) return '';
+        var invitados = m.mudancerosInvitados || [];
+        var todosPasaron = invitados.length > 0 && rechazados.length >= invitados.length;
+        var nombres = rechazados.map(function(r){ return esc(r.nombre || r.email); }).join(', ');
+        var titulo = todosPasaron
+          ? '⚠ Todos los mudanceros que elegiste pasaron este pedido'
+          : (rechazados.length === 1 ? '⚠ Un mudancero pasó este pedido' : '⚠ ' + rechazados.length + ' mudanceros pasaron este pedido');
+        var sub = todosPasaron
+          ? 'Republicá tu pedido para que lo vean otros mudanceros de la zona.'
+          : 'Podés esperar a los demás o ampliar la búsqueda a más mudanceros.';
+        return '<div style="background:#FEF3F2;border:1px solid #FECACA;border-radius:12px;padding:14px 16px;margin-bottom:14px">'
+          + '<div style="font-size:13px;font-weight:700;color:#991B1B;margin-bottom:6px">' + titulo + '</div>'
+          + '<div style="font-size:12px;color:#7F1D1D;line-height:1.55;margin-bottom:8px"><b>Pasaron:</b> ' + nombres + '</div>'
+          + '<div style="font-size:12px;color:#7F1D1D;line-height:1.55;margin-bottom:12px">' + sub + '</div>'
+          + '<button class="btn btn-green" style="font-size:13px;padding:9px 18px" onclick="republicarAbierto(\''+m.id+'\',this)">🔄 Buscar otros mudanceros</button>'
+          + '</div>';
+      })()
     + (pasoActual === 0 ? '<div style="font-size:11px;color:var(--amber);font-family:var(--mono);margin-bottom:10px">⏱ Expira en '+horasRestantes+'hs · los mudanceros están enviando cotizaciones</div>' : '')
     + cotzHtml
     + (m.cotizacionAceptada ? '<div class="mudanza-mudancero">'
@@ -893,6 +914,24 @@ async function aceptarCotizacion(mudanzaId, cotizacionId){
   }catch(e){
     alert('Error: ' + e.message);
     if (btn) { btn.disabled = false; btn.textContent = 'Elegir →'; }
+  }
+}
+
+async function republicarAbierto(mudanzaId, btn){
+  if (!confirm('¿Republicar tu pedido en modo abierto?\n\n• Va a estar visible para todos los mudanceros de tu zona (no solo los que elegiste).\n• Recibirás cotizaciones durante las próximas 24hs.\n\n¿Confirmás?')) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Republicando…'; }
+  try {
+    var r = await fetch('/api/cotizaciones?action=republicar-abierto', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ mudanzaId: mudanzaId, clienteEmail: currentUser.email })
+    });
+    var d = await r.json();
+    if (d.error) throw new Error(d.error);
+    await loadMudanzas();
+  } catch(e){
+    alert('Error: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '🔄 Buscar otros mudanceros'; }
   }
 }
 
