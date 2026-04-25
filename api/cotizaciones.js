@@ -1465,8 +1465,41 @@ module.exports = async function handler(req, res) {
       const rechazados = await getJSON(`rechazados:${mudanceroEmail}`) || [];
       if (!rechazados.includes(mudanzaId)) rechazados.push(mudanzaId);
       await setJSON(`rechazados:${mudanceroEmail}`, rechazados, 604800);
+      // Si es modo dirigido, marcar la mudanza con quién pasó (para avisar al cliente)
+      try {
+        const m = await getJSON(`mudanza:${mudanzaId}`);
+        if (m && m.modoCotizacion === 'dirigido') {
+          m.rechazadosPor = m.rechazadosPor || [];
+          if (!m.rechazadosPor.find(r => r.email === mudanceroEmail)) {
+            const perfil = await getJSON(`mudancero:perfil:${mudanceroEmail}`);
+            m.rechazadosPor.push({
+              email: mudanceroEmail,
+              nombre: (perfil && (perfil.empresa || perfil.nombre)) || mudanceroEmail.split('@')[0],
+              fecha: new Date().toISOString()
+            });
+            await setJSON(`mudanza:${mudanzaId}`, m, 604800);
+          }
+        }
+      } catch(e) { console.warn('No pude marcar rechazo en mudanza:', e.message); }
       return res.status(200).json({ ok: true });
     }
+    if (action === 'republicar-abierto' && req.method === 'POST') {
+      const { mudanzaId, clienteEmail } = req.body;
+      if (!mudanzaId || !clienteEmail) return res.status(400).json({ error: 'Faltan datos' });
+      const m = await getJSON(`mudanza:${mudanzaId}`);
+      if (!m) return res.status(404).json({ error: 'Mudanza no encontrada' });
+      if (m.clienteEmail !== clienteEmail) return res.status(403).json({ error: 'No autorizado' });
+      if (m.estado !== 'buscando') return res.status(400).json({ error: 'La mudanza ya no está en estado de búsqueda' });
+      // Convertir a modo abierto y limpiar invitados
+      m.modoCotizacion = 'abierto';
+      m.mudancerosInvitados = [];
+      // Refrescar fecha de expiración 24hs más (le damos otra ventana)
+      m.expira = new Date(Date.now() + 24*60*60*1000).toISOString();
+      m.republicadaEn = new Date().toISOString();
+      await setJSON(`mudanza:${mudanzaId}`, m, 604800);
+      return res.status(200).json({ ok: true });
+    }
+
     if (action === 'update-wa' && req.method === 'POST') {
       const { email, clienteWA } = req.body;
       if (!email || !clienteWA) return res.status(400).json({ error: 'Faltan datos' });
