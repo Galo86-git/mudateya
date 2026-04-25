@@ -1255,7 +1255,10 @@ async function loadMudancerasZona() {
   var wrap = document.getElementById('packsPicker');
   wrap.innerHTML = '<div class="loading-full"><span class="loader-inline"></span></div>';
   try {
-    var r = await fetch('/api/asesores?action=mudanceros-todos&token=' + encodeURIComponent(TOKEN));
+    // Tomar ambientes elegidos en Step 2 (FSW_DATA.mudanza.ambientes)
+    var ambStr = (FSW_DATA && FSW_DATA.mudanza && FSW_DATA.mudanza.ambientes) || '';
+    var ambN = parseInt(String(ambStr).replace(/\D/g,'')) || 2;
+    var r = await fetch('/api/asesores?action=mudanceros-todos&token=' + encodeURIComponent(TOKEN) + '&ambientes=' + ambN);
     var d = await r.json();
     if (!r.ok || !d.ok) throw new Error(d.error || 'Error');
     // Solo mudanceras con al menos un precio > 0
