@@ -164,6 +164,20 @@ body{font-family:Inter,sans-serif;background:#fff;color:var(--text);min-height:1
 @media(max-width:768px){
   .mc-mobile-nav{display:block}
 }
+
+/* ── Tabla preciosLeads (Plan Referidos 25%) ── */
+.leads-banner{background:linear-gradient(135deg,#FEF3C7 0%,#FFFBEB 100%);border:1px solid #FDE68A;border-radius:10px;padding:12px 14px;margin:0 1.2rem 14px;font-size:12px;color:#92400E;line-height:1.5}
+.leads-banner b{color:#78350F}
+.leads-table{width:100%;border-collapse:collapse;font-family:Inter,sans-serif}
+.leads-table thead th{background:var(--surface2);font-size:11px;font-family:var(--mono);font-weight:700;color:var(--text2);padding:9px 8px;text-transform:uppercase;letter-spacing:.5px;text-align:center;border-bottom:1px solid var(--border)}
+.leads-table thead th:first-child{text-align:left;padding-left:14px}
+.leads-table tbody td{padding:7px 6px;border-bottom:1px solid var(--border);text-align:center}
+.leads-table tbody td:first-child{text-align:left;padding-left:14px;font-size:13px;color:var(--text2);font-weight:500;white-space:nowrap}
+.leads-table tbody tr:last-child td{border-bottom:none}
+.leads-input-wrap{position:relative;display:inline-flex;align-items:center;justify-content:flex-end}
+.leads-input-wrap span{position:absolute;left:8px;font-size:12px;color:var(--text3);font-family:var(--mono)}
+.leads-input{width:100%;max-width:130px;padding:7px 8px 7px 18px;border:1px solid var(--border2);border-radius:7px;font-size:12.5px;font-family:var(--mono);color:var(--text);background:#fff;outline:none;text-align:right;transition:border-color .15s}
+.leads-input:focus{border-color:var(--blue)}
 </style>
 </head>
 <body>
@@ -445,6 +459,55 @@ body{font-family:Inter,sans-serif;background:#fff;color:var(--text);min-height:1
             <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)"><span style="flex:1;font-size:13px;color:var(--text2)">Flete / envío chico</span><div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:10px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span><input type="number" id="pf-pflete" placeholder="18.000" style="width:130px;padding:8px 10px 8px 22px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--mono);color:var(--text);background:#fff;outline:none"/></div></div>
           </div>
         </div>
+
+        <!-- ═══ NUEVO: Precios para Leads Plan Referidos Inmobiliarios (25% comisión) ═══ -->
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-header"><span class="card-title">🏢 Precios Plan Referidos Inmobiliarios</span></div>
+          <div class="leads-banner">
+            ⚠️ <b>Comisión MudateYa: 25%</b> — Plan Referidos son leads pre-calificados que llegan desde nuestros asesores inmobiliarios aliados. Cargá los precios que querés cobrar para cada tamaño y tipo de pack. <b>Te queda el 75%</b> del precio que pongas.
+          </div>
+          <div style="padding:0 1.2rem 1.2rem;overflow-x:auto">
+            <table class="leads-table" id="leadsTable">
+              <thead>
+                <tr>
+                  <th>Tamaño</th>
+                  <th>🥉 Esencial</th>
+                  <th>🥈 Integral</th>
+                  <th>🥇 Llave en Mano</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>1 amb</td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb1-esencial" data-amb="amb1" data-nivel="esencial" placeholder="0"/></div></td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb1-integral" data-amb="amb1" data-nivel="integral" placeholder="0"/></div></td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb1-llave" data-amb="amb1" data-nivel="llave" placeholder="0"/></div></td>
+                </tr>
+                <tr><td>2 amb</td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb2-esencial" data-amb="amb2" data-nivel="esencial" placeholder="0"/></div></td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb2-integral" data-amb="amb2" data-nivel="integral" placeholder="0"/></div></td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb2-llave" data-amb="amb2" data-nivel="llave" placeholder="0"/></div></td>
+                </tr>
+                <tr><td>3 amb</td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb3-esencial" data-amb="amb3" data-nivel="esencial" placeholder="0"/></div></td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb3-integral" data-amb="amb3" data-nivel="integral" placeholder="0"/></div></td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb3-llave" data-amb="amb3" data-nivel="llave" placeholder="0"/></div></td>
+                </tr>
+                <tr><td>4 amb</td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb4-esencial" data-amb="amb4" data-nivel="esencial" placeholder="0"/></div></td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb4-integral" data-amb="amb4" data-nivel="integral" placeholder="0"/></div></td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb4-llave" data-amb="amb4" data-nivel="llave" placeholder="0"/></div></td>
+                </tr>
+                <tr><td>5+ amb</td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb5plus-esencial" data-amb="amb5plus" data-nivel="esencial" placeholder="0"/></div></td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb5plus-integral" data-amb="amb5plus" data-nivel="integral" placeholder="0"/></div></td>
+                  <td><div class="leads-input-wrap"><span>$</span><input type="number" class="leads-input" id="pl-amb5plus-llave" data-amb="amb5plus" data-nivel="llave" placeholder="0"/></div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="font-size:11px;color:var(--text3);margin-top:8px;font-family:var(--mono)">Dejá en blanco lo que no querés cubrir — solo aparecerás en pedidos de los tamaños donde tengas precio cargado.</div>
+          </div>
+        </div>
+
         <div class="card" style="margin-bottom:1rem">
           <div class="card-header"><span class="card-title">🏦 Datos para cobrar</span></div>
           <div style="padding:1.2rem;display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -1143,6 +1206,30 @@ function loadPerfil(){
   document.querySelectorAll('#pf-dias .chip').forEach(function(c){ if(sd.includes(c.textContent.trim())) c.classList.add('sel'); });
   var sh = m[13]||'';
   document.querySelectorAll('#pf-horarios .chip').forEach(function(c){ if(sh.includes(c.textContent.trim())) c.classList.add('sel'); });
+  // Cargar precios Plan Referidos (vienen de Redis, GET a actualizar-mudancero)
+  cargarPreciosLeads();
+}
+
+// Lee preciosLeads desde Redis y llena la tabla 5×3
+async function cargarPreciosLeads(){
+  try {
+    var r = await fetch('/api/actualizar-mudancero?email=' + encodeURIComponent(currentUser.email));
+    var d = await r.json();
+    if (!d.ok || !d.perfil) return;
+    var pl = d.perfil.preciosLeads || {};
+    var ambs = ['amb1','amb2','amb3','amb4','amb5plus'];
+    var nivs = ['esencial','integral','llave'];
+    ambs.forEach(function(a){
+      nivs.forEach(function(n){
+        var inp = document.getElementById('pl-'+a+'-'+n);
+        if (!inp) return;
+        var v = pl[a] && pl[a][n] ? pl[a][n] : '';
+        inp.value = v && v > 0 ? v : '';
+      });
+    });
+  } catch(e) {
+    // silencioso — si falla, los inputs quedan vacíos y el mudancero los llena
+  }
 }
 
 function toggleMetodoCobroPanel(){
@@ -1161,7 +1248,18 @@ async function guardarPerfil(){
   var servicios=Array.from(document.querySelectorAll('#pf-servicios .sel')).map(function(c){return c.textContent.trim();}).join(', ');
   var dias=Array.from(document.querySelectorAll('#pf-dias .sel')).map(function(c){return c.textContent.trim();}).join(', ');
   var horarios=Array.from(document.querySelectorAll('#pf-horarios .sel')).map(function(c){return c.textContent.trim();}).join(', ');
-  var datos={nombre:document.getElementById('pf-nombre').value.trim(),empresa:document.getElementById('pf-empresa').value.trim(),telefono:document.getElementById('pf-tel').value.trim(),email:currentUser.email,zonaBase:document.getElementById('pf-zona').value,zonasExtra:document.getElementById('pf-zonas-extra').value.trim(),vehiculo:document.getElementById('pf-vehiculo').value,cantVehiculos:document.getElementById('pf-cant-vehiculos').value,equipo:document.getElementById('pf-equipo').value,servicios,dias,horarios,anticipacion:document.getElementById('pf-anticipacion').value,precio1amb:document.getElementById('pf-p1').value,precio2amb:document.getElementById('pf-p2').value,precio3amb:document.getElementById('pf-p3').value,precio4amb:document.getElementById('pf-p4').value,precioFlete:document.getElementById('pf-pflete').value,extra:document.getElementById('pf-notas').value.trim()};
+
+  // Construir preciosLeads desde la tabla 5×3
+  var preciosLeads = { amb1:{}, amb2:{}, amb3:{}, amb4:{}, amb5plus:{} };
+  document.querySelectorAll('.leads-input').forEach(function(inp){
+    var amb = inp.getAttribute('data-amb');
+    var nivel = inp.getAttribute('data-nivel');
+    if (!amb || !nivel) return;
+    var v = parseInt(String(inp.value||'').replace(/\./g,'').replace(/,/g,'')) || 0;
+    preciosLeads[amb][nivel] = v;
+  });
+
+  var datos={nombre:document.getElementById('pf-nombre').value.trim(),empresa:document.getElementById('pf-empresa').value.trim(),telefono:document.getElementById('pf-tel').value.trim(),email:currentUser.email,zonaBase:document.getElementById('pf-zona').value,zonasExtra:document.getElementById('pf-zonas-extra').value.trim(),vehiculo:document.getElementById('pf-vehiculo').value,cantVehiculos:document.getElementById('pf-cant-vehiculos').value,equipo:document.getElementById('pf-equipo').value,servicios,dias,horarios,anticipacion:document.getElementById('pf-anticipacion').value,precio1amb:document.getElementById('pf-p1').value,precio2amb:document.getElementById('pf-p2').value,precio3amb:document.getElementById('pf-p3').value,precio4amb:document.getElementById('pf-p4').value,precioFlete:document.getElementById('pf-pflete').value,extra:document.getElementById('pf-notas').value.trim(),preciosLeads:preciosLeads};
   localStorage.setItem('banking_'+currentUser.email, JSON.stringify({metodoCobro:document.getElementById('pf-metodoCobro').value,cbu:document.getElementById('pf-cbu').value.trim(),emailMP:document.getElementById('pf-emailMP').value.trim(),titular:document.getElementById('pf-titular').value.trim()}));
   try{
     var r=await fetch('/api/actualizar-mudancero',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
