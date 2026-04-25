@@ -684,7 +684,18 @@
     el.classList.add('sel');
     _fleteObj = tipo;
     var box = document.getElementById('flete-otros-box');
-    if (box) box.style.display = tipo === 'otros' ? 'block' : 'none';
+    var input = document.getElementById('flete-otros-input');
+    // El cuadro de descripción se abre tanto para "otros" como para "mascota"
+    var necesitaDesc = tipo === 'otros' || tipo === 'mascota';
+    if (box) box.style.display = necesitaDesc ? 'block' : 'none';
+    // Placeholder específico según el tipo
+    if (input) {
+      if (tipo === 'mascota') {
+        input.placeholder = 'Ej: 1 perro mediano de 25kg con su transportadora';
+      } else if (tipo === 'otros') {
+        input.placeholder = '¿Qué es? Ej: Lavarropas, mesa de billar, piano…';
+      }
+    }
   }
 
   function onFleteFoto(input) {
@@ -1064,6 +1075,7 @@
             <span style="font-size:11px;color:rgba(255,255,255,.85);font-family:var(--mono);white-space:nowrap">¿Qué objeto?</span>
             <div class="obj-chip" onclick="selFleteObj(this,'sillon')">🛋️ Sillón/sofá</div>
             <div class="obj-chip" onclick="selFleteObj(this,'heladera')">🧊 Heladera</div>
+            <div class="obj-chip" onclick="selFleteObj(this,'mascota')" id="chip-mascota">🐶 Mascota</div>
             <div class="obj-chip" onclick="selFleteObj(this,'otros')" id="chip-otros">📝 Otros</div>
           </div>
           <!-- Descripción manual (si elige Otros) -->
@@ -1745,15 +1757,19 @@
         return;
       }
 
-      // Eligió "Otros" pero no escribió descripción
-      if (_fleteObj === 'otros' && !tieneOtros) {
+      // Eligió "Otros" o "Mascota" pero no escribió descripción
+      if ((_fleteObj === 'otros' || _fleteObj === 'mascota') && !tieneOtros) {
         if (otrosInput) {
           otrosInput.style.borderColor = '#FF5252';
           otrosInput.focus();
-          otrosInput.placeholder = '⚠ Describí el objeto antes de continuar';
+          otrosInput.placeholder = _fleteObj === 'mascota'
+            ? '⚠ Describí la mascota (tamaño, cantidad, transportadora)'
+            : '⚠ Describí el objeto antes de continuar';
           setTimeout(function(){
             otrosInput.style.borderColor = '';
-            otrosInput.placeholder = '¿Qué es? Ej: Lavarropas, mesa de billar, piano…';
+            otrosInput.placeholder = _fleteObj === 'mascota'
+              ? 'Ej: 1 perro mediano de 25kg con su transportadora'
+              : '¿Qué es? Ej: Lavarropas, mesa de billar, piano…';
           }, 3000);
         }
         return;
@@ -2170,6 +2186,10 @@
     document.getElementById('pub-ok').style.display = 'none';
     document.getElementById('pubModal').classList.add('open');
     var objetos = Array.from(document.querySelectorAll('.obj-chip.sel')).map(function(e){ return e.textContent.trim(); }).join(', ');
+    // Si el tipo elegido necesita descripción libre (otros/mascota), agregarla al string
+    if ((_fleteObj === 'otros' || _fleteObj === 'mascota') && fleteOtrosTexto && fleteOtrosTexto.trim().length > 2) {
+      objetos += ': ' + fleteOtrosTexto.trim();
+    }
     // ── Leer cookie de referido de aliado (mya_ref) ──
     var refAliado = null;
     try {
