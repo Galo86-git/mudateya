@@ -404,6 +404,33 @@
   .filtro-serv-dest.premium{border-color:#F59E0B;color:#B45309;background:#FFFBEB}
   .filtro-serv-dest input{accent-color:currentColor;width:14px;height:14px;cursor:pointer;flex-shrink:0}
 
+  /* ── Toggle switch iOS-style (para checkboxes binarios) ── */
+  .tg-row{display:flex;align-items:center;gap:10px;padding:8px 4px;cursor:pointer;font-size:13px;color:var(--text);user-select:none}
+  .tg-row:hover{color:var(--blue)}
+  .tg-row.is-on{color:var(--blue);font-weight:500}
+  .tg-row .tg-lbl{flex:1;line-height:1.3}
+  .tg-row input[type="checkbox"]{position:absolute;opacity:0;pointer-events:none}
+  .tg-switch{
+    position:relative;width:36px;height:20px;
+    background:#E2E8F0;border-radius:999px;
+    transition:background .2s;flex-shrink:0;
+  }
+  .tg-switch::after{
+    content:'';position:absolute;
+    top:2px;left:2px;
+    width:16px;height:16px;
+    background:#fff;border-radius:50%;
+    box-shadow:0 1px 3px rgba(0,0,0,.15);
+    transition:transform .2s;
+  }
+  .tg-row.is-on .tg-switch{background:var(--blue)}
+  .tg-row.is-on .tg-switch::after{transform:translateX(16px)}
+  /* Variantes destacadas (Guardamuebles violeta, Premium ámbar) */
+  .tg-row.is-on.tg-guardamuebles .tg-switch{background:#7C3AED}
+  .tg-row.is-on.tg-guardamuebles{color:#7C3AED}
+  .tg-row.is-on.tg-premium .tg-switch{background:#F59E0B}
+  .tg-row.is-on.tg-premium{color:#B45309}
+
   /* Header resultados */
   .res-header{
     display:flex;align-items:center;justify-content:space-between;
@@ -1151,18 +1178,6 @@
         <button class="drawer-close" onclick="cerrarDrawerFiltros()">✕</button>
       </div>
       <div class="drawer-body">
-        <!-- Servicios destacados -->
-        <div class="drawer-section">
-          <div class="drawer-section-h">⭐ Servicios destacados</div>
-          <label class="drawer-serv-dest guardamuebles">
-            <input type="checkbox" id="dFiltGuarda" onchange="toggleFServicio('Guardamuebles',this)"/>
-            🏭 Guardamuebles
-          </label>
-          <label class="drawer-serv-dest premium">
-            <input type="checkbox" id="dFiltPremium" onchange="toggleFServicio('premium',this)"/>
-            ⭐ Mudanza premium
-          </label>
-        </div>
         <!-- Ordenar -->
         <div class="drawer-section">
           <div class="drawer-section-h">Ordenar por</div>
@@ -1171,6 +1186,30 @@
             <label class="drawer-opt"><input type="radio" name="ordenDrawer" onchange="setOrden('precio');actualizarBadge()"/> Menor precio</label>
             <label class="drawer-opt"><input type="radio" name="ordenDrawer" onchange="setOrden('trab');actualizarBadge()"/> Más trabajos</label>
           </div>
+        </div>
+        <!-- Servicios (toggles iOS) -->
+        <div class="drawer-section">
+          <div class="drawer-section-h">Servicios</div>
+          <label class="tg-row tg-guardamuebles" onclick="_tgClick(event,this)">
+            <span class="tg-lbl">🏭 Guardamuebles</span>
+            <span class="tg-switch"></span>
+            <input type="checkbox" id="dFiltGuarda" onchange="toggleFServicio('Guardamuebles',this);actualizarBadge()"/>
+          </label>
+          <label class="tg-row tg-premium" onclick="_tgClick(event,this)">
+            <span class="tg-lbl">⭐ Mudanza premium</span>
+            <span class="tg-switch"></span>
+            <input type="checkbox" id="dFiltPremium" onchange="toggleFServicio('premium',this);actualizarBadge()"/>
+          </label>
+          <label class="tg-row" onclick="_tgClick(event,this)">
+            <span class="tg-lbl">📦 Embalaje incluido</span>
+            <span class="tg-switch"></span>
+            <input type="checkbox" onchange="toggleFServicio('Embalaje incluido',this);actualizarBadge()"/>
+          </label>
+          <label class="tg-row" onclick="_tgClick(event,this)">
+            <span class="tg-lbl">🔧 Desmontaje y montaje</span>
+            <span class="tg-switch"></span>
+            <input type="checkbox" onchange="toggleFServicio('Desmontaje y montaje',this);actualizarBadge()"/>
+          </label>
         </div>
         <!-- Zona -->
         <div class="drawer-section">
@@ -1214,9 +1253,11 @@
         <!-- Verificaciones -->
         <div class="drawer-section">
           <div class="drawer-section-h">Verificaciones</div>
-          <div class="drawer-opts">
-            <label class="drawer-opt"><input type="checkbox" onchange="toggleFVer('seg',this);actualizarBadge()"/> 🛡 Con seguro</label>
-          </div>
+          <label class="tg-row" onclick="_tgClick(event,this)">
+            <span class="tg-lbl">🛡 Con seguro</span>
+            <span class="tg-switch"></span>
+            <input type="checkbox" onchange="toggleFVer('seg',this);actualizarBadge()"/>
+          </label>
         </div>
       </div>
       <div class="drawer-footer">
@@ -1238,6 +1279,30 @@
           <div class="filtro-opt"><label><input type="radio" name="orden" checked onchange="setOrden('cal')"/> Mejor calificación</label></div>
           <div class="filtro-opt"><label><input type="radio" name="orden" onchange="setOrden('precio')"/> Menor precio</label></div>
           <div class="filtro-opt"><label><input type="radio" name="orden" onchange="setOrden('trab')"/> Más trabajos</label></div>
+        </div>
+        <!-- Servicios (toggles iOS) -->
+        <div class="filtro-section">
+          <div class="filtro-h">Servicios</div>
+          <label class="tg-row tg-guardamuebles" onclick="_tgClick(event,this)">
+            <span class="tg-lbl">🏭 Guardamuebles</span>
+            <span class="tg-switch"></span>
+            <input type="checkbox" onchange="toggleFServicio('Guardamuebles',this)"/>
+          </label>
+          <label class="tg-row tg-premium" onclick="_tgClick(event,this)">
+            <span class="tg-lbl">⭐ Mudanza premium</span>
+            <span class="tg-switch"></span>
+            <input type="checkbox" onchange="toggleFServicio('premium',this)"/>
+          </label>
+          <label class="tg-row" onclick="_tgClick(event,this)">
+            <span class="tg-lbl">📦 Embalaje incluido</span>
+            <span class="tg-switch"></span>
+            <input type="checkbox" onchange="toggleFServicio('Embalaje incluido',this)"/>
+          </label>
+          <label class="tg-row" onclick="_tgClick(event,this)">
+            <span class="tg-lbl">🔧 Desmontaje y montaje</span>
+            <span class="tg-switch"></span>
+            <input type="checkbox" onchange="toggleFServicio('Desmontaje y montaje',this)"/>
+          </label>
         </div>
         <div class="filtro-section">
           <div class="filtro-h">Zona</div>
@@ -1277,20 +1342,11 @@
         </div>
         <div class="filtro-section">
           <div class="filtro-h">Verificaciones</div>
-          <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFVer('seg',this)"/> 🛡 Con seguro</label></div>
-        </div>
-        <div class="filtro-section">
-          <div class="filtro-h">Servicios</div>
-          <label class="filtro-serv-dest guardamuebles">
-            <input type="checkbox" onchange="toggleFServicio('Guardamuebles',this)"/>
-            🏭 Guardamuebles
+          <label class="tg-row" onclick="_tgClick(event,this)">
+            <span class="tg-lbl">🛡 Con seguro</span>
+            <span class="tg-switch"></span>
+            <input type="checkbox" onchange="toggleFVer('seg',this)"/>
           </label>
-          <label class="filtro-serv-dest premium">
-            <input type="checkbox" onchange="toggleFServicio('premium',this)"/>
-            ⭐ Mudanza premium
-          </label>
-          <div class="filtro-opt" style="margin-top:4px"><label><input type="checkbox" onchange="toggleFServicio('Embalaje incluido',this)"/> 📦 Embalaje incluido</label></div>
-          <div class="filtro-opt"><label><input type="checkbox" onchange="toggleFServicio('Desmontaje y montaje',this)"/> 🔧 Desmontaje y montaje</label></div>
         </div>
         <button class="btn-clear" onclick="limpiarFiltros()">Limpiar filtros</button>
       </div>
@@ -2032,6 +2088,22 @@
   // ══════════════════════════════════════════
   // FILTROS
   // ══════════════════════════════════════════
+
+  // Toggle iOS-style: sincroniza la clase visual con el estado del checkbox interno
+  function _tgClick(ev, label){
+    var cb = label.querySelector('input[type="checkbox"]');
+    if (!cb) return;
+    // Si el click NO vino del checkbox, lo simulamos
+    if (ev.target !== cb) {
+      ev.preventDefault();
+      cb.checked = !cb.checked;
+      cb.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    // Sincronizar clase visual
+    if (cb.checked) label.classList.add('is-on');
+    else label.classList.remove('is-on');
+  }
+
   function setOrden(v) { _filtros.orden = v; renderResultados(); }
   function toggleFV(v,el) {
     if(_filtros.vehiculos.has(v)) _filtros.vehiculos.delete(v); else _filtros.vehiculos.add(v);
@@ -2076,7 +2148,8 @@
   function limpiarFiltros() {
     _filtros.vehiculos.clear(); _filtros.zonas.clear(); _filtros.verifs.clear(); _filtros.orden='cal';
     if (_filtros.servicios) _filtros.servicios.clear();
-    document.querySelectorAll('.filtro-opt input, .drawer-opt input, .filtro-serv-dest input, .drawer-serv-dest input').forEach(function(i){ i.checked=false; });
+    document.querySelectorAll('.filtro-opt input, .drawer-opt input, .filtro-serv-dest input, .drawer-serv-dest input, .tg-row input').forEach(function(i){ i.checked=false; });
+    document.querySelectorAll('.tg-row.is-on').forEach(function(r){ r.classList.remove('is-on'); });
     document.querySelectorAll('input[name=orden], input[name=ordenDrawer]').forEach(function(i,idx){ i.checked=idx===0; });
     renderResultados();
     actualizarBadge();
