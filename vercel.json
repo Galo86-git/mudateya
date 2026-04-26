@@ -17,6 +17,7 @@
     { "src": "/asesor-login", "dest": "/asesor-login.html" },
     { "src": "/asesor-dashboard", "dest": "/asesor-dashboard.html" },
     { "src": "/cliente-packs", "dest": "/cliente-packs.html" },
+    { "src": "/aliados", "dest": "/aliados.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
 }
