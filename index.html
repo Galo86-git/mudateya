@@ -652,7 +652,7 @@
   .mud-card.sel .mud-sel-check svg{display:block}
 
   /* Body del card */
-  .mud-card-body{padding:14px 16px 0;flex:1;display:flex;flex-direction:column;gap:6px}
+  .mud-card-body{padding:10px 12px 0;flex:1;display:flex;flex-direction:column;gap:5px}
   .mud-card-empresa{
     font-size:15px;font-weight:700;color:#003580;
     line-height:1.25;letter-spacing:-.2px;cursor:pointer;
@@ -680,13 +680,13 @@
   .mud-card-trabajos{font-size:11px;color:var(--text2);font-family:var(--mono)}
 
   /* Precio (grande, estilo ML) */
-  .mud-card-precio{padding:4px 16px 12px;margin-top:auto}
+  .mud-card-precio{padding:3px 12px 8px;margin-top:auto}
   .mud-precio-desde{font-size:10px;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px}
   .mud-precio-num{font-size:24px;font-weight:400;color:var(--text);line-height:1;letter-spacing:-.5px}
   .mud-precio-sub{font-size:10.5px;color:var(--text2);margin-top:2px}
 
   /* CTAs abajo */
-  .mud-card-actions{padding:0 14px 14px;display:flex;gap:6px}
+  .mud-card-actions{padding:0 12px 10px;display:flex;gap:6px}
   .btn-ver{
     background:var(--blue);color:#fff;border:none;
     padding:10px 14px;border-radius:var(--r);
@@ -2256,7 +2256,7 @@
         tags += '<span class="mud-nivel-badge esencial">📦 Esencial</span>';
       }
       if (m.verificadoIdentidad) tags += '<span class="mud-tag mud-tag-green">✓ Verificado</span>';
-      if (m.verificadoVehiculo)  tags += '<span class="mud-tag mud-tag-blue">🚛 '+m.vehiculo+'</span>';
+      // Tag de vehículo (camión) eliminado: ocupa espacio y aporta poco valor visual
 
       // Badge top 3 (solo si tiene trabajos > 0, sino no tiene sentido)
       var topIdx = topTrabajos.indexOf(m.email);
