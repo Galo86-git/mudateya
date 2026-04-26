@@ -317,6 +317,14 @@
   .filtros{background:#fff}
   .filtro-section{border-bottom:1px solid var(--border);padding-bottom:1rem;margin-bottom:1rem}
   .filtro-section:last-child{border-bottom:none;margin-bottom:0}
+  /* Sección sticky (Tipo de mudanza) - se queda fija arriba al scrollear el panel */
+  .filtro-section-sticky{
+    position:sticky;top:80px;z-index:50;
+    background:#fff;
+    margin:0 -8px 1rem;padding:.7rem 8px 1rem;
+    border-bottom:2px solid var(--border);
+    box-shadow:0 2px 6px rgba(0,0,0,.04);
+  }
   .filtro-h{font-size:13px;font-weight:700;color:var(--text);margin-bottom:.7rem}
   .filtro-opt{
     display:flex;align-items:center;gap:8px;padding:5px 0;
@@ -439,6 +447,9 @@
     border-bottom:1px solid var(--border);
     overflow-x:auto;-webkit-overflow-scrolling:touch;
     scrollbar-width:none;
+    /* Sticky: se queda fija al scrollear, debajo del nav (56px) + res-search-bar (~44px) */
+    position:sticky;top:100px;z-index:98;
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
   }
   .nivel-bar-mobile::-webkit-scrollbar{display:none}
   .nivel-pill{
@@ -1237,7 +1248,6 @@
           <span class="res-seg-label">Ambientes</span>
           <span class="res-seg-val" id="res-amb">—</span>
         </div>
-        <button class="btn-res-search" onclick="scrollToHero()">✏ Modificar</button>
         <button class="btn-filtros-sticky" id="btnFiltrosSticky" onclick="abrirDrawerFiltros()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
           Filtros
@@ -1314,7 +1324,7 @@
         </div>
         <div id="mapaDistancia" style="display:none;font-size:12px;color:#475569;font-family:var(--mono);padding:6px 8px;background:#F5F7FA;border:1px solid var(--border);border-top:none;border-radius:0 0 8px 8px;text-align:center"></div>
         <!-- Tipo de mudanza (3 niveles, toggles slide) -->
-        <div class="filtro-section">
+        <div class="filtro-section filtro-section-sticky">
           <div class="filtro-h">Tipo de mudanza</div>
           <label class="tg-row tg-nivel" id="tgNivelEsencial" onclick="_tgClick(event,this)">
             <span class="tg-lbl">📦 Esencial</span>
