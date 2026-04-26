@@ -148,7 +148,7 @@ async function generarPDFBase64(datos) {
   hLine(0, PW, Y, C_BGRN, 0.5);
   hLine(0, PW, Y + 24, C_BGRN, 0.5);
   doc.font('Helvetica-Bold').fontSize(8).fillColor(C_GRND);
-  doc.text('PRESUPUESTO OFICIAL  -  Valido 24hs', ML, Y + 8);
+  doc.text('PRESUPUESTO OFICIAL  -  Valido 7 dias', ML, Y + 8);
 
   Y = 116;
 
@@ -322,7 +322,7 @@ async function generarPDFBase64(datos) {
   doc.font('Helvetica').fontSize(8).fillColor(C_TEXT3);
   doc.text('  mudateya.ar  -  hola@mudateya.ar', ML + 56, Y, { lineBreak: false });
   doc.font('Helvetica').fontSize(7).fillColor(C_TEXT3);
-  doc.text('Valida 24hs  |  ' + nro, 0, Y, { width: PW - MR, align: 'right' });
+  doc.text('Valida 7 dias  |  ' + nro, 0, Y, { width: PW - MR, align: 'right' });
 
   doc.end();
 
