@@ -896,6 +896,18 @@ document.getElementById('pptoModal').addEventListener('click', function(e){
 // ── ACEPTAR COTIZACIÓN ─────────────────────────────────────────────────────
 async function aceptarCotizacion(mudanzaId, cotizacionId){
   var btn = event && event.currentTarget;
+  // Buscar datos para el mensaje de confirmación
+  var mPre = mudanzasData.find(function(x){ return x.id===mudanzaId; });
+  var cPre = mPre && (mPre.cotizaciones || []).find(function(x){ return x.id===cotizacionId; });
+  var nombreMud = (cPre && (cPre.mudanceroNombre || cPre.empresa)) || 'este mudancero';
+  var precioMud = cPre && cPre.precio ? '$' + Number(cPre.precio).toLocaleString('es-AR') : '';
+  var msg = '¿Confirmás elegir a ' + nombreMud + '?'
+    + (precioMud ? '\n\nMonto total: ' + precioMud : '')
+    + '\n\nDespués de aceptar:'
+    + '\n• Las otras cotizaciones quedan canceladas'
+    + '\n• Vas a pagar el anticipo (50%) por Mercado Pago'
+    + '\n• El resto se paga al completar la mudanza';
+  if (!confirm(msg)) return;
   if (btn) { btn.disabled = true; btn.textContent = 'Procesando…'; }
   try{
     var r = await fetch('/api/cotizaciones?action=aceptar', {
