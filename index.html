@@ -439,23 +439,28 @@
   .tg-row.is-on.tg-premium .tg-switch{background:#F59E0B}
   .tg-row.is-on.tg-premium{color:#B45309}
 
-  /* ══ Barra mobile de niveles (pills horizontales) ══ */
+  /* ══ Barra mobile de niveles (pills horizontales en 2 filas) ══ */
   .nivel-bar-mobile{
     display:none; /* solo en mobile */
-    gap:8px;padding:10px 12px;
+    flex-direction:column;
+    gap:6px;padding:8px 12px;
     background:#fff;
     border-bottom:1px solid var(--border);
-    overflow-x:auto;-webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
     /* Sticky pegado al nav. La info de búsqueda (Desde/Hasta/etc) queda arriba y se esconde con el scroll */
     position:sticky;top:56px;z-index:98;
     box-shadow:0 2px 8px rgba(0,0,0,.04);
-    align-items:center;
   }
+  .nivel-bar-row{
+    display:flex;gap:6px;align-items:center;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .nivel-bar-row::-webkit-scrollbar{display:none}
+  .nivel-bar-row-filtros{justify-content:center;overflow:visible}
   .btn-filtros-mobile-pill{
     flex-shrink:0;
     display:inline-flex;align-items:center;gap:5px;
-    padding:6px 12px;border-radius:999px;
+    padding:6px 16px;border-radius:999px;
     background:#003580;color:#fff;border:1.5px solid #003580;
     font-size:12px;font-weight:600;cursor:pointer;
     font-family:'Inter',sans-serif;transition:all .2s;white-space:nowrap;
@@ -595,7 +600,7 @@
   /* ── Grid de mudanceros (3 columnas desktop) ── */
   .mud-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
   @media(max-width:1100px){.mud-grid{grid-template-columns:repeat(2,1fr);gap:12px}}
-  @media(max-width:640px){.mud-grid{grid-template-columns:1fr;gap:10px}}
+  @media(max-width:640px){.mud-grid{grid-template-columns:repeat(2,1fr);gap:8px}}
 
   /* ── Card mudancero estilo MercadoLibre (vertical) ── */
   .mud-card{
@@ -816,6 +821,22 @@
     .footer-inner{flex-direction:column;align-items:flex-start}
     .card-rapida{flex-direction:column;text-align:center}
     .btn-cr{width:100%}
+    /* Cards de mudancero en 2 columnas mobile - ajustes para que entren bien */
+    .mud-card-body{padding:10px 10px 0;gap:4px}
+    .mud-card-empresa{font-size:13px;line-height:1.2}
+    .mud-card-zona{font-size:11px}
+    .mud-rating-inline{font-size:11px}
+    .mud-card-trabajos{font-size:10px}
+    .mud-tag{font-size:9.5px;padding:2px 5px}
+    .mud-nivel-badge{font-size:9px;padding:2px 5px;letter-spacing:.3px}
+    .mud-card-precio{padding:2px 10px 10px}
+    .mud-precio-num{font-size:18px}
+    .mud-precio-desde{font-size:9px}
+    .mud-precio-sub{font-size:9.5px}
+    .mud-card-actions{padding:0 8px 10px;gap:4px}
+    .mud-top-badge{font-size:9px;padding:3px 7px;top:6px;left:6px}
+    .mud-sel-check{width:22px;height:22px;top:6px;right:6px}
+    .res-body{padding:.5rem .6rem}
   }
   </style>
   <script data-cfasync="false">
@@ -1321,27 +1342,30 @@
       </div>
       <div class="drawer-footer">
         <button class="drawer-btn-clear" onclick="limpiarFiltros();actualizarBadge()">Limpiar</button>
-        <button class="drawer-btn-apply" id="btnVerResultados" onclick="cerrarDrawerFiltros()">Ver resultados</button>
+        <button class="drawer-btn-apply" id="btnVerResultados" onclick="cerrarDrawerFiltros()">Aplicar</button>
       </div>
     </div>
 
     <!-- ══ BARRA MOBILE: Tipo de mudanza (visible solo en mobile, fuera del drawer) ══ -->
     <div class="nivel-bar-mobile" id="nivelBarMobile">
-      <button class="nivel-pill" id="pillNivelEsencial" onclick="setNivelToggle('esencial',null)">
-        <span>📦</span> Esencial
-      </button>
-      <button class="nivel-pill" id="pillNivelIntegral" onclick="setNivelToggle('integral',null)">
-        <span>🛠️</span> Integral
-      </button>
-      <button class="nivel-pill nivel-pill-llave is-on" id="pillNivelLlave" onclick="setNivelToggle('llave',null)">
-        <span>🔑</span> Llave en mano
-      </button>
-      <div class="nivel-bar-divider"></div>
-      <button class="btn-filtros-mobile-pill" id="btnFiltrosMobilePill" onclick="abrirDrawerFiltros()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
-        Filtros
-        <span class="flt-badge3" id="fltBadge3">0</span>
-      </button>
+      <div class="nivel-bar-row">
+        <button class="nivel-pill" id="pillNivelEsencial" onclick="setNivelToggle('esencial',null)">
+          <span>📦</span> Esencial
+        </button>
+        <button class="nivel-pill" id="pillNivelIntegral" onclick="setNivelToggle('integral',null)">
+          <span>🛠️</span> Integral
+        </button>
+        <button class="nivel-pill nivel-pill-llave is-on" id="pillNivelLlave" onclick="setNivelToggle('llave',null)">
+          <span>🔑</span> Llave en mano
+        </button>
+      </div>
+      <div class="nivel-bar-row nivel-bar-row-filtros">
+        <button class="btn-filtros-mobile-pill" id="btnFiltrosMobilePill" onclick="abrirDrawerFiltros()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+          Filtros
+          <span class="flt-badge3" id="fltBadge3">0</span>
+        </button>
+      </div>
     </div>
 
     <div class="res-body" id="resBody">
@@ -2117,7 +2141,7 @@
     var btnVer = document.getElementById('btnVerResultados');
     if (btnVer) {
       btnVer.textContent = lista.length > 0
-        ? 'Ver ' + lista.length + ' resultado' + (lista.length !== 1 ? 's' : '')
+        ? 'Aplicar (' + lista.length + ')'
         : 'Sin resultados';
       btnVer.style.background = lista.length > 0 ? '' : '#94A3B8';
       btnVer.disabled = lista.length === 0;
