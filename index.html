@@ -579,19 +579,16 @@
   /* Opción rápida card */
   .card-rapida{
     background:linear-gradient(135deg,#EEF4FF 0%,#F0FFF6 100%);
-    border:2px solid var(--blue);border-radius:var(--r2);
-    padding:1rem 1.2rem;display:flex;align-items:center;gap:1rem;
+    border:1.5px solid var(--blue);border-radius:var(--r);
+    padding:8px 10px 8px 14px;display:flex;align-items:center;gap:10px;
     cursor:pointer;transition:all .2s;margin-bottom:10px;
   }
   .card-rapida:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
-  .cr-icon{font-size:2rem;flex-shrink:0}
-  .cr-body{flex:1}
-  .cr-title{font-size:15px;font-weight:700;color:var(--blue);margin-bottom:2px}
-  .cr-sub{font-size:12px;color:var(--text2);line-height:1.5}
+  .cr-title{font-size:13px;font-weight:700;color:var(--blue);flex:1;line-height:1.3}
   .btn-cr{
     background:var(--blue);color:#fff;
-    border:none;padding:10px 18px;border-radius:var(--r);
-    font-size:13px;font-weight:700;cursor:pointer;
+    border:none;padding:7px 14px;border-radius:6px;
+    font-size:12.5px;font-weight:700;cursor:pointer;
     font-family:'Inter',sans-serif;transition:all .2s;
     white-space:nowrap;flex-shrink:0;
   }
@@ -819,8 +816,10 @@
     .steps-grid,.aud-grid,.dif-grid{grid-template-columns:1fr}
     .section{padding:2.5rem 1rem}
     .footer-inner{flex-direction:column;align-items:flex-start}
-    .card-rapida{flex-direction:column;text-align:center}
-    .btn-cr{width:100%}
+    /* Card rápida compacta también en mobile - se mantiene en 1 fila */
+    .card-rapida{padding:7px 8px 7px 12px;gap:8px;margin-bottom:8px}
+    .cr-title{font-size:11.5px;line-height:1.25}
+    .btn-cr{padding:6px 12px;font-size:11.5px}
     /* Cards de mudancero estilo Mercado Libre en mobile (compactas, casi 4 por pantalla) */
     .mud-card{border-radius:8px}
     .mud-card-foto{aspect-ratio:16/10} /* foto baja, formato apaisado */
@@ -2186,12 +2185,10 @@
       return;
     }
     var html = '';
-    // Opción rápida
+    // Opción rápida (compacta: 1 línea de texto + botón)
     html += '<div class="card-rapida" onclick="publicarAbierto()">'
-      + '<div class="cr-icon">⚡</div>'
-      + '<div class="cr-body"><div class="cr-title">Recibir las primeras 5 cotizaciones automáticamente</div>'
-      + '<div class="cr-sub">Los primeros 5 mudanceros disponibles en tu zona te cotizan sin que tengas que elegirlos vos.</div></div>'
-      + '<button class="btn-cr" onclick="event.stopPropagation();publicarAbierto()">Solicitar →</button>'
+      + '<div class="cr-title">⚡ Recibí las primeras 5 cotizaciones gratis</div>'
+      + '<button class="btn-cr" onclick="event.stopPropagation();publicarAbierto()">Solicitar</button>'
       + '</div>';
 
     // Top 3 "Más contratados" — se calcula sobre la lista filtrada pero
