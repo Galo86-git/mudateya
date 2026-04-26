@@ -759,20 +759,19 @@ function getFiltered(lista) {
 }
 
 // ── ORDENAMIENTO ──────────────────────────────────────────────────
-// Devuelve el monto representativo del pedido para ordenar.
-// - Si el cliente ya eligió un nivel → ese precio
-// - Si no, la suma de los 3 packs (total "en juego")
+// Devuelve el monto real del pedido SOLO si el cliente eligió un pack.
+// Si no eligió → null (no inflar números con la suma de los 3 packs).
 function montoPedido(p) {
+  if (!p.nivelElegido) return null;
   var packs = p.packs || [];
-  if (p.nivelElegido) {
-    var elegido = packs.find(function(pk){ return pk.nivel === p.nivelElegido; });
-    if (elegido) return Number(elegido.precio) || 0;
-  }
-  var total = 0;
-  for (var i = 0; i < packs.length; i++) {
-    total += Number(packs[i].precio) || 0;
-  }
-  return total;
+  var elegido = packs.find(function(pk){ return pk.nivel === p.nivelElegido; });
+  return elegido ? (Number(elegido.precio) || 0) : null;
+}
+
+// Para ordenamiento: trata null como 0 (los pendientes van al final cuando es desc)
+function montoParaSort(p) {
+  var m = montoPedido(p);
+  return m === null ? 0 : m;
 }
 
 function getSorted(lista) {
@@ -780,7 +779,7 @@ function getSorted(lista) {
   copia.sort(function(a, b) {
     var diff;
     if (SORT.by === 'monto') {
-      diff = montoPedido(a) - montoPedido(b);
+      diff = montoParaSort(a) - montoParaSort(b);
     } else {
       // Fecha: usamos creadoEn (ISO) — comparación por string funciona para ISO
       var fa = a.creadoEn || '';
@@ -907,8 +906,13 @@ function renderTabla(filtrados) {
     }
 
     var monto = montoPedido(p);
-    var montoCls = p.nivelElegido ? 'green' : '';
-    var montoCol = '<td class="cel-monto ' + montoCls + '">' + fmtCompact(monto) + '</td>';
+    var montoCol;
+    if (monto === null) {
+      montoCol = '<td class="cel-monto" style="color:var(--text3);font-weight:500">—</td>';
+    } else {
+      var montoCls = p.nivelElegido ? 'green' : '';
+      montoCol = '<td class="cel-monto ' + montoCls + '">' + fmtCompact(monto) + '</td>';
+    }
 
     var clienteUrl = '/cliente-packs?id=' + encodeURIComponent(p.id);
     var actions = '<a class="ped-btn" href="' + clienteUrl + '" target="_blank" onclick="event.stopPropagation()" title="Ver lo que ve el cliente">👁</a>' +
