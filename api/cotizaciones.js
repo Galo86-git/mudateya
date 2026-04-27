@@ -898,14 +898,39 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === 'pdf' && req.method === 'GET') {
-      const { mudanzaId, cotizacionId } = req.query;
+      const { mudanzaId, cotizacionId, propuestaNivel } = req.query;
       if (!mudanzaId || !cotizacionId) return res.status(400).json({ error: 'Faltan parámetros' });
       const mudanza = await getJSON(`mudanza:${mudanzaId}`);
       if (!mudanza) return res.status(404).json({ error: 'Mudanza no encontrada' });
       const cot = mudanza.cotizaciones.find(c => c.id === cotizacionId);
       if (!cot) return res.status(404).json({ error: 'Cotización no encontrada' });
+
+      // Si la cotización tiene propuestas[] múltiples, elegir cuál mostrar en el PDF
+      let precioPDF = cot.precio;
+      let notaPDF = cot.nota;
+      let tiempoPDF = cot.tiempoEstimado;
+      let nivelPDF = cot.nivelAceptado || mudanza.nivel || 'esencial';
+      if (Array.isArray(cot.propuestas) && cot.propuestas.length > 0) {
+        let prop = null;
+        if (propuestaNivel) {
+          prop = cot.propuestas.find(p => p.nivel === propuestaNivel);
+        }
+        if (!prop) {
+          // Default: nivel pedido por el cliente o primera propuesta
+          prop = cot.propuestas.find(p => p.nivel === (mudanza.nivel || 'esencial')) || cot.propuestas[0];
+        }
+        if (prop) {
+          precioPDF  = prop.precio;
+          notaPDF    = prop.nota || cot.nota;
+          tiempoPDF  = prop.tiempoEstimado || cot.tiempoEstimado;
+          nivelPDF   = prop.nivel;
+        }
+      }
+      const NIVEL_NOMBRES = { esencial:'Esencial', integral:'Integral', llave:'Llave en mano', flete:'Flete' };
+      const packNombre = NIVEL_NOMBRES[nivelPDF] || 'Esencial';
+
       const pdfBase64 = await generarPDFBase64({
-        id:                cot.id,
+        id:                cot.id + (propuestaNivel ? '-' + propuestaNivel : ''),
         fechaEmision:      new Date().toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' }),
         clienteNombre:     mudanza.clienteNombre,
         clienteEmail:      mudanza.clienteEmail,
@@ -917,9 +942,10 @@ module.exports = async function handler(req, res) {
         ambientes:         mudanza.ambientes,
         objetos:           mudanza.servicios,
         extras:            mudanza.extras,
-        precio:            cot.precio,
-        nota:              cot.nota,
-        tiempoEstimado:    cot.tiempoEstimado,
+        precio:            precioPDF,
+        nota:              notaPDF ? ('Pack: ' + packNombre + (notaPDF ? ' · ' + notaPDF : '')) : ('Pack: ' + packNombre),
+        tiempoEstimado:    tiempoPDF,
+        pack:              packNombre,
       });
       const pdfBuffer = Buffer.from(pdfBase64, 'base64');
       res.setHeader('Content-Type', 'application/pdf');
