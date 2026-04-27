@@ -707,15 +707,22 @@ module.exports = async function handler(req, res) {
       if (!mudanza.origen || !mudanza.destino || !mudanza.fecha) {
         return res.status(400).json({ error: 'Datos de la mudanza incompletos (origen, destino, fecha)' });
       }
-      if (!Array.isArray(packs) || packs.length !== 3) {
-        return res.status(400).json({ error: 'Tenés que elegir exactamente 3 packs (1 de cada nivel)' });
+      if (!Array.isArray(packs) || packs.length < 1 || packs.length > 3) {
+        return res.status(400).json({ error: 'Tenés que elegir entre 1 y 3 packs.' });
       }
 
-      // Validar: 1 de cada nivel, distintas mudanceras permitido repetir si admin lo permite
-      var nivelesPresentes = packs.map(function(p){ return p.nivel; }).sort();
-      var nivelesEsperados = NIVELES.slice().sort();
-      if (nivelesPresentes.join(',') !== nivelesEsperados.join(',')) {
-        return res.status(400).json({ error: 'Tenés que elegir 1 Esencial + 1 Integral + 1 Llave en Mano' });
+      // Validar niveles: cada uno debe ser válido y no puede haber duplicados
+      var nivelesPresentes = packs.map(function(p){ return p.nivel; });
+      var nivelesUnicos = {};
+      for (var ni = 0; ni < nivelesPresentes.length; ni++) {
+        var nv = nivelesPresentes[ni];
+        if (NIVELES.indexOf(nv) === -1) {
+          return res.status(400).json({ error: 'Nivel inválido: ' + nv });
+        }
+        if (nivelesUnicos[nv]) {
+          return res.status(400).json({ error: 'No podés elegir el mismo nivel dos veces' });
+        }
+        nivelesUnicos[nv] = true;
       }
 
       // Rehidratar cada pack desde Redis (nunca confiar en el precio que viene del cliente)
