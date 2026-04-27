@@ -229,9 +229,9 @@ nav{position:sticky;top:0;z-index:200;background:#003580;backdrop-filter:blur(20
         </div>
         <div class="field" id="f-email">
           <label class="field-label">Email <span>*</span></label>
-          <input type="text" id="email" placeholder="tunombre@gmail.com" onblur="validarEmailGmail()"/>
-          <span class="field-hint">⚠ Solo se aceptan cuentas de Gmail.</span>
-          <span class="field-error">Ingresá un email de Gmail válido (@gmail.com)</span>
+          <input type="email" id="email" placeholder="tunombre@gmail.com" onblur="validarEmail()"/>
+          <span class="field-hint">📧 Recomendamos un email de <b>Gmail</b> o <b>Google Workspace</b> para entrar más rápido con un click. Si usás otro email (Hotmail, Yahoo, dominio propio sin Google), también podés ingresar pidiendo un link de acceso por mail.</span>
+          <span class="field-error">Ingresá un email válido</span>
         </div>
         <div class="field" id="f-cuil" style="grid-column:1/-1">
           <label class="field-label">CUIL / CUIT <span>*</span></label>
@@ -863,11 +863,12 @@ function fmtPrecioInput(el) {
 }
 
 // ── SUBMIT ───────────────────────────────────────────────────────
-function validarEmailGmail() {
+function validarEmail() {
   var val = document.getElementById('email').value.trim();
   var field = document.getElementById('f-email');
   if (val.length === 0) { field.classList.remove('has-error'); return; }
-  if (!/^[^\s@]+@gmail\.com$/.test(val)) { field.classList.add('has-error'); }
+  // Regex de email estándar (acepta gmail, workspace, hotmail, dominio propio, etc.)
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { field.classList.add('has-error'); }
   else { field.classList.remove('has-error'); }
 }
 
@@ -882,7 +883,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   var ok = true;
   ok = validateField('nombre',   nombre.length > 1)   && ok;
   ok = validateField('telefono', telefono.length > 6) && ok;
-  ok = validateField('email',    /^[^\s@]+@gmail\.com$/.test(email)) && ok;
+  ok = validateField('email',    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) && ok;
   if (!ok) {
     var firstErr = document.querySelector('.has-error input, .has-error select');
     if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
