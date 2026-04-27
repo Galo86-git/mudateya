@@ -1231,14 +1231,18 @@ function renderRowPedido(m, tipo) {
     var pmc = parseInt(m.miCotizacion.precio||0);
     if (pmc > 0) precioTxt = '$'+pmc.toLocaleString('es-AR');
   }
-  // Ruta compacta
+  // Ruta compacta + indicador de origen (asesor vs sitio)
+  var esAsesor = !!m.refAliado;
+  var iconoOrigen = esAsesor
+    ? '<span title="Cliente referido por asesor inmobiliario · comisión 25%" style="font-size:13px;flex-shrink:0;margin-right:2px">🏢</span>'
+    : '';
   var ruta = (m.desde||'') + ' → ' + (m.hasta||'');
   // Meta inline: ambientes + km
   var metaInline = (m.ambientes||'—') + (m.km ? ' · '+m.km+'km' : '');
 
   return '<div class="pd-row-line" id="pd-row-'+m.id+'" data-id="'+m.id+'" data-tipo="'+tipo+'" onclick="seleccionarPedido(\''+m.id+'\',\''+tipo+'\')" tabindex="0">'
     + '<span class="pd-st-pill '+pillCls+'">'+pillTxt+'</span>'
-    + '<span class="pd-ruta-line" title="'+ruta.replace(/"/g,'&quot;')+'">'+ruta+'</span>'
+    + '<span class="pd-ruta-line" title="'+ruta.replace(/"/g,'&quot;')+(esAsesor?' · Cliente por asesor':'')+'">'+iconoOrigen+ruta+'</span>'
     + packBadge
     + (precioTxt ? '<span class="pd-precio-line">'+precioTxt+'</span>' : '<span class="pd-precio-line" style="color:var(--text3)">—</span>')
     + '<span class="pd-arrow">›</span>'
@@ -1258,12 +1262,30 @@ function seleccionarPedido(mudanzaId, tipo) {
   document.querySelectorAll('.pd-row-line').forEach(function(el){ el.classList.remove('active'); });
   var row = document.getElementById('pd-row-'+mudanzaId);
   if (row) row.classList.add('active');
+  // Banner de origen del cliente (asesor vs directo) con comisión
+  var esAsesor = !!m.refAliado;
+  var bannerOrigen = esAsesor
+    ? '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FEF3F2;border:1px solid #FECACA;border-left:3px solid #DC2626;border-radius:8px;margin-bottom:14px">'
+      + '<span style="font-size:18px;flex-shrink:0">🏢</span>'
+      + '<div style="flex:1;min-width:0">'
+      +   '<div style="font-size:12px;font-weight:700;color:#991B1B;line-height:1.3">Cliente referido por asesor inmobiliario</div>'
+      +   '<div style="font-size:11px;color:#7F1D1D;font-family:var(--mono);margin-top:2px">Comisión MudateYa: <b>25%</b>'+(m.refAliado?' · Ref: '+esc(m.refAliado):'')+'</div>'
+      + '</div>'
+      + '</div>'
+    : '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F0FDF4;border:1px solid #BBF7D0;border-left:3px solid #16A34A;border-radius:8px;margin-bottom:14px">'
+      + '<span style="font-size:18px;flex-shrink:0">🌐</span>'
+      + '<div style="flex:1;min-width:0">'
+      +   '<div style="font-size:12px;font-weight:700;color:#15803D;line-height:1.3">Cliente directo del sitio</div>'
+      +   '<div style="font-size:11px;color:#166534;font-family:var(--mono);margin-top:2px">Comisión MudateYa: <b>15%</b></div>'
+      + '</div>'
+      + '</div>';
   // Renderizar contenido (reusa los renders existentes)
   var detailHtml = '<div class="pd-detail-content">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #E2E8F0">'
     +   '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px">Detalle del pedido</div>'
     +   '<button class="pd-detail-close" onclick="cerrarDetallePedido()" aria-label="Cerrar">✕</button>'
     + '</div>'
+    + bannerOrigen
     + (tipo === 'disponibles' ? renderCardDisponible(m) : renderCardCotizacion(m))
     + '</div>';
   var panel = document.getElementById('pdSidePanel');
