@@ -488,7 +488,7 @@ module.exports = async function handler(req, res) {
   const { action } = req.query;
 
   // ── RATE LIMITING por IP ─────────────────────────────────────────
-  const RATE_LIMITED_ACTIONS = ['publicar', 'cotizar', 'analizar-foto', 'crear-sesion', 'request-magic-link'];
+  const RATE_LIMITED_ACTIONS = ['publicar', 'cotizar', 'analizar-foto', 'crear-sesion', 'request-magic-link', 'request-magic-link-cliente'];
   if (RATE_LIMITED_ACTIONS.includes(action)) {
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
     const rlKey = `ratelimit:${action}:${ip}`;
@@ -612,9 +612,81 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ok: true, message: 'Si tu email está registrado, recibirás un link en breve.' });
   }
 
+  // ── MAGIC LINK CLIENTE: solicitar link de login para cliente ──────
+  // POST /api/cotizaciones?action=request-magic-link-cliente  body: { email, nombre }
+  // No requiere que el cliente exista previamente en Redis (puede ser nuevo).
+  // Rate limit: 3 magic links por email cada 10 min.
+  if (action === 'request-magic-link-cliente' && req.method === 'POST') {
+    const { email, nombre } = req.body || {};
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: 'Email inválido' });
+    }
+    const emailNorm = String(email).trim().toLowerCase();
+    const nombreNorm = String(nombre || emailNorm.split('@')[0]).trim().slice(0, 80);
+
+    // Rate limit por email
+    const rlKey = `magiclink:rl:cliente:${emailNorm}`;
+    const intentos = (await getJSON(rlKey)) || 0;
+    if (intentos >= 3) {
+      return res.status(200).json({ ok: true, message: 'Si todo está OK, recibirás un link en breve.' });
+    }
+    await setJSON(rlKey, intentos + 1, 600);
+
+    // Generar token
+    const token = require('crypto').randomBytes(32).toString('hex');
+    const TTL_LINK = 15 * 60;
+    await setJSON(`magiclink:token:${token}`, {
+      email: emailNorm,
+      nombre: nombreNorm,
+      tipo: 'cliente',
+      creado: Date.now()
+    }, TTL_LINK);
+
+    if (!process.env.RESEND_API_KEY) {
+      console.error('[magic-link-cliente] RESEND_API_KEY no configurada');
+      return res.status(500).json({ error: 'Error de configuración del servidor' });
+    }
+    const { Resend } = require('resend');
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const link = `https://mudateya.ar/?token=${token}`;
+    const nombreEsc = nombreNorm.replace(/[<>&"']/g, function(c){
+      return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c];
+    });
+
+    try {
+      await resend.emails.send({
+        from:    'MudateYa <noreply@mudateya.ar>',
+        to:      emailNorm,
+        subject: '🔑 Tu link para publicar tu mudanza en MudateYa',
+        html: '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #E2E8F0">' +
+          '<div style="background:#003580;padding:28px 32px"><div style="font-size:26px;font-weight:900;color:#fff">Mudate<span style="color:#22C36A">Ya</span></div></div>' +
+          '<div style="background:#22C36A;padding:4px"></div>' +
+          '<div style="padding:32px">' +
+            '<div style="font-size:40px;text-align:center;margin-bottom:12px">📦</div>' +
+            '<h2 style="font-size:20px;color:#003580;margin:0 0 8px;text-align:center">Hola ' + nombreEsc + ',</h2>' +
+            '<p style="font-size:14px;color:#475569;text-align:center;margin:0 0 24px;line-height:1.5">Hacé click para volver a MudateYa y completar tu pedido de mudanza.<br/>El link es válido por <b>15 minutos</b> y se puede usar una sola vez.</p>' +
+            '<div style="text-align:center;margin:24px 0">' +
+              '<a href="' + link + '" style="display:inline-block;background:#22C36A;color:#fff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:10px;text-decoration:none">Ingresar y publicar mi mudanza</a>' +
+            '</div>' +
+            '<p style="font-size:12px;color:#64748B;text-align:center;margin:20px 0 0;line-height:1.5">Si el botón no funciona, copiá este link:<br/><span style="font-family:monospace;font-size:11px;word-break:break-all;color:#475569">' + link + '</span></p>' +
+            '<div style="margin-top:28px;padding-top:20px;border-top:1px solid #E2E8F0">' +
+              '<p style="font-size:11px;color:#94A3B8;text-align:center;margin:0;line-height:1.5">Si vos no pediste este link, podés ignorar este email.<br/>Por seguridad, expira en 15 minutos.</p>' +
+            '</div>' +
+          '</div>' +
+          '<div style="background:#F5F7FA;padding:16px 32px;text-align:center;font-size:11px;color:#94A3B8">© MudateYa · <a href="https://mudateya.ar" style="color:#1A6FFF;text-decoration:none">mudateya.ar</a></div>' +
+          '</div>'
+      });
+    } catch(emailErr) {
+      console.error('[magic-link-cliente] Error enviando email:', emailErr);
+      return res.status(500).json({ error: 'No se pudo enviar el email. Intentá de nuevo.' });
+    }
+    return res.status(200).json({ ok: true, message: 'Te mandamos un link a tu email. Revisá tu casilla (también el spam).' });
+  }
+
   // ── MAGIC LINK: validar token y crear sesión ───────────────────────
   // POST /api/cotizaciones?action=verify-magic-link  body: { token }
   // Valida el token, lo borra (one-time use), y devuelve sessionToken + datos del usuario.
+  // Soporta tipo 'mudancero' (busca perfil) y 'cliente' (acepta sin perfil previo).
   if (action === 'verify-magic-link' && req.method === 'POST') {
     const { token } = req.body || {};
     if (!token || typeof token !== 'string' || token.length !== 64) {
@@ -628,13 +700,28 @@ module.exports = async function handler(req, res) {
     try { await redisCall('DEL', `magiclink:token:${token}`); } catch(e) {}
 
     const emailNorm = data.email;
+    const tipo = data.tipo || 'mudancero'; // tokens viejos = mudancero por default
+    const sessionToken = require('crypto').randomBytes(32).toString('hex');
+    const ttl = 60 * 60 * 24 * 7; // 7 días
+
+    if (tipo === 'cliente') {
+      // Login de cliente: NO requiere perfil previo
+      await setJSON(`session:cliente:${emailNorm}`, sessionToken, ttl);
+      return res.status(200).json({
+        ok: true,
+        sessionToken,
+        ttl,
+        email: emailNorm,
+        nombre: data.nombre || emailNorm.split('@')[0],
+        tipo: 'cliente'
+      });
+    }
+
+    // Login de mudancero: requiere perfil registrado
     const perfil = await getJSON(`mudancero:perfil:${emailNorm}`);
     if (!perfil) {
       return res.status(401).json({ error: 'No encontramos tu perfil. Contactanos.' });
     }
-    // Generar sesión (igual que crear-sesion de Google)
-    const sessionToken = require('crypto').randomBytes(32).toString('hex');
-    const ttl = 60 * 60 * 24 * 7; // 7 días
     await setJSON(`session:mudancero:${emailNorm}`, sessionToken, ttl);
     return res.status(200).json({
       ok: true,
@@ -643,7 +730,8 @@ module.exports = async function handler(req, res) {
       email: emailNorm,
       nombre: perfil.nombre || '',
       empresa: perfil.empresa || '',
-      foto: perfil.foto || ''
+      foto: perfil.foto || '',
+      tipo: 'mudancero'
     });
   }
 
