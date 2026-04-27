@@ -592,19 +592,11 @@ module.exports = async function handler(req, res) {
         if (m.estado && m.estado !== 'aprobado') continue;
 
         // Modelo nuevo: precios por nivel × ambientes (uso amb2 por default acá)
+        // Sin fallbacks: si el mudancero no cargó el precio en el form actual,
+        // ese pack queda vacío.
         var pe = parsePrecioZ(m.preciosEsencial && m.preciosEsencial.amb2);
         var pi = parsePrecioZ(m.preciosIntegral && m.preciosIntegral.amb2);
         var pl = parsePrecioZ(m.preciosLlave    && m.preciosLlave.amb2);
-
-        // Fallback a preciosLeads (amb2)
-        if (pe === 0 && m.preciosLeads && m.preciosLeads.amb2) pe = parsePrecioZ(m.preciosLeads.amb2.esencial);
-        if (pi === 0 && m.preciosLeads && m.preciosLeads.amb2) pi = parsePrecioZ(m.preciosLeads.amb2.integral);
-        if (pl === 0 && m.preciosLeads && m.preciosLeads.amb2) pl = parsePrecioZ(m.preciosLeads.amb2.llave);
-
-        // Fallback a preciosPack viejo
-        if (pe === 0 && m.preciosPack) pe = parsePrecioZ(m.preciosPack.esencial);
-        if (pi === 0 && m.preciosPack) pi = parsePrecioZ(m.preciosPack.integral);
-        if (pl === 0 && m.preciosPack) pl = parsePrecioZ(m.preciosPack.llave);
 
         mudanceras.push({
           email:        m.email,
@@ -661,29 +653,15 @@ module.exports = async function handler(req, res) {
         if (!mt) continue;
         if (mt.estado && mt.estado !== 'aprobado') continue;
 
-        // ── Modelo nuevo (lo que carga el mudancero hoy en su perfil): ──
+        // ── Modelo nuevo (único que carga el mudancero hoy en su perfil): ──
         // mt.preciosEsencial = { amb1, amb2, amb3, amb4 } (strings/números)
         // mt.preciosIntegral = { amb1, amb2, amb3, amb4 }
         // mt.preciosLlave    = { amb1, amb2, amb3, amb4 }
+        // NO usamos fallbacks (preciosLeads, preciosPack) — si el mudancero no
+        // cargó el precio en el modelo nuevo, ese pack queda vacío y no aparece.
         var mtEsc = parsePrecio(mt.preciosEsencial && mt.preciosEsencial[ambKey]);
         var mtInt = parsePrecio(mt.preciosIntegral && mt.preciosIntegral[ambKey]);
         var mtLla = parsePrecio(mt.preciosLlave    && mt.preciosLlave[ambKey]);
-
-        // Fallback a preciosLeads (modelo intermedio para Plan Referidos, si lo cargaron)
-        if (mtEsc === 0 && mt.preciosLeads && mt.preciosLeads[ambKeyLeads]) {
-          mtEsc = parsePrecio(mt.preciosLeads[ambKeyLeads].esencial);
-        }
-        if (mtInt === 0 && mt.preciosLeads && mt.preciosLeads[ambKeyLeads]) {
-          mtInt = parsePrecio(mt.preciosLeads[ambKeyLeads].integral);
-        }
-        if (mtLla === 0 && mt.preciosLeads && mt.preciosLeads[ambKeyLeads]) {
-          mtLla = parsePrecio(mt.preciosLeads[ambKeyLeads].llave);
-        }
-
-        // Fallback a preciosPack viejo (para mudanceros legacy)
-        if (mtEsc === 0 && mt.preciosPack) mtEsc = parsePrecio(mt.preciosPack.esencial);
-        if (mtInt === 0 && mt.preciosPack) mtInt = parsePrecio(mt.preciosPack.integral);
-        if (mtLla === 0 && mt.preciosPack) mtLla = parsePrecio(mt.preciosPack.llave);
 
         // Filtramos las que no tienen ningún precio cargado para este tamaño
         if (mtEsc === 0 && mtInt === 0 && mtLla === 0) continue;
