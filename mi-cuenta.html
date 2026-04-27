@@ -651,106 +651,6 @@ body{font-family:Inter,sans-serif;background:#fff;color:var(--text);min-height:1
           </div>
         </div>
 
-        <!-- ═══ NUEVO: Precios para Leads Plan Referidos Inmobiliarios (25% comisión) ═══ -->
-        <div class="card" style="margin-bottom:1rem">
-          <div class="card-header"><span class="card-title">🏢 Precios Plan Referidos Inmobiliarios</span></div>
-          <div style="background:#EEF4FF;border:1px solid #C7D7F5;border-radius:10px;padding:12px 14px;margin:14px 1.2rem 0;display:flex;align-items:flex-start;gap:10px">
-            <span style="font-size:18px;flex-shrink:0;line-height:1">🏢</span>
-            <div style="font-size:12.5px;color:#1E40AF;line-height:1.5">
-              <b>Estos precios solo los ven los leads que llegan desde inmobiliarias aliadas.</b><br>
-              No afectan tu visibilidad en la búsqueda pública del sitio (esos precios los cargás arriba en "Servicios y precios").
-            </div>
-          </div>
-          <div class="leads-banner">
-            ⚠️ <b>Comisión MudateYa: 25%</b> — Plan Referidos son leads pre-calificados que llegan desde nuestros asesores inmobiliarios aliados. Cargá los precios que querés cobrar para cada tamaño y tipo de pack. <b>Te queda el 75%</b> del precio que pongas.
-          </div>
-          <div style="padding:0 1.2rem 1.2rem;overflow-x:auto">
-            <table class="leads-table" id="leadsTable">
-              <thead>
-                <tr>
-                  <th>Tamaño</th>
-                  <th>🥉 Esencial</th>
-                  <th>
-                    🥈 Integral
-                    <span class="pct-pill" id="pct-integral-pill" onclick="togglePctPopup('integral',event)">+ %</span>
-                    <div class="pct-popup" id="pct-integral-popup">
-                      <div class="pct-popup-title">Integral = Esencial + %</div>
-                      <div class="pct-popup-row">
-                        <span class="pct-popup-symbol">+</span>
-                        <input type="number" id="pct-integral-input" class="pct-popup-input" placeholder="30" min="0" max="500"/>
-                        <span class="pct-popup-symbol">%</span>
-                      </div>
-                      <div class="pct-popup-actions">
-                        <button class="pct-popup-clear" onclick="clearPct('integral',event)">Quitar</button>
-                        <button class="pct-popup-apply" onclick="applyPct('integral',event)">Aplicar</button>
-                      </div>
-                    </div>
-                  </th>
-                  <th>
-                    🥇 Llave en Mano
-                    <span class="pct-pill" id="pct-llave-pill" onclick="togglePctPopup('llave',event)">+ %</span>
-                    <div class="pct-popup" id="pct-llave-popup">
-                      <div class="pct-popup-title">Llave = Integral + %</div>
-                      <div class="pct-popup-row">
-                        <span class="pct-popup-symbol">+</span>
-                        <input type="number" id="pct-llave-input" class="pct-popup-input" placeholder="40" min="0" max="500"/>
-                        <span class="pct-popup-symbol">%</span>
-                      </div>
-                      <div class="pct-popup-actions">
-                        <button class="pct-popup-clear" onclick="clearPct('llave',event)">Quitar</button>
-                        <button class="pct-popup-apply" onclick="applyPct('llave',event)">Aplicar</button>
-                      </div>
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>1 amb</td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb1-esencial" data-amb="amb1" data-nivel="esencial" placeholder="0"/></div></td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb1-integral" data-amb="amb1" data-nivel="integral" placeholder="0"/></div></td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb1-llave" data-amb="amb1" data-nivel="llave" placeholder="0"/></div></td>
-                </tr>
-                <tr><td>2 amb</td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb2-esencial" data-amb="amb2" data-nivel="esencial" placeholder="0"/></div></td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb2-integral" data-amb="amb2" data-nivel="integral" placeholder="0"/></div></td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb2-llave" data-amb="amb2" data-nivel="llave" placeholder="0"/></div></td>
-                </tr>
-                <tr><td>3 amb</td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb3-esencial" data-amb="amb3" data-nivel="esencial" placeholder="0"/></div></td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb3-integral" data-amb="amb3" data-nivel="integral" placeholder="0"/></div></td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb3-llave" data-amb="amb3" data-nivel="llave" placeholder="0"/></div></td>
-                </tr>
-                <tr><td>4 amb</td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb4-esencial" data-amb="amb4" data-nivel="esencial" placeholder="0"/></div></td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb4-integral" data-amb="amb4" data-nivel="integral" placeholder="0"/></div></td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb4-llave" data-amb="amb4" data-nivel="llave" placeholder="0"/></div></td>
-                </tr>
-                <tr><td>5+ amb</td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb5plus-esencial" data-amb="amb5plus" data-nivel="esencial" placeholder="0"/></div></td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb5plus-integral" data-amb="amb5plus" data-nivel="integral" placeholder="0"/></div></td>
-                  <td><div class="leads-input-wrap"><span>$</span><input type="text" inputmode="numeric" oninput="_fmtPrecioLeads(this)" class="leads-input" id="pl-amb5plus-llave" data-amb="amb5plus" data-nivel="llave" placeholder="0"/></div></td>
-                </tr>
-              </tbody>
-            </table>
-            <div style="font-size:11px;color:var(--text3);margin-top:8px;font-family:var(--mono)">Dejá en blanco lo que no querés cubrir — solo aparecerás en pedidos de los tamaños donde tengas precio cargado.</div>
-
-            <div class="niveles-info">
-              <div class="niv-card bronce">
-                <div class="niv-eyebrow"><span class="niv-medal">🥉</span> Esencial</div>
-                <div class="niv-desc">Solo mudanza. Camión + 2 operarios, carga/traslado/descarga, hasta 4 hs. Cliente provee embalaje.</div>
-              </div>
-              <div class="niv-card plata">
-                <div class="niv-eyebrow"><span class="niv-medal">🥈</span> Integral</div>
-                <div class="niv-desc">Mudanza completa. Esencial + cajas, equipo de embaladores 3-4 pax y desembalaje en destino.</div>
-              </div>
-              <div class="niv-card oro">
-                <div class="niv-eyebrow"><span class="niv-medal">🥇</span> Llave en Mano</div>
-                <div class="niv-desc">El premium. Integral + desarme/armado, instalación TV/electro, limpieza, retiro de cartón.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div class="card" style="margin-bottom:1rem">
           <div class="card-header"><span class="card-title">🏦 Datos para cobrar</span></div>
           <div style="padding:1.2rem;display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -1766,146 +1666,13 @@ function loadPerfil(){
 }
 
 // Estado de los % (también lee/escribe los inputs hidden de pct)
-var _pctState = { integral: 0, llave: 0 };
-
-// Formatea input como moneda argentina (1500000 → 1.500.000) mientras escribe
-function _fmtPrecioLeads(el) {
-  var raw = String(el.value || '').replace(/\D/g,'');
-  el.value = raw ? parseInt(raw,10).toLocaleString('es-AR') : '';
-  // Si se modifica un input de la tabla, recalcular en cascada según los % activos
-  recalcularCascadaDesde(el);
-}
-// Parsea valor formateado a número limpio
-function _parseLeadsValue(v) {
-  return parseInt(String(v||'').replace(/\D/g,''),10) || 0;
-}
-
-// Recalcula columnas con % activo a partir del input que cambió.
-// Si cambió Esencial → recalcula Integral (si pct activo) → recalcula Llave (si pct activo)
-// Si cambió Integral → recalcula Llave (si pct activo)
-// Si cambió Llave → no recalcula nada (es el último)
-function recalcularCascadaDesde(el) {
-  if (!el || !el.classList || !el.classList.contains('leads-input')) return;
-  var amb = el.getAttribute('data-amb');
-  var nivel = el.getAttribute('data-nivel');
-  if (!amb || !nivel) return;
-  var v = _parseLeadsValue(el.value);
-  if (nivel === 'esencial') {
-    if (_pctState.integral > 0) {
-      var integralInp = document.getElementById('pl-' + amb + '-integral');
-      var newInt = v > 0 ? Math.round(v * (1 + _pctState.integral / 100)) : 0;
-      if (integralInp) integralInp.value = newInt > 0 ? newInt.toLocaleString('es-AR') : '';
-      // luego cascada a Llave si también hay pct
-      if (_pctState.llave > 0) {
-        var llaveInp = document.getElementById('pl-' + amb + '-llave');
-        var newLla = newInt > 0 ? Math.round(newInt * (1 + _pctState.llave / 100)) : 0;
-        if (llaveInp) llaveInp.value = newLla > 0 ? newLla.toLocaleString('es-AR') : '';
-      }
-    }
-  } else if (nivel === 'integral') {
-    if (_pctState.llave > 0) {
-      var llaveInp2 = document.getElementById('pl-' + amb + '-llave');
-      var newLla2 = v > 0 ? Math.round(v * (1 + _pctState.llave / 100)) : 0;
-      if (llaveInp2) llaveInp2.value = newLla2 > 0 ? newLla2.toLocaleString('es-AR') : '';
-    }
-  }
-}
-
-// Toggle popup del pill (abrir/cerrar)
-function togglePctPopup(tipo, ev) {
-  if (ev) ev.stopPropagation();
-  var popup = document.getElementById('pct-' + tipo + '-popup');
-  if (!popup) return;
-  // Cerrar otros
-  document.querySelectorAll('.pct-popup.open').forEach(function(p){ if (p !== popup) p.classList.remove('open'); });
-  popup.classList.toggle('open');
-  if (popup.classList.contains('open')) {
-    var inp = document.getElementById('pct-' + tipo + '-input');
-    if (inp) {
-      inp.value = _pctState[tipo] > 0 ? _pctState[tipo] : '';
-      inp.focus();
-    }
-  }
-}
-
-// Aplicar % al click en "Aplicar"
-function applyPct(tipo, ev) {
-  if (ev) ev.stopPropagation();
-  var inp = document.getElementById('pct-' + tipo + '-input');
-  var pct = parseFloat((inp && inp.value) || '0');
-  if (!pct || pct <= 0) {
-    if (inp) { inp.style.borderColor = '#EF4444'; inp.focus(); setTimeout(function(){ inp.style.borderColor = ''; }, 1500); }
-    return;
-  }
-  _pctState[tipo] = pct;
-  // Aplicar a las 5 filas
-  var ambs = ['amb1','amb2','amb3','amb4','amb5plus'];
-  ambs.forEach(function(a){
-    var src, dst;
-    if (tipo === 'integral') {
-      src = document.getElementById('pl-'+a+'-esencial');
-      dst = document.getElementById('pl-'+a+'-integral');
-    } else { // llave
-      src = document.getElementById('pl-'+a+'-integral');
-      dst = document.getElementById('pl-'+a+'-llave');
-    }
-    if (!src || !dst) return;
-    var v = _parseLeadsValue(src.value);
-    if (v > 0) {
-      var nv = Math.round(v * (1 + pct / 100));
-      dst.value = nv.toLocaleString('es-AR');
-    }
-  });
-  // Si se aplicó Integral, también encadenar a Llave si tiene pct
-  if (tipo === 'integral' && _pctState.llave > 0) {
-    ambs.forEach(function(a){
-      var src = document.getElementById('pl-'+a+'-integral');
-      var dst = document.getElementById('pl-'+a+'-llave');
-      if (!src || !dst) return;
-      var v = _parseLeadsValue(src.value);
-      if (v > 0) dst.value = Math.round(v * (1 + _pctState.llave / 100)).toLocaleString('es-AR');
-    });
-  }
-  actualizarPctPill(tipo);
-  document.getElementById('pct-' + tipo + '-popup').classList.remove('open');
-}
-
-// Quitar % (limpia el estado pero NO los valores ya calculados)
-function clearPct(tipo, ev) {
-  if (ev) ev.stopPropagation();
-  _pctState[tipo] = 0;
-  actualizarPctPill(tipo);
-  document.getElementById('pct-' + tipo + '-popup').classList.remove('open');
-}
-
-// Refleja el estado del pct en el pill (color y texto)
-function actualizarPctPill(tipo) {
-  var pill = document.getElementById('pct-' + tipo + '-pill');
-  if (!pill) return;
-  if (_pctState[tipo] > 0) {
-    pill.classList.add('active');
-    pill.innerHTML = '+ ' + _pctState[tipo] + '% <span class="pct-x" title="Quitar">×</span>';
-  } else {
-    pill.classList.remove('active');
-    pill.innerHTML = '+ %';
-  }
-}
-
-// Cerrar popups al click fuera
-document.addEventListener('click', function(ev){
-  if (!ev.target.closest('.pct-popup') && !ev.target.closest('.pct-pill')) {
-    document.querySelectorAll('.pct-popup.open').forEach(function(p){ p.classList.remove('open'); });
-  }
-});
-
-// Lee preciosLeads desde Redis y llena la tabla 5×3
+// Lee precio por km desde Redis (la tabla Plan Referidos fue eliminada)
 async function cargarPreciosLeads(){
   try {
     var r = await fetch('/api/actualizar-mudancero?email=' + encodeURIComponent(currentUser.email));
     var d = await r.json();
     if (!d.ok || !d.perfil) return;
     mudanceroPerfilRedis = d.perfil; // disponible globalmente
-    var pl = d.perfil.preciosLeads || {};
     // Cargar precio por km
     var pkmInput = document.getElementById('pf-pkm');
     if (pkmInput) {
@@ -1913,21 +1680,6 @@ async function cargarPreciosLeads(){
       var pkmNum = parseInt(String(pkm).replace(/\D/g,''));
       if (pkmNum && pkmNum > 0) pkmInput.value = pkmNum.toLocaleString('es-AR');
     }
-    var ambs = ['amb1','amb2','amb3','amb4','amb5plus'];
-    var nivs = ['esencial','integral','llave'];
-    ambs.forEach(function(a){
-      nivs.forEach(function(n){
-        var inp = document.getElementById('pl-'+a+'-'+n);
-        if (!inp) return;
-        var v = pl[a] && pl[a][n] ? pl[a][n] : '';
-        inp.value = v && v > 0 ? Number(v).toLocaleString('es-AR') : '';
-      });
-    });
-    // Cargar % de cascada y reflejar en los pills
-    _pctState.integral = parseFloat(pl.pctIntegral || 0) || 0;
-    _pctState.llave    = parseFloat(pl.pctLlave    || 0) || 0;
-    actualizarPctPill('integral');
-    actualizarPctPill('llave');
   } catch(e) {
     // silencioso — si falla, los inputs quedan vacíos y el mudancero los llena
   }
@@ -1977,18 +1729,6 @@ async function guardarPerfil(){
   var dias=Array.from(document.querySelectorAll('#pf-dias .sel')).map(function(c){return c.textContent.trim();}).join(', ');
   var horarios=Array.from(document.querySelectorAll('#pf-horarios .sel')).map(function(c){return c.textContent.trim();}).join(', ');
 
-  // Construir preciosLeads desde la tabla 5×3 (Plan Referidos Inmobiliarios)
-  var preciosLeads = { amb1:{}, amb2:{}, amb3:{}, amb4:{}, amb5plus:{} };
-  document.querySelectorAll('.leads-input').forEach(function(inp){
-    var amb = inp.getAttribute('data-amb');
-    var nivel = inp.getAttribute('data-nivel');
-    if (!amb || !nivel) return;
-    preciosLeads[amb][nivel] = _parseLeadsValue(inp.value);
-  });
-  // Incluir % de cascada (auto-cálculo)
-  preciosLeads.pctIntegral = _pctState.integral || 0;
-  preciosLeads.pctLlave    = _pctState.llave    || 0;
-
   // Limpiar puntos de los inputs de precios antes de mandar al backend
   var rawPrecio = function(id) {
     var el = document.getElementById(id);
@@ -2030,8 +1770,7 @@ async function guardarPerfil(){
     preciosIntegral: preciosIntegral,
     preciosLlave: preciosLlave,
     precioFleteNuevo: precioFleteNuevo,
-    extra:document.getElementById('pf-notas').value.trim(),
-    preciosLeads:preciosLeads
+    extra:document.getElementById('pf-notas').value.trim()
   };
 
   // Persistencia local de los datos del nuevo modelo (para que la próxima vez se carguen)
