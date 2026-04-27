@@ -302,27 +302,29 @@
     .fsw-step.wide .selector-title{margin:0 0 6px;padding-top:0;border-top:none}
   }
 
-  /* Selector de mudanceras existente */
-  .nivel-block{background:#fff;border:1px solid var(--border);border-radius:var(--r2);margin-bottom:12px;overflow:hidden;position:relative}
-  .nivel-block.recomendado{border:2px solid var(--green);box-shadow:0 4px 16px rgba(34,195,106,.15);margin-bottom:18px}
-  .nivel-block.recomendado .nivel-head{background:linear-gradient(90deg,#16A34A,#22C36A)}
-  .reco-badge{position:absolute;top:-10px;left:14px;background:linear-gradient(90deg,#F59E0B,#FBBF24);color:#78350F;font-family:'Inter',sans-serif;font-weight:800;font-size:10.5px;padding:4px 11px;border-radius:6px;letter-spacing:.5px;box-shadow:0 2px 6px rgba(245,158,11,.35);z-index:2;text-transform:uppercase;display:flex;align-items:center;gap:4px}
-  .nivel-head{padding:12px 14px;background:linear-gradient(90deg,var(--navy),#0057BF);color:#fff;display:flex;align-items:center;justify-content:space-between}
-  .nivel-head .lvl-name{font-weight:700;font-size:14px}
-  .nivel-head .lvl-desc{font-size:11px;opacity:.85;font-family:var(--mono)}
-  .nivel-opts{padding:8px}
-  .mud-opt{padding:12px;border:2px solid var(--border);border-radius:var(--r);margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .15s}
-  .mud-opt:last-child{margin-bottom:0}
-  .mud-opt:hover{border-color:#CBD5E1}
-  .mud-opt.selected{border-color:var(--green);background:#F0FDF4}
-  .mud-opt .mud-avatar{flex-shrink:0;width:40px;height:40px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--navy);font-weight:700;font-size:14px;overflow:hidden}
+  /* Selector de mudanceras — estilo CRM compacto */
+  .nivel-block{background:#fff;border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;position:relative}
+  .nivel-block.recomendado{border:1.5px solid var(--green);box-shadow:0 2px 8px rgba(34,195,106,.12)}
+  .nivel-head{padding:9px 12px;background:#F5F7FA;color:var(--text);display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--border)}
+  .nivel-block.recomendado .nivel-head{background:linear-gradient(90deg,#F0FDF4,#DCFCE7);border-bottom-color:#BBF7D0}
+  .nivel-head .lvl-name{font-weight:700;font-size:12.5px;color:var(--navy);display:flex;align-items:center;gap:6px}
+  .nivel-block.recomendado .lvl-name{color:#15803D}
+  .nivel-head .lvl-desc{font-size:10.5px;color:var(--text3);font-family:var(--mono);font-weight:500}
+  .reco-badge-inline{background:linear-gradient(90deg,#F59E0B,#FBBF24);color:#78350F;font-family:'Inter',sans-serif;font-weight:800;font-size:9.5px;padding:2px 7px;border-radius:4px;letter-spacing:.4px;text-transform:uppercase;display:inline-flex;align-items:center;gap:3px}
+  .nivel-opts{padding:0}
+  .mud-opt{padding:10px 12px;border:none;border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .12s}
+  .mud-opt:last-child{border-bottom:none}
+  .mud-opt:hover{background:#FAFBFC}
+  .mud-opt.selected{background:#F0FDF4;border-left:3px solid var(--green);padding-left:9px}
+  .mud-opt .mud-avatar{flex-shrink:0;width:32px;height:32px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--navy);font-weight:700;font-size:12px;overflow:hidden}
   .mud-opt .mud-avatar img{width:100%;height:100%;object-fit:cover}
   .mud-opt .mud-info{flex:1;min-width:0}
-  .mud-opt .mud-nombre{font-weight:700;color:var(--navy);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .mud-opt .mud-estrellas{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px}
-  .mud-opt .mud-precio{flex-shrink:0;font-family:var(--mono);font-weight:700;color:var(--green);font-size:15px}
+  .mud-opt .mud-nombre{font-weight:600;color:var(--navy);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mud-opt .mud-estrellas{font-size:10.5px;color:var(--text3);font-family:var(--mono);margin-top:1px}
+  .mud-opt .mud-precio{flex-shrink:0;font-family:var(--mono);font-weight:700;color:var(--green);font-size:14px;white-space:nowrap}
+  .mud-opt.selected .mud-precio{color:#15803D}
 
-  .nivel-empty{padding:20px;text-align:center;font-size:12px;color:var(--text3);font-style:italic}
+  .nivel-empty{padding:14px;text-align:center;font-size:11.5px;color:var(--text3);font-style:italic;line-height:1.5}
 
   /* Resumen step 4 */
   .resumen-pack{background:#fff;border-radius:var(--r2);padding:14px;margin-bottom:10px;border-left:4px solid var(--green)}
@@ -532,9 +534,8 @@
               </ul>
             </div>
 
-            <!-- INTEGRAL (recomendado) -->
-            <div class="pack-info featured">
-              <div class="pack-info-badge">★ Recomendado</div>
+            <!-- INTEGRAL -->
+            <div class="pack-info">
               <div class="pack-info-ribbon">🥈</div>
               <div class="pack-info-eyebrow">Paquete 2</div>
               <div class="pack-info-title">Integral</div>
@@ -548,8 +549,9 @@
               </ul>
             </div>
 
-            <!-- LLAVE EN MANO -->
-            <div class="pack-info">
+            <!-- LLAVE EN MANO (recomendado) -->
+            <div class="pack-info featured">
+              <div class="pack-info-badge">★ Recomendado</div>
               <div class="pack-info-ribbon">🥇</div>
               <div class="pack-info-eyebrow">Paquete 3</div>
               <div class="pack-info-title">Llave en mano</div>
@@ -1314,10 +1316,10 @@ function renderPacksPicker() {
     var esRecomendado = nivel === 'llave';
     var blockClass = 'nivel-block' + (esRecomendado ? ' recomendado' : '');
     var nivelLabel = (nivel === 'llave' ? 'Llave en Mano' : (nivel.charAt(0).toUpperCase() + nivel.slice(1)));
+    var nameWithBadge = nivelLabel + (esRecomendado ? ' <span class="reco-badge-inline">★ Recomendado</span>' : '');
     h += '<div class="' + blockClass + '">' +
-      (esRecomendado ? '<div class="reco-badge">★ Recomendado</div>' : '') +
       '<div class="nivel-head">' +
-        '<div><div class="lvl-name">' + nivelLabel + '</div><div class="lvl-desc">' + esc(NIVELES_DESC[nivel]) + '</div></div>' +
+        '<div><div class="lvl-name">' + nameWithBadge + '</div><div class="lvl-desc">' + esc(NIVELES_DESC[nivel]) + '</div></div>' +
       '</div>' +
       '<div class="nivel-opts">';
     if (!opts.length) {
