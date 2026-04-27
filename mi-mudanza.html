@@ -14,6 +14,7 @@
   --border:#E2E8F0;--border2:#CBD5E1;
   --blue:#1A6FFF;--blue-glow:rgba(26,111,255,.15);--blue-light:#EEF4FF;
   --green:#22C36A;--green-light:rgba(34,195,106,.1);
+  --emerald:#22C36A;
   --red:#EF4444;--red-light:rgba(239,68,68,.08);
   --amber:#F59E0B;--amber-light:rgba(245,158,11,.08);
   --text:#0F1923;--text2:#475569;--text3:#64748B;
@@ -1112,16 +1113,19 @@ async function eliminarMudanza(mudanzaId, btn) {
   if (!confirm('¿Eliminar esta publicación? No podrás recuperarla.')) return;
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
-    await fetch('/api/cotizaciones?action=eliminar', {
+    var r = await fetch('/api/cotizaciones?action=eliminar', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ mudanzaId, clienteEmail: currentUser.email })
+      body: JSON.stringify({ mudanzaId: mudanzaId, clienteEmail: currentUser.email })
     });
+    var d = await r.json();
+    if (!r.ok || d.error) throw new Error(d.error || 'Error al eliminar');
     mudanzasData = mudanzasData.filter(function(m){ return m.id !== mudanzaId; });
+    cerrarDetalle();
     renderMudanzasTabs();
   } catch(e) {
     if (btn) { btn.disabled = false; btn.textContent = '🗑 Eliminar'; }
-    alert('Error al eliminar. Intentá de nuevo.');
+    alert(e.message || 'Error al eliminar. Intentá de nuevo.');
   }
 }
 var _pptoMudanzaId = null;
