@@ -782,6 +782,10 @@ function renderMudanzaCard(m, idx){
   }
 
   // ── Calcular rango de precios para mostrar en row compacto ─────
+  // Tiempo restante hasta que expire el pedido (lo necesitamos para el aviso del drawer)
+  var expira = new Date(m.expira);
+  var ahorita = new Date();
+  var horasRestantes = Math.max(0, Math.round((expira - ahorita) / 3600000));
   var precioRangoTxt = '';
   if (tieneCotz) {
     var todosPrecios = [];
