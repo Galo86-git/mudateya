@@ -79,7 +79,7 @@ body{font-family:Inter,sans-serif;background:#fff;color:var(--text);min-height:1
 .mz-chevron{color:var(--text3);font-size:12px;transition:transform .25s ease;flex-shrink:0;width:18px;text-align:center}
 .mudanza-card.expanded .mz-chevron{transform:rotate(180deg);color:var(--blue)}
 /* Drawer con animación */
-.mudanza-drawer{display:none;border-top:1px solid #E2E8F0;padding:1.2rem 1.4rem 1.4rem;background:#FAFBFC}
+.mudanza-drawer{display:none;border-top:1px solid #E2E8F0;padding:.9rem 1rem 1rem;background:#FAFBFC}
 .mudanza-card.expanded .mudanza-drawer{display:block;animation:mzExpand .25s ease-out}
 @keyframes mzExpand{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 /* Tabla CRM de cotizaciones */
@@ -122,19 +122,20 @@ body{font-family:Inter,sans-serif;background:#fff;color:var(--text);min-height:1
 .mud-avatar{width:36px;height:36px;border-radius:8px;background:var(--blue-light);border:1px solid rgba(26,111,255,.25);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--blue);font-family:var(--mono);flex-shrink:0}
 .mud-name{font-size:13px;font-weight:500;color:var(--text)}
 .mud-tel{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px}
-.mudanza-actions{display:flex;gap:8px;flex-wrap:wrap}
+.mudanza-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-top:8px;border-top:1px dashed #E2E8F0;margin-top:6px}
+.mudanza-actions .btn-ghost{font-size:11.5px;padding:6px 12px;border-radius:6px}
 
-.stepper{display:flex;gap:0;margin-bottom:1.4rem;padding:8px 4px 4px;position:relative}
+.stepper{display:flex;gap:0;margin-bottom:.9rem;padding:4px 2px;position:relative}
 .step-item{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;min-width:0}
-.step-item:not(:last-child)::after{content:'';position:absolute;top:26px;left:calc(50% + 30px);right:calc(-50% + 30px);height:4px;background:var(--border);border-radius:2px;z-index:0;transition:background .4s}
-.step-item.done::after{background:linear-gradient(90deg,var(--emerald) 0%,var(--emerald) 100%)}
+.step-item:not(:last-child)::after{content:'';position:absolute;top:14px;left:calc(50% + 14px);right:calc(-50% + 14px);height:2px;background:var(--border);border-radius:1px;z-index:0;transition:background .4s}
+.step-item.done::after{background:var(--emerald)}
 .step-item.active::after{background:linear-gradient(90deg,var(--blue) 0%,var(--border) 100%)}
-.step-dot{width:52px;height:52px;border-radius:50%;border:3px solid var(--border2);background:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--text3);position:relative;z-index:1;transition:all .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 1px 2px rgba(15,25,35,.04);font-family:'Bebas Neue',sans-serif;letter-spacing:.5px}
-.step-item.done .step-dot{background:linear-gradient(135deg,#22C36A 0%,#16A34A 100%);border-color:#16A34A;color:#fff;box-shadow:0 4px 12px rgba(34,195,106,.35);font-size:22px;font-family:inherit}
-.step-item.active .step-dot{background:linear-gradient(135deg,#1A6FFF 0%,#003580 100%);border-color:#003580;color:#fff;box-shadow:0 0 0 6px rgba(26,111,255,.18),0 6px 20px rgba(0,53,128,.3);transform:scale(1.08);animation:stepPulse 2s ease-in-out infinite}
-@keyframes stepPulse{0%,100%{box-shadow:0 0 0 6px rgba(26,111,255,.18),0 6px 20px rgba(0,53,128,.3)}50%{box-shadow:0 0 0 10px rgba(26,111,255,.08),0 6px 20px rgba(0,53,128,.3)}}
+.step-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text3);position:relative;z-index:1;transition:all .35s cubic-bezier(.34,1.56,.64,1);font-family:'Inter',sans-serif}
+.step-item.done .step-dot{background:var(--emerald);border-color:var(--emerald);color:#fff;font-size:13px}
+.step-item.active .step-dot{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 0 4px rgba(26,111,255,.18);transform:scale(1.1);animation:stepPulse 2s ease-in-out infinite}
+@keyframes stepPulse{0%,100%{box-shadow:0 0 0 4px rgba(26,111,255,.18)}50%{box-shadow:0 0 0 7px rgba(26,111,255,.08)}}
 .step-item:not(.done):not(.active) .step-dot{opacity:.55}
-.step-label{font-size:11px;color:var(--text3);font-family:'Inter',sans-serif;font-weight:500;margin-top:10px;text-align:center;letter-spacing:.2px;line-height:1.3;max-width:110px}
+.step-label{font-size:10px;color:var(--text3);font-family:'Inter',sans-serif;font-weight:500;margin-top:5px;text-align:center;letter-spacing:.2px;line-height:1.2;max-width:90px}
 .step-item.active .step-label{color:var(--blue);font-weight:700}
 .step-item.done .step-label{color:var(--text2);font-weight:600}
 .step-fecha{font-size:9.5px;color:var(--emerald);font-family:var(--mono);margin-top:3px;font-weight:600;letter-spacing:.3px}
@@ -869,7 +870,7 @@ function renderMudanzaCard(m, idx){
           + '<button class="btn btn-green" style="font-size:13px;padding:9px 18px" onclick="republicarAbierto(\''+m.id+'\',this)">🔄 Buscar otros mudanceros</button>'
           + '</div>';
       })()
-    + (pasoActual === 0 ? '<div style="font-size:11px;color:var(--amber);font-family:var(--mono);margin-bottom:10px">⏱ Expira en '+horasRestantes+'hs · los mudanceros están enviando cotizaciones</div>' : '')
+    + (pasoActual === 0 ? '<div style="font-size:11px;color:var(--amber);font-family:var(--mono);margin-bottom:8px;padding:6px 10px;background:#FFFBEB;border-radius:6px;border-left:3px solid var(--amber);display:inline-block">⏱ Expira en '+horasRestantes+'hs · esperando cotizaciones</div>' : '')
     + cotzHtml
     + (m.cotizacionAceptada ? '<div class="mudanza-mudancero">'
         + '<div class="mud-avatar">'+m.cotizacionAceptada.mudanceroNombre.split(' ').map(function(w){return w[0];}).join('').toUpperCase().slice(0,2)+'</div>'
@@ -881,21 +882,7 @@ function renderMudanzaCard(m, idx){
                   : '<span style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-left:auto;text-align:right">Te contactará<br>por email</span>')
             : '</div><span style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-left:auto;text-align:right">Disponible<br>tras el pago</span>')
         + '</div>' : '')
-    + '<div class="mudanza-meta">'
-    +   (m.extras ? '<span class="meta-tag">📦 '+m.extras+'</span>' : '')
-    +   (function(){
-          var cotz = m.cotizaciones || [];
-          if (cotz.length > 0) {
-            var precios = cotz.map(function(c){ return parseInt(String(c.precio||0).replace(/\./g,'').replace(/[^0-9]/g,''))||0; }).filter(Boolean).sort(function(a,b){return a-b;});
-            if (precios.length === 1) {
-              return '<span class="meta-tag" style="color:var(--blue);border-color:rgba(26,111,255,.25)">💰 Cotización: $'+precios[0].toLocaleString('es-AR')+'</span>';
-            } else {
-              return '<span class="meta-tag" style="color:var(--blue);border-color:rgba(26,111,255,.25)">💰 Rango: $'+precios[0].toLocaleString('es-AR')+' — $'+precios[precios.length-1].toLocaleString('es-AR')+'</span>';
-            }
-          }
-          return '';
-        })()
-    + '</div>'
+    + (m.extras ? '<div style="margin-bottom:8px"><span class="meta-tag">📦 '+m.extras+'</span></div>' : '')
     // ═══ CARD DE AJUSTE DE PRECIO ═══
     + (function(){
         var aj = m.ajustePrecio;
@@ -966,7 +953,7 @@ function renderMudanzaCard(m, idx){
           +'Si el día de la mudanza hubiera condiciones no previstas (más volumen, accesos complicados, piso sin ascensor), el mudancero puede proponerte un ajuste justificado. Vos decidís: lo aceptás o <strong>recuperás tu anticipo completo</strong>.'
         +'</div>'
         : '')
-    + '<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px">ID: '+m.id+'</div>'
+    + '<div style="font-size:9.5px;color:#94A3B8;font-family:var(--mono);margin-top:6px;text-align:right;opacity:.6">'+m.id+'</div>'
     + '</div>' // cierre drawer
     + '</div>'; // cierre card
 }
