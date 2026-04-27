@@ -523,10 +523,10 @@
       </div>
     </div>
 
-    <!-- STEP 3: Armar los 3 packs -->
+    <!-- STEP 3: Armar los packs -->
     <div class="fsw-step wide" data-step="3">
-      <h2>Armá los 3 packs</h2>
-      <p class="subtitle">Mirá qué incluye cada paquete y elegí 1 mudancera para cada nivel.</p>
+      <h2>Armá los packs</h2>
+      <p class="subtitle">Mirá qué incluye cada paquete y elegí qué packs querés enviarle al cliente. Podés mandar 1, 2 o los 3.</p>
       <div class="form-err" id="err-3"></div>
 
       <div class="step-grid">
@@ -587,8 +587,8 @@
 
         <!-- ═══ COLUMNA DERECHA — SELECTOR DE MUDANCERAS ═══ -->
         <div class="step-col-picker">
-          <div class="selector-title">Elegí tus 3 opciones</div>
-          <div class="selector-sub">Una mudancera para cada nivel, con el precio real que cobra.</div>
+          <div class="selector-title">Elegí qué enviar</div>
+          <div class="selector-sub">Hacé click en una mudancera para incluir ese pack. Podés mandar 1, 2 o los 3.</div>
 
           <div id="packsPicker">
             <div class="loading-full"><span class="loader-inline"></span></div>
@@ -1256,22 +1256,8 @@ async function fswNext() {
     FSW_STEP = 3; fswRenderStep(); return;
   }
   if (FSW_STEP === 3) {
-    // Validación adaptativa: si una mudancera no fue elegida porque no hay oferentes
-    // para ese nivel en la zona, dejamos pasar igual (el pack queda en blanco).
-    // Solo exigimos elegir cuando SÍ hay opciones disponibles.
-    var hayOferentes = function(nivel){
-      return MUDANCERAS_ZONA.some(function(m){
-        var p = Number((m.preciosPack||{})[nivel]);
-        return p && p > 0 && !isNaN(p);
-      });
-    };
-    if (!FSW_DATA.packs.esencial && hayOferentes('esencial'))
-      return showErr(3, 'Elegí una mudancera para el pack Esencial.');
-    if (!FSW_DATA.packs.integral && hayOferentes('integral'))
-      return showErr(3, 'Elegí una mudancera para el pack Integral.');
-    if (!FSW_DATA.packs.llave    && hayOferentes('llave'))
-      return showErr(3, 'Elegí una mudancera para el pack Llave en Mano.');
-    // Al menos un pack tiene que estar elegido
+    // Validación: el asesor elige libremente cuántos packs envía (1, 2 o 3).
+    // Solo exigimos que haya elegido al menos uno.
     if (!FSW_DATA.packs.esencial && !FSW_DATA.packs.integral && !FSW_DATA.packs.llave)
       return showErr(3, 'Elegí al menos una mudancera para uno de los packs.');
     FSW_STEP = 4; fswRenderStep(); return;
