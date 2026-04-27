@@ -1232,7 +1232,7 @@ function renderRowPedido(m, tipo) {
     if (pmc > 0) precioTxt = '$'+pmc.toLocaleString('es-AR');
   }
   // Ruta compacta + indicador de origen (asesor vs sitio)
-  var esAsesor = !!m.refAliado;
+  var esAsesor = !!(m.refAliado || m.origenAsesor);
   var iconoOrigen = esAsesor
     ? '<span title="Cliente referido por asesor inmobiliario · comisión 25%" style="font-size:13px;flex-shrink:0;margin-right:2px">🏢</span>'
     : '';
@@ -1263,13 +1263,15 @@ function seleccionarPedido(mudanzaId, tipo) {
   var row = document.getElementById('pd-row-'+mudanzaId);
   if (row) row.classList.add('active');
   // Banner de origen del cliente (asesor vs directo) con comisión
-  var esAsesor = !!m.refAliado;
+  var esAsesor = !!(m.refAliado || m.origenAsesor);
+  // Mostrar referencia: preferir asesorEmail (legible), fallback a refAliado
+  var refMostrar = m.asesorEmail || m.refAliado || '';
   var bannerOrigen = esAsesor
     ? '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FEF3F2;border:1px solid #FECACA;border-left:3px solid #DC2626;border-radius:8px;margin-bottom:14px">'
       + '<span style="font-size:18px;flex-shrink:0">🏢</span>'
       + '<div style="flex:1;min-width:0">'
       +   '<div style="font-size:12px;font-weight:700;color:#991B1B;line-height:1.3">Cliente referido por asesor inmobiliario</div>'
-      +   '<div style="font-size:11px;color:#7F1D1D;font-family:var(--mono);margin-top:2px">Comisión MudateYa: <b>25%</b>'+(m.refAliado?' · Ref: '+esc(m.refAliado):'')+'</div>'
+      +   '<div style="font-size:11px;color:#7F1D1D;font-family:var(--mono);margin-top:2px">Comisión MudateYa: <b>25%</b>'+(refMostrar?' · '+esc(refMostrar):'')+'</div>'
       + '</div>'
       + '</div>'
     : '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F0FDF4;border:1px solid #BBF7D0;border-left:3px solid #16A34A;border-radius:8px;margin-bottom:14px">'
