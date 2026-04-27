@@ -1544,54 +1544,104 @@ function abrirCotizacion(mudanza){
   var precioPorKm = parseInt((perfilRedis.precios && perfilRedis.precios.porKm) || perfilRedis.precioPorKm || 0);
   var precios = perfilRedis.precios || {};
 
-  // Determinar precio base por ambientes / flete según el nivel del pedido
   var ambStr = String(mudanza.ambientes || '');
   var ambN = parseInt(ambStr.replace(/\D/g,'')) || 0;
   var esFlete = (mudanza.tipo === 'flete') || ambStr.toLowerCase().indexOf('flete') !== -1;
-  // Nivel del pack que pidió el cliente (con fallback inteligente)
-  var nivelPed = mudanza.nivel || (esFlete ? 'flete' : 'esencial');
-  var packInfoCot = {
-    esencial: { nombre:'Esencial',      emoji:'📦', color:'#475569' },
-    integral: { nombre:'Integral',      emoji:'🛠️', color:'#1A6FFF' },
-    llave:    { nombre:'Llave en mano', emoji:'🔑', color:'#22C36A' },
-    flete:    { nombre:'Flete',         emoji:'🚚', color:'#F59E0B' }
-  }[nivelPed] || { nombre:'Esencial', emoji:'📦', color:'#475569' };
-  var precioBase = 0;
-  var lblBase = '';
-  if (nivelPed === 'flete') {
-    precioBase = parseInt(perfilRedis.precioFleteNuevo || precios.flete || 0) || 0;
-    lblBase = 'flete';
-  } else {
-    var claveAmb = ['amb1','amb2','amb3','amb4'][Math.min(Math.max(ambN,1),4)-1] || 'amb1';
-    var preciosNivel = perfilRedis['precios' + nivelPed.charAt(0).toUpperCase() + nivelPed.slice(1)];
-    if (preciosNivel) {
-      precioBase = parseInt(preciosNivel[claveAmb]||0) || 0;
-    }
-    // Fallback al modelo viejo si el nivel no tiene precios cargados
-    if (precioBase === 0) {
-      if (ambN === 1) precioBase = parseInt(precios.amb1||0) || 0;
-      else if (ambN === 2) precioBase = parseInt(precios.amb2||0) || 0;
-      else if (ambN === 3) precioBase = parseInt(precios.amb3||0) || 0;
-      else if (ambN >= 4)  precioBase = parseInt(precios.amb4||0) || 0;
-    }
-    lblBase = packInfoCot.emoji + ' ' + packInfoCot.nombre + ' · ' + (ambN || 1) + ' amb';
-  }
+  // Nivel del pack que pidió el cliente (queda activado por default y resaltado)
+  var nivelPedido = mudanza.nivel || (esFlete ? 'flete' : 'esencial');
+
+  var packsCfg = {
+    esencial: { nombre:'Esencial',      emoji:'📦', color:'#475569', desc:'Carga, transporte y descarga' },
+    integral: { nombre:'Integral',      emoji:'🛠️', color:'#1A6FFF', desc:'+ Embalaje y desembalaje' },
+    llave:    { nombre:'Llave en mano', emoji:'🔑', color:'#22C36A', desc:'Todo incluido' },
+    flete:    { nombre:'Flete',         emoji:'🚚', color:'#F59E0B', desc:'Solo transporte' }
+  };
+
   var costoKm = (km > 0 && precioPorKm > 0) ? (km * precioPorKm) : 0;
 
-  // Si no hay precio base cargado en el perfil, usar precio_estimado del cliente como fallback
-  var precioBaseInicial = precioBase > 0 ? precioBase : ps;
-  var warningBaseHTML = '';
-  if (precioBase === 0) {
-    warningBaseHTML = '<div style="font-size:10.5px;color:#F59E0B;font-family:var(--mono);margin-top:5px">'
-      + '⚠ No tenés precio cargado para ' + (lblBase || 'este tamaño') + ' — revisá tu perfil'
-      + '</div>';
+  // Calcular precio base por nivel
+  function _precioBasePorNivel(nivel) {
+    if (nivel === 'flete') {
+      return parseInt(perfilRedis.precioFleteNuevo || precios.flete || 0) || 0;
+    }
+    var clave = ['amb1','amb2','amb3','amb4'][Math.min(Math.max(ambN,1),4)-1] || 'amb1';
+    var pn = perfilRedis['precios' + nivel.charAt(0).toUpperCase() + nivel.slice(1)];
+    if (pn) return parseInt(pn[clave]||0) || 0;
+    // Fallback al modelo viejo SOLO si no hay precios cargados para ningún nivel
+    if (nivel === 'esencial') {
+      if (ambN === 1) return parseInt(precios.amb1||0) || 0;
+      if (ambN === 2) return parseInt(precios.amb2||0) || 0;
+      if (ambN === 3) return parseInt(precios.amb3||0) || 0;
+      if (ambN >= 4)  return parseInt(precios.amb4||0) || 0;
+    }
+    return 0;
+  }
+
+  // Determinar qué packs ofrece el mudancero
+  var serviciosActivos = Array.isArray(perfilRedis.serviciosActivos) ? perfilRedis.serviciosActivos : null;
+  var packsDisponibles = []; // niveles que el mudancero puede ofrecer
+  if (esFlete) {
+    // Si el cliente pide flete, solo se permite ofrecer flete
+    packsDisponibles = ['flete'];
   } else {
-    warningBaseHTML = '<div style="font-size:10.5px;color:#1A6FFF;font-family:var(--mono);margin-top:5px">'
-      + '✓ Tu precio cargado para ' + lblBase
+    var posibles = ['esencial','integral','llave'];
+    if (serviciosActivos) {
+      packsDisponibles = posibles.filter(function(n){ return serviciosActivos.indexOf(n) !== -1; });
+    } else {
+      // Compat: sin serviciosActivos, asumir que ofrece esencial al menos
+      packsDisponibles = ['esencial'];
+      if (perfilRedis.preciosIntegral) packsDisponibles.push('integral');
+      if (perfilRedis.preciosLlave || perfilRedis.sinEstres) packsDisponibles.push('llave');
+    }
+    // Si el cliente pidió un nivel y el mudancero no lo tiene activado, igual lo agrego
+    // así puede ofrecer ese pack (con warning en la UI)
+    if (packsDisponibles.indexOf(nivelPedido) === -1 && nivelPedido !== 'flete') {
+      packsDisponibles.unshift(nivelPedido);
+    }
+  }
+
+  // Render cards de packs con switch
+  function _renderPackCard(nivel) {
+    var cfg = packsCfg[nivel];
+    var pBase = _precioBasePorNivel(nivel);
+    var esElPedido = (nivel === nivelPedido);
+    var sinPrecio = (pBase === 0);
+    // Activar por default solo el pack pedido
+    var activado = esElPedido;
+    // Highlight del pack pedido por el cliente
+    var bordeHL = esElPedido ? cfg.color : '#E2E8F0';
+    var bgHL = esElPedido ? cfg.color + '08' : '#fff';
+    return '<div class="pack-prop-card" id="pp-card-'+nivel+'" data-nivel="'+nivel+'" data-on="'+(activado?'1':'0')+'" '
+      + 'style="border:2px solid '+bordeHL+';background:'+bgHL+';border-radius:12px;padding:12px 14px;transition:all .2s">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:'+(activado?'10':'0')+'px" id="pp-head-'+nivel+'">'
+      +   '<div style="flex:1;min-width:0">'
+      +     '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
+      +       '<span style="font-size:14px;font-weight:700;color:'+cfg.color+'">'+cfg.emoji+' '+cfg.nombre+'</span>'
+      +       (esElPedido?'<span style="background:'+cfg.color+';color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;letter-spacing:.5px">PIDE EL CLIENTE</span>':'')
+      +     '</div>'
+      +     '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+cfg.desc+'</div>'
+      +   '</div>'
+      +   '<label style="position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0;cursor:pointer">'
+      +     '<input type="checkbox" '+(activado?'checked':'')+' onchange="_pfTogglePropuesta(\''+nivel+'\')" style="opacity:0;width:0;height:0"/>'
+      +     '<span class="pp-slider" style="position:absolute;inset:0;background:'+(activado?cfg.color:'#CBD5E1')+';border-radius:24px;transition:.2s"></span>'
+      +     '<span style="position:absolute;top:3px;left:'+(activado?'21':'3')+'px;width:18px;height:18px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>'
+      +   '</label>'
+      + '</div>'
+      + '<div id="pp-body-'+nivel+'" style="display:'+(activado?'block':'none')+'">'
+      +   '<div style="position:relative;display:flex;align-items:center;margin-bottom:6px"><span style="position:absolute;left:11px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span>'
+      +   '<input type="text" id="pp-precio-'+nivel+'" value="'+(pBase>0?fmtMiles(pBase):'')+'" placeholder="Precio base ($ARS)" inputmode="numeric" '
+      +     'style="width:100%;padding:10px 12px 10px 24px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;font-family:var(--mono);color:var(--text);background:#fff;outline:none;font-weight:600" '
+      +     'oninput="formatearPrecioInput(this);_recalcularTotalCot()"/></div>'
+      + (sinPrecio?'<div style="font-size:10.5px;color:#F59E0B;font-family:var(--mono);margin-bottom:4px">⚠ No tenés precio cargado para '+cfg.nombre+' — ingresalo o cargalo en tu perfil</div>':'')
+      +   '<input type="text" id="pp-nota-'+nivel+'" placeholder="Nota específica para este pack (opcional)" '
+      +     'style="width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:7px;font-size:11.5px;font-family:Inter,sans-serif;color:var(--text);background:#fff;outline:none"/>'
+      + '</div>'
       + '</div>';
   }
 
-  // Bloque distancia: aparece SIEMPRE que haya km > 0 (auto-calculado o manual)
+  var packsHTML = packsDisponibles.map(_renderPackCard).join('<div style="height:8px"></div>');
+
+  // Bloque distancia (sigue igual)
   var bloqueDistanciaHTML = '';
   if (km > 0) {
     var valorKm = (precioPorKm > 0) ? fmtMiles(costoKm) : '';
@@ -1609,73 +1659,112 @@ function abrirCotizacion(mudanza){
   var modal = document.createElement('div');
   modal.id = 'cotModal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem';
-  modal.innerHTML = '<div style="background:#fff;border:1px solid #E2E8F0;border-radius:20px;padding:1.8rem;max-width:460px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.6);max-height:92vh;overflow-y:auto">'
+  modal.innerHTML = '<div style="background:#fff;border:1px solid #E2E8F0;border-radius:20px;padding:1.6rem;max-width:500px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.6);max-height:92vh;overflow-y:auto">'
     +'<div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:.4rem">Enviar cotización</div>'
-    +'<div style="font-size:13px;color:var(--text2);margin-bottom:1.2rem">'+mudanza.desde+' → '+mudanza.hasta+' · '+(mudanza.ambientes||'')+(km>0?' · <span style="color:#1A6FFF;font-weight:600">'+km+' km</span>':'')+'</div>'
-    +'<div style="display:flex;flex-direction:column;gap:12px">'
-    // Input 1: Precio base por ambientes
-    +'<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Precio base ($ARS) <span style="color:#1A6FFF">*</span></label>'
-    +'<div style="position:relative;display:flex;align-items:center"><span style="position:absolute;left:12px;font-size:13px;color:var(--text3);font-family:var(--mono)">$</span>'
-    +'<input type="text" id="cot-precio-base" value="'+fmtMiles(precioBaseInicial)+'" inputmode="numeric" style="width:100%;padding:11px 14px 11px 26px;border:1px solid var(--border2);border-radius:10px;font-size:14px;font-family:var(--mono);color:var(--text);background:var(--surface2);outline:none;font-weight:600" oninput="formatearPrecioInput(this);_recalcularTotalCot()"/></div>'
-    + warningBaseHTML
-    + '</div>'
-    // Input 2: Distancia (si aplica)
-    + bloqueDistanciaHTML
-    // Desglose visual: base + km → total
-    + '<div id="cot-total-row" style="background:linear-gradient(135deg,#EEF4FF 0%,#F8FAFD 100%);border:1px solid #C7D7F5;border-radius:10px;padding:12px 14px;font-family:var(--mono)">'
-    +   '<div id="cot-desg-base-row" style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2);margin-bottom:5px">'
-    +     '<span>Precio base</span>'
-    +     '<span id="cot-desg-base" style="font-weight:600;color:var(--text)">$' + precioBaseInicial.toLocaleString('es-AR') + '</span>'
-    +   '</div>'
-    +   '<div id="cot-desg-km-row" style="display:'+(km>0?'flex':'none')+';justify-content:space-between;align-items:center;font-size:12px;color:var(--text2);margin-bottom:7px">'
-    +     '<span>'+km+' km'+(precioPorKm>0?' × $'+precioPorKm.toLocaleString('es-AR'):'')+'</span>'
-    +     '<span id="cot-desg-km" style="font-weight:600;color:var(--text)">$' + costoKm.toLocaleString('es-AR') + '</span>'
-    +   '</div>'
-    +   '<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed #C7D7F5;padding-top:7px">'
-    +     '<span style="font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px">Total a cobrar</span>'
-    +     '<span id="cot-total-mostrar" style="font-weight:700;color:var(--blue);font-size:18px">$' + (precioBaseInicial + costoKm).toLocaleString('es-AR') + '</span>'
-    +   '</div>'
-    + '</div>'
-    +'<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Tiempo estimado</label>'
-    +'<input type="text" id="cot-tiempo" placeholder="Ej: 3-4 horas" style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:Inter,sans-serif;color:var(--text);background:var(--surface2);outline:none"/></div>'
-    +'<div><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Nota para el cliente</label>'
-    +'<textarea id="cot-nota" rows="3" placeholder="Describí tu propuesta: experiencia, qué incluye, condiciones…" style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:Inter,sans-serif;color:var(--text);background:var(--surface2);outline:none;resize:vertical;line-height:1.55"></textarea></div>'
+    +'<div style="font-size:13px;color:var(--text2);margin-bottom:14px">'+mudanza.desde+' → '+mudanza.hasta+' · '+(mudanza.ambientes||'')+(km>0?' · <span style="color:#1A6FFF;font-weight:600">'+km+' km</span>':'')+'</div>'
+    +'<div style="background:#EEF4FF;border:1px solid #C7D7F5;border-radius:10px;padding:10px 12px;margin-bottom:14px">'
+    +  '<div style="font-size:11.5px;color:#003580;font-weight:700;margin-bottom:3px">💡 Podés ofrecer 1 a 3 packs</div>'
+    +  '<div style="font-size:11px;color:#475569;line-height:1.4">El cliente compara y elige uno. Esto cuenta como <b>1 cotización</b> de las 5 disponibles.</div>'
     +'</div>'
+    +'<div style="display:flex;flex-direction:column;gap:0;margin-bottom:14px">'+packsHTML+'</div>'
+    + bloqueDistanciaHTML
+    + '<div id="cot-total-row" style="background:linear-gradient(135deg,#EEF4FF 0%,#F8FAFD 100%);border:1px solid #C7D7F5;border-radius:10px;padding:12px 14px;font-family:var(--mono);margin-top:10px">'
+    +   '<div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Resumen del total a cobrar (por pack)</div>'
+    +   '<div id="cot-resumen-packs" style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--text2)"></div>'
+    + '</div>'
+    +'<div style="margin-top:12px"><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Tiempo estimado (común a todos los packs)</label>'
+    +'<input type="text" id="cot-tiempo" placeholder="Ej: 3-4 horas" style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:Inter,sans-serif;color:var(--text);background:var(--surface2);outline:none"/></div>'
+    +'<div style="margin-top:10px"><label style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-family:var(--mono);display:block;margin-bottom:6px">Nota general (opcional)</label>'
+    +'<textarea id="cot-nota" rows="2" placeholder="Algo común a todos los packs: experiencia, condiciones, etc." style="width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;font-size:13px;font-family:Inter,sans-serif;color:var(--text);background:var(--surface2);outline:none;resize:vertical;line-height:1.5"></textarea></div>'
     +'<div style="display:flex;gap:8px;margin-top:1.2rem;justify-content:flex-end">'
     +'<button class="btn btn-ghost" onclick="document.getElementById(\'cotModal\').remove()">Cancelar</button>'
     +'<button class="btn btn-green" id="btnEnviarCot" onclick="enviarCotizacion(\''+mudanza.id+'\')">Enviar cotización →</button>'
     +'</div></div>';
   document.body.appendChild(modal);
+  // Estado inicial: solo el pack pedido activo
+  window._cotPacksDisponibles = packsDisponibles;
+  window._cotKm = km;
+  window._cotCostoKmDefault = costoKm;
+  _recalcularTotalCot();
 }
 
-// Recalcula el total mostrado en el modal sumando base + km y refresca el desglose
+// Toggle de un pack en el modal de cotización
+function _pfTogglePropuesta(nivel) {
+  var card = document.getElementById('pp-card-'+nivel);
+  var body = document.getElementById('pp-body-'+nivel);
+  if (!card || !body) return;
+  var on = card.getAttribute('data-on') === '1';
+  on = !on;
+  card.setAttribute('data-on', on?'1':'0');
+  body.style.display = on ? 'block' : 'none';
+  // Update visual del switch
+  var slider = card.querySelector('.pp-slider');
+  var packsCfg = { esencial:'#475569', integral:'#1A6FFF', llave:'#22C36A', flete:'#F59E0B' };
+  if (slider) slider.style.background = on ? packsCfg[nivel] : '#CBD5E1';
+  var thumb = card.querySelector('label > span:last-child');
+  if (thumb) thumb.style.left = on ? '21px' : '3px';
+  _recalcularTotalCot();
+}
+
+// Recalcula resumen del total por cada pack activo
 function _recalcularTotalCot() {
-  var baseEl = document.getElementById('cot-precio-base');
+  var resumenEl = document.getElementById('cot-resumen-packs');
+  if (!resumenEl) return;
+  var packs = window._cotPacksDisponibles || [];
+  var packsCfg = {
+    esencial: { nombre:'Esencial',      emoji:'📦', color:'#475569' },
+    integral: { nombre:'Integral',      emoji:'🛠️', color:'#1A6FFF' },
+    llave:    { nombre:'Llave en mano', emoji:'🔑', color:'#22C36A' },
+    flete:    { nombre:'Flete',         emoji:'🚚', color:'#F59E0B' }
+  };
   var kmEl = document.getElementById('cot-km-monto');
-  var totalEl = document.getElementById('cot-total-mostrar');
-  var desgBaseEl = document.getElementById('cot-desg-base');
-  var desgKmEl = document.getElementById('cot-desg-km');
-  var desgKmRow = document.getElementById('cot-desg-km-row');
-  if (!baseEl || !totalEl) return;
-  var rawBase = parseInt((baseEl.value || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0;
   var rawKm = kmEl ? (parseInt((kmEl.value || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0) : 0;
-  var total = rawBase + rawKm;
-  totalEl.textContent = '$' + total.toLocaleString('es-AR');
-  if (desgBaseEl) desgBaseEl.textContent = '$' + rawBase.toLocaleString('es-AR');
-  if (desgKmEl) desgKmEl.textContent = '$' + rawKm.toLocaleString('es-AR');
-  // Si el mudancero ingresa monto km > 0 y la fila estaba oculta (km=0), mostrarla
-  if (desgKmRow && rawKm > 0) desgKmRow.style.display = 'flex';
+  var html = '';
+  var algunoActivo = false;
+  packs.forEach(function(nivel){
+    var card = document.getElementById('pp-card-'+nivel);
+    if (!card) return;
+    if (card.getAttribute('data-on') !== '1') return;
+    algunoActivo = true;
+    var pEl = document.getElementById('pp-precio-'+nivel);
+    var rawBase = pEl ? (parseInt((pEl.value || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0) : 0;
+    var total = rawBase + rawKm;
+    var cfg = packsCfg[nivel];
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px dashed #E2E8F0">'
+      +    '<span>'+cfg.emoji+' <b style="color:'+cfg.color+'">'+cfg.nombre+'</b></span>'
+      +    '<span style="font-weight:700;color:var(--blue);font-size:14px">$'+total.toLocaleString('es-AR')+'</span>'
+      +    '</div>';
+  });
+  if (!algunoActivo) {
+    html = '<div style="text-align:center;color:#94A3B8;font-size:11px;padding:6px">Activá al menos un pack</div>';
+  }
+  resumenEl.innerHTML = html;
 }
 
 async function enviarCotizacion(mudanzaId){
-  var baseEl = document.getElementById('cot-precio-base');
+  // Construir array de propuestas activas
+  var packs = window._cotPacksDisponibles || [];
   var kmEl = document.getElementById('cot-km-monto');
-  var rawBase = parseInt((baseEl.value || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0;
   var rawKm = kmEl ? (parseInt((kmEl.value || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0) : 0;
-  var totalCotizado = rawBase + rawKm;
-  var nota = document.getElementById('cot-nota').value.trim();
+  var notaGeneral = document.getElementById('cot-nota').value.trim();
   var tiempo = document.getElementById('cot-tiempo').value.trim();
-  if(!totalCotizado || totalCotizado <= 0){ alert('Ingresá un precio válido'); return; }
+  var propuestas = [];
+  packs.forEach(function(nivel){
+    var card = document.getElementById('pp-card-'+nivel);
+    if (!card || card.getAttribute('data-on') !== '1') return;
+    var pEl = document.getElementById('pp-precio-'+nivel);
+    var rawBase = pEl ? (parseInt((pEl.value || '0').replace(/\./g,'').replace(/[^0-9]/g,'')) || 0) : 0;
+    if (rawBase <= 0) return; // no incluir packs sin precio
+    var notaEl = document.getElementById('pp-nota-'+nivel);
+    var notaPack = notaEl ? notaEl.value.trim() : '';
+    propuestas.push({
+      nivel: nivel,
+      precio: rawBase + rawKm, // total final por pack
+      tiempoEstimado: tiempo,
+      nota: notaPack || notaGeneral
+    });
+  });
+  if (propuestas.length === 0) { alert('Activá al menos un pack y cargale un precio.'); return; }
   var btn = document.getElementById('btnEnviarCot');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px;vertical-align:middle;display:inline-block"></span>Enviando…';
@@ -1683,7 +1772,17 @@ async function enviarCotizacion(mudanzaId){
   try{
     var r = await fetch('/api/cotizaciones?action=cotizar',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({mudanzaId, mudanceroEmail:currentUser.email, mudanceroNombre:m[1]||currentUser.name, mudanceroTel:m[3]||'', precio:String(totalCotizado), nota, tiempoEstimado:tiempo, precioBase:rawBase, precioKm:rawKm})
+      body:JSON.stringify({
+        mudanzaId,
+        mudanceroEmail: currentUser.email,
+        mudanceroNombre: m[1]||currentUser.name,
+        mudanceroTel: m[3]||'',
+        propuestas: propuestas,
+        // Compat: campos planos por si algún flujo viejo los espera
+        precio: String(propuestas[0].precio),
+        nota: notaGeneral,
+        tiempoEstimado: tiempo
+      })
     });
     var d = await r.json();
     if(d.error) throw new Error(d.error);
