@@ -2600,7 +2600,8 @@
   // ══════════════════════════════════════════
   function abrirLogin(e, destino) {
     if (e) e.preventDefault();
-    if (destino) window._pendingRedirect = destino;
+    // Si se pasa destino: setearlo. Si no: limpiar el anterior (estamos en flujo cliente)
+    window._pendingRedirect = destino || null;
     document.getElementById('loginModal').classList.add('open');
     document.body.style.overflow='hidden';
     if (!_googleInited) initGLogin();
@@ -2608,6 +2609,9 @@
   function cerrarLogin() {
     document.getElementById('loginModal').classList.remove('open');
     document.body.style.overflow='';
+    // Limpiar pendingRedirect si el usuario cerró el modal sin completar login
+    // (evita que un click previo a "Soy mudancero" contamine un click posterior a "Solicitar")
+    window._pendingRedirect = null;
   }
   function initGLogin() {
     fetch('/api/admin-config').then(function(r){ return r.json(); }).then(function(cfg) {
@@ -2644,14 +2648,6 @@
 
   // ── MAGIC LINK CLIENTE: solicitar link de acceso ──────────────────
   async function solicitarMagicLinkCliente(){
-    // Si está en flujo de mudancero, redirigir al portal correcto
-    if (window._pendingRedirect === '/mi-cuenta') {
-      var msg0 = document.getElementById('cliMagicMsg');
-      msg0.style.display = 'block';
-      msg0.style.color = '#DC2626';
-      msg0.textContent = 'Para mudanceros, usá el portal de "Soy mudancero".';
-      return;
-    }
     var emailInput = document.getElementById('cliMagicEmail');
     var btn = document.getElementById('cliMagicBtn');
     var msg = document.getElementById('cliMagicMsg');
