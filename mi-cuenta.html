@@ -327,17 +327,120 @@ body.pd-panel-open .pd-list-col{flex:1.3}
 .pd-arrow{color:var(--text3);font-size:18px;font-weight:700;flex-shrink:0;width:14px;text-align:center;line-height:1}
 .pd-row-line.active .pd-arrow{color:var(--blue)}
 .pd-pack-mini{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.2px;white-space:nowrap;flex-shrink:0;font-family:Inter,sans-serif}
-@media (max-width:900px){
+@media (max-width:640px){
+  /* ───── Filas CRM mobile-friendly: 2 líneas, áreas táctiles grandes ───── */
+  .pd-row-line{
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    grid-template-rows:auto auto;
+    gap:4px 10px;
+    padding:14px 14px;
+    font-size:13px;
+    min-height:64px;
+    align-items:center;
+    border-radius:12px;
+    margin-bottom:8px;
+    -webkit-tap-highlight-color:rgba(26,111,255,.1)
+  }
+  .pd-row-line:active{transform:scale(.98);background:#EEF4FF}
+  .pd-st-pill{
+    grid-row:1;grid-column:1;
+    min-width:auto;font-size:9.5px;padding:4px 9px;align-self:start
+  }
+  .pd-ruta-line{
+    grid-row:1;grid-column:2;
+    font-size:14px;font-weight:700;line-height:1.3
+  }
+  .pd-arrow{
+    grid-row:1/3;grid-column:3;
+    font-size:22px;align-self:center;color:#94A3B8
+  }
+  .pd-pack-mini{
+    grid-row:2;grid-column:1/3;
+    align-self:start;justify-self:start;font-size:10.5px
+  }
+  .pd-precio-line{
+    grid-row:2;grid-column:3;
+    justify-self:end;align-self:end;font-size:13px;font-weight:700;color:var(--blue);min-width:auto
+  }
+  .pd-meta-line{display:none}
+
+  /* ───── Bottom sheet (panel detalle desliza desde abajo) ───── */
+  .pd-side-panel{
+    position:fixed!important;
+    top:auto!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:0;
+    max-height:92vh;
+    border-radius:18px 18px 0 0!important;
+    border:none!important;
+    border-top:1px solid #E2E8F0!important;
+    box-shadow:0 -8px 24px rgba(15,25,35,.12)!important;
+    z-index:200;
+    transition:height .28s cubic-bezier(.4,0,.2,1);
+    overflow:hidden
+  }
+  .pd-side-panel.open{
+    width:100%!important;
+    max-width:100%!important;
+    height:92vh;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch
+  }
+  /* Drag handle visual arriba del bottom sheet */
+  .pd-side-panel.open::before{
+    content:'';position:sticky;top:0;display:block;
+    width:40px;height:4px;background:#CBD5E1;border-radius:2px;
+    margin:8px auto 0;z-index:5
+  }
+  body.pd-panel-open::after{
+    content:'';position:fixed;inset:0;background:rgba(15,25,35,.5);
+    backdrop-filter:blur(3px);z-index:199;
+    animation:pdBackdropIn .25s ease-out
+  }
+  @keyframes pdBackdropIn{from{opacity:0}to{opacity:1}}
+  body.pd-panel-open{overflow:hidden}
+  .pd-detail-content{padding:8px 16px 90px}
+  .pd-detail-close{
+    width:38px;height:38px;font-size:18px;border-radius:10px
+  }
+
+  /* ───── Tabs mobile friendly (Disponibles / En espera / etc.) ───── */
+  .tabs-pedidos{
+    display:flex;gap:6px;overflow-x:auto;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none;
+    padding:8px 12px;margin:0 -12px 12px;
+    background:#FAFBFC;border-bottom:1px solid #E2E8F0
+  }
+  .tabs-pedidos::-webkit-scrollbar{display:none}
+  .tab-pedido{
+    flex-shrink:0;padding:10px 14px;border-radius:20px;
+    font-size:12.5px;font-weight:600;color:var(--text2);
+    background:#fff;border:1px solid #E2E8F0;cursor:pointer;
+    white-space:nowrap;transition:all .15s
+  }
+  .tab-pedido:active{transform:scale(.96)}
+  .tab-pedido.active{
+    background:var(--blue);color:#fff;border-color:var(--blue);
+    box-shadow:0 2px 8px rgba(26,111,255,.3)
+  }
+  .tab-pedido .tab-count{
+    display:inline-block;background:rgba(0,0,0,.08);
+    color:inherit;font-size:10.5px;padding:1px 6px;border-radius:8px;
+    margin-left:5px;font-weight:700
+  }
+  .tab-pedido.active .tab-count{background:rgba(255,255,255,.25)}
+}
+@media (max-width:900px) and (min-width:641px){
   .pd-side-panel{position:fixed;top:0;right:0;bottom:0;width:0;max-height:100vh;border-radius:0;border-left:1px solid #E2E8F0;z-index:200;box-shadow:-8px 0 24px rgba(15,25,35,.08)}
   .pd-side-panel.open{width:90%;max-width:520px}
   body.pd-panel-open::after{content:'';position:fixed;inset:0;background:rgba(15,25,35,.4);backdrop-filter:blur(2px);z-index:199}
   body.pd-panel-open .pd-list-col{flex:1}
-}
-@media (max-width:640px){
-  .pd-row-line{grid-template-columns:auto 1fr auto;gap:8px;padding:10px 12px;font-size:12.5px}
-  .pd-meta-line{display:none}
-  .pd-st-pill{min-width:auto;font-size:9.5px;padding:3px 8px}
-  .pd-precio-line{font-size:11px;min-width:70px}
 }
 </style>
 </head>
@@ -1297,17 +1400,62 @@ function seleccionarPedido(mudanzaId, tipo) {
   }
   document.body.classList.add('pd-panel-open');
   try { sessionStorage.setItem('pdSelected', JSON.stringify({id:mudanzaId, tipo:tipo})); } catch(e) {}
+  // ── Mobile: bindear swipe-down para cerrar el bottom sheet ──
+  if (window.innerWidth <= 640 && panel) bindBottomSheetGesturesPd(panel);
 }
+
+// Swipe down para cerrar bottom sheet (mobile)
+function bindBottomSheetGesturesPd(panel) {
+  var startY = 0, currY = 0, dragging = false;
+  panel.ontouchstart = function(e){
+    if (panel.scrollTop > 0) return;
+    startY = e.touches[0].clientY;
+    currY = startY;
+    dragging = true;
+  };
+  panel.ontouchmove = function(e){
+    if (!dragging) return;
+    currY = e.touches[0].clientY;
+    var delta = currY - startY;
+    if (delta > 0) {
+      panel.style.transform = 'translateY('+delta+'px)';
+      panel.style.transition = 'none';
+    }
+  };
+  panel.ontouchend = function(){
+    if (!dragging) return;
+    dragging = false;
+    var delta = currY - startY;
+    panel.style.transition = '';
+    panel.style.transform = '';
+    if (delta > 120) cerrarDetallePedido();
+  };
+}
+
 function cerrarDetallePedido() {
   document.querySelectorAll('.pd-row-line').forEach(function(el){ el.classList.remove('active'); });
   var panel = document.getElementById('pdSidePanel');
   if (panel) {
     panel.classList.remove('open');
+    panel.style.transform = '';
     panel.innerHTML = '';
+    panel.ontouchstart = panel.ontouchmove = panel.ontouchend = null;
   }
   document.body.classList.remove('pd-panel-open');
   try { sessionStorage.removeItem('pdSelected'); } catch(e) {}
 }
+
+// Cerrar bottom sheet al tocar backdrop (mobile) y con ESC
+document.addEventListener('click', function(e){
+  if (window.innerWidth > 640) return;
+  if (!document.body.classList.contains('pd-panel-open')) return;
+  var panel = document.getElementById('pdSidePanel');
+  if (panel && panel.contains(e.target)) return;
+  cerrarDetallePedido();
+});
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape' && document.body.classList.contains('pd-panel-open')) cerrarDetallePedido();
+});
 function restaurarPedidoSeleccionado() {
   try {
     var raw = sessionStorage.getItem('pdSelected');
