@@ -1142,27 +1142,6 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJwvI7R_CLVclDMxSL8uCKwRdrKQF1Oo8&libraries=places&language=es&region=AR&loading=async&callback=initMaps" async defer></script>
   </head>
   <body>
-  <!-- TEMP: marca de versión para confirmar deploy. Sacar después de debug. -->
-  <div id="versionBanner" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#22C36A;color:#000;text-align:center;font-family:monospace;font-size:11px;font-weight:700;padding:4px 8px;letter-spacing:.5px">
-    ✅ MUDATEYA v.MOBILE-FIX-2026-04-27 · tap aquí para ocultar
-  </div>
-  <script>
-    // Log inmediato al cargar (vas a verlo en consola del browser si el HTML nuevo cargó)
-    console.log('[mudateya] HTML cargado · versión MOBILE-FIX-2026-04-27 · ts=' + Date.now());
-    // Permitir ocultar el banner tocándolo
-    document.addEventListener('DOMContentLoaded', function(){
-      var vb = document.getElementById('versionBanner');
-      if (vb) vb.addEventListener('click', function(){ vb.style.display='none'; });
-    });
-    // ── DEBUG GLOBAL: capturar TODO tap del document para ver qué elemento recibe ──
-    document.addEventListener('touchstart', function(e){
-      var t = e.target;
-      var info = (t.tagName || '?') + (t.id ? '#'+t.id : '') + (t.className ? '.'+String(t.className).slice(0,40) : '');
-      var vb = document.getElementById('versionBanner');
-      if (vb) { vb.style.background = '#1A6FFF'; vb.style.color = '#fff'; vb.textContent = '👆 TOUCH: ' + info.slice(0,60); }
-      console.log('[debug-touch]', info, 'target:', t);
-    }, true); // capture phase
-  </script>
 
   </div>
 
@@ -2843,11 +2822,6 @@
     if (lmm) {
       var hMisMudanzas = function(e){
         if (e) { e.preventDefault(); e.stopPropagation(); }
-        var info = '[mob-menu] Mis mudanzas tap. rolMud:' + sessionStorage.getItem('rolMudancero') + ' rolCli:' + sessionStorage.getItem('rolCliente');
-        console.log(info);
-        // DEBUG: mostrar también en pantalla por si no hay devtools
-        var vb = document.getElementById('versionBanner');
-        if (vb) { vb.textContent = '👆 TAP MIS MUDANZAS · redirecting...'; vb.style.background = '#FFB700'; }
         closeMenu();
         var rolMud = sessionStorage.getItem('rolMudancero') === '1';
         var rolCli = sessionStorage.getItem('rolCliente') === '1';
@@ -2863,10 +2837,6 @@
     if (lsm) {
       var hSoyMudancero = function(e){
         if (e) { e.preventDefault(); e.stopPropagation(); }
-        var info = '[mob-menu] Soy mudancero tap. rolMud:' + sessionStorage.getItem('rolMudancero');
-        console.log(info);
-        var vb = document.getElementById('versionBanner');
-        if (vb) { vb.textContent = '👆 TAP SOY MUDANCERO · redirecting...'; vb.style.background = '#FFB700'; }
         closeMenu();
         var rolMud = sessionStorage.getItem('rolMudancero') === '1';
         if (rolMud) { window.location.href = '/mi-cuenta'; return false; }
