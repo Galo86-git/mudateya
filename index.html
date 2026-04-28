@@ -1154,6 +1154,14 @@
       var vb = document.getElementById('versionBanner');
       if (vb) vb.addEventListener('click', function(){ vb.style.display='none'; });
     });
+    // ── DEBUG GLOBAL: capturar TODO tap del document para ver qué elemento recibe ──
+    document.addEventListener('touchstart', function(e){
+      var t = e.target;
+      var info = (t.tagName || '?') + (t.id ? '#'+t.id : '') + (t.className ? '.'+String(t.className).slice(0,40) : '');
+      var vb = document.getElementById('versionBanner');
+      if (vb) { vb.style.background = '#1A6FFF'; vb.style.color = '#fff'; vb.textContent = '👆 TOUCH: ' + info.slice(0,60); }
+      console.log('[debug-touch]', info, 'target:', t);
+    }, true); // capture phase
   </script>
 
   </div>
