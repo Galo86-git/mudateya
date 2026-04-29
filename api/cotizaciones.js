@@ -1751,6 +1751,31 @@ module.exports = async function handler(req, res) {
           const p = await getJSON(`mudancero:perfil:${email}`);
           if (!p || p.estado !== 'aprobado') continue;
           if (palabrasBuscadas.length > 0 && !cubreZona(p)) continue;
+
+          // ── Filtro: no mostrar mudanceros sin precios cargados ──────────
+          // Criterio: tiene que tener al menos UN precio > 0 en cualquier
+          // pack/ambiente o en flete. Si todo está en 0/vacío, no aparece.
+          function _toNum(v) {
+            if (v === null || v === undefined || v === '') return 0;
+            return parseInt(String(v).replace(/\./g, '').replace(/[^0-9]/g, ''), 10) || 0;
+          }
+          function _packTienePrecio(pk) {
+            if (!pk || typeof pk !== 'object') return false;
+            return _toNum(pk.amb1) > 0 || _toNum(pk.amb2) > 0 || _toNum(pk.amb3) > 0 || _toNum(pk.amb4) > 0;
+          }
+          var tienePrecioAlguno =
+                _packTienePrecio(p.preciosEsencial)
+             || _packTienePrecio(p.preciosIntegral)
+             || _packTienePrecio(p.preciosLlave)
+             || _toNum(p.precioFleteNuevo) > 0
+             // Compat con modelo viejo (precios.amb1..amb4 / precios.flete)
+             || _toNum(p.precios && p.precios.amb1) > 0
+             || _toNum(p.precios && p.precios.amb2) > 0
+             || _toNum(p.precios && p.precios.amb3) > 0
+             || _toNum(p.precios && p.precios.amb4) > 0
+             || _toNum(p.precios && p.precios.flete) > 0;
+          if (!tienePrecioAlguno) continue;
+
           // Devolver solo datos públicos — sin datos bancarios ni fotos de DNI
           catalogo.push({
             email:               p.email,
