@@ -2315,8 +2315,8 @@
       } else {
         tags += '<span class="mud-nivel-badge esencial">📦 Esencial</span>';
       }
-      if (m.verificadoIdentidad) tags += '<span class="mud-tag mud-tag-green">✓ Verificado</span>';
-      // Tag de vehículo (camión) eliminado: ocupa espacio y aporta poco valor visual
+      // Tag "✓ Verificado" eliminado: todos los mudanceros del catálogo ya están aprobados, ocupa espacio sin aportar info nueva.
+      // Tag de vehículo (camión) eliminado: ocupa espacio y aporta poco valor visual.
 
       // Badge top 3 (solo si tiene trabajos > 0, sino no tiene sentido)
       var topIdx = topTrabajos.indexOf(m.email);
