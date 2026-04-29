@@ -1969,6 +1969,86 @@ async function openModal(idx){
     if (perfil.extra) {
       html += '<div class="modal-section">📝 Descripción</div><div style="font-size:12px;color:#475569;padding:8px;background:#F8FAFC;border-radius:8px;line-height:1.5">'+perfil.extra+'</div>';
     }
+
+    // ── Precios cargados (modelo nuevo + legacy) ──────────────────────
+    var fmtAR = function(v) {
+      var n = parseInt(String(v||'').replace(/\D/g,''));
+      return (n && n > 0) ? '$' + n.toLocaleString('es-AR') : '—';
+    };
+    var hasN = function(o) {
+      if (!o) return false;
+      return parseInt(String(o.amb1||'').replace(/\D/g,'')) > 0
+          || parseInt(String(o.amb2||'').replace(/\D/g,'')) > 0
+          || parseInt(String(o.amb3||'').replace(/\D/g,'')) > 0
+          || parseInt(String(o.amb4||'').replace(/\D/g,'')) > 0;
+    };
+    var hasEsc = hasN(perfil.preciosEsencial);
+    var hasInt = hasN(perfil.preciosIntegral);
+    var hasLla = hasN(perfil.preciosLlave);
+    var hasFle = perfil.precioFleteNuevo && parseInt(String(perfil.precioFleteNuevo).replace(/\D/g,'')) > 0;
+    var hasLegacy = perfil.precios && (perfil.precios.amb1 || perfil.precios.amb2 || perfil.precios.amb3 || perfil.precios.amb4 || perfil.precios.flete);
+    var serviciosActivos = Array.isArray(perfil.serviciosActivos) ? perfil.serviciosActivos : [];
+
+    if (hasEsc || hasInt || hasLla || hasFle || hasLegacy) {
+      html += '<div class="modal-section">💰 Precios cargados</div>';
+      // Tabla de packs (modelo nuevo)
+      var tablaH = '<div style="overflow-x:auto;margin-bottom:10px"><table style="width:100%;border-collapse:collapse;font-size:12px;background:#fff;border:1px solid #E2E8F0;border-radius:8px;overflow:hidden">'
+        + '<thead><tr style="background:#F1F5F9;color:#475569"><th style="text-align:left;padding:8px 10px;font-weight:600">Pack</th>'
+        + '<th style="text-align:right;padding:8px 6px;font-weight:600">1 amb</th>'
+        + '<th style="text-align:right;padding:8px 6px;font-weight:600">2 amb</th>'
+        + '<th style="text-align:right;padding:8px 6px;font-weight:600">3 amb</th>'
+        + '<th style="text-align:right;padding:8px 10px;font-weight:600">4+ amb</th>'
+        + '<th style="text-align:center;padding:8px 6px;font-weight:600">Activo</th></tr></thead><tbody>';
+      function rowPack(label, color, key, obj) {
+        var act = serviciosActivos.indexOf(key) !== -1;
+        var hasData = hasN(obj);
+        var actBadge = act
+          ? '<span style="background:#DCFCE7;color:#15803D;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px">Sí</span>'
+          : '<span style="background:#FEF3C7;color:#92400E;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px">No</span>';
+        var celda = function(v){ return '<td style="text-align:right;padding:8px 6px;font-family:DM Mono,monospace;color:'+(hasData?'#0F1923':'#94A3B8')+'">'+fmtAR(v)+'</td>'; };
+        return '<tr style="border-top:1px solid #E2E8F0">'
+          + '<td style="padding:8px 10px;font-weight:600;color:'+color+'">'+label+'</td>'
+          + celda(obj && obj.amb1) + celda(obj && obj.amb2) + celda(obj && obj.amb3) + celda(obj && obj.amb4)
+          + '<td style="text-align:center;padding:8px 6px">'+actBadge+'</td></tr>';
+      }
+      tablaH += rowPack('📦 Esencial',         '#1E40AF', 'esencial', perfil.preciosEsencial);
+      tablaH += rowPack('🛠️ Integral',         '#16A34A', 'integral', perfil.preciosIntegral);
+      tablaH += rowPack('🔑 Llave en Mano',    '#B45309', 'llave',    perfil.preciosLlave);
+      tablaH += '</tbody></table></div>';
+      html += tablaH;
+      // Flete (precio único)
+      var actFle = serviciosActivos.indexOf('flete') !== -1;
+      var actFleBadge = actFle
+        ? '<span style="background:#DCFCE7;color:#15803D;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px">Sí</span>'
+        : '<span style="background:#FEF3C7;color:#92400E;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px">No</span>';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:10px">'
+        + '<div style="font-weight:600;font-size:12px;color:#475569">🚚 Flete (precio único)</div>'
+        + '<div style="display:flex;align-items:center;gap:10px">'
+        + '<span style="font-family:DM Mono,monospace;font-size:13px;font-weight:700;color:#0F1923">'+fmtAR(perfil.precioFleteNuevo)+'</span>'
+        + actFleBadge
+        + '</div></div>';
+      // Precios legacy si existen y no tiene modelo nuevo
+      if (hasLegacy && !(hasEsc || hasInt || hasLla)) {
+        html += '<div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;padding:10px 12px;margin-bottom:10px">'
+          + '<div style="font-size:11px;font-weight:700;color:#92400E;margin-bottom:6px">⚠ Precios LEGACY (no migró al modelo nuevo)</div>'
+          + '<div style="display:flex;flex-wrap:wrap;gap:8px;font-family:DM Mono,monospace;font-size:11px;color:#0F1923">'
+          + '<span>1 amb: '+fmtAR(perfil.precios.amb1)+'</span>'
+          + '<span>2 amb: '+fmtAR(perfil.precios.amb2)+'</span>'
+          + '<span>3 amb: '+fmtAR(perfil.precios.amb3)+'</span>'
+          + '<span>4+ amb: '+fmtAR(perfil.precios.amb4)+'</span>'
+          + '<span>Flete: '+fmtAR(perfil.precios.flete)+'</span>'
+          + (perfil.precios.porKm ? '<span>Por km: '+fmtAR(perfil.precios.porKm)+'</span>' : '')
+          + '</div></div>';
+      } else if (perfil.precios && perfil.precios.porKm) {
+        // Solo mostrar precio por km si tiene
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;font-size:12px">'
+          + '<span style="color:#475569;font-weight:600">📏 Precio por km adicional</span>'
+          + '<span style="font-family:DM Mono,monospace;font-weight:700">'+fmtAR(perfil.precios.porKm)+'</span></div>';
+      }
+    } else {
+      html += '<div class="modal-section">💰 Precios cargados</div>';
+      html += '<div style="padding:12px;background:#FEF3C7;border:1px solid #FCD34D;border-radius:8px;font-size:12px;color:#92400E">⚠ El mudancero NO tiene precios cargados en su perfil.</div>';
+    }
   }
 
   document.getElementById('modalContent').innerHTML = html;
