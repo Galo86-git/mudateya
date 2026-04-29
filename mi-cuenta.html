@@ -2214,54 +2214,12 @@ function loadPerfil(){
   setVal('pf-notas', m[20]||'');
 
   // ── Cargar las 4 cards de servicios y precios ──
-  // Intento leer datos nuevos (preciosEsencial / preciosIntegral / preciosLlave / precioFleteNuevo).
-  // Si no hay, hago fallback a los precios viejos (m[15]..m[19]) y los pongo en Esencial + Flete.
+  // IMPORTANTE: los precios de los packs (Esencial/Integral/Llave/Flete) y serviciosActivos
+  // NO se leen acá de localStorage. Se leen de Redis en cargarPreciosLeads() (al final).
+  // localStorage solo sirve como respaldo para el dato del precio por km y la metodoCobro.
+  // Esto evita el bug donde un localStorage cacheado (de otro browser/sesión) pisaba lo de Redis.
   var datosExtra = {};
-  try {
-    var raw = localStorage.getItem('mudExtra_' + (currentUser && currentUser.email ? currentUser.email : ''));
-    if (raw) datosExtra = JSON.parse(raw) || {};
-  } catch(e) {}
-  // Esencial
-  if (datosExtra.preciosEsencial) {
-    setVal('pf-esc-p1', fmtPrecio(datosExtra.preciosEsencial.amb1));
-    setVal('pf-esc-p2', fmtPrecio(datosExtra.preciosEsencial.amb2));
-    setVal('pf-esc-p3', fmtPrecio(datosExtra.preciosEsencial.amb3));
-    setVal('pf-esc-p4', fmtPrecio(datosExtra.preciosEsencial.amb4));
-    if (datosExtra.serviciosActivos && datosExtra.serviciosActivos.indexOf('esencial') !== -1) pfToggleSvc('esencial');
-  } else if (m[15] || m[16] || m[17] || m[18]) {
-    // Fallback: datos viejos en Esencial
-    setVal('pf-esc-p1', fmtPrecio(m[15]));
-    setVal('pf-esc-p2', fmtPrecio(m[16]));
-    setVal('pf-esc-p3', fmtPrecio(m[17]));
-    setVal('pf-esc-p4', fmtPrecio(m[18]));
-    pfToggleSvc('esencial');
-  }
-  // Integral
-  if (datosExtra.preciosIntegral) {
-    setVal('pf-int-p1', fmtPrecio(datosExtra.preciosIntegral.amb1));
-    setVal('pf-int-p2', fmtPrecio(datosExtra.preciosIntegral.amb2));
-    setVal('pf-int-p3', fmtPrecio(datosExtra.preciosIntegral.amb3));
-    setVal('pf-int-p4', fmtPrecio(datosExtra.preciosIntegral.amb4));
-    if (datosExtra.serviciosActivos && datosExtra.serviciosActivos.indexOf('integral') !== -1) pfToggleSvc('integral');
-  }
-  // Llave en mano
-  if (datosExtra.preciosLlave) {
-    setVal('pf-llv-p1', fmtPrecio(datosExtra.preciosLlave.amb1));
-    setVal('pf-llv-p2', fmtPrecio(datosExtra.preciosLlave.amb2));
-    setVal('pf-llv-p3', fmtPrecio(datosExtra.preciosLlave.amb3));
-    setVal('pf-llv-p4', fmtPrecio(datosExtra.preciosLlave.amb4));
-    if (datosExtra.serviciosActivos && datosExtra.serviciosActivos.indexOf('llave') !== -1) pfToggleSvc('llave');
-  }
-  // Flete
-  if (datosExtra.precioFleteNuevo) {
-    setVal('pf-flt-p', fmtPrecio(datosExtra.precioFleteNuevo));
-    if (datosExtra.serviciosActivos && datosExtra.serviciosActivos.indexOf('flete') !== -1) pfToggleSvc('flete');
-  } else if (m[19]) {
-    setVal('pf-flt-p', fmtPrecio(m[19]));
-    pfToggleSvc('flete');
-  }
-  // Seguro de mudanza
-  if (datosExtra.seguroMudanza === true) pfToggleSeguro();
+  // Banking sigue desde localStorage como antes (no es crítico):
   var bk = JSON.parse(localStorage.getItem('banking_'+currentUser.email)||'{}');
   if(bk.metodoCobro) setSelect('pf-metodoCobro', bk.metodoCobro);
   if(bk.cbu) setVal('pf-cbu', bk.cbu);
@@ -2305,8 +2263,13 @@ async function cargarPreciosLeads(){
       setVal('pf-esc-p2', fmtP(p.preciosEsencial.amb2));
       setVal('pf-esc-p3', fmtP(p.preciosEsencial.amb3));
       setVal('pf-esc-p4', fmtP(p.preciosEsencial.amb4));
+    } else if (p.precios && (p.precios.amb1 || p.precios.amb2 || p.precios.amb3 || p.precios.amb4)) {
+      // Compat legacy: si nunca migró al modelo nuevo, traemos lo viejo a Esencial
+      setVal('pf-esc-p1', fmtP(p.precios.amb1));
+      setVal('pf-esc-p2', fmtP(p.precios.amb2));
+      setVal('pf-esc-p3', fmtP(p.precios.amb3));
+      setVal('pf-esc-p4', fmtP(p.precios.amb4));
     } else {
-      // Si Redis no tiene preciosEsencial, limpio los inputs (no dejar valores fantasma de localStorage)
       setVal('pf-esc-p1',''); setVal('pf-esc-p2',''); setVal('pf-esc-p3',''); setVal('pf-esc-p4','');
     }
     // Integral
@@ -2330,23 +2293,39 @@ async function cargarPreciosLeads(){
     // Flete
     if (p.precioFleteNuevo) {
       setVal('pf-flt-p', fmtP(p.precioFleteNuevo));
+    } else if (p.precios && p.precios.flete) {
+      // Compat legacy
+      setVal('pf-flt-p', fmtP(p.precios.flete));
+    } else {
+      setVal('pf-flt-p','');
     }
     // ── Sincronizar svc-cards (qué packs están activos) según serviciosActivos de Redis ──
+    // FORZAMOS el estado deseado en _pfSvc + clase CSS, sin usar pfToggleSvc (que togglea
+    // y puede borrar precios al "desactivar"). Esto evita pisar los precios recién cargados.
     var activos = Array.isArray(p.serviciosActivos) ? p.serviciosActivos : [];
     var idMap = { esencial:'pf-svcEsencial', integral:'pf-svcIntegral', llave:'pf-svcLlave', flete:'pf-svcFlete' };
     ['esencial','integral','llave','flete'].forEach(function(svc){
       var card = document.getElementById(idMap[svc]);
       if (!card) return;
       var debeEstarActivo = activos.indexOf(svc) !== -1;
-      var estaActivo = card.classList.contains('active');
-      if (debeEstarActivo !== estaActivo) pfToggleSvc(svc);
+      // Setear estado interno
+      if (typeof _pfSvc !== 'undefined') _pfSvc[svc] = debeEstarActivo;
+      // Setear clases CSS sin togglear (evita perder precios al "desactivar")
+      if (debeEstarActivo) {
+        card.classList.add('active');
+        if (svc === 'llave') card.classList.add('is-llave');
+      } else {
+        card.classList.remove('active');
+        if (svc === 'llave') card.classList.remove('is-llave');
+      }
     });
     // ── Seguro de mudanza ──
     var cardSeg = document.getElementById('pf-svcSeguro');
     if (cardSeg) {
       var debeSeguro = !!p.seguroMudanza;
-      var estaSeguro = cardSeg.classList.contains('active');
-      if (debeSeguro !== estaSeguro) pfToggleSeguro();
+      if (typeof _pfSeguro !== 'undefined') _pfSeguro = debeSeguro;
+      if (debeSeguro) cardSeg.classList.add('active');
+      else            cardSeg.classList.remove('active');
     }
   } catch(e) {
     // silencioso — si falla, los inputs quedan con lo que el mudancero llene
