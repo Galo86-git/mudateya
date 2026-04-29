@@ -2277,23 +2277,80 @@ function loadPerfil(){
   cargarPreciosLeads();
 }
 
-// Estado de los % (también lee/escribe los inputs hidden de pct)
-// Lee precio por km desde Redis (la tabla Plan Referidos fue eliminada)
+// Lee perfil completo desde Redis (fuente de verdad) y rellena TODOS los campos.
+// Redis manda sobre cualquier dato cacheado en localStorage del navegador.
 async function cargarPreciosLeads(){
   try {
     var r = await fetch('/api/actualizar-mudancero?email=' + encodeURIComponent(currentUser.email));
     var d = await r.json();
     if (!d.ok || !d.perfil) return;
     mudanceroPerfilRedis = d.perfil; // disponible globalmente
-    // Cargar precio por km
+    var p = d.perfil;
+    // Helper local para formato AR
+    var fmtP = function(v){
+      var n = parseInt(String(v||'').replace(/\D/g,''));
+      return (n && n > 0) ? n.toLocaleString('es-AR') : '';
+    };
+    // ── Cargar precios por km ──
     var pkmInput = document.getElementById('pf-pkm');
     if (pkmInput) {
-      var pkm = (d.perfil.precios && d.perfil.precios.porKm) || d.perfil.precioPorKm || '';
+      var pkm = (p.precios && p.precios.porKm) || p.precioPorKm || '';
       var pkmNum = parseInt(String(pkm).replace(/\D/g,''));
       if (pkmNum && pkmNum > 0) pkmInput.value = pkmNum.toLocaleString('es-AR');
     }
+    // ── Cargar packs desde Redis (fuente de verdad) ──
+    // Esencial
+    if (p.preciosEsencial) {
+      setVal('pf-esc-p1', fmtP(p.preciosEsencial.amb1));
+      setVal('pf-esc-p2', fmtP(p.preciosEsencial.amb2));
+      setVal('pf-esc-p3', fmtP(p.preciosEsencial.amb3));
+      setVal('pf-esc-p4', fmtP(p.preciosEsencial.amb4));
+    } else {
+      // Si Redis no tiene preciosEsencial, limpio los inputs (no dejar valores fantasma de localStorage)
+      setVal('pf-esc-p1',''); setVal('pf-esc-p2',''); setVal('pf-esc-p3',''); setVal('pf-esc-p4','');
+    }
+    // Integral
+    if (p.preciosIntegral) {
+      setVal('pf-int-p1', fmtP(p.preciosIntegral.amb1));
+      setVal('pf-int-p2', fmtP(p.preciosIntegral.amb2));
+      setVal('pf-int-p3', fmtP(p.preciosIntegral.amb3));
+      setVal('pf-int-p4', fmtP(p.preciosIntegral.amb4));
+    } else {
+      setVal('pf-int-p1',''); setVal('pf-int-p2',''); setVal('pf-int-p3',''); setVal('pf-int-p4','');
+    }
+    // Llave
+    if (p.preciosLlave) {
+      setVal('pf-llv-p1', fmtP(p.preciosLlave.amb1));
+      setVal('pf-llv-p2', fmtP(p.preciosLlave.amb2));
+      setVal('pf-llv-p3', fmtP(p.preciosLlave.amb3));
+      setVal('pf-llv-p4', fmtP(p.preciosLlave.amb4));
+    } else {
+      setVal('pf-llv-p1',''); setVal('pf-llv-p2',''); setVal('pf-llv-p3',''); setVal('pf-llv-p4','');
+    }
+    // Flete
+    if (p.precioFleteNuevo) {
+      setVal('pf-flt-p', fmtP(p.precioFleteNuevo));
+    }
+    // ── Sincronizar svc-cards (qué packs están activos) según serviciosActivos de Redis ──
+    var activos = Array.isArray(p.serviciosActivos) ? p.serviciosActivos : [];
+    var idMap = { esencial:'pf-svcEsencial', integral:'pf-svcIntegral', llave:'pf-svcLlave', flete:'pf-svcFlete' };
+    ['esencial','integral','llave','flete'].forEach(function(svc){
+      var card = document.getElementById(idMap[svc]);
+      if (!card) return;
+      var debeEstarActivo = activos.indexOf(svc) !== -1;
+      var estaActivo = card.classList.contains('active');
+      if (debeEstarActivo !== estaActivo) pfToggleSvc(svc);
+    });
+    // ── Seguro de mudanza ──
+    var cardSeg = document.getElementById('pf-svcSeguro');
+    if (cardSeg) {
+      var debeSeguro = !!p.seguroMudanza;
+      var estaSeguro = cardSeg.classList.contains('active');
+      if (debeSeguro !== estaSeguro) pfToggleSeguro();
+    }
   } catch(e) {
-    // silencioso — si falla, los inputs quedan vacíos y el mudancero los llena
+    // silencioso — si falla, los inputs quedan con lo que el mudancero llene
+    console.warn('cargarPreciosLeads error:', e.message);
   }
 }
 
