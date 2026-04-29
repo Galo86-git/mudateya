@@ -867,6 +867,8 @@
     .mud-precio-desde{display:none} /* sacamos "Desde" arriba del precio */
     .mud-precio-num{font-size:16px;letter-spacing:-.3px}
     .mud-precio-sub{display:none} /* sacamos "precio estimado" */
+    /* Excepción: si es tarifa por hora (Córdoba), mostramos siempre el badge */
+    .mud-precio-sub[style*="B45309"]{display:block!important;font-size:9.5px;line-height:1.2}
     /* Botones: ocultar Ver perfil, hacer Elegir más angosto */
     .mud-card-actions{padding:0 6px 8px;gap:4px;justify-content:flex-end}
     .btn-ver{display:none} /* oculto en mobile */
@@ -2173,6 +2175,17 @@
   // Devuelve el precio base del mudancero para el nivel y los ambientes pedidos.
   // En el nuevo modelo lee directamente de m.preciosEsencial / preciosIntegral / preciosLlave.
   // SI EL PACK NO ESTÁ CARGADO → devuelve 0 (no inventa precios con multiplicador).
+  // ¿El mudancero cobra por hora? (caso Córdoba — el resto del país cobra fijo).
+  // Detección por keywords en zonaBase + zonasExtra. Si en el futuro otras provincias
+  // cobran por hora (ej. Tucumán), agregalas acá.
+  function esCordobes(m) {
+    if (!m) return false;
+    var zonas = ((m.zonaBase || '') + ' ' + (m.zonasExtra || '')).toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // sin acentos
+    // Keywords específicas de Córdoba (evita ambigüedad con "Capital" que comparte con CABA/Mendoza)
+    return /\b(cordoba|cba|nueva\s*cordoba|villa\s*carlos\s*paz|alta\s*gracia|rio\s*cuarto|villa\s*allende|vcp|saldan|jesus\s*maria)\b/.test(zonas);
+  }
+
   function precioMudanceroNivel(m, nivel, ambientes) {
     var pAmt = function(v) { return parseInt(String(v||0).replace(/\./g,'').replace(/,/g,'')) || 0; };
     var amb = Math.max(1, ambientes || 2);
@@ -2369,9 +2382,14 @@
         +   '<div class="mud-card-trabajos">'+(m.trabajosCompletados||0)+' trabajos completados</div>'
         + '</div>'
         + '<div class="mud-card-precio">'
-        +   '<div class="mud-precio-desde">Desde</div>'
-        +   '<div class="mud-precio-num">$ '+precio.toLocaleString('es-AR')+'</div>'
-        +   '<div class="mud-precio-sub">precio estimado</div>'
+        +   (esCordobes(m)
+              ? '<div class="mud-precio-desde">Por hora</div>'
+                + '<div class="mud-precio-num">$ '+precio.toLocaleString('es-AR')+' <span style="font-size:13px;font-weight:600;color:var(--text2)">/hr</span></div>'
+                + '<div class="mud-precio-sub" style="color:#B45309;font-weight:600">⏱ Tarifa por hora trabajada</div>'
+              : '<div class="mud-precio-desde">Desde</div>'
+                + '<div class="mud-precio-num">$ '+precio.toLocaleString('es-AR')+'</div>'
+                + '<div class="mud-precio-sub">precio estimado</div>'
+            )
         + '</div>'
         + '<div class="mud-card-actions" onclick="event.stopPropagation()">'
         +   '<button class="btn-ver" onclick="verPerfil(\''+m.email+'\')">Ver perfil</button>'
