@@ -2138,21 +2138,41 @@
     return false;
   }
   // ¿El mudancero aplica al filtro seleccionado por el cliente?
-  // En el nuevo modelo: aparece SOLO si tiene ese servicio activado (no es acumulativo).
+  // En el nuevo modelo: aparece SOLO si tiene ese servicio activado Y precio > 0 cargado
+  // (no inventamos precios con multiplicador). Para flete, el filtro de nivel no aplica.
   function aplicaAlNivel(m, nivel) {
-    return ofreceNivel(m, nivel);
+    if (!ofreceNivel(m, nivel)) return false;
+    // Si la búsqueda actual es de flete, el nivel no se evalúa por precio (es otro flujo)
+    if (_busqueda && _busqueda.tipo === 'flete') return true;
+    // Para mudanza, además exigimos precio > 0 en el pack del nivel.
+    // Si tiene modelo nuevo (al menos un pack cargado), exigimos precio real para este nivel.
+    var tieneModeloNuevo = !!(m && (m.preciosEsencial || m.preciosIntegral || m.preciosLlave));
+    if (tieneModeloNuevo) {
+      var amb = (_busqueda && _busqueda.ambientes) || 2;
+      return precioMudanceroNivel(m, nivel, amb) > 0;
+    }
+    // Modelo viejo (legacy): si no migró al modelo nuevo, dejamos pasar (multiplicador histórico).
+    return true;
   }
   // Helper compat: nivel "máximo" que ofrece el mudancero (para el badge de la card).
-  // Llave > Integral > Esencial.
+  // Llave > Integral > Esencial. Solo cuenta el nivel si ADEMÁS tiene precio > 0 cargado
+  // (modelo nuevo). Si está en modelo legacy, basta con serviciosActivos.
   function nivelMaxMudancero(m) {
-    if (ofreceNivel(m, 'llave'))    return 'llave';
-    if (ofreceNivel(m, 'integral')) return 'integral';
-    if (ofreceNivel(m, 'esencial')) return 'esencial';
+    var tieneModeloNuevo = !!(m && (m.preciosEsencial || m.preciosIntegral || m.preciosLlave));
+    var amb = (_busqueda && _busqueda.ambientes) || 2;
+    function ofreceConPrecio(nivel) {
+      if (!ofreceNivel(m, nivel)) return false;
+      if (!tieneModeloNuevo) return true; // legacy: solo chequea serviciosActivos
+      return precioMudanceroNivel(m, nivel, amb) > 0;
+    }
+    if (ofreceConPrecio('llave'))    return 'llave';
+    if (ofreceConPrecio('integral')) return 'integral';
+    if (ofreceConPrecio('esencial')) return 'esencial';
     return 'esencial';
   }
   // Devuelve el precio base del mudancero para el nivel y los ambientes pedidos.
   // En el nuevo modelo lee directamente de m.preciosEsencial / preciosIntegral / preciosLlave.
-  // En el modelo viejo aplica el multiplicador histórico (×1, ×1.5, ×2.25) sobre m.precios.amb*.
+  // SI EL PACK NO ESTÁ CARGADO → devuelve 0 (no inventa precios con multiplicador).
   function precioMudanceroNivel(m, nivel, ambientes) {
     var pAmt = function(v) { return parseInt(String(v||0).replace(/\./g,'').replace(/,/g,'')) || 0; };
     var amb = Math.max(1, ambientes || 2);
@@ -2163,7 +2183,12 @@
       var p = pAmt(m[mapa[nivel]][clave]) || pAmt(m[mapa[nivel]].amb1);
       if (p > 0) return p;
     }
-    // Compat con datos viejos: aplica multiplicador
+    // Compat con datos viejos: SOLO si el perfil NO tiene NINGÚN dato del modelo nuevo
+    // (preciosEsencial/Integral/Llave todos vacíos), aplicamos multiplicador sobre precios viejos.
+    // Si tiene algo del modelo nuevo (aunque sea solo un pack), no inventamos los faltantes.
+    var tieneModeloNuevo = (m && m.preciosEsencial) || (m && m.preciosIntegral) || (m && m.preciosLlave);
+    if (tieneModeloNuevo) return 0;
+    // Solo legacy: usuarios viejos sin migrar al modelo nuevo
     var multi = (nivel === 'integral') ? 1.5 : (nivel === 'llave' ? 2.25 : 1);
     var base = pAmt(m && m.precios && m.precios[clave]) || pAmt(m && m.precios && m.precios.amb1);
     return Math.round(base * multi);
