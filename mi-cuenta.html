@@ -1605,11 +1605,44 @@ function renderRowPedido(m, tipo) {
   var nivelPedido = m.nivel || (esFlete ? 'flete' : 'esencial');
   var cfg = packsCfg[nivelPedido] || packsCfg.esencial;
   var packBadge = '<span class="pd-pack-mini" style="background:'+cfg.color+'15;color:'+cfg.color+'">'+cfg.emoji+' '+cfg.nombre+'</span>';
-  // Precio: en disponibles muestro estimado; en enviados/aceptados/expirados muestro mi cotización
+  // Precio: en disponibles muestro MI precio calculado (base por amb + km),
+  // en enviados/aceptados/expirados muestro mi cotización real
   var precioTxt = '';
   if (tipo === 'disponibles') {
-    var pe = parseInt(m.precio_estimado||0);
-    if (pe > 0) precioTxt = '~$'+pe.toLocaleString('es-AR');
+    // Calcular el precio del mudancero igual que renderCardDisponible:
+    // base por nivel/ambientes + km × precioPorKm. Si no hay precio cargado,
+    // fallback al precio_estimado del cliente.
+    var perfilRedis_pl = mudanceroPerfilRedis || {};
+    var precios_pl = perfilRedis_pl.precios || {};
+    var precioPorKm_pl = parseInt((precios_pl.porKm || perfilRedis_pl.precioPorKm || 0)) || 0;
+    var ambN_pl = parseInt(String(m.ambientes||'').replace(/\D/g,'')) || 0;
+    var nivel_pl = m.nivel || (esFlete ? 'flete' : 'esencial');
+    var precioBase_pl = 0;
+    if (nivel_pl === 'flete') {
+      precioBase_pl = parseInt(perfilRedis_pl.precioFleteNuevo || precios_pl.flete || 0) || 0;
+    } else {
+      var clave_pl = ['amb1','amb2','amb3','amb4'][Math.min(Math.max(ambN_pl,1),4)-1] || 'amb1';
+      var preciosNivel_pl = perfilRedis_pl['precios' + nivel_pl.charAt(0).toUpperCase() + nivel_pl.slice(1)];
+      if (preciosNivel_pl) {
+        precioBase_pl = parseInt(preciosNivel_pl[clave_pl] || 0) || 0;
+      }
+      if (precioBase_pl === 0) {
+        if (ambN_pl === 1) precioBase_pl = parseInt(precios_pl.amb1||0) || 0;
+        else if (ambN_pl === 2) precioBase_pl = parseInt(precios_pl.amb2||0) || 0;
+        else if (ambN_pl === 3) precioBase_pl = parseInt(precios_pl.amb3||0) || 0;
+        else if (ambN_pl >= 4) precioBase_pl = parseInt(precios_pl.amb4||0) || 0;
+      }
+    }
+    var km_pl = parseInt(m.km||0);
+    var costoKm_pl = (km_pl > 0 && precioPorKm_pl > 0) ? (km_pl * precioPorKm_pl) : 0;
+    var precioMudList = precioBase_pl + costoKm_pl;
+    if (precioMudList > 0) {
+      precioTxt = '$' + precioMudList.toLocaleString('es-AR');
+    } else {
+      // Fallback: precio_estimado del cliente
+      var pe = parseInt(m.precio_estimado||0);
+      if (pe > 0) precioTxt = '~$'+pe.toLocaleString('es-AR');
+    }
   } else if (m.miCotizacion) {
     var pmc = parseInt(m.miCotizacion.precio||0);
     if (pmc > 0) precioTxt = '$'+pmc.toLocaleString('es-AR');
