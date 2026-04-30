@@ -1,6 +1,15 @@
 // api/cotizaciones.js — Upstash Redis + PDF con pdfmake
 const { Resend } = require('resend');
 
+// Helper de push notifications (definido en api/push.js)
+// Si push.js no está disponible o falla, los envíos de email siguen funcionando normal.
+let enviarPush = async function() { return { ok: false, error: 'push no cargado' }; };
+try {
+  enviarPush = require('./push').enviarPush || enviarPush;
+} catch (e) {
+  console.warn('[push] no se pudo cargar push.js:', e.message);
+}
+
 // ════════════════════════════════════════════════════
 // REDIS
 // ════════════════════════════════════════════════════
@@ -1557,6 +1566,12 @@ module.exports = async function handler(req, res) {
       // Si se acaba de aprobar → mandar email de alta con link de términos
       if (nuevoEstado === 'aprobado' && estadoAnterior !== 'aprobado') {
         try { await enviarEmailAltaMudancero(perfil); } catch(e) { console.error('Email alta error:', e.message); }
+        // Push: avisar que ya está aprobado y puede empezar a recibir pedidos
+        enviarPush(email, {
+          titulo: '✅ Tu perfil fue aprobado',
+          cuerpo: 'Ya estás recibiendo pedidos en MudateYa.',
+          link: '/mi-cuenta'
+        }).catch(function(e){ console.error('Push aprobación error:', email, e && e.message); });
       }
 
       return res.status(200).json({ ok: true, estado: perfil.estado });
@@ -2067,6 +2082,18 @@ async function notificarMudanceros(mudanza) {
         }).catch(function(e) { console.error('Email mudancero error:', dest.email, e.message); });
       }));
     }
+
+    // Push notifications a todos los destinatarios (en paralelo)
+    const dirigido = mudanza.modoCotizacion === 'dirigido';
+    const tituloPush = dirigido ? '⭐ Te eligieron' : tipoLabel;
+    const cuerpoPush = `${mudanza.desde?.split(',')[0] || mudanza.desde} → ${mudanza.hasta?.split(',')[0] || mudanza.hasta}`;
+    await Promise.all(destinatarios.map(function(dest){
+      return enviarPush(dest.email, {
+        titulo: tituloPush,
+        cuerpo: cuerpoPush,
+        link: '/mi-cuenta'
+      }).catch(function(e){ console.error('Push mudancero error:', dest.email, e && e.message); });
+    }));
   } catch(e) {
     console.error('Error notificando mudanceros:', e.message);
   }
@@ -2302,6 +2329,14 @@ async function notificarMudanceroInvitado(mudanza, perfil) {
   const resend = new Resend(process.env.RESEND_API_KEY);
   if (!process.env.RESEND_API_KEY || !perfil.email) return;
   const siteUrl = process.env.SITE_URL || 'https://mudateya.ar';
+
+  // Push en paralelo con el email
+  enviarPush(perfil.email, {
+    titulo: '⭐ Un cliente te eligió',
+    cuerpo: `${mudanza.clienteNombre || 'Un cliente'}: ${mudanza.desde?.split(',')[0] || mudanza.desde} → ${mudanza.hasta?.split(',')[0] || mudanza.hasta}`,
+    link: '/mi-cuenta'
+  }).catch(function(e){ console.error('Push invitado error:', perfil.email, e && e.message); });
+
   await resend.emails.send({
     from: 'MudateYa <noreply@mudateya.ar>',
     to:   perfil.email,
@@ -2408,6 +2443,17 @@ async function notificarMudanceroPago(mudanza, tipoPago) {
   const netoMudancero = Math.round(precioTotal * (1 - comisionPct));
   const netoFmt = '$' + netoMudancero.toLocaleString('es-AR');
   const nombre = (cot.mudanceroNombre || 'Mudancero').split(' ')[0];
+
+  // Push notification — paralela al email
+  const tituloPush = esAnticipo ? '💰 Anticipo recibido' : '✅ Pago completado';
+  const cuerpoPush = esAnticipo
+    ? `${montoFmt} acreditado. Coordiná la mudanza.`
+    : `${montoFmt} acreditado. Mudanza pagada al 100%.`;
+  enviarPush(cot.mudanceroEmail, {
+    titulo: tituloPush,
+    cuerpo: cuerpoPush,
+    link: '/mi-cuenta'
+  }).catch(function(e){ console.error('Push pago error:', cot.mudanceroEmail, e && e.message); });
 
   const subject = esAnticipo
     ? `💰 Anticipo recibido — ${mudanza.desde?.split(',')[0]} → ${mudanza.hasta?.split(',')[0]}`
