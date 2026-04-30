@@ -1246,14 +1246,74 @@ body.pd-panel-open .pd-list-col{flex:1.3}
       <!-- GANANCIAS -->
       <div class="page" id="page-ganancias">
         <div class="page-title">Mis ganancias</div>
-        <div class="metrics-grid">
-          <div class="metric-card green"><div class="metric-label">Ganancias totales</div><div class="metric-val" id="g-total">$0</div><div class="metric-sub">neto después de fee</div></div>
-          <div class="metric-card blue"><div class="metric-label">Trabajos completados</div><div class="metric-val" id="g-trabajos">0</div><div class="metric-sub">mudanzas</div></div>
-          <div class="metric-card amber"><div class="metric-label">Promedio por trabajo</div><div class="metric-val" id="g-promedio">$0</div><div class="metric-sub">por mudanza</div></div>
+
+        <!-- Estado de cobros: 3 tarjetas con saldo, en proceso y próximos -->
+        <div id="gananciasEstados" style="display:flex;flex-direction:column;gap:12px;margin-bottom:18px">
+          <!-- Card DISPONIBLE -->
+          <div id="gEstadoDisp" class="g-estado g-estado-disp" style="background:linear-gradient(135deg,#22C36A 0%,#16A34A 100%);color:#fff;border-radius:14px;padding:18px 18px 16px;box-shadow:0 4px 14px rgba(34,195,106,.18)">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px">
+              <div style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;opacity:.85">✅ Disponible para retirar</div>
+              <div id="gDispCount" style="font-size:11px;font-family:var(--mono);opacity:.85">0 cobros</div>
+            </div>
+            <div id="gDispMonto" style="font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:1px;line-height:1;margin-bottom:6px">$0</div>
+            <div style="font-size:11.5px;opacity:.9;line-height:1.4" id="gDispSubtitulo">Sin cobros disponibles aún</div>
+          </div>
+
+          <!-- Card EN PROCESO -->
+          <div id="gEstadoProc" class="g-estado g-estado-proc" style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:14px;padding:16px 18px;display:none">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px">
+              <div style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;color:#C2410C;font-weight:700">⏳ En proceso (15 días hábiles)</div>
+              <div id="gProcCount" style="font-size:11px;font-family:var(--mono);color:#C2410C">0 cobros</div>
+            </div>
+            <div id="gProcMonto" style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;line-height:1;color:#0F1923;margin-bottom:10px">$0</div>
+            <div id="gProcLista" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+
+          <!-- Card PRÓXIMOS -->
+          <div id="gEstadoFut" class="g-estado g-estado-fut" style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:14px;padding:16px 18px;display:none">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px">
+              <div style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;color:#1D4ED8;font-weight:700">🔜 Próximos cobros</div>
+              <div id="gFutCount" style="font-size:11px;font-family:var(--mono);color:#1D4ED8">0 mudanzas</div>
+            </div>
+            <div id="gFutMonto" style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;line-height:1;color:#0F1923;margin-bottom:10px">$0</div>
+            <div id="gFutLista" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
         </div>
+
+        <!-- Resumen del mes -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-header">
+            <span class="card-title">Resumen total</span>
+          </div>
+          <div style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div>
+              <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px">Total ganado (neto)</div>
+              <div id="g-total" style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--blue);letter-spacing:.5px;margin-top:4px">$0</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px">Comisión MudateYa</div>
+              <div id="g-comision" style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#DC2626;letter-spacing:.5px;margin-top:4px">$0</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px">Trabajos completados</div>
+              <div id="g-trabajos" style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text);letter-spacing:.5px;margin-top:4px">0</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px">Promedio por trabajo</div>
+              <div id="g-promedio" style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#F59E0B;letter-spacing:.5px;margin-top:4px">$0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Historial detallado -->
         <div class="card">
-          <div class="card-header"><span class="card-title">Detalle de pagos</span></div>
-          <div id="gananciasList"><div class="empty"><div class="empty-icon">💰</div>Sin pagos registrados aún</div></div>
+          <div class="card-header"><span class="card-title">Historial de trabajos</span></div>
+          <div id="gananciasList"><div class="empty"><div class="empty-icon">💰</div>Cuando aceptes tu primera cotización, los trabajos aparecen acá.</div></div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div style="font-size:10.5px;color:var(--text3);text-align:center;margin-top:14px;line-height:1.5;padding:0 8px">
+          ℹ️ Las fechas son estimadas — los feriados pueden mover el día de cobro 1-2 días. El admin coordina la transferencia a tu CBU/alias una vez disponible.
         </div>
       </div>
 
@@ -2909,40 +2969,264 @@ function loadHistorial(){
 // ════════════════════════════════════════════════════
 // GANANCIAS
 // ════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// HELPER: días hábiles (solo lunes-viernes, sin contar feriados)
+// ════════════════════════════════════════════════════
+function addBusinessDays(date, n){
+  var d = new Date(date);
+  var added = 0;
+  while (added < n) {
+    d.setDate(d.getDate() + 1);
+    var dow = d.getDay(); // 0=dom, 6=sab
+    if (dow !== 0 && dow !== 6) added++;
+  }
+  return d;
+}
+
+function fmtFechaCorta(d){
+  if (!d) return '';
+  var x = (d instanceof Date) ? d : new Date(d);
+  if (isNaN(x.getTime())) return '';
+  var meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return x.getDate() + ' ' + meses[x.getMonth()] + (x.getFullYear() !== new Date().getFullYear() ? ' ' + x.getFullYear() : '');
+}
+
+function diasHabilesEntre(desde, hasta){
+  var d = new Date(desde);
+  var h = new Date(hasta);
+  if (h <= d) return 0;
+  var n = 0;
+  while (d < h) {
+    d.setDate(d.getDate() + 1);
+    var dow = d.getDay();
+    if (dow !== 0 && dow !== 6) n++;
+  }
+  return n;
+}
+
+// ════════════════════════════════════════════════════
+// loadGanancias — clasifica cobros en 3 estados
+// ════════════════════════════════════════════════════
 function loadGanancias(){
   var ACTIVOS = ['cotizacion_aceptada','en_curso','completada'];
   var aceptadas = misCotizaciones.filter(function(m){
-    return ACTIVOS.indexOf(m.estado)!==-1 && m.cotizacionAceptada && m.cotizacionAceptada.id===m.miCotizacion?.id;
+    return ACTIVOS.indexOf(m.estado)!==-1 && m.cotizacionAceptada && m.cotizacionAceptada.id===(m.miCotizacion && m.miCotizacion.id);
   });
-  var total = aceptadas.reduce(function(s,m){ return s+(precioFinalMudanza(m)*calcNeto(m.ambientes)); },0);
-  var prom = aceptadas.length>0 ? Math.round(total/aceptadas.length) : 0;
-  document.getElementById('g-total').textContent='$'+Math.round(total).toLocaleString('es-AR');
+
+  var hoy = new Date();
+  var DIAS_LIQ = 15; // 15 días hábiles para liberar el cobro
+
+  // Cada mudanza genera 2 cobros independientes (anticipo y saldo) que se clasifican por separado
+  // Estados:
+  //   'disponible' = cliente ya pagó + pasaron los 15 hábiles
+  //   'en_proceso' = cliente ya pagó pero faltan días para liberar
+  //   'futuro'     = cliente todavía no pagó (estimado)
+  var cobros = [];
+
+  aceptadas.forEach(function(m){
+    var precioFinal = precioFinalMudanza(m);
+    var feeTotal = Math.round(calcFee(precioFinal, m.ambientes));
+    var netoTotal = precioFinal - feeTotal;
+    var netoAnticipo = Math.round(netoTotal * 0.5);
+    var netoSaldo = netoTotal - netoAnticipo;
+    var ruta = (m.desde||'').split(',')[0] + ' → ' + (m.hasta||'').split(',')[0];
+
+    // ── Cobro de anticipo ─────────────────────────────────────
+    var cobroAnt = {
+      mudanzaId: m.id,
+      ruta: ruta,
+      tipo: 'anticipo',
+      etiqueta: '50% anticipo',
+      monto: netoAnticipo,
+      mudanza: m
+    };
+    if (m.anticipoPagado) {
+      // Backfill: si pagado pero no tiene fecha, asumo que se pagó el día de la mudanza planeada
+      var fechaPagoAnt = m.fechaPagoAnticipo ? new Date(m.fechaPagoAnticipo) : (m.fecha ? new Date(m.fecha) : null);
+      if (fechaPagoAnt && !isNaN(fechaPagoAnt.getTime())) {
+        var fechaDispAnt = addBusinessDays(fechaPagoAnt, DIAS_LIQ);
+        cobroAnt.fechaPago = fechaPagoAnt;
+        cobroAnt.fechaDisp = fechaDispAnt;
+        cobroAnt.estado = (hoy >= fechaDispAnt) ? 'disponible' : 'en_proceso';
+        cobroAnt.diasFaltan = (hoy < fechaDispAnt) ? diasHabilesEntre(hoy, fechaDispAnt) : 0;
+      } else {
+        // Sin ninguna fecha conocida — asumir disponible
+        cobroAnt.estado = 'disponible';
+      }
+    } else {
+      // Cliente todavía no pagó el anticipo → estimado
+      cobroAnt.estado = 'futuro';
+      var fechaEstAnt = m.fecha ? new Date(m.fecha) : null;
+      if (fechaEstAnt && !isNaN(fechaEstAnt.getTime())) {
+        cobroAnt.fechaEstimadaPago = fechaEstAnt;
+        cobroAnt.fechaDisp = addBusinessDays(fechaEstAnt, DIAS_LIQ);
+      }
+    }
+    cobros.push(cobroAnt);
+
+    // ── Cobro de saldo ────────────────────────────────────────
+    var cobroSld = {
+      mudanzaId: m.id,
+      ruta: ruta,
+      tipo: 'saldo',
+      etiqueta: '50% saldo',
+      monto: netoSaldo,
+      mudanza: m
+    };
+    if (m.saldoPagado) {
+      var fechaPagoSld = m.fechaPagoSaldo ? new Date(m.fechaPagoSaldo) : (m.fechaCompletada ? new Date(m.fechaCompletada) : (m.fecha ? new Date(m.fecha) : null));
+      if (fechaPagoSld && !isNaN(fechaPagoSld.getTime())) {
+        var fechaDispSld = addBusinessDays(fechaPagoSld, DIAS_LIQ);
+        cobroSld.fechaPago = fechaPagoSld;
+        cobroSld.fechaDisp = fechaDispSld;
+        cobroSld.estado = (hoy >= fechaDispSld) ? 'disponible' : 'en_proceso';
+        cobroSld.diasFaltan = (hoy < fechaDispSld) ? diasHabilesEntre(hoy, fechaDispSld) : 0;
+      } else {
+        cobroSld.estado = 'disponible';
+      }
+    } else {
+      cobroSld.estado = 'futuro';
+      var fechaEstSld = m.fecha ? new Date(m.fecha) : null;
+      if (fechaEstSld && !isNaN(fechaEstSld.getTime())) {
+        cobroSld.fechaEstimadaPago = fechaEstSld;
+        cobroSld.fechaDisp = addBusinessDays(fechaEstSld, DIAS_LIQ);
+      }
+    }
+    cobros.push(cobroSld);
+  });
+
+  // ── Totales por estado ──────────────────────────────────────
+  var disp = cobros.filter(function(c){ return c.estado === 'disponible'; });
+  var proc = cobros.filter(function(c){ return c.estado === 'en_proceso'; });
+  var fut  = cobros.filter(function(c){ return c.estado === 'futuro'; });
+
+  var sum = function(arr){ return arr.reduce(function(s,c){ return s + c.monto; }, 0); };
+  var totalDisp = sum(disp);
+  var totalProc = sum(proc);
+  var totalFut  = sum(fut);
+
+  // ── Render Card DISPONIBLE ──────────────────────────────────
+  var dispMontoEl = document.getElementById('gDispMonto');
+  var dispCountEl = document.getElementById('gDispCount');
+  var dispSubEl = document.getElementById('gDispSubtitulo');
+  if (dispMontoEl) dispMontoEl.textContent = '$' + totalDisp.toLocaleString('es-AR');
+  if (dispCountEl) dispCountEl.textContent = disp.length === 1 ? '1 cobro' : disp.length + ' cobros';
+  if (dispSubEl) {
+    var perfil = mudanceroPerfilRedis || {};
+    var cbu = perfil.cbu || perfil.alias || '';
+    if (totalDisp > 0 && cbu) {
+      dispSubEl.innerHTML = 'El admin coordina la transferencia a:<br><b>' + esc(cbu) + '</b>';
+    } else if (totalDisp > 0) {
+      dispSubEl.textContent = 'El admin coordina la transferencia a tu CBU/alias.';
+    } else {
+      dispSubEl.textContent = 'Sin cobros disponibles aún';
+    }
+  }
+
+  // ── Render Card EN PROCESO ──────────────────────────────────
+  var procEl = document.getElementById('gEstadoProc');
+  if (procEl) {
+    if (proc.length === 0) {
+      procEl.style.display = 'none';
+    } else {
+      procEl.style.display = 'block';
+      document.getElementById('gProcMonto').textContent = '$' + totalProc.toLocaleString('es-AR');
+      document.getElementById('gProcCount').textContent = proc.length === 1 ? '1 cobro' : proc.length + ' cobros';
+      document.getElementById('gProcLista').innerHTML = proc.map(function(c){
+        return '<div style="background:#fff;border:1px solid #FED7AA;border-radius:8px;padding:10px 12px;font-size:11.5px">'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:3px">'
+          +   '<span style="font-weight:700;color:#0F1923">' + esc(c.ruta) + '</span>'
+          +   '<span style="font-family:var(--mono);color:#0F1923;font-weight:700">$' + c.monto.toLocaleString('es-AR') + '</span>'
+          + '</div>'
+          + '<div style="color:#9A3412;font-size:10.5px">'
+          +   c.etiqueta + ' · cobrado ' + fmtFechaCorta(c.fechaPago)
+          +   ' · disponible <b>' + fmtFechaCorta(c.fechaDisp) + '</b>'
+          +   ' (faltan ' + c.diasFaltan + ' días háb.)'
+          + '</div>'
+          + '</div>';
+      }).join('');
+    }
+  }
+
+  // ── Render Card PRÓXIMOS ───────────────────────────────────
+  var futEl = document.getElementById('gEstadoFut');
+  if (futEl) {
+    if (fut.length === 0) {
+      futEl.style.display = 'none';
+    } else {
+      futEl.style.display = 'block';
+      // Mostrar mudanzas únicas (no doble por anticipo+saldo)
+      var futMudanzas = {};
+      fut.forEach(function(c){
+        if (!futMudanzas[c.mudanzaId]) futMudanzas[c.mudanzaId] = { ruta: c.ruta, monto: 0, mudanza: c.mudanza, fechaDisp: c.fechaDisp, fechaPlan: c.fechaEstimadaPago };
+        futMudanzas[c.mudanzaId].monto += c.monto;
+      });
+      var futList = Object.values(futMudanzas);
+      document.getElementById('gFutMonto').textContent = '$' + totalFut.toLocaleString('es-AR');
+      document.getElementById('gFutCount').textContent = futList.length === 1 ? '1 mudanza' : futList.length + ' mudanzas';
+      document.getElementById('gFutLista').innerHTML = futList.map(function(c){
+        var dispStr = c.fechaDisp ? ' · disponible aprox <b>' + fmtFechaCorta(c.fechaDisp) + '</b>' : '';
+        var planStr = c.fechaPlan ? 'mudanza ' + fmtFechaCorta(c.fechaPlan) : 'mudanza pendiente';
+        return '<div style="background:#fff;border:1px solid #BFDBFE;border-radius:8px;padding:10px 12px;font-size:11.5px">'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:3px">'
+          +   '<span style="font-weight:700;color:#0F1923">' + esc(c.ruta) + '</span>'
+          +   '<span style="font-family:var(--mono);color:#0F1923;font-weight:700">$' + c.monto.toLocaleString('es-AR') + '</span>'
+          + '</div>'
+          + '<div style="color:#1E40AF;font-size:10.5px">' + planStr + dispStr + '</div>'
+          + '</div>';
+      }).join('');
+    }
+  }
+
+  // ── Resumen total ───────────────────────────────────────────
+  var totalNeto = aceptadas.reduce(function(s,m){
+    var p = precioFinalMudanza(m), f = Math.round(calcFee(p, m.ambientes));
+    return s + (p - f);
+  }, 0);
+  var totalComision = aceptadas.reduce(function(s,m){
+    return s + Math.round(calcFee(precioFinalMudanza(m), m.ambientes));
+  }, 0);
+  var prom = aceptadas.length > 0 ? Math.round(totalNeto / aceptadas.length) : 0;
+  document.getElementById('g-total').textContent='$' + totalNeto.toLocaleString('es-AR');
+  document.getElementById('g-comision').textContent='$' + totalComision.toLocaleString('es-AR');
   document.getElementById('g-trabajos').textContent=aceptadas.length;
-  document.getElementById('g-promedio').textContent='$'+prom.toLocaleString('es-AR');
-  if(aceptadas.length===0){
-    document.getElementById('gananciasList').innerHTML='<div class="empty"><div class="empty-icon">💰</div>Cuando el cliente acepte tu cotización, tus ganancias aparecen acá.</div>';
+  document.getElementById('g-promedio').textContent='$' + prom.toLocaleString('es-AR');
+
+  // ── Historial detallado ─────────────────────────────────────
+  if(aceptadas.length === 0){
+    document.getElementById('gananciasList').innerHTML = '<div class="empty"><div class="empty-icon">💰</div>Cuando el cliente acepte tu cotización, los trabajos aparecen acá.</div>';
     return;
   }
-  var html='<table style="width:100%;border-collapse:collapse">'
-    +'<thead><tr style="border-bottom:1px solid var(--border)">'
-    +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Trabajo</th>'
-    +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Precio total</th>'
-    +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Fee MYA</th>'
-    +'<th style="padding:10px 14px;text-align:left;font-size:10px;color:var(--text3);font-family:var(--mono)">Vos cobrás</th>'
-    +'</tr></thead><tbody>'
-    +aceptadas.map(function(m){
-      var precio = precioFinalMudanza(m), fee=Math.round(calcFee(precio, m.ambientes));
-      var huboAjuste = m.ajustePrecio && m.ajustePrecio.estado === 'aceptado';
-      var ajusteHint = huboAjuste ? '<span style="font-size:9px;color:#15803D;margin-left:4px;font-weight:600">· AJUSTADO</span>' : '';
-      return '<tr style="border-bottom:1px solid var(--border)">'
-        +'<td style="padding:11px 14px;font-size:12px;color:var(--text2)">'+esc(m.desde.split(',')[0])+' → '+esc(m.hasta.split(',')[0])+ajusteHint+'</td>'
-        +'<td style="padding:11px 14px;font-size:12px;font-family:var(--mono)">$'+precio.toLocaleString('es-AR')+'</td>'
-        +'<td style="padding:11px 14px;font-size:12px;font-family:var(--mono);color:var(--red)">-$'+fee.toLocaleString('es-AR')+'</td>'
-        +'<td style="padding:11px 14px;font-size:13px;font-family:var(--mono);color:var(--blue);font-weight:600">$'+(precio-fee).toLocaleString('es-AR')+'</td>'
-        +'</tr>';
-    }).join('')
-    +'</tbody></table>';
-  document.getElementById('gananciasList').innerHTML=html;
+
+  // Ordenar por fecha de mudanza desc (más reciente primero)
+  var ordenadas = aceptadas.slice().sort(function(a,b){
+    return new Date(b.fecha||0) - new Date(a.fecha||0);
+  });
+
+  var html = ordenadas.map(function(m){
+    var precio = precioFinalMudanza(m), fee = Math.round(calcFee(precio, m.ambientes));
+    var huboAjuste = m.ajustePrecio && m.ajustePrecio.estado === 'aceptado';
+    var ajusteHint = huboAjuste ? '<span style="font-size:9px;color:#15803D;margin-left:4px;font-weight:600">· AJUSTADO</span>' : '';
+    var nivelLabel = ({esencial:'📦',integral:'🛠️',llave:'🔑',flete:'🚚'})[m.nivelPack] || '';
+    var estadoLabel = m.estado === 'completada' ? '<span style="background:#DCFCE7;color:#166534;padding:2px 7px;border-radius:6px;font-size:9.5px;font-weight:700;letter-spacing:.3px">COMPLETADA</span>'
+                    : m.estado === 'en_curso' ? '<span style="background:#FEF3C7;color:#92400E;padding:2px 7px;border-radius:6px;font-size:9.5px;font-weight:700;letter-spacing:.3px">EN CURSO</span>'
+                    : '<span style="background:#DBEAFE;color:#1E40AF;padding:2px 7px;border-radius:6px;font-size:9.5px;font-weight:700;letter-spacing:.3px">ACEPTADA</span>';
+    return '<div style="border-bottom:1px solid var(--border);padding:14px 16px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px">'
+      +   '<div style="flex:1;min-width:0">'
+      +     '<div style="font-weight:700;font-size:13px;color:var(--text);line-height:1.3">' + nivelLabel + ' ' + esc(m.desde.split(',')[0]) + ' → ' + esc(m.hasta.split(',')[0]) + ajusteHint + '</div>'
+      +     '<div style="font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono)">' + (m.fecha ? fmtFechaCorta(new Date(m.fecha)) : '') + ' · ' + (m.ambientes || '') + ' amb · ' + (m.km || 0) + ' km</div>'
+      +   '</div>'
+      +   estadoLabel
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:11px;font-family:var(--mono);margin-top:6px;padding-top:8px;border-top:1px dashed var(--border)">'
+      +   '<div><div style="color:var(--text3);font-size:9.5px">Total</div><div style="color:var(--text);font-weight:600">$' + precio.toLocaleString('es-AR') + '</div></div>'
+      +   '<div><div style="color:var(--text3);font-size:9.5px">Fee MYA</div><div style="color:#DC2626;font-weight:600">-$' + fee.toLocaleString('es-AR') + '</div></div>'
+      +   '<div><div style="color:var(--text3);font-size:9.5px">Vos cobrás</div><div style="color:var(--blue);font-weight:700">$' + (precio - fee).toLocaleString('es-AR') + '</div></div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+  document.getElementById('gananciasList').innerHTML = html;
 }
 
 // ════════════════════════════════════════════════════
