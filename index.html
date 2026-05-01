@@ -2603,12 +2603,24 @@
     // Modo dirigido: precio del mudancero seleccionado (más barato si hay varios)
     // Modo abierto: mediana de precios del catálogo
     var pAmt = function(v){ return parseInt(String(v||0).replace(/\./g,'').replace(/,/g,'')) || 0; };
+    // CRÍTICO: usar el MISMO cálculo que muestran las cards del catálogo (precioMudanceroNivel)
+    // para que el precio publicado matchee con lo que el cliente vio en pantalla.
+    // Sin esto, las cards mostraban "$200.000 Llave en mano 2 amb" pero el publicar
+    // guardaba $50.000 (precios.amb2 legacy ignorando el nivel) → mail al mudancero
+    // con un número distinto al que vio el cliente.
     var getPrecioMud = function(mud) {
-      if (!mud || !mud.precios) return 0;
-      if (_busqueda.tipo === 'flete') return pAmt(mud.precios.flete);
+      if (!mud) return 0;
+      if (_busqueda.tipo === 'flete') {
+        return pAmt(mud.precioFleteNuevo) || pAmt(mud.precios && mud.precios.flete);
+      }
+      // Mudanza: usar el helper del index que ya considera nivel + modelo nuevo
+      if (typeof precioMudanceroNivel === 'function') {
+        return precioMudanceroNivel(mud, _nivel || 'esencial', _busqueda.ambientes);
+      }
+      // Fallback defensivo (no debería entrar aquí en condiciones normales)
       var amb = Math.max(1, _busqueda.ambientes || 2);
       var clave = ['amb1','amb2','amb3','amb4'][Math.min(amb,4)-1] || 'amb1';
-      return pAmt(mud.precios[clave]) || pAmt(mud.precios.amb1);
+      return pAmt(mud.precios && mud.precios[clave]) || pAmt(mud.precios && mud.precios.amb1);
     };
     var precioEstimadoCalc = 0;
     var preciosCatalogo = (_todos || []).map(getPrecioMud).filter(function(p){ return p > 0; });
