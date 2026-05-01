@@ -774,7 +774,34 @@ function confirmarSolicitud() {
 
   var esFlete = busqueda.tipo === 'flete';
   var ambNum = parseInt(busqueda.ambientes) || 2;
-  var precioEst = esFlete ? 180000 : ({1:450000,2:550000,3:680000,4:860000,5:1050000,6:1180000}[Math.min(ambNum,6)] || 550000);
+  var nivel = esFlete ? 'flete' : (busqueda.nivel || 'esencial');
+
+  // ── Calcular precio_estimado del mudancero específico (NO hardcoded) ──
+  // Usar el mismo cálculo que renderPerfil() arriba para que matchee con
+  // lo que el cliente vio en el perfil al solicitar la cotización.
+  var pAmt = function(v) { return parseInt(String(v||0).replace(/\./g,'').replace(/,/g,'')) || 0; };
+  var precioEst = 0;
+  var m = _mudancero || {};
+  if (esFlete) {
+    precioEst = pAmt(m.precioFleteNuevo) || pAmt(m.precios && m.precios.flete);
+  } else {
+    var clave = ['amb1','amb2','amb3','amb4'][Math.min(ambNum,4)-1] || 'amb1';
+    var mapa = { esencial:'preciosEsencial', integral:'preciosIntegral', llave:'preciosLlave' };
+    if (m[mapa[nivel]]) {
+      precioEst = pAmt(m[mapa[nivel]][clave]) || pAmt(m[mapa[nivel]].amb1);
+    }
+    // Compat legacy: solo si NO tiene modelo nuevo
+    if (!precioEst) {
+      var tieneModeloNuevo = m.preciosEsencial || m.preciosIntegral || m.preciosLlave;
+      if (!tieneModeloNuevo) {
+        var multi = (nivel === 'integral') ? 1.5 : (nivel === 'llave' ? 2.25 : 1);
+        var base = pAmt(m.precios && m.precios[clave]) || pAmt(m.precios && m.precios.amb1);
+        precioEst = Math.round(base * multi);
+      }
+    }
+  }
+  // Si no se pudo calcular (mudancero sin precios cargados), 0 es honesto:
+  // el mudancero entra a /mi-cuenta y carga el precio real al cotizar.
 
   fetch('/api/cotizaciones?action=publicar', {
     method: 'POST',
@@ -787,6 +814,7 @@ function confirmarSolicitud() {
       ambientes: esFlete ? 'Flete' : (ambNum + ' ambientes'),
       fecha: busqueda.fecha || 'A confirmar',
       tipo: busqueda.tipo || 'mudanza',
+      nivel: nivel, // ← crítico: para que el mudancero sepa qué pack cotizar
       precio_estimado: precioEst,
       km: parseInt(busqueda.km) || 0,
       modoCotizacion: 'dirigido',
