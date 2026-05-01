@@ -339,6 +339,7 @@ body.pd-panel-open .pd-list-col{flex:1.3}
 .pd-st-pill.pd-esp-pago{background:#FEF3C7;color:#92400E;border:1px solid #FCD34D}
 .pd-st-pill.pd-listo{background:#DCFCE7;color:#15803D;border:1px solid #86EFAC;font-weight:700}
 .pd-ruta-line{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pd-fecha-line{display:inline-block;margin-left:8px;font-size:11px;font-weight:600;color:var(--text3);font-family:var(--mono);background:#F1F5F9;padding:1px 7px;border-radius:6px;vertical-align:middle}
 .pd-meta-line{font-size:11px;color:var(--text3);font-family:var(--mono);white-space:nowrap;flex-shrink:0}
 .pd-precio-line{font-size:11.5px;font-family:var(--mono);font-weight:700;color:var(--blue);white-space:nowrap;flex-shrink:0;min-width:90px;text-align:right}
 .pd-arrow{color:var(--text3);font-size:18px;font-weight:700;flex-shrink:0;width:14px;text-align:center;line-height:1}
@@ -2281,12 +2282,25 @@ function renderRowPedido(m, tipo) {
     ? '<span title="Cliente referido por asesor inmobiliario · comisión 25%" style="font-size:13px;flex-shrink:0;margin-right:2px">🏢</span>'
     : '';
   var ruta = (m.desde||'') + ' → ' + (m.hasta||'');
+  // Fecha corta de la mudanza (la planificada por el cliente)
+  var fechaCorta = '';
+  if (m.fecha) {
+    try {
+      var _f = new Date(m.fecha);
+      if (!isNaN(_f.getTime())) {
+        var _meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+        fechaCorta = _f.getDate() + ' ' + _meses[_f.getMonth()];
+      } else {
+        fechaCorta = String(m.fecha); // fallback texto plano (ej "Esta semana")
+      }
+    } catch(e) {}
+  }
   // Meta inline: ambientes + km
   var metaInline = (m.ambientes||'—') + (m.km ? ' · '+m.km+'km' : '');
 
   return '<div class="pd-row-line" id="pd-row-'+m.id+'" data-id="'+m.id+'" data-tipo="'+tipo+'" onclick="seleccionarPedido(\''+m.id+'\',\''+tipo+'\')" tabindex="0">'
     + '<span class="pd-st-pill '+pillCls+'">'+pillTxt+'</span>'
-    + '<span class="pd-ruta-line" title="'+ruta.replace(/"/g,'&quot;')+(esAsesor?' · Cliente por asesor':'')+'">'+iconoOrigen+ruta+'</span>'
+    + '<span class="pd-ruta-line" title="'+ruta.replace(/"/g,'&quot;')+(esAsesor?' · Cliente por asesor':'')+'">'+iconoOrigen+ruta+(fechaCorta?'<span class="pd-fecha-line">📅 '+esc(fechaCorta)+'</span>':'')+'</span>'
     + packBadge
     + (precioTxt ? '<span class="pd-precio-line">'+precioTxt+'</span>' : '<span class="pd-precio-line" style="color:var(--text3)">—</span>')
     + '<span class="pd-arrow">›</span>'
