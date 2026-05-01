@@ -2427,7 +2427,11 @@
     // Guardar contexto en sessionStorage para que mudancero.html lo use
     var m = _todos.find(function(x){ return x.email===email; });
     if (m) sessionStorage.setItem('perfilMudancero', JSON.stringify(m));
-    sessionStorage.setItem('busquedaActual', JSON.stringify(_busqueda));
+    // Incluir el nivel actual (esencial/integral/llave) para que el perfil muestre
+    // exactamente el mismo precio que la card del index. Sin esto, el perfil cae
+    // a "esencial" por default y muestra un precio distinto.
+    var busquedaConNivel = Object.assign({}, _busqueda, { nivel: _nivel || 'esencial' });
+    sessionStorage.setItem('busquedaActual', JSON.stringify(busquedaConNivel));
     window.open('/mudancero?id=' + encodeURIComponent(email), '_blank');
   }
 
