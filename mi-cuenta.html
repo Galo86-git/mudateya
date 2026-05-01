@@ -2956,7 +2956,14 @@ function loadHistorial(){
     return ACTIVOS.indexOf(m.estado)!==-1 && m.cotizacionAceptada && m.cotizacionAceptada.id===m.miCotizacion?.id;
   });
   if(aceptadas.length===0){
-    document.getElementById('historialList').innerHTML='<div class="empty"><div class="empty-icon">📅</div>Aún no tenés trabajos aceptados.</div>';
+    var hoyD = new Date();
+    var meses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+    var calIcono = '<div style="display:inline-block;width:60px;height:64px;border-radius:8px;overflow:hidden;border:1px solid #E2E8F0;box-shadow:0 2px 6px rgba(15,25,35,.08);font-family:Inter,sans-serif;background:#fff;margin-bottom:10px">'
+      + '<div style="background:#DC2626;color:#fff;font-size:11px;font-weight:700;text-align:center;padding:4px 0;letter-spacing:.5px">' + meses[hoyD.getMonth()] + '</div>'
+      + '<div style="font-size:28px;font-weight:800;text-align:center;color:#0F1923;line-height:1;padding:8px 0 0">' + hoyD.getDate() + '</div>'
+      + '<div style="font-size:9px;color:#64748B;text-align:center;font-family:var(--mono);margin-top:2px">' + hoyD.getFullYear() + '</div>'
+      + '</div>';
+    document.getElementById('historialList').innerHTML='<div class="empty">' + calIcono + '<div>Aún no tenés trabajos aceptados.</div></div>';
     return;
   }
   document.getElementById('historialList').innerHTML = aceptadas.map(function(m){
