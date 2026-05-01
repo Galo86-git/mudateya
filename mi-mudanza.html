@@ -71,6 +71,7 @@ body{font-family:Inter,sans-serif;background:#fff;color:var(--text);min-height:1
 .mz-st-pill.st-comp{background:#F3F4F6;color:#374151}
 .mz-ruta-line{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .mz-meta-line{font-size:11px;color:var(--text3);font-family:var(--mono);white-space:nowrap;flex-shrink:0}
+.mz-fecha-line{display:inline-block;margin-left:8px;font-size:11px;font-weight:600;color:var(--text3);font-family:var(--mono);background:#F1F5F9;padding:1px 7px;border-radius:6px;vertical-align:middle}
 .mz-precio-line{font-size:11.5px;font-family:var(--mono);font-weight:700;color:var(--blue);white-space:nowrap;flex-shrink:0;min-width:90px;text-align:right}
 .mz-arrow{color:var(--text3);font-size:18px;font-weight:700;flex-shrink:0;width:14px;text-align:center;line-height:1}
 .mz-row-line.active .mz-arrow{color:var(--blue)}
@@ -1124,11 +1125,25 @@ function renderMudanzaCard(m, idx){
   // Ruta compacta (truncar destino si es largo)
   var rutaCompacta = esc(m.desde) + ' → ' + esc(m.hasta);
 
+  // Fecha corta formateada
+  var fechaTxt = '';
+  if (m.fecha) {
+    try {
+      var _f = new Date(m.fecha);
+      if (!isNaN(_f.getTime())) {
+        var _meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+        fechaTxt = _f.getDate() + ' ' + _meses[_f.getMonth()];
+      } else {
+        fechaTxt = String(m.fecha);
+      }
+    } catch(e) { fechaTxt = String(m.fecha); }
+  }
+
   // ═════ FILA COMPACTA - 1 LINEA ═════
   return '<div class="mz-row-line" id="mz-row-'+m.id+'" data-id="'+m.id+'" onclick="seleccionarMudanza(\''+m.id+'\')" tabindex="0">'
     + '<span class="mz-st-pill '+estadoCfg.cls+'">'+estadoCfg.txt+'</span>'
-    + '<span class="mz-ruta-line" title="'+rutaCompacta+'">'+rutaCompacta+'</span>'
-    + '<span class="mz-meta-line">'+esc(m.ambientes||'—')+(m.km?' · '+m.km+'km':'')+(m.fecha?' · '+esc(m.fecha):'')+'</span>'
+    + '<span class="mz-ruta-line" title="'+rutaCompacta+'">'+rutaCompacta+(fechaTxt?'<span class="mz-fecha-line">📅 '+esc(fechaTxt)+'</span>':'')+'</span>'
+    + '<span class="mz-meta-line">'+esc(m.ambientes||'—')+(m.km?' · '+m.km+'km':'')+'</span>'
     + (precioRangoTxt ? '<span class="mz-precio-line">'+precioRangoTxt+'</span>' : '<span class="mz-precio-line" style="color:var(--text3)">—</span>')
     + '<span class="mz-arrow">›</span>'
     + '</div>';
@@ -1384,20 +1399,29 @@ function seleccionarMudanza(mudanzaId) {
     return;
   }
   panel.innerHTML = renderMudanzaDetail(m);
-  // ── CRÍTICO MOBILE: mover el panel al body (fuera del flex container)
-  //    así position:fixed se posiciona respecto al viewport y no al flex,
-  //    que es lo que causa que `top:auto` quede pegado en 73px en mobile.
-  if (panel.parentElement !== document.body) {
-    document.body.appendChild(panel);
+  // ── CRÍTICO MOBILE: en mobile mover el panel al body (fuera del flex)
+  //    para que position:fixed funcione respecto al viewport.
+  //    En desktop dejarlo en su lugar para que el drawer lateral muestre al lado de la lista.
+  var esMobile = window.innerWidth <= 768;
+  if (esMobile) {
+    if (panel.parentElement !== document.body) {
+      document.body.appendChild(panel);
+    }
+  } else {
+    // Desktop: si quedó en body por una sesión mobile previa, devolverlo al contenedor original
+    var contenedor = document.querySelector('.mz-list-wrap') || document.querySelector('main') || document.body;
+    if (panel.parentElement === document.body && contenedor !== document.body) {
+      contenedor.appendChild(panel);
+    }
   }
   panel.classList.add('open');
   document.body.classList.add('mz-panel-open');
   // Forzar scroll al inicio del panel (evitar que aparezca a mitad)
   setTimeout(function(){ panel.scrollTop = 0; }, 50);
-  console.log('[mz] Panel abierto. Classes:', panel.className, 'Body:', document.body.className);
+  console.log('[mz] Panel abierto.', 'mobile?', esMobile, 'Classes:', panel.className);
   try { sessionStorage.setItem('mzSelected', mudanzaId); } catch(e) {}
   // ── Mobile: bindear swipe-down para cerrar el bottom sheet ──
-  if (window.innerWidth <= 768) bindBottomSheetGestures(panel);
+  if (esMobile) bindBottomSheetGestures(panel);
 }
 
 // Swipe down para cerrar bottom sheet (mobile)
