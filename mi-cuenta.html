@@ -1816,14 +1816,26 @@ function showScreen(name){
 
 // FIX: logout limpia TODOS los storages
 // Fee diferenciado: 20% fletes, 15% mudanzas
-function calcFee(precio, ambientes) {
-  var pct = (ambientes === 'Flete') ? 0.20 : 0.15;
+// Comisión MudateYa según tipo y origen:
+// - Mudanza normal: 15%
+// - Flete normal: 20%
+// - Plan Referidos (mudanza vino de un asesor o aliado): 25%
+//   Esto se detecta con m.origenAsesor o m.refAliado (presentes en la mudanza completa)
+function _esPlanReferidos(m) {
+  return !!(m && (m.origenAsesor === true || m.refAliado));
+}
+function calcFee(precio, ambientes, m) {
+  var pct;
+  if (_esPlanReferidos(m)) pct = 0.25;
+  else pct = (ambientes === 'Flete') ? 0.20 : 0.15;
   return Math.round(precio * pct);
 }
-function calcNeto(ambientes) {
+function calcNeto(ambientes, m) {
+  if (_esPlanReferidos(m)) return 0.75;
   return (ambientes === 'Flete') ? 0.80 : 0.85;
 }
-function calcFeeLabel(ambientes) {
+function calcFeeLabel(ambientes, m) {
+  if (_esPlanReferidos(m)) return '25%';
   return (ambientes === 'Flete') ? '20%' : '15%';
 }
 function verFotoGrande(mudanzaId, fotoIdx) {
@@ -2949,7 +2961,7 @@ function loadHistorial(){
   }
   document.getElementById('historialList').innerHTML = aceptadas.map(function(m){
     var precio = precioFinalMudanza(m);
-    var fee = Math.round(calcFee(precio, m.ambientes));
+    var fee = Math.round(calcFee(precio, m.ambientes, m));
     var estadoLabel = m.estado==='completada'?'✓ Completado':m.estado==='en_curso'?'▶ En curso':'✓ Aceptado';
     var huboAjuste = m.ajustePrecio && m.ajustePrecio.estado === 'aceptado';
     var badgeAjuste = huboAjuste ? '<span style="margin-left:8px;background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;border-radius:6px;padding:1px 7px;font-size:10px;font-family:var(--mono);font-weight:600">✓ Ajustado</span>' : '';
@@ -2959,7 +2971,7 @@ function loadHistorial(){
       +'<div class="pedido-fecha">📅 '+(m.fecha||'—')+' · '+(m.ambientes||'—')+'</div>'
       +'</div><span class="badge aceptado">'+estadoLabel+'</span></div>'
       +'<div class="pedido-precio">$'+(precio-fee).toLocaleString('es-AR')+'</div>'
-      +'<div class="pedido-precio-sub">vos cobrás · fee MYA ('+calcFeeLabel(m.ambientes)+'): $'+fee.toLocaleString('es-AR')+'</div>'
+      +'<div class="pedido-precio-sub">vos cobrás · fee MYA ('+calcFeeLabel(m.ambientes, m)+'): $'+fee.toLocaleString('es-AR')+'</div>'
       +'</div>';
   }).join('');
 }
@@ -3023,7 +3035,7 @@ function loadGanancias(){
 
   aceptadas.forEach(function(m){
     var precioFinal = precioFinalMudanza(m);
-    var feeTotal = Math.round(calcFee(precioFinal, m.ambientes));
+    var feeTotal = Math.round(calcFee(precioFinal, m.ambientes, m));
     var netoTotal = precioFinal - feeTotal;
     var netoAnticipo = Math.round(netoTotal * 0.5);
     var netoSaldo = netoTotal - netoAnticipo;
@@ -3133,11 +3145,11 @@ function loadGanancias(){
 
   // ── Resumen total ───────────────────────────────────────────
   var totalNeto = aceptadas.reduce(function(s,m){
-    var p = precioFinalMudanza(m), f = Math.round(calcFee(p, m.ambientes));
+    var p = precioFinalMudanza(m), f = Math.round(calcFee(p, m.ambientes, m));
     return s + (p - f);
   }, 0);
   var totalComision = aceptadas.reduce(function(s,m){
-    return s + Math.round(calcFee(precioFinalMudanza(m), m.ambientes));
+    return s + Math.round(calcFee(precioFinalMudanza(m), m.ambientes, m));
   }, 0);
   var prom = aceptadas.length > 0 ? Math.round(totalNeto / aceptadas.length) : 0;
   document.getElementById('g-total').textContent='$' + totalNeto.toLocaleString('es-AR');
@@ -3156,7 +3168,7 @@ function loadGanancias(){
   });
 
   var html = ordenadas.map(function(m){
-    var precio = precioFinalMudanza(m), fee = Math.round(calcFee(precio, m.ambientes));
+    var precio = precioFinalMudanza(m), fee = Math.round(calcFee(precio, m.ambientes, m));
     var huboAjuste = m.ajustePrecio && m.ajustePrecio.estado === 'aceptado';
     var ajusteHint = huboAjuste ? '<span style="font-size:9px;color:#15803D;margin-left:4px;font-weight:600">· AJUSTADO</span>' : '';
     var nivelLabel = ({esencial:'📦',integral:'🛠️',llave:'🔑',flete:'🚚'})[m.nivelPack] || '';
