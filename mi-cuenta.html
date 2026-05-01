@@ -1953,7 +1953,8 @@ function renderPedidos(){
     var isAcept = esActivo && m.cotizacionAceptada && m.cotizacionAceptada.id===cot?.id;
     var expirado = new Date(m.expira) < new Date();
     var noElegido = m.estado==='cotizacion_aceptada' && !isAcept;
-    return !isAcept && !noElegido && !expirado;
+    var cancelada = m.estado === 'eliminada' || m.estado === 'cancelada';
+    return !isAcept && !noElegido && !expirado && !cancelada;
   });
   var expirados = misCotizaciones.filter(function(m){
     var cot = m.miCotizacion;
@@ -1961,7 +1962,8 @@ function renderPedidos(){
     var isAcept = esActivo && m.cotizacionAceptada && m.cotizacionAceptada.id===cot?.id;
     var expirado = new Date(m.expira) < new Date();
     var noElegido = m.estado==='cotizacion_aceptada' && !isAcept;
-    return !isAcept && (noElegido || expirado);
+    var cancelada = m.estado === 'eliminada' || m.estado === 'cancelada';
+    return !isAcept && (noElegido || expirado || cancelada);
   });
   var aceptados = misCotizaciones.filter(function(m){
     var cot = m.miCotizacion;
@@ -2060,7 +2062,13 @@ function renderRowPedido(m, tipo) {
     else if (m.estado === 'en_curso') { pillCls = 'pd-curso'; pillTxt = 'En curso'; }
     else { pillCls = 'pd-acept'; pillTxt = '✓ Aceptado'; }
   } else if (tipo === 'expirados') {
-    pillCls = 'pd-exp'; pillTxt = m.estado === 'cotizacion_aceptada' ? 'No elegido' : 'Expirado';
+    if (m.estado === 'eliminada' || m.estado === 'cancelada') {
+      pillCls = 'pd-exp'; pillTxt = '❌ Cancelada por el cliente';
+    } else if (m.estado === 'cotizacion_aceptada') {
+      pillCls = 'pd-exp'; pillTxt = 'No elegido';
+    } else {
+      pillCls = 'pd-exp'; pillTxt = 'Expirado';
+    }
   }
   // Pack que pidió el cliente
   var nivelPedido = m.nivel || (esFlete ? 'flete' : 'esencial');
@@ -3050,11 +3058,9 @@ function loadGanancias(){
         cobroAnt.estado = (hoy >= fechaDispAnt) ? 'disponible' : 'en_proceso';
         cobroAnt.diasFaltan = (hoy < fechaDispAnt) ? diasHabilesEntre(hoy, fechaDispAnt) : 0;
       } else {
-        // Sin ninguna fecha conocida — asumir disponible
         cobroAnt.estado = 'disponible';
       }
     } else {
-      // Cliente todavía no pagó el anticipo → estimado
       cobroAnt.estado = 'futuro';
       var fechaEstAnt = m.fecha ? new Date(m.fecha) : null;
       if (fechaEstAnt && !isNaN(fechaEstAnt.getTime())) {
@@ -3155,7 +3161,6 @@ function loadGanancias(){
       futEl.style.display = 'none';
     } else {
       futEl.style.display = 'block';
-      // Mostrar mudanzas únicas (no doble por anticipo+saldo)
       var futMudanzas = {};
       fut.forEach(function(c){
         if (!futMudanzas[c.mudanzaId]) futMudanzas[c.mudanzaId] = { ruta: c.ruta, monto: 0, mudanza: c.mudanza, fechaDisp: c.fechaDisp, fechaPlan: c.fechaEstimadaPago };
@@ -3198,7 +3203,6 @@ function loadGanancias(){
     return;
   }
 
-  // Ordenar por fecha de mudanza desc (más reciente primero)
   var ordenadas = aceptadas.slice().sort(function(a,b){
     return new Date(b.fecha||0) - new Date(a.fecha||0);
   });
