@@ -168,6 +168,8 @@ body.mz-panel-open .mz-list-col{flex:1.3}
     animation:mzBackdropIn .25s ease-out
   }
   @keyframes mzBackdropIn{from{opacity:0}to{opacity:1}}
+  @keyframes toastIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  @keyframes toastOut{from{transform:translateY(0);opacity:1}to{transform:translateY(-20px);opacity:0}}
   body.mz-panel-open{overflow:hidden}
   /* Ocultar bottom-nav cuando hay panel abierto, así nada queda debajo */
   body.mz-panel-open .mm-mobile-nav{display:none!important}
@@ -807,6 +809,8 @@ function showApp(){
   document.getElementById('navName').textContent = currentUser.name.split(' ')[0];
   document.getElementById('navAvatar').src = currentUser.picture || '';
   loadMudanzas();
+  // Iniciar auto-update (polling cada 10s) — solo se inicia una vez por sesión
+  iniciarAutoUpdate();
 }
 
 function pedirCelular() {
@@ -892,26 +896,233 @@ function truckLoader(msg) {
 // ── MUDANZAS ───────────────────────────────────────────────────────────────
 var _tabMudanzas = 'buscando';
 
-async function loadMudanzas(){
-  document.getElementById('mudanzasList').innerHTML = truckLoader('Buscando tus mudanzas…');
+async function loadMudanzas(silencioso){
+  if (!silencioso) {
+    document.getElementById('mudanzasList').innerHTML = truckLoader('Buscando tus mudanzas…');
+  }
+  var nuevas = [];
   try{
     var controller = new AbortController();
     var timeout = setTimeout(function(){ controller.abort(); }, 8000);
     var r = await fetch('/api/cotizaciones?action=mis-mudanzas&email='+encodeURIComponent(currentUser.email), { signal: controller.signal });
     clearTimeout(timeout);
     var d = await r.json();
-    mudanzasData = d.mudanzas || [];
+    nuevas = d.mudanzas || [];
   }catch(e){
-    mudanzasData = [];
+    if (!silencioso) {
+      mudanzasData = [];
+      renderMudanzasTabs();
+    }
+    // Si es silencioso (polling), fallar es OK — reintenta en el próximo ciclo
+    return;
   }
-  // Auto-seleccionar tab con contenido
-  var ahora = new Date();
-  var tieneActivas = mudanzasData.some(function(m){ return m.estado==='buscando' && new Date(m.expira)>=ahora && (!m.cotizaciones||m.cotizaciones.length===0); });
-  var tieneCotz    = mudanzasData.some(function(m){ return m.cotizaciones&&m.cotizaciones.length>0&&m.estado!=='cotizacion_aceptada'&&m.estado!=='en_curso'&&m.estado!=='completada'; });
-  var tieneAcept   = mudanzasData.some(function(m){ return m.estado==='cotizacion_aceptada'||m.estado==='en_curso'||m.estado==='completada'; });
-  if(!tieneActivas && tieneCotz) _tabMudanzas='cotizados';
-  else if(!tieneActivas && !tieneCotz && tieneAcept) _tabMudanzas='aceptadas';
+
+  // Detectar cambios y notificar al cliente con toasts (solo en silencioso = polling)
+  if (silencioso) {
+    detectarCambiosClienteYNotificar(mudanzasData, nuevas);
+  }
+
+  mudanzasData = nuevas;
+
+  // En modo silencioso: si hay un bottom sheet abierto, NO re-renderizar la lista
+  // (para no romper la lectura del usuario). Se re-renderiza al cerrar el panel.
+  if (silencioso && document.body.classList.contains('mz-panel-open')) {
+    return;
+  }
+
+  // Auto-seleccionar tab con contenido (solo primera carga, no en polling)
+  if (!silencioso) {
+    var ahora = new Date();
+    var tieneActivas = mudanzasData.some(function(m){ return m.estado==='buscando' && new Date(m.expira)>=ahora && (!m.cotizaciones||m.cotizaciones.length===0); });
+    var tieneCotz    = mudanzasData.some(function(m){ return m.cotizaciones&&m.cotizaciones.length>0&&m.estado!=='cotizacion_aceptada'&&m.estado!=='en_curso'&&m.estado!=='completada'; });
+    var tieneAcept   = mudanzasData.some(function(m){ return m.estado==='cotizacion_aceptada'||m.estado==='en_curso'||m.estado==='completada'; });
+    if(!tieneActivas && tieneCotz) _tabMudanzas='cotizados';
+    else if(!tieneActivas && !tieneCotz && tieneAcept) _tabMudanzas='aceptadas';
+  }
   renderMudanzasTabs();
+}
+
+// ════════════════════════════════════════════════════
+// AUTO-UPDATE — Polling inteligente cada 10s (60s en background)
+// ════════════════════════════════════════════════════
+var _pollingTimer = null;
+var _pollingActivo = false;
+
+function iniciarAutoUpdate(){
+  if (_pollingActivo) return;
+  _pollingActivo = true;
+
+  function siguienteIntervalo(){
+    return document.hidden ? 60000 : 10000;
+  }
+  function programarSiguiente(){
+    if (_pollingTimer) clearTimeout(_pollingTimer);
+    _pollingTimer = setTimeout(ejecutarPoll, siguienteIntervalo());
+  }
+  async function ejecutarPoll(){
+    if (!currentUser || !currentUser.email) {
+      programarSiguiente();
+      return;
+    }
+    try {
+      // Solo refrescar si está en la página de Mis Mudanzas (no gasta requests en otras tabs)
+      var pageActiva = document.querySelector('.page.active');
+      var enMudanzas = pageActiva && pageActiva.id === 'page-mudanzas';
+      if (enMudanzas) {
+        await loadMudanzas(true); // silencioso=true
+      }
+    } catch(e) {
+      console.warn('[poll]', e.message);
+    }
+    programarSiguiente();
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    if (!document.hidden && _pollingActivo) ejecutarPoll();
+  });
+
+  programarSiguiente();
+}
+
+// Detecta cambios entre el estado viejo y nuevo de las mudanzas, dispara toasts
+function detectarCambiosClienteYNotificar(viejas, nuevas){
+  if (!Array.isArray(viejas) || viejas.length === 0) return; // primera carga, no notificar
+
+  var oldById = {};
+  viejas.forEach(function(m){ oldById[m.id] = m; });
+
+  nuevas.forEach(function(m){
+    var prev = oldById[m.id];
+    if (!prev) return; // mudanza creada en otra pestaña
+    var ruta = (m.desde||'').split(',')[0] + ' → ' + (m.hasta||'').split(',')[0];
+
+    // 1) Nueva cotización recibida
+    var cotsOld = (prev.cotizaciones || []).length;
+    var cotsNew = (m.cotizaciones || []).length;
+    if (cotsNew > cotsOld) {
+      var diff = cotsNew - cotsOld;
+      var ult = m.cotizaciones[m.cotizaciones.length - 1];
+      var nombre = ult && (ult.mudanceroNombre || ult.mudancero || '');
+      var precio = ult && ult.precio;
+      var detalle = nombre ? nombre : ruta;
+      if (precio) detalle += ' · $' + parseInt(precio).toLocaleString('es-AR');
+      mostrarToast(
+        diff > 1 ? '📩 ' + diff + ' cotizaciones nuevas' : '📩 Nueva cotización',
+        detalle,
+        'nuevo',
+        m.id
+      );
+    }
+
+    // 2) Mudancero propuso ajuste de precio
+    var ajusteNew = m.ajustePrecio;
+    var ajusteOld = prev.ajustePrecio;
+    var hayAjustePend = ajusteNew && ajusteNew.estado === 'pendiente';
+    var teniaAjustePend = ajusteOld && ajusteOld.estado === 'pendiente';
+    if (hayAjustePend && !teniaAjustePend) {
+      var precioOld = ajusteNew.precioOriginal || ajusteNew.precioAnterior || '';
+      var precioNew = ajusteNew.precioNuevo || ajusteNew.nuevoPrecio || '';
+      var msg = (precioOld && precioNew)
+        ? 'De $' + parseInt(precioOld).toLocaleString('es-AR') + ' a $' + parseInt(precioNew).toLocaleString('es-AR')
+        : ruta;
+      mostrarToast('✏️ Ajuste de precio pendiente', msg, 'ajuste', m.id);
+    }
+
+    // 3) Mudancero inició la mudanza
+    if (m.estado === 'en_curso' && prev.estado !== 'en_curso') {
+      mostrarToast('🚛 Mudanza iniciada', ruta + ' · está en curso', 'curso', m.id);
+    }
+
+    // 4) Mudancero completó la mudanza
+    if (m.estado === 'completada' && prev.estado !== 'completada') {
+      mostrarToast('✓ Mudanza completada', ruta + ' · pagá el saldo cuando puedas', 'completada', m.id);
+    }
+
+    // 5) Un mudancero invitado pasó del pedido (modo dirigido)
+    var rechOld = (prev.rechazadosPor || []).length;
+    var rechNew = (m.rechazadosPor || []).length;
+    if (rechNew > rechOld && m.estado === 'buscando') {
+      var invitados = (m.mudancerosInvitados || []).length;
+      var todosPasaron = invitados > 0 && rechNew >= invitados;
+      mostrarToast(
+        todosPasaron ? '⚠ Todos los mudanceros pasaron' : '⚠ Un mudancero pasó tu pedido',
+        todosPasaron ? 'Republicá para ampliar la búsqueda' : ruta,
+        'cancelada',
+        m.id
+      );
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════
+// TOAST SYSTEM (cola arriba del centro)
+// ════════════════════════════════════════════════════
+var _toastQueue = [];
+var _toastShowing = false;
+
+function mostrarToast(titulo, cuerpo, tipo, mudanzaId){
+  _toastQueue.push({ titulo: titulo, cuerpo: cuerpo, tipo: tipo || 'nuevo', mudanzaId: mudanzaId, ts: Date.now() });
+  if (!_toastShowing) procesarSiguienteToast();
+}
+
+function procesarSiguienteToast(){
+  if (_toastQueue.length === 0) {
+    _toastShowing = false;
+    return;
+  }
+  _toastShowing = true;
+  var t = _toastQueue.shift();
+
+  var cont = document.getElementById('toastContainer');
+  if (!cont) {
+    cont = document.createElement('div');
+    cont.id = 'toastContainer';
+    cont.style.cssText = 'position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:10000;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:auto;max-width:calc(100% - 28px)';
+    document.body.appendChild(cont);
+  }
+
+  var colors = {
+    nuevo:      { bg:'#1A6FFF', txt:'#fff' },
+    ajuste:     { bg:'#F59E0B', txt:'#fff' },
+    curso:      { bg:'#1A6FFF', txt:'#fff' },
+    completada: { bg:'#22C36A', txt:'#fff' },
+    cancelada:  { bg:'#DC2626', txt:'#fff' }
+  };
+  var c = colors[t.tipo] || colors.nuevo;
+
+  var toast = document.createElement('div');
+  toast.style.cssText = 'background:'+c.bg+';color:'+c.txt+';padding:11px 16px;border-radius:12px;box-shadow:0 6px 20px rgba(15,25,35,.25);font-family:Inter,sans-serif;min-width:240px;max-width:380px;display:flex;align-items:center;gap:10px;pointer-events:auto;cursor:pointer;animation:toastIn .25s cubic-bezier(.4,0,.2,1)';
+  toast.innerHTML = '<div style="flex:1;min-width:0">'
+    + '<div style="font-size:13px;font-weight:700;line-height:1.2">'+t.titulo+'</div>'
+    + '<div style="font-size:11.5px;opacity:.92;margin-top:2px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.cuerpo+'</div>'
+    + '</div>'
+    + '<button onclick="event.stopPropagation();this.parentElement.remove();procesarSiguienteToast();" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:14px;line-height:1;flex-shrink:0;padding:0">&times;</button>';
+
+  toast.onclick = function(){
+    if (t.mudanzaId) {
+      if (t.tipo === 'nuevo' || t.tipo === 'ajuste') _tabMudanzas = 'cotizados';
+      else if (t.tipo === 'curso' || t.tipo === 'completada') _tabMudanzas = 'aceptadas';
+      renderMudanzasTabs();
+      setTimeout(function(){
+        seleccionarMudanza(t.mudanzaId);
+        var row = document.getElementById('mz-row-'+t.mudanzaId);
+        if (row) {
+          try { row.scrollIntoView({ behavior:'smooth', block:'center' }); } catch(e) {}
+        }
+      }, 150);
+    }
+    toast.remove();
+    procesarSiguienteToast();
+  };
+
+  cont.appendChild(toast);
+
+  setTimeout(function(){
+    if (toast.parentElement) {
+      toast.style.animation = 'toastOut .2s ease-in';
+      setTimeout(function(){ toast.remove(); procesarSiguienteToast(); }, 200);
+    }
+  }, 6000);
 }
 
 function setTabMudanzas(tab) {
@@ -1477,6 +1688,9 @@ function cerrarDetalle() {
   }
   document.body.classList.remove('mz-panel-open');
   try { sessionStorage.removeItem('mzSelected'); } catch(e) {}
+  // Re-renderizar la lista para reflejar cambios entrados via polling silencioso
+  // mientras el panel estaba abierto.
+  try { renderMudanzasTabs(); } catch(e) {}
 }
 
 // Cerrar bottom sheet al tocar el backdrop (mobile) y con tecla ESC
@@ -1718,7 +1932,7 @@ async function pagarAnticipo(m) {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
           mudanceroNombre: cot.mudanceroNombre,
-          monto: precio,
+          monto: anticipo, // ← 50% ya calculado arriba; el backend NO divide más
           desde: m.desde, hasta: m.hasta,
           ambientes: m.ambientes,
           mudanzaId: m.id,
