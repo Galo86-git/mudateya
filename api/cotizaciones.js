@@ -1361,6 +1361,62 @@ module.exports = async function handler(req, res) {
       await setJSON(`cliente:${clienteEmail}`, idxCliente.filter(id => id !== mudanzaId), 2592000);
       // ── Hook aliados: cancelar atribución si existía ──
       try { await hookCancelarAtribucion(mudanzaId); } catch(e) { console.warn('Hook aliado cancelar:', e.message); }
+
+      // ── NOTIFICAR A LOS MUDANCEROS QUE COTIZARON ──────────────────────
+      // Push + email para que sepan que el cliente canceló y no esperen respuesta.
+      // OJO: NO sacamos la mudanza del índice del mudancero (mudancero:{email}) — la sigue
+      // viendo en su tab "Expirados" con el badge "Cancelada por el cliente".
+      try {
+        const cotizadores = (m.cotizaciones || [])
+          .map(c => c.mudanceroEmail)
+          .filter(Boolean);
+        // También avisar a los invitados que aún no cotizaron (modo dirigido)
+        const invitados = (m.mudancerosInvitados || []).filter(Boolean);
+        const todosEmails = Array.from(new Set([...cotizadores, ...invitados]));
+        if (todosEmails.length > 0) {
+          const rutaTxt = `${(m.desde||'').split(',')[0]} → ${(m.hasta||'').split(',')[0]}`;
+          // Push en paralelo (no bloquea el response al cliente)
+          Promise.all(todosEmails.map(emailMud =>
+            enviarPush(emailMud, {
+              titulo: '❌ Mudanza cancelada',
+              cuerpo: `El cliente canceló: ${rutaTxt}`,
+              link: '/mi-cuenta'
+            }).catch(e => console.warn('Push cancelación error:', emailMud, e && e.message))
+          )).catch(()=>{});
+          // Email simple a cada uno
+          if (process.env.RESEND_API_KEY) {
+            const resend = new Resend(process.env.RESEND_API_KEY);
+            for (const emailMud of todosEmails) {
+              try {
+                const perfil = await getJSON(`mudancero:perfil:${emailMud}`);
+                const nombre = (perfil && perfil.nombre) ? perfil.nombre.split(' ')[0] : 'Mudancero';
+                resend.emails.send({
+                  from: 'MudateYa <noreply@mudateya.ar>',
+                  to: emailMud,
+                  subject: `❌ Mudanza cancelada — ${rutaTxt}`,
+                  html: `
+                    <div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;background:#F5F7FA;padding:20px">
+                      <div style="background:#003580;padding:18px 24px;border-radius:8px 8px 0 0">
+                        <span style="font-family:Georgia,serif;font-size:18px;font-weight:900;color:#fff">Mudate</span><span style="font-family:Georgia,serif;font-size:18px;font-weight:900;color:#22C36A">Ya</span>
+                      </div>
+                      <div style="background:#fff;padding:24px;border-radius:0 0 8px 8px">
+                        <h2 style="color:#0F1923;font-size:18px;margin:0 0 12px">Hola ${nombre},</h2>
+                        <p style="color:#374151;font-size:14px;line-height:1.6">El cliente <b>canceló</b> la siguiente mudanza:</p>
+                        <div style="background:#FEE2E2;border-left:4px solid #DC2626;padding:12px 14px;border-radius:6px;margin:16px 0;font-size:14px;color:#7F1D1D">
+                          <b>${rutaTxt}</b>
+                        </div>
+                        <p style="color:#374151;font-size:13px;line-height:1.6">Esta mudanza pasó automáticamente a tu sección <b>Expirados</b> en MudateYa. No hace falta que hagas nada.</p>
+                        <p style="color:#64748B;font-size:12px;margin-top:18px">Si tenés dudas, respondé este mail.</p>
+                      </div>
+                    </div>
+                  `
+                }).catch(e => console.warn('Email cancelación error:', emailMud, e.message));
+              } catch(e) { console.warn('Email cancelación loop:', emailMud, e.message); }
+            }
+          }
+        }
+      } catch(e) { console.warn('Notificación cancelación error:', e.message); }
+
       return res.status(200).json({ ok: true });
     }
     // Modo dirigido: cliente invita a mudanceros específicos
