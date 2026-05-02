@@ -92,16 +92,16 @@ module.exports = async function handler(req, res) {
       m.mpAnticipoPagoId  = String(data.id);
       // Fecha en que MP confirmó el pago — base para calcular liquidación al mudancero (15 días hábiles)
       if (!m.fechaPagoAnticipo) m.fechaPagoAnticipo = new Date().toISOString();
-      // Guardar el monto exacto del anticipo (igual que registrar-pago manual)
-      if (!m.anticipoMonto) {
-        const cot = m.cotizacionAceptada || {};
-        m.anticipoMonto = Math.round((parseInt(cot.precio || 0)) * 0.5);
-      }
+      // Guardar el monto REAL cobrado por MP (transaction_amount), no calcularlo a partir del precio
+      // que puede estar desactualizado por ajustes de precio. Es la fuente de verdad.
+      m.anticipoMonto = Math.round(Number(transaction_amount) || 0);
     }
     if (tipoPago === 'saldo') {
       m.saldoPagado    = true;
       m.mpSaldoPagoId  = String(data.id);
       if (!m.fechaPagoSaldo) m.fechaPagoSaldo = new Date().toISOString();
+      // Idem: guardar monto real del saldo cobrado
+      m.saldoMonto = Math.round(Number(transaction_amount) || 0);
       // Al pagar el saldo, la mudanza queda completada
       m.estado = 'completada';
       if (!m.fechaCompletada) m.fechaCompletada = new Date().toISOString();
