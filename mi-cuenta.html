@@ -2925,9 +2925,24 @@ function renderCardCotizacion(m) {
   var cotKm = parseInt(m.km||0);
   var cotPrecioBase = parseInt(cot?.precioBase||0);
   var cotPrecioKm = parseInt(cot?.precioKm||0);
-  var cotTotal = parseInt(cot?.precio||0);
+  var cotPrecioOriginal = parseInt(cot?.precio||0);
+  // Si hubo ajuste aceptado, el precio FINAL está en cotizacionAceptada (más actualizado).
+  // Esto coincide con lo que ve el cliente y con la fila CRM tachada.
+  var huboAjusteAcept = m.ajustePrecio && m.ajustePrecio.estado === 'aceptado';
+  var cotTotal = (m.cotizacionAceptada && m.cotizacionAceptada.id === cot?.id)
+    ? parseInt(m.cotizacionAceptada.precio || cotPrecioOriginal)
+    : cotPrecioOriginal;
   var bloqueCotDesglose = '';
-  if (cotPrecioBase > 0 && cotPrecioKm > 0) {
+  // Pill informativa del ajuste (debajo del precio principal) — solo cuando hubo ajuste aceptado
+  var pillAjuste = (huboAjusteAcept && cotPrecioOriginal !== cotTotal)
+    ? '<div style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:3px 8px;background:#F0FFF4;border:1px solid #BBF7D0;border-radius:6px;font-size:11px;font-family:var(--mono);color:#15803D">'
+        +'<span style="text-decoration:line-through;color:#64748B">$'+cotPrecioOriginal.toLocaleString('es-AR')+'</span>'
+        +'<span style="font-weight:700">→ $'+cotTotal.toLocaleString('es-AR')+'</span>'
+        +'<span style="opacity:.7">· ajuste aceptado</span>'
+      +'</div>'
+    : '';
+  if (cotPrecioBase > 0 && cotPrecioKm > 0 && !huboAjusteAcept) {
+    // Mostrar desglose base + km solo si NO hubo ajuste (post-ajuste el desglose ya no aplica)
     var pkmUnit = cotKm > 0 ? Math.round(cotPrecioKm / cotKm) : 0;
     bloqueCotDesglose = '<div style="margin-top:8px;padding:10px 12px;background:#EEF4FF;border:1px solid #C7D7F5;border-radius:10px;font-family:var(--mono)">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text2);margin-bottom:4px">'
@@ -2942,7 +2957,8 @@ function renderCardCotizacion(m) {
       +'</div>';
   } else {
     bloqueCotDesglose = '<div class="pedido-precio">$'+(cotTotal?cotTotal.toLocaleString('es-AR'):'—')+'</div>'
-      +'<div style="font-size:11px;color:var(--text3);font-family:var(--mono)">tu cotización</div>';
+      +'<div style="font-size:11px;color:var(--text3);font-family:var(--mono)">tu cotización</div>'
+      + pillAjuste;
   }
 
   return '<div class="pedido-card '+(isAcept||enCurso||completada?'aceptado':(noElegido||expirado?'rechazado':''))+'">'
