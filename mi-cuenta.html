@@ -3417,21 +3417,46 @@ function loadHistorial(){
     document.getElementById('historialList').innerHTML='<div class="empty">' + calIcono + '<div>Cuando completes tu primer trabajo, aparece acá.</div></div>';
     return;
   }
-  document.getElementById('historialList').innerHTML = aceptadas.map(function(m){
+  document.getElementById('historialList').innerHTML = '<div class="pedidos-list">'
+    + aceptadas.map(function(m){
     var precio = precioFinalMudanza(m);
     var fee = Math.round(calcFee(precio, m.ambientes, m));
-    var estadoLabel = m.estado==='completada'?'✓ Completado':m.estado==='en_curso'?'▶ En curso':'✓ Aceptado';
+    var neto = precio - fee;
     var huboAjuste = m.ajustePrecio && m.ajustePrecio.estado === 'aceptado';
-    var badgeAjuste = huboAjuste ? '<span style="margin-left:8px;background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;border-radius:6px;padding:1px 7px;font-size:10px;font-family:var(--mono);font-weight:600">✓ Ajustado</span>' : '';
-    return '<div class="pedido-card aceptado">'
-      +'<div class="pedido-header"><div>'
-      +'<div class="pedido-ruta">'+esc(m.desde)+' → '+esc(m.hasta)+badgeAjuste+'</div>'
-      +'<div class="pedido-fecha">📅 '+(m.fecha||'—')+' · '+(m.ambientes||'—')+'</div>'
-      +'</div><span class="badge aceptado">'+estadoLabel+'</span></div>'
-      +'<div class="pedido-precio">$'+(precio-fee).toLocaleString('es-AR')+'</div>'
-      +'<div class="pedido-precio-sub">vos cobrás · fee MYA ('+calcFeeLabel(m.ambientes, m)+'): $'+fee.toLocaleString('es-AR')+'</div>'
+    // Fecha pill (formato corto: "15 may")
+    var fechaTxt = '';
+    if (m.fecha && /^\d{4}-\d{2}-\d{2}/.test(m.fecha)) {
+      var d = new Date(m.fecha);
+      var meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+      fechaTxt = d.getDate() + ' ' + meses[d.getMonth()];
+    } else if (m.fecha) {
+      fechaTxt = m.fecha;
+    }
+    var fechaPill = fechaTxt
+      ? '<span class="pd-fecha-line"><span class="pd-fecha-pill">📅 ' + esc(fechaTxt) + '</span></span>'
+      : '';
+    // Badge de ajuste si aplica
+    var badgeAjuste = huboAjuste
+      ? '<span class="pd-line-tag" style="background:#F0FDF4;color:#15803D;border-color:#BBF7D0">✓ Ajuste</span>'
+      : '';
+    // Pack/nivel chip
+    var nivelChip = '';
+    var nivel = m.nivel || (m.cotizacionAceptada && m.cotizacionAceptada.nivelPack) || '';
+    if (nivel === 'esencial')      nivelChip = '<span class="pd-line-tag">📦 Esencial</span>';
+    else if (nivel === 'integral') nivelChip = '<span class="pd-line-tag">🛠️ Integral</span>';
+    else if (nivel === 'llave')    nivelChip = '<span class="pd-line-tag">🔑 Llave</span>';
+    else if (m.tipo === 'flete')   nivelChip = '<span class="pd-line-tag">🚚 Flete</span>';
+    return '<div class="pd-row-line" onclick="seleccionarPedido(\''+m.id+'\',\'aceptados\')">'
+      +'<span class="pd-tag-line pd-completada">✓ Completada</span>'
+      +'<span class="pd-ruta-line">'+esc(m.desde)+' → '+esc(m.hasta)+'</span>'
+      + fechaPill
+      + nivelChip
+      + badgeAjuste
+      +'<span class="pd-precio-line">$'+neto.toLocaleString('es-AR')+'</span>'
+      +'<span class="pd-arrow-line">›</span>'
       +'</div>';
-  }).join('');
+  }).join('')
+  + '</div>';
 }
 
 // ════════════════════════════════════════════════════
