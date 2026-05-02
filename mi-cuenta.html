@@ -1038,6 +1038,91 @@ body.pd-panel-open .pd-list-col{flex:1.3}
 
 <script>
 // ════════════════════════════════════════════════════════════════════════
+// CONFIRMACIÓN UI — modal reutilizable para acciones críticas
+// ════════════════════════════════════════════════════════════════════════
+// Uso: confirmarAccion({ titulo, mensaje, textoConfirmar, colorConfirmar, esDestructivo, onConfirmar })
+// Retorna una Promise<boolean>: true si confirmó, false si canceló
+function confirmarAccion(opts) {
+  return new Promise(function(resolve){
+    var titulo = opts.titulo || '¿Continuar?';
+    var mensaje = opts.mensaje || '';
+    var textoConfirmar = opts.textoConfirmar || 'Sí, continuar';
+    var textoCancelar = opts.textoCancelar || 'Cancelar';
+    var color = opts.colorConfirmar || (opts.esDestructivo ? '#DC2626' : '#1A6FFF');
+    var icono = opts.icono || (opts.esDestructivo ? '⚠️' : '');
+    // Sacar modal previo si quedó colgado
+    var prev = document.getElementById('cf-acc-host');
+    if (prev) prev.remove();
+    var host = document.createElement('div');
+    host.id = 'cf-acc-host';
+    host.innerHTML =
+      '<div class="cf-acc-backdrop">'
+      +  '<div class="cf-acc-card" role="dialog" aria-modal="true">'
+      +    '<div class="cf-acc-header">'
+      +      (icono ? '<div class="cf-acc-icon">'+icono+'</div>' : '')
+      +      '<div class="cf-acc-title">'+titulo+'</div>'
+      +    '</div>'
+      +    (mensaje ? '<div class="cf-acc-body">'+mensaje+'</div>' : '')
+      +    '<div class="cf-acc-footer">'
+      +      '<button type="button" class="cf-acc-btn cf-acc-cancel">'+textoCancelar+'</button>'
+      +      '<button type="button" class="cf-acc-btn cf-acc-confirm" style="background:'+color+'">'+textoConfirmar+'</button>'
+      +    '</div>'
+      +  '</div>'
+      +'</div>';
+    document.body.appendChild(host);
+    document.body.style.overflow = 'hidden';
+    var cleanup = function(result){
+      document.body.style.overflow = '';
+      if (host.parentNode) host.parentNode.removeChild(host);
+      document.removeEventListener('keydown', onKey);
+      resolve(!!result);
+    };
+    var onKey = function(e){
+      if (e.key === 'Escape') cleanup(false);
+      if (e.key === 'Enter') cleanup(true);
+    };
+    document.addEventListener('keydown', onKey);
+    host.querySelector('.cf-acc-cancel').onclick = function(){ cleanup(false); };
+    host.querySelector('.cf-acc-confirm').onclick = function(){ cleanup(true); };
+    host.querySelector('.cf-acc-backdrop').onclick = function(e){
+      if (e.target.classList.contains('cf-acc-backdrop')) cleanup(false);
+    };
+    // Foco automático al botón principal
+    setTimeout(function(){ try { host.querySelector('.cf-acc-confirm').focus(); } catch(e){} }, 50);
+  });
+}
+// CSS del modal — inyectar 1 vez si no existe
+(function(){
+  if (document.getElementById('cf-acc-styles')) return;
+  var s = document.createElement('style');
+  s.id = 'cf-acc-styles';
+  s.textContent = ''
+    + '.cf-acc-backdrop{position:fixed;inset:0;background:rgba(15,25,35,.55);z-index:10001;display:flex;align-items:center;justify-content:center;padding:18px;animation:cfAccIn .15s ease-out;backdrop-filter:blur(2px)}'
+    + '@keyframes cfAccIn{from{opacity:0}to{opacity:1}}'
+    + '.cf-acc-card{background:#fff;border-radius:14px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(15,25,35,.3);overflow:hidden;animation:cfAccCardIn .2s cubic-bezier(.4,0,.2,1);font-family:Inter,sans-serif}'
+    + '@keyframes cfAccCardIn{from{transform:translateY(15px);opacity:0}to{transform:translateY(0);opacity:1}}'
+    + '.cf-acc-header{padding:20px 22px 8px;display:flex;align-items:center;gap:12px}'
+    + '.cf-acc-icon{font-size:24px;line-height:1;flex-shrink:0}'
+    + '.cf-acc-title{font-size:16px;font-weight:700;color:#0F1923;line-height:1.3}'
+    + '.cf-acc-body{padding:6px 22px 18px;font-size:13.5px;color:#475569;line-height:1.55;white-space:pre-line}'
+    + '.cf-acc-footer{display:flex;gap:8px;padding:12px 18px;background:#FAFBFC;border-top:1px solid #E2E8F0;justify-content:flex-end}'
+    + '.cf-acc-btn{padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;border:none;min-width:100px;transition:filter .15s,transform .1s}'
+    + '.cf-acc-btn:active{transform:scale(.97)}'
+    + '.cf-acc-cancel{background:#fff;color:#475569;border:1px solid #E2E8F0}'
+    + '.cf-acc-cancel:hover{background:#F5F7FA;color:#0F1923}'
+    + '.cf-acc-confirm{color:#fff}'
+    + '.cf-acc-confirm:hover{filter:brightness(.92)}'
+    + '@media (max-width:640px){'
+    +   '.cf-acc-backdrop{padding:0;align-items:flex-end}'
+    +   '.cf-acc-card{max-width:100%;border-radius:18px 18px 0 0;animation:cfAccCardInM .22s cubic-bezier(.4,0,.2,1)}'
+    +   '@keyframes cfAccCardInM{from{transform:translateY(100%)}to{transform:translateY(0)}}'
+    +   '.cf-acc-footer{flex-direction:column-reverse}'
+    +   '.cf-acc-btn{width:100%;padding:12px 18px;font-size:14px}'
+    + '}';
+  document.head.appendChild(s);
+})();
+
+// ════════════════════════════════════════════════════════════════════════
 // PASSKEY / WEBAUTHN — login con huella digital, Face ID, etc.
 // ════════════════════════════════════════════════════════════════════════
 (function(){
@@ -2116,7 +2201,14 @@ function verFotoGrande(mudanzaId, fotoIdx) {
   document.body.appendChild(lb);
 }
 
-function logout(){
+async function logout(){
+  var ok = await confirmarAccion({
+    titulo: '¿Cerrar sesión?',
+    mensaje: 'Vas a tener que volver a iniciar sesión la próxima vez que entres.',
+    textoConfirmar: '🚪 Sí, salir',
+    colorConfirmar: '#475569'
+  });
+  if (!ok) return;
   sessionStorage.removeItem('mudanceroUser');
   sessionStorage.removeItem('googleUser');
   sessionStorage.removeItem('clienteUser');
@@ -3049,6 +3141,31 @@ function renderCardCotizacion(m) {
 }
 
 async function cambiarEstado(mudanzaId, nuevoEstado, btn) {
+  // Mensajes específicos por destino
+  var cfg;
+  if (nuevoEstado === 'en_curso') {
+    cfg = {
+      titulo: '¿Iniciar la mudanza?',
+      mensaje: 'Le vamos a avisar al cliente que ya empezaste el trabajo. El cliente verá la mudanza como "en curso".',
+      textoConfirmar: '🚛 Sí, iniciar',
+      colorConfirmar: '#1A6FFF'
+    };
+  } else if (nuevoEstado === 'completada') {
+    cfg = {
+      titulo: '¿Marcar mudanza como completada?',
+      mensaje: 'El cliente recibirá un aviso para pagar el saldo final (50%). Solo confirmá esto cuando ya hayas terminado el trabajo.',
+      textoConfirmar: '✓ Sí, completar',
+      colorConfirmar: '#22C36A'
+    };
+  } else {
+    cfg = {
+      titulo: '¿Cambiar el estado?',
+      mensaje: 'El cliente recibirá un aviso del cambio.',
+      textoConfirmar: 'Sí, continuar'
+    };
+  }
+  var ok = await confirmarAccion(cfg);
+  if (!ok) return;
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
     var r = await fetch('/api/cotizaciones?action=cambiar-estado', {
@@ -3069,7 +3186,14 @@ async function cambiarEstado(mudanzaId, nuevoEstado, btn) {
 }
 
 async function rechazarPedido(mudanzaId, btn) {
-  if (!confirm('¿Seguro que querés pasar este pedido?\n\nNo vas a poder cotizarlo después y desaparecerá de tu lista.')) return;
+  var ok = await confirmarAccion({
+    titulo: '¿Pasar este pedido?',
+    mensaje: 'No vas a poder cotizarlo después y desaparecerá de tu lista de disponibles. Si todos los mudanceros invitados pasan, el cliente recibe un aviso para republicar.',
+    textoConfirmar: '✕ Sí, pasar',
+    colorConfirmar: '#DC2626',
+    esDestructivo: true
+  });
+  if (!ok) return;
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
     await fetch('/api/cotizaciones?action=rechazar', {
@@ -3420,6 +3544,19 @@ async function enviarCotizacion(mudanzaId){
     });
   });
   if (propuestas.length === 0) { alert('Activá al menos un pack y cargale un precio.'); return; }
+  // Confirmación con resumen de los packs que se van a enviar
+  var resumenPacks = propuestas.map(function(p){
+    var emojis = { esencial:'📦', integral:'🛠️', llave:'🔑', flete:'🚚' };
+    var nombres = { esencial:'Esencial', integral:'Integral', llave:'Llave en mano', flete:'Flete' };
+    return '• '+(emojis[p.nivel]||'')+' '+(nombres[p.nivel]||p.nivel)+': $'+parseInt(p.precio).toLocaleString('es-AR');
+  }).join('\n');
+  var ok = await confirmarAccion({
+    titulo: '¿Enviar cotización?',
+    mensaje: 'El cliente recibirá tu propuesta y podrá aceptarla.\n\n'+resumenPacks+(tiempo?'\n\nTiempo estimado: '+tiempo:''),
+    textoConfirmar: '✓ Sí, enviar',
+    colorConfirmar: '#22C36A'
+  });
+  if (!ok) return;
   var btn = document.getElementById('btnEnviarCot');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px;vertical-align:middle;display:inline-block"></span>Enviando…';
@@ -4099,6 +4236,15 @@ async function guardarPerfil(){
   }
   if (msg) { msg.textContent=''; msg.style.color=''; }
 
+  // Confirmación final antes de guardar
+  var ok = await confirmarAccion({
+    titulo: '¿Guardar cambios del perfil?',
+    mensaje: 'Los nuevos datos de tu perfil (precios, servicios, zonas, etc.) van a estar visibles para los clientes.',
+    textoConfirmar: '✓ Sí, guardar',
+    colorConfirmar: '#22C36A'
+  });
+  if (!ok) return;
+
   btn.disabled=true;
   btn.innerHTML='<span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:6px;vertical-align:middle;display:inline-block"></span>Guardando…';
 
@@ -4245,6 +4391,19 @@ async function confirmarAjuste() {
   var msg = document.getElementById('ajMsg');
   if (nuevo < 1) { msg.textContent = 'Ingresá un precio válido'; msg.style.color='var(--red)'; return; }
   if (motivo.length < 8) { msg.textContent = 'El motivo debe tener al menos 8 caracteres'; msg.style.color='var(--red)'; return; }
+  // Confirmación final con detalle del ajuste
+  var m = misCotizaciones.find(function(x){ return x.id === _ajusteMudanzaId; });
+  var precioOrig = m && m.miCotizacion ? parseInt(m.miCotizacion.precio || 0) : 0;
+  var diff = nuevo - precioOrig;
+  var diffTxt = diff > 0 ? '+$'+diff.toLocaleString('es-AR') : '-$'+Math.abs(diff).toLocaleString('es-AR');
+  var ok = await confirmarAccion({
+    titulo: '¿Enviar ajuste de precio al cliente?',
+    mensaje: (precioOrig ? 'Precio original: $'+precioOrig.toLocaleString('es-AR')+'\nNuevo precio: $'+nuevo.toLocaleString('es-AR')+' ('+diffTxt+')\n\n' : 'Nuevo precio: $'+nuevo.toLocaleString('es-AR')+'\n\n')
+      + 'Motivo: '+motivo+'\n\nEl cliente puede aceptarlo o rechazarlo. Si rechaza, se cancela la mudanza y se le devuelve el anticipo.',
+    textoConfirmar: '✓ Sí, enviar al cliente',
+    colorConfirmar: '#F59E0B'
+  });
+  if (!ok) return;
   btn.disabled = true; btn.textContent = 'Enviando…';
   try {
     var r = await fetch('/api/cotizaciones?action=proponer-ajuste', {
