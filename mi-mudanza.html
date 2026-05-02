@@ -753,6 +753,86 @@ var GOOGLE_CLIENT_ID = '';
 // ── SEGURIDAD: escapar HTML antes de insertar en innerHTML ──────────
 function esc(s){ if(!s) return ''; var d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }
 
+// ════════════════════════════════════════════════════════════════════════
+// CONFIRMACIÓN UI — modal reutilizable para acciones críticas
+// ════════════════════════════════════════════════════════════════════════
+function confirmarAccion(opts) {
+  return new Promise(function(resolve){
+    var titulo = opts.titulo || '¿Continuar?';
+    var mensaje = opts.mensaje || '';
+    var textoConfirmar = opts.textoConfirmar || 'Sí, continuar';
+    var textoCancelar = opts.textoCancelar || 'Cancelar';
+    var color = opts.colorConfirmar || (opts.esDestructivo ? '#DC2626' : '#1A6FFF');
+    var icono = opts.icono || (opts.esDestructivo ? '⚠️' : '');
+    var prev = document.getElementById('cf-acc-host');
+    if (prev) prev.remove();
+    var host = document.createElement('div');
+    host.id = 'cf-acc-host';
+    host.innerHTML =
+      '<div class="cf-acc-backdrop">'
+      +  '<div class="cf-acc-card" role="dialog" aria-modal="true">'
+      +    '<div class="cf-acc-header">'
+      +      (icono ? '<div class="cf-acc-icon">'+icono+'</div>' : '')
+      +      '<div class="cf-acc-title">'+titulo+'</div>'
+      +    '</div>'
+      +    (mensaje ? '<div class="cf-acc-body">'+mensaje+'</div>' : '')
+      +    '<div class="cf-acc-footer">'
+      +      '<button type="button" class="cf-acc-btn cf-acc-cancel">'+textoCancelar+'</button>'
+      +      '<button type="button" class="cf-acc-btn cf-acc-confirm" style="background:'+color+'">'+textoConfirmar+'</button>'
+      +    '</div>'
+      +  '</div>'
+      +'</div>';
+    document.body.appendChild(host);
+    document.body.style.overflow = 'hidden';
+    var cleanup = function(result){
+      document.body.style.overflow = '';
+      if (host.parentNode) host.parentNode.removeChild(host);
+      document.removeEventListener('keydown', onKey);
+      resolve(!!result);
+    };
+    var onKey = function(e){
+      if (e.key === 'Escape') cleanup(false);
+      if (e.key === 'Enter') cleanup(true);
+    };
+    document.addEventListener('keydown', onKey);
+    host.querySelector('.cf-acc-cancel').onclick = function(){ cleanup(false); };
+    host.querySelector('.cf-acc-confirm').onclick = function(){ cleanup(true); };
+    host.querySelector('.cf-acc-backdrop').onclick = function(e){
+      if (e.target.classList.contains('cf-acc-backdrop')) cleanup(false);
+    };
+    setTimeout(function(){ try { host.querySelector('.cf-acc-confirm').focus(); } catch(e){} }, 50);
+  });
+}
+(function(){
+  if (document.getElementById('cf-acc-styles')) return;
+  var s = document.createElement('style');
+  s.id = 'cf-acc-styles';
+  s.textContent = ''
+    + '.cf-acc-backdrop{position:fixed;inset:0;background:rgba(15,25,35,.55);z-index:10001;display:flex;align-items:center;justify-content:center;padding:18px;animation:cfAccIn .15s ease-out;backdrop-filter:blur(2px)}'
+    + '@keyframes cfAccIn{from{opacity:0}to{opacity:1}}'
+    + '.cf-acc-card{background:#fff;border-radius:14px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(15,25,35,.3);overflow:hidden;animation:cfAccCardIn .2s cubic-bezier(.4,0,.2,1);font-family:Inter,sans-serif}'
+    + '@keyframes cfAccCardIn{from{transform:translateY(15px);opacity:0}to{transform:translateY(0);opacity:1}}'
+    + '.cf-acc-header{padding:20px 22px 8px;display:flex;align-items:center;gap:12px}'
+    + '.cf-acc-icon{font-size:24px;line-height:1;flex-shrink:0}'
+    + '.cf-acc-title{font-size:16px;font-weight:700;color:#0F1923;line-height:1.3}'
+    + '.cf-acc-body{padding:6px 22px 18px;font-size:13.5px;color:#475569;line-height:1.55;white-space:pre-line}'
+    + '.cf-acc-footer{display:flex;gap:8px;padding:12px 18px;background:#FAFBFC;border-top:1px solid #E2E8F0;justify-content:flex-end}'
+    + '.cf-acc-btn{padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;border:none;min-width:100px;transition:filter .15s,transform .1s}'
+    + '.cf-acc-btn:active{transform:scale(.97)}'
+    + '.cf-acc-cancel{background:#fff;color:#475569;border:1px solid #E2E8F0}'
+    + '.cf-acc-cancel:hover{background:#F5F7FA;color:#0F1923}'
+    + '.cf-acc-confirm{color:#fff}'
+    + '.cf-acc-confirm:hover{filter:brightness(.92)}'
+    + '@media (max-width:640px){'
+    +   '.cf-acc-backdrop{padding:0;align-items:flex-end}'
+    +   '.cf-acc-card{max-width:100%;border-radius:18px 18px 0 0;animation:cfAccCardInM .22s cubic-bezier(.4,0,.2,1)}'
+    +   '@keyframes cfAccCardInM{from{transform:translateY(100%)}to{transform:translateY(0)}}'
+    +   '.cf-acc-footer{flex-direction:column-reverse}'
+    +   '.cf-acc-btn{width:100%;padding:12px 18px;font-size:14px}'
+    + '}';
+  document.head.appendChild(s);
+})();
+
 var currentUser = null;
 var mudanzasData = [];
 
@@ -851,7 +931,14 @@ function guardarCelular() {
   if (modal) modal.remove();
 }
 
-function logout(){
+async function logout(){
+  var ok = await confirmarAccion({
+    titulo: '¿Cerrar sesión?',
+    mensaje: 'Vas a tener que volver a iniciar sesión la próxima vez que entres.',
+    textoConfirmar: '🚪 Sí, salir',
+    colorConfirmar: '#475569'
+  });
+  if (!ok) return;
   sessionStorage.removeItem('clienteUser');
   sessionStorage.removeItem('googleUser');
   window.location.href='/';
@@ -1729,7 +1816,14 @@ function restaurarMudanzasExpandidas() {
 
 
 async function eliminarMudanza(mudanzaId, btn) {
-  if (!confirm('¿Eliminar esta publicación? No podrás recuperarla.')) return;
+  var ok = await confirmarAccion({
+    titulo: '¿Eliminar esta publicación?',
+    mensaje: 'No vas a poder recuperarla después. Si ya hay mudanceros cotizando, dejarán de poder verla.',
+    textoConfirmar: '🗑 Sí, eliminar',
+    colorConfirmar: '#DC2626',
+    esDestructivo: true
+  });
+  if (!ok) return;
   if (btn) { btn.disabled = true; btn.textContent = '…'; }
   try {
     var r = await fetch('/api/cotizaciones?action=eliminar', {
@@ -1836,14 +1930,20 @@ async function aceptarCotizacion(mudanzaId, cotizacionId, propuestaNivel){
     }
   }
   if (!precioMud && cPre && cPre.precio) precioMud = '$' + Number(cPre.precio).toLocaleString('es-AR');
-  var msg = '¿Confirmás elegir a ' + nombreMud + '?'
-    + (packNombre ? '\n\nPack: ' + packNombre : '')
-    + (precioMud ? '\nMonto total: ' + precioMud : '')
-    + '\n\nDespués de aceptar:'
-    + '\n• Las otras cotizaciones quedan canceladas'
-    + '\n• Vas a pagar el anticipo (50%) por Mercado Pago'
-    + '\n• El resto se paga al completar la mudanza';
-  if (!confirm(msg)) return;
+  var msg = ''
+    + (packNombre ? 'Pack: ' + packNombre + '\n' : '')
+    + (precioMud ? 'Monto total: ' + precioMud + '\n\n' : '\n')
+    + 'Después de aceptar:\n'
+    + '• Las otras cotizaciones quedan canceladas\n'
+    + '• Vas a pagar el anticipo (50%) por Mercado Pago\n'
+    + '• El resto se paga al completar la mudanza';
+  var ok = await confirmarAccion({
+    titulo: '¿Elegir a ' + nombreMud + '?',
+    mensaje: msg,
+    textoConfirmar: '✓ Sí, elegir',
+    colorConfirmar: '#22C36A'
+  });
+  if (!ok) return;
   if (btn) { btn.disabled = true; btn.textContent = 'Procesando…'; }
   try{
     var body = { mudanzaId: mudanzaId, cotizacionId: cotizacionId };
@@ -1868,7 +1968,13 @@ async function aceptarCotizacion(mudanzaId, cotizacionId, propuestaNivel){
 }
 
 async function republicarAbierto(mudanzaId, btn){
-  if (!confirm('¿Republicar tu pedido en modo abierto?\n\n• Va a estar visible para todos los mudanceros de tu zona (no solo los que elegiste).\n• Recibirás cotizaciones durante las próximas 24hs.\n\n¿Confirmás?')) return;
+  var ok = await confirmarAccion({
+    titulo: '¿Republicar tu pedido en modo abierto?',
+    mensaje: '• Va a estar visible para todos los mudanceros de tu zona (no solo los que elegiste).\n• Recibirás cotizaciones durante las próximas 24hs.',
+    textoConfirmar: '🔄 Sí, republicar',
+    colorConfirmar: '#1A6FFF'
+  });
+  if (!ok) return;
   if (btn) { btn.disabled = true; btn.textContent = 'Republicando…'; }
   try {
     var r = await fetch('/api/cotizaciones?action=republicar-abierto', {
@@ -1962,6 +2068,15 @@ async function pagarSaldo(mudanzaId) {
   } else {
     saldo = Math.round((cot.precio||0) * 0.5);
   }
+
+  // Confirmar antes de ir a Mercado Pago
+  var ok = await confirmarAccion({
+    titulo: '¿Pagar el saldo final?',
+    mensaje: 'Vas a pagar $'+saldo.toLocaleString('es-AR')+' por Mercado Pago.\nTotal mudanza: $'+(cot.precio||0).toLocaleString('es-AR')+'\n\nUna vez pagado, la mudanza queda cerrada y se libera el cobro al mudancero.',
+    textoConfirmar: '💳 Sí, pagar saldo',
+    colorConfirmar: '#009EE3'
+  });
+  if (!ok) return;
 
   var btn = document.getElementById('btnPagarSaldo_'+mudanzaId);
   if (btn) { btn.disabled = true; btn.textContent = 'Redirigiendo…'; }
@@ -2121,6 +2236,13 @@ function renderStarsUI(){ document.querySelectorAll('.star').forEach(function(s,
 async function guardarCalificacion(mudanzaId){
   if(calStars===0){ alert('Seleccioná al menos 1 estrella'); return; }
   var comentario = document.getElementById('calComentario').value.trim();
+  var ok = await confirmarAccion({
+    titulo: '¿Enviar tu calificación?',
+    mensaje: 'Le diste '+calStars+' estrella'+(calStars>1?'s':'')+' al mudancero.\n\nLa calificación es pública y va a ser visible para futuros clientes. No se puede modificar después.',
+    textoConfirmar: '⭐ Sí, enviar',
+    colorConfirmar: '#F59E0B'
+  });
+  if (!ok) return;
   var btn = document.querySelector('#calModal .btn-green');
   if(btn){ btn.disabled=true; btn.textContent='Enviando…'; }
   try{
@@ -2161,7 +2283,20 @@ function setMmNav(name) {
 // AJUSTE DE PRECIO (cliente acepta/rechaza propuesta del mudancero)
 // ═══════════════════════════════════════════════════════════════
 async function aceptarAjusteCli(mudanzaId, btn) {
-  if (!confirm('¿Confirmás que aceptás el nuevo precio? El saldo a pagar se ajustará automáticamente.')) return;
+  // Buscar la mudanza para mostrar el detalle del nuevo precio
+  var m = mudanzasData.find(function(x){ return x.id === mudanzaId; });
+  var precioNuevo = m && m.ajustePrecio ? parseInt(m.ajustePrecio.precioNuevo || m.ajustePrecio.nuevoPrecio || 0) : 0;
+  var precioOrig = m && m.ajustePrecio ? parseInt(m.ajustePrecio.precioOriginal || m.ajustePrecio.precioAnterior || 0) : 0;
+  var detalle = (precioOrig && precioNuevo)
+    ? 'Precio anterior: $'+precioOrig.toLocaleString('es-AR')+'\nNuevo precio: $'+precioNuevo.toLocaleString('es-AR')+'\n\n'
+    : '';
+  var ok = await confirmarAccion({
+    titulo: '¿Aceptar el nuevo precio?',
+    mensaje: detalle + 'El saldo a pagar se ajustará automáticamente al nuevo total.',
+    textoConfirmar: '✓ Sí, aceptar',
+    colorConfirmar: '#22C36A'
+  });
+  if (!ok) return;
   if (btn) { btn.disabled = true; btn.textContent = 'Procesando…'; }
   try {
     var r = await fetch('/api/cotizaciones?action=aceptar-ajuste', {
@@ -2182,7 +2317,13 @@ async function aceptarAjusteCli(mudanzaId, btn) {
 }
 
 async function rechazarAjusteCli(mudanzaId, btn) {
-  var ok = confirm('¿Seguro que querés rechazar el ajuste?\n\n• Se cancela la mudanza\n• Te devolvemos el anticipo completo en 5-10 días hábiles\n\nEsta acción no se puede deshacer.');
+  var ok = await confirmarAccion({
+    titulo: '¿Rechazar el ajuste y cancelar la mudanza?',
+    mensaje: '• Se cancela la mudanza\n• Te devolvemos el anticipo completo en 5-10 días hábiles\n\nEsta acción no se puede deshacer.',
+    textoConfirmar: '✕ Sí, rechazar y cancelar',
+    colorConfirmar: '#DC2626',
+    esDestructivo: true
+  });
   if (!ok) return;
   if (btn) { btn.disabled = true; btn.textContent = 'Procesando…'; }
   try {
