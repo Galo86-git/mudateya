@@ -1547,27 +1547,68 @@ module.exports = async function handler(req, res) {
       for (const id of activas) {
         try {
           const m = await getJSON(`mudanza:${id}`);
-          if (m && (m.anticipoPagado || m.saldoPagado)) {
-            rows.push({
-              id: m.id,
-              desde: m.desde,
-              hasta: m.hasta,
-              clienteEmail: m.clienteEmail,
-              clienteNombre: m.clienteNombre,
-              anticipoPagado: m.anticipoPagado || false,
-              saldoPagado: m.saldoPagado || false,
-              precio: m.cotizacionAceptada ? (m.cotizacionAceptada.precio || 0) : (m.precio_estimado || 0),
-              tipo: m.tipo || 'mudanza',
-              mudancero: m.cotizacionAceptada ? (m.cotizacionAceptada.mudanceroNombre || '—') : '—',
-              mudanceroEmail: m.cotizacionAceptada ? (m.cotizacionAceptada.mudanceroEmail || '') : '',
-              fecha: m.fechaPublicacion || '',
-              precio_estimado: m.precio_estimado || 0,
-              estado: m.estado,
-              fechaPublicacion: m.fechaPublicacion,
-            });
+          if (!m) continue;
+          if (!(m.anticipoPagado || m.saldoPagado)) continue;
+          // Calcular comisión: 25% Plan Referidos / 20% flete / 15% mudanza normal
+          const esFlete = (m.tipo || '').toLowerCase() === 'flete';
+          const esPlanReferidos = !!(m.origenAsesor === true || m.refAliado);
+          const feePct = esPlanReferidos ? 0.25 : (esFlete ? 0.20 : 0.15);
+          const feePctLabel = (feePct * 100).toFixed(0) + '%';
+          const cot = m.cotizacionAceptada || {};
+          const precioBase = parseInt(cot.precio || m.precio_estimado || 0);
+          const baseRow = {
+            mudanzaId: m.id,
+            id: m.id,
+            desde: m.desde,
+            hasta: m.hasta,
+            clienteEmail: m.clienteEmail,
+            clienteNombre: m.clienteNombre,
+            mudancero: cot.mudanceroNombre || '—',
+            mudanceroEmail: cot.mudanceroEmail || '',
+            tipo: m.tipo || 'mudanza',
+            estado: m.estado,
+            precio: precioBase,
+            feePct: feePct,
+            feePctLabel: feePctLabel,
+            esPlanReferidos: esPlanReferidos,
+            fechaPublicacion: m.fechaPublicacion,
+          };
+          // Una fila por cada pago realizado (anticipo y saldo son pagos separados,
+          // cada uno tiene su propia fecha y por ende su propia ventana de liquidación)
+          if (m.anticipoPagado) {
+            const montoPagado = parseInt(m.anticipoMonto) || Math.round(precioBase * 0.5);
+            const fee = Math.round(montoPagado * feePct);
+            const neto = montoPagado - fee;
+            rows.push(Object.assign({}, baseRow, {
+              tipoPago: 'anticipo',
+              montoPagado: montoPagado,
+              fee: fee,
+              neto: neto,
+              fechaPago: m.fechaPagoAnticipo || null,
+              liquidadoEn: m.liquidadoAnticipoEn || null,
+              mpPagoId: m.mpAnticipoPagoId || null,
+            }));
           }
-        } catch(e) {}
+          if (m.saldoPagado) {
+            const montoPagado = parseInt(m.saldoMonto) || Math.round(precioBase * 0.5);
+            const fee = Math.round(montoPagado * feePct);
+            const neto = montoPagado - fee;
+            rows.push(Object.assign({}, baseRow, {
+              tipoPago: 'saldo',
+              montoPagado: montoPagado,
+              fee: fee,
+              neto: neto,
+              fechaPago: m.fechaPagoSaldo || null,
+              liquidadoEn: m.liquidadoSaldoEn || null,
+              mpPagoId: m.mpSaldoPagoId || null,
+            }));
+          }
+        } catch(e) { console.warn('admin-pagos error mudanza', id, e.message); }
       }
+      // Ordenar por fecha de pago descendente (más reciente primero)
+      rows.sort(function(a,b){
+        return new Date(b.fechaPago||0) - new Date(a.fechaPago||0);
+      });
       return res.status(200).json({ rows });
     }
 
