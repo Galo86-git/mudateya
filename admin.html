@@ -1108,6 +1108,87 @@ tr:hover td{background:rgba(34,195,106,.03)}
 <script>
 var GOOGLE_CLIENT_ID = '';
 var ADMIN_EMAILS = [];
+
+// ════════════════════════════════════════════════════════════════════════
+// CONFIRMACIÓN UI — modal reutilizable para acciones críticas
+// ════════════════════════════════════════════════════════════════════════
+function confirmarAccion(opts) {
+  return new Promise(function(resolve){
+    var titulo = opts.titulo || '¿Continuar?';
+    var mensaje = opts.mensaje || '';
+    var textoConfirmar = opts.textoConfirmar || 'Sí, continuar';
+    var textoCancelar = opts.textoCancelar || 'Cancelar';
+    var color = opts.colorConfirmar || (opts.esDestructivo ? '#DC2626' : '#1A6FFF');
+    var icono = opts.icono || (opts.esDestructivo ? '⚠️' : '');
+    var prev = document.getElementById('cf-acc-host');
+    if (prev) prev.remove();
+    var host = document.createElement('div');
+    host.id = 'cf-acc-host';
+    host.innerHTML =
+      '<div class="cf-acc-backdrop">'
+      +  '<div class="cf-acc-card" role="dialog" aria-modal="true">'
+      +    '<div class="cf-acc-header">'
+      +      (icono ? '<div class="cf-acc-icon">'+icono+'</div>' : '')
+      +      '<div class="cf-acc-title">'+titulo+'</div>'
+      +    '</div>'
+      +    (mensaje ? '<div class="cf-acc-body">'+mensaje+'</div>' : '')
+      +    '<div class="cf-acc-footer">'
+      +      '<button type="button" class="cf-acc-btn cf-acc-cancel">'+textoCancelar+'</button>'
+      +      '<button type="button" class="cf-acc-btn cf-acc-confirm" style="background:'+color+'">'+textoConfirmar+'</button>'
+      +    '</div>'
+      +  '</div>'
+      +'</div>';
+    document.body.appendChild(host);
+    document.body.style.overflow = 'hidden';
+    var cleanup = function(result){
+      document.body.style.overflow = '';
+      if (host.parentNode) host.parentNode.removeChild(host);
+      document.removeEventListener('keydown', onKey);
+      resolve(!!result);
+    };
+    var onKey = function(e){
+      if (e.key === 'Escape') cleanup(false);
+      if (e.key === 'Enter') cleanup(true);
+    };
+    document.addEventListener('keydown', onKey);
+    host.querySelector('.cf-acc-cancel').onclick = function(){ cleanup(false); };
+    host.querySelector('.cf-acc-confirm').onclick = function(){ cleanup(true); };
+    host.querySelector('.cf-acc-backdrop').onclick = function(e){
+      if (e.target.classList.contains('cf-acc-backdrop')) cleanup(false);
+    };
+    setTimeout(function(){ try { host.querySelector('.cf-acc-confirm').focus(); } catch(e){} }, 50);
+  });
+}
+(function(){
+  if (document.getElementById('cf-acc-styles')) return;
+  var s = document.createElement('style');
+  s.id = 'cf-acc-styles';
+  s.textContent = ''
+    + '.cf-acc-backdrop{position:fixed;inset:0;background:rgba(15,25,35,.55);z-index:10001;display:flex;align-items:center;justify-content:center;padding:18px;animation:cfAccIn .15s ease-out;backdrop-filter:blur(2px)}'
+    + '@keyframes cfAccIn{from{opacity:0}to{opacity:1}}'
+    + '.cf-acc-card{background:#fff;border-radius:14px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(15,25,35,.3);overflow:hidden;animation:cfAccCardIn .2s cubic-bezier(.4,0,.2,1);font-family:Inter,sans-serif}'
+    + '@keyframes cfAccCardIn{from{transform:translateY(15px);opacity:0}to{transform:translateY(0);opacity:1}}'
+    + '.cf-acc-header{padding:20px 22px 8px;display:flex;align-items:center;gap:12px}'
+    + '.cf-acc-icon{font-size:24px;line-height:1;flex-shrink:0}'
+    + '.cf-acc-title{font-size:16px;font-weight:700;color:#0F1923;line-height:1.3}'
+    + '.cf-acc-body{padding:6px 22px 18px;font-size:13.5px;color:#475569;line-height:1.55;white-space:pre-line}'
+    + '.cf-acc-footer{display:flex;gap:8px;padding:12px 18px;background:#FAFBFC;border-top:1px solid #E2E8F0;justify-content:flex-end}'
+    + '.cf-acc-btn{padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;border:none;min-width:100px;transition:filter .15s,transform .1s}'
+    + '.cf-acc-btn:active{transform:scale(.97)}'
+    + '.cf-acc-cancel{background:#fff;color:#475569;border:1px solid #E2E8F0}'
+    + '.cf-acc-cancel:hover{background:#F5F7FA;color:#0F1923}'
+    + '.cf-acc-confirm{color:#fff}'
+    + '.cf-acc-confirm:hover{filter:brightness(.92)}'
+    + '@media (max-width:640px){'
+    +   '.cf-acc-backdrop{padding:0;align-items:flex-end}'
+    +   '.cf-acc-card{max-width:100%;border-radius:18px 18px 0 0;animation:cfAccCardInM .22s cubic-bezier(.4,0,.2,1)}'
+    +   '@keyframes cfAccCardInM{from{transform:translateY(100%)}to{transform:translateY(0)}}'
+    +   '.cf-acc-footer{flex-direction:column-reverse}'
+    +   '.cf-acc-btn{width:100%;padding:12px 18px;font-size:14px}'
+    + '}';
+  document.head.appendChild(s);
+})();
+
 var currentUser = null;
 var mudancerosData = [];
 var pagosData = [];
@@ -1164,7 +1245,14 @@ function showAdmin(){
   loadAll();
 }
 
-function logout(){
+async function logout(){
+  var ok = await confirmarAccion({
+    titulo: '¿Cerrar sesión del admin?',
+    mensaje: 'Vas a tener que volver a iniciar sesión la próxima vez que entres.',
+    textoConfirmar: '🚪 Sí, salir',
+    colorConfirmar: '#475569'
+  });
+  if (!ok) return;
   sessionStorage.removeItem('adminUser');
   sessionStorage.removeItem('clienteUser');
   sessionStorage.removeItem('googleUser');
@@ -1758,7 +1846,21 @@ function renderHistorialPagos(){
 }
 
 async function marcarLiquidado(mudanzaId, tipoPago, btn) {
-  if (!confirm('¿Confirmás que transferiste el neto al mudancero para este pago?\n\nEsto no se puede deshacer fácilmente.')) return;
+  // Buscar el pago en memoria para mostrar info en el modal
+  var pago = pagosData.find(function(p){ return p.mudanzaId === mudanzaId && p.tipoPago === tipoPago; });
+  var detalle = '';
+  if (pago) {
+    detalle = (pago.mudancero ? 'Mudancero: '+pago.mudancero+'\n' : '')
+      + 'Tipo: '+(tipoPago === 'anticipo' ? 'Anticipo' : 'Saldo final')+'\n'
+      + 'Neto a transferir: $'+Math.round(pago.neto||0).toLocaleString('es-AR')+'\n\n';
+  }
+  var ok = await confirmarAccion({
+    titulo: '¿Marcar este pago como liquidado?',
+    mensaje: detalle + 'Confirmá solo si ya transferiste el neto al mudancero. Esta acción no se puede deshacer fácilmente.',
+    textoConfirmar: '✓ Sí, ya transferí',
+    colorConfirmar: '#22C36A'
+  });
+  if (!ok) return;
   if (btn) { btn.disabled = true; btn.textContent = '...'; }
   try {
     var r = await fetch('/api/cotizaciones?action=admin-marcar-liquidado&token=mya-admin-2026', {
@@ -2254,7 +2356,14 @@ async function onFotoCamionChange(input, email) {
 }
 
 async function eliminarFotoPerfil(email) {
-  if (!confirm('¿Eliminás la foto de perfil de este mudancero? Esta acción no se puede deshacer.')) return;
+  var ok = await confirmarAccion({
+    titulo: '¿Eliminar foto de perfil?',
+    mensaje: 'La foto del mudancero se borra de Redis y de Vercel Blob. No se puede recuperar después.',
+    textoConfirmar: '🗑 Sí, eliminar',
+    colorConfirmar: '#DC2626',
+    esDestructivo: true
+  });
+  if (!ok) return;
   var key = fotoKey(email);
   _fotosEstado[email].foto = '';
   document.getElementById('fperfil-' + key).innerHTML = '<span style="font-size:11px;color:#94A3B8;font-family:var(--mono)">Sin foto</span>';
@@ -2263,7 +2372,14 @@ async function eliminarFotoPerfil(email) {
 }
 
 async function eliminarFotoCamion(email, idx) {
-  if (!confirm('¿Eliminás esta foto del vehículo? Esta acción no se puede deshacer.')) return;
+  var ok = await confirmarAccion({
+    titulo: '¿Eliminar esta foto del vehículo?',
+    mensaje: 'Se borra de Redis y de Vercel Blob. No se puede recuperar después.',
+    textoConfirmar: '🗑 Sí, eliminar',
+    colorConfirmar: '#DC2626',
+    esDestructivo: true
+  });
+  if (!ok) return;
   _fotosEstado[email].fotosVehiculo.splice(idx, 1);
   renderCamionFotos(email);
   try { await guardarFotosRedis(email); mostrarFotoOk(fotoKey(email)); }
@@ -3124,6 +3240,13 @@ function activarEdicion(){
 }
 
 async function guardarEdicion(){
+  var ok = await confirmarAccion({
+    titulo: '¿Guardar cambios del mudancero?',
+    mensaje: 'Los nuevos datos van a quedar guardados en Redis y serán visibles para los clientes.',
+    textoConfirmar: '✓ Sí, guardar',
+    colorConfirmar: '#22C36A'
+  });
+  if (!ok) return;
   var btn = document.getElementById('btnGuardar');
   if(btn){ btn.disabled=true; btn.textContent='Guardando…'; }
   var m = mudancerosData[currentMudanceroIdx];
@@ -3352,7 +3475,13 @@ async function cargarAltasPendientes() {
 }
 
 async function acreditarAltaAdmin(mudanceroEmail) {
-  if (!confirm('¿Acreditar esta alta al aliado? Se le sumará el fijo + contará para sus bonos trimestral/anual.')) return;
+  var ok = await confirmarAccion({
+    titulo: '¿Acreditar esta alta al aliado?',
+    mensaje: 'Se le va a sumar el fijo (cobranza inmediata) + va a contar para sus bonos trimestral y anual.',
+    textoConfirmar: '✓ Sí, acreditar',
+    colorConfirmar: '#22C36A'
+  });
+  if (!ok) return;
   try {
     var r = await fetch('/api/aliados?action=admin-acreditar-alta', {
       method:'POST',
@@ -3367,7 +3496,14 @@ async function acreditarAltaAdmin(mudanceroEmail) {
 }
 
 async function cancelarAltaAdmin(mudanceroEmail) {
-  if (!confirm('¿Cancelar esta alta? El aliado NO va a cobrar por este mudancero.')) return;
+  var ok = await confirmarAccion({
+    titulo: '¿Cancelar esta alta?',
+    mensaje: 'El aliado NO va a cobrar nada por este mudancero (ni fijo ni bono). Esta acción no se revierte.',
+    textoConfirmar: '✕ Sí, cancelar alta',
+    colorConfirmar: '#DC2626',
+    esDestructivo: true
+  });
+  if (!ok) return;
   try {
     var r = await fetch('/api/aliados?action=admin-cancelar-alta', {
       method:'POST',
@@ -3469,12 +3605,17 @@ async function aliPagar(email, incluirTrim, incluirAnual) {
   var bonoTrim = incluirTrim ? a.balance.trimestre.bono : 0;
   var bonoAnual = incluirAnual ? a.balance.anio.bono : 0;
   total += bonoTrim + bonoAnual;
-  var msg = '¿Confirmar pago a ' + a.nombre + '?\n\n';
-  msg += 'Comisiones acreditadas: $' + aliFmt(a.balance.acreditadasMonto) + '\n';
-  if (bonoTrim) msg += 'Bono trimestral: $' + aliFmt(bonoTrim) + '\n';
-  if (bonoAnual) msg += 'Bono anual: $' + aliFmt(bonoAnual) + '\n';
-  msg += '─────────────\nTOTAL: $' + aliFmt(total);
-  if (!confirm(msg)) return;
+  var detalle = 'Comisiones acreditadas: $' + aliFmt(a.balance.acreditadasMonto) + '\n';
+  if (bonoTrim) detalle += 'Bono trimestral: $' + aliFmt(bonoTrim) + '\n';
+  if (bonoAnual) detalle += 'Bono anual: $' + aliFmt(bonoAnual) + '\n';
+  detalle += '─────────────\nTOTAL: $' + aliFmt(total);
+  var ok = await confirmarAccion({
+    titulo: '¿Confirmar pago a ' + a.nombre + '?',
+    mensaje: detalle + '\n\nConfirmá solo si ya hiciste la transferencia. La acción queda registrada para auditoría.',
+    textoConfirmar: '✓ Sí, ya pagué',
+    colorConfirmar: '#22C36A'
+  });
+  if (!ok) return;
   try {
     // Obtener IDs de atribuciones acreditadas
     var detalle = await aliFetch('/api/aliados?action=admin-detalle&token=' + ALIT() + '&email=' + encodeURIComponent(email));
@@ -3628,7 +3769,17 @@ function cerrarAliDetalle() {
 }
 
 async function cambiarEstadoAliado(email, nuevoEstado) {
-  if (!confirm('¿' + (nuevoEstado === 'activo' ? 'Reactivar' : 'Bloquear') + ' a este aliado?')) return;
+  var esReactivar = nuevoEstado === 'activo';
+  var ok = await confirmarAccion({
+    titulo: esReactivar ? '¿Reactivar a este aliado?' : '¿Bloquear a este aliado?',
+    mensaje: esReactivar
+      ? 'Va a poder volver a generar referidos y cobrar comisiones.'
+      : 'No va a poder generar nuevas referencias. Las comisiones acreditadas se siguen pagando, pero no se van a sumar nuevas.',
+    textoConfirmar: esReactivar ? '✓ Sí, reactivar' : '🚫 Sí, bloquear',
+    colorConfirmar: esReactivar ? '#22C36A' : '#DC2626',
+    esDestructivo: !esReactivar
+  });
+  if (!ok) return;
   try {
     await aliFetch('/api/aliados?action=admin-cambiar-estado', { method:'POST', body: JSON.stringify({ email: email, estado: nuevoEstado }) });
     cerrarAliDetalle();
@@ -3748,6 +3899,21 @@ async function guardarConfig() {
     cookieDias: parseInt(document.getElementById('cfgCookieDias').value) || 90,
     programaAbierto: document.getElementById('cfgAbierto').checked
   };
+  var ok = await confirmarAccion({
+    titulo: '¿Guardar configuración del programa de aliados?',
+    mensaje: 'Resumen de los nuevos valores:\n\n'
+      + '• Fijo mudanza: $' + body.fijoMudanza.toLocaleString('es-AR') + '\n'
+      + '• Fijo flete: $' + body.fijoFlete.toLocaleString('es-AR') + '\n'
+      + '• Fijo alta mudancero: $' + body.fijoAlta.toLocaleString('es-AR') + '\n'
+      + '• Bono trimestral: ' + body.trimPct + '% (umbral ' + body.trimUmbral + ' ops)\n'
+      + '• Bono anual: ' + body.anualPct + '% (umbral ' + body.anualUmbral + ' ops)\n'
+      + '• Cookie tracking: ' + body.cookieDias + ' días\n'
+      + '• Programa abierto: ' + (body.programaAbierto ? 'Sí' : 'No') + '\n\n'
+      + 'Estos valores afectan a TODAS las nuevas comisiones futuras.',
+    textoConfirmar: '✓ Sí, guardar config',
+    colorConfirmar: '#22C36A'
+  });
+  if (!ok) return;
   try {
     await aliFetch('/api/aliados?action=admin-config-update', { method:'POST', body: JSON.stringify(body) });
     alert('✓ Configuración guardada');
@@ -3990,7 +4156,20 @@ function renderAsesoresLista() {
 }
 
 async function asrCambiarEstado(email, estado) {
-  if (!confirm('¿Cambiar estado del asesor a "' + estado + '"?')) return;
+  var esActivar = estado === 'activo';
+  var esBloquear = estado === 'bloqueado';
+  var ok = await confirmarAccion({
+    titulo: '¿Cambiar estado del asesor?',
+    mensaje: 'Nuevo estado: ' + estado.toUpperCase() + '\n\n' + (esActivar
+      ? 'El asesor va a poder crear pedidos directos para mudanceros y generar comisión 25%.'
+      : esBloquear
+        ? 'El asesor NO va a poder crear más pedidos directos. Los pedidos existentes siguen su curso.'
+        : 'El asesor cambia a estado pendiente — quedará en espera de revisión.'),
+    textoConfirmar: '✓ Sí, cambiar',
+    colorConfirmar: esActivar ? '#22C36A' : (esBloquear ? '#DC2626' : '#F59E0B'),
+    esDestructivo: esBloquear
+  });
+  if (!ok) return;
   try {
     var d = await asrFetch('/api/asesores?action=admin-cambiar-estado', {
       method: 'POST',
