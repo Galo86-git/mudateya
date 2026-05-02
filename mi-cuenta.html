@@ -3432,28 +3432,24 @@ function loadHistorial(){
     } else if (m.fecha) {
       fechaTxt = m.fecha;
     }
-    var fechaPill = fechaTxt
-      ? '<span class="pd-fecha-line"><span class="pd-fecha-pill">📅 ' + esc(fechaTxt) + '</span></span>'
-      : '';
-    // Badge de ajuste si aplica
-    var badgeAjuste = huboAjuste
-      ? '<span class="pd-line-tag" style="background:#F0FDF4;color:#15803D;border-color:#BBF7D0">✓ Ajuste</span>'
-      : '';
-    // Pack/nivel chip
-    var nivelChip = '';
-    var nivel = m.nivel || (m.cotizacionAceptada && m.cotizacionAceptada.nivelPack) || '';
-    if (nivel === 'esencial')      nivelChip = '<span class="pd-line-tag">📦 Esencial</span>';
-    else if (nivel === 'integral') nivelChip = '<span class="pd-line-tag">🛠️ Integral</span>';
-    else if (nivel === 'llave')    nivelChip = '<span class="pd-line-tag">🔑 Llave</span>';
-    else if (m.tipo === 'flete')   nivelChip = '<span class="pd-line-tag">🚚 Flete</span>';
-    return '<div class="pd-row-line" onclick="seleccionarPedido(\''+m.id+'\',\'aceptados\')">'
-      +'<span class="pd-tag-line pd-completada">✓ Completada</span>'
-      +'<span class="pd-ruta-line">'+esc(m.desde)+' → '+esc(m.hasta)+'</span>'
-      + fechaPill
-      + nivelChip
-      + badgeAjuste
+    // Pack chip — usar cfg de packsCfg para que coincida con los otros tabs (mismo estilo)
+    var esFleteHist = m.tipo === 'flete';
+    var nivelHist = m.nivel || (m.cotizacionAceptada && m.cotizacionAceptada.nivelPack) || (esFleteHist ? 'flete' : 'esencial');
+    var cfgHist = packsCfg[nivelHist] || packsCfg.esencial;
+    var packBadgeHist = '<span class="pd-pack-mini" style="background:'+cfgHist.color+'15;color:'+cfgHist.color+'">'+cfgHist.emoji+' '+cfgHist.nombre+'</span>';
+    // Ruta + fecha embebida igual que renderRowPedido
+    var rutaHist = esc(m.desde)+' → '+esc(m.hasta);
+    var rutaConFecha = '<span class="pd-ruta-line" title="'+rutaHist.replace(/"/g,'&quot;')+'">'
+      + rutaHist
+      + (fechaTxt ? '<span class="pd-fecha-line">📅 '+esc(fechaTxt)+'</span>' : '')
+      + (huboAjuste ? '<span class="pd-fecha-line" style="color:#15803D;font-weight:700">✓ Ajustado</span>' : '')
+      + '</span>';
+    return '<div class="pd-row-line" onclick="seleccionarPedido(\''+m.id+'\',\'aceptados\')" tabindex="0">'
+      +'<span class="pd-st-pill pd-comp">✓ Completada</span>'
+      + rutaConFecha
+      + packBadgeHist
       +'<span class="pd-precio-line">$'+neto.toLocaleString('es-AR')+'</span>'
-      +'<span class="pd-arrow-line">›</span>'
+      +'<span class="pd-arrow">›</span>'
       +'</div>';
   }).join('')
   + '</div>';
